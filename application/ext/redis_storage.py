@@ -42,8 +42,7 @@ class RedisSessionInterface(SessionInterface):
         self.serializer = json_serializer
         self.random = Random.new().read
 
-    @property
-    def random_string(self):
+    def get_random_string(self):
         return hexlify(self.random(self.RANDOM_STRING_LENGTH))
 
     def key(self, suffix):
@@ -52,14 +51,14 @@ class RedisSessionInterface(SessionInterface):
             suffix=suffix
         )
 
-    def generate_sid(self):
+    def new_session(self):
         while True:
-            sid = self.random_string
+            sid = self.random_string()
 
-            if self.redis.setnx(self.key(sid), ''):
+            if self.redis.setnx(self.key(sid), '{}'):
                 break
 
-        return sid
+        return self.session_class(sid=sid, new=True)
 
     def ttl(self, app):
         return int(app.permanent_session_lifetime.total_seconds())
@@ -68,9 +67,7 @@ class RedisSessionInterface(SessionInterface):
         sid = request.cookies.get(app.session_cookie_name)
 
         if not sid:
-            sid = self.generate_sid()
-
-            return self.session_class(sid=sid, new=True)
+            return self.new_session()
 
         data = self.redis.get(self.key(sid))
 
@@ -79,9 +76,7 @@ class RedisSessionInterface(SessionInterface):
 
             return self.session_class(data, sid=sid)
         else:
-            sid = self.generate_sid()
-
-            return self.session_class(sid=sid, new=True)
+            return self.new_session()
 
     def save_session(self, app, session, response):
         domain = self.get_cookie_domain(app)
