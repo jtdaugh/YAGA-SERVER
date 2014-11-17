@@ -1,4 +1,7 @@
+from collections import MutableMapping
+
 from flask import g
+from flask.views import View as BaseView
 from flask_wtf import Form as BaseForm
 from flask.ext.restful import Api as BaseApi, Resource as BaseResource
 from flask.ext.restful import DEFAULT_REPRESENTATIONS
@@ -8,6 +11,10 @@ from .helpers import output_json
 
 
 DEFAULT_REPRESENTATIONS['application/json'] = output_json
+
+
+class View(BaseView):
+    pass
 
 
 class Api(BaseApi):
@@ -47,3 +54,32 @@ class BaseAdminView(object):
             and
             g.user.has_role('superuser')
         )
+
+
+class DummyDict(MutableMapping):
+    @property
+    def dct(self):
+        return self.__dict__
+
+    def __getitem__(self, key):
+        try:
+            return self.dct[key]
+        except:
+            return None
+
+    def __setitem__(self, key, value):
+        self.dct[key] = value
+
+        return self[key]
+
+    def __delitem__(self, key):
+        try:
+            del self.dct[key]
+        except KeyError:
+            pass
+
+    def __iter__(self):
+        return self.dct.__iter__()
+
+    def __len__(self):
+        return self.dct.__len__()

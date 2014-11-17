@@ -19,17 +19,18 @@ from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.utils import import_string
 from speaklater import is_lazy_string
 from flask.ext.script import Manager
-from flask.ext.mongoengine import MongoEngineSessionInterface
-from flask.ext.security import MongoEngineUserDatastore
-from flask.ext.security import current_user
+from flask.ext.security import current_user, SQLAlchemyUserDatastore
+from flanker.addresslib import set_mx_cache
 
 from .helpers import (
-    now, cache, db, babel, sentry, s3, toolbar, security, json_error
+    heroku, cache, db, babel, sentry, s3, toolbar, security, redis,
+    json_error, now, DummyDict
 )
 from .admin import create_admin
 from .modules.auth.models import User, Role
 from .modules.frontend.index import blueprint as index_blueprint
 from .modules.auth.api import blueprint as api_auth_blueprint
+from .ext.redis_storage import RedisSessionInterface
 
 
 def load_config():
@@ -52,25 +53,33 @@ class CustomJSONEncoder(JSONEncoder):
 
 
 def create_app():
+    mx_cache = DummyDict()
+    set_mx_cache(mx_cache)
+
     app = Flask(__name__)
     app.config.from_object(load_config())
     app.wsgi_app = ProxyFix(app.wsgi_app)
     app.json_encoder = CustomJSONEncoder
 
+    heroku.init_app(app)
     cache.init_app(app)
     db.init_app(app)
     babel.init_app(app)
     sentry.init_app(app)
     s3.init_app(app)
     toolbar.init_app(app)
+    redis.init_app(app)
+
+    app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+
     security.init_app(
         app,
-        datastore=MongoEngineUserDatastore(db, User, Role),
+        datastore=app.user_datastore,
         register_blueprint=False
     )
 
     app.manager = Manager(app)
-    app.session_interface = MongoEngineSessionInterface(db)
+    app.session_interface = RedisSessionInterface(redis)
 
     create_admin(app)
 

@@ -1,21 +1,26 @@
-from flask import Blueprint
+from flask import Blueprint, current_app as app
 from flask.ext.security import login_user, logout_user
 
 from application.helpers import (
-    Api, Resource, marshal_with_form, anonymous_user_required, login_required
+    Api, Resource,
+    marshal_with_form, anonymous_user_required, login_required,
+    db
 )
 from .forms import UserRegisterForm, UserLoginForm
-from .models import User
 
 
 class RegisterResource(Resource):
     @anonymous_user_required
     @marshal_with_form(UserRegisterForm)
     def post(self):
-        user = User.create_user(
-            email=self.form.email.data,
-            password=self.form.password.data
+        user = app.user_datastore.create_user(
+            email=self.form.email.data
         )
+        user.set_password(self.form.password.data)
+
+        db.session.commit()
+
+        login_user(user)
 
         return {
             'email': user.email

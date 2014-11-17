@@ -2,15 +2,17 @@ import datetime
 
 from flask import jsonify
 from flask.ext.cache import Cache
-from flask.ext.mongoengine import MongoEngine
+from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.babelex import Babel
 from raven.contrib.flask import Sentry
 from flask_s3 import FlaskS3
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.security import Security
+from flask.ext.heroku import Heroku
 from flask.ext.babelex import lazy_gettext as _
 
 from .decorators import marshal_with_form, anonymous_user_required, login_required  # noqa
+from .ext.redis_storage import Redis
 
 
 HTTP_STATUS_CODES = {
@@ -60,12 +62,14 @@ def now():
 
 
 cache = Cache()
-db = MongoEngine()
+db = SQLAlchemy()
 babel = Babel()
 sentry = Sentry()
 s3 = FlaskS3()
 toolbar = DebugToolbarExtension()
 security = Security()
+heroku = Heroku()
+redis = Redis()
 
 
-from .mixins import Api, Resource, Form, Validator, BaseAdminView # noqa
+from .mixins import Api, Resource, Form, Validator, BaseAdminView, DummyDict  # noqa

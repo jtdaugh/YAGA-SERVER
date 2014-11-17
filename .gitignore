@@ -5,3 +5,4 @@ env
 messages.pot
 *.sublime*
 cache
+*.sqlite

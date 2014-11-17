@@ -2,16 +2,25 @@ from flask import current_app as app
 from flask.ext.script import Command, prompt, prompt_pass
 from werkzeug.datastructures import MultiDict
 
-from .models import User, Role
+from application.helpers import db
+from .models import Role
 from .forms import UserRegisterForm
 
 
 class CreateSuperUser(Command):
     def run(self):
-        superuser_role = Role.objects.get_or_create(
-            name='superuser',
-            description='superuser',
-        )
+        superuser_role = db.session.query(Role).filter_by(
+            name='superuser'
+        ).first()
+
+        if superuser_role is None:
+            superuser_role = Role(
+                name='superuser',
+                description=app.config['ROLES']['superuser']
+            )
+
+            db.session.add(superuser_role)
+            db.session.commit()
 
         while True:
             email = prompt('email')
@@ -24,12 +33,13 @@ class CreateSuperUser(Command):
             form = UserRegisterForm(data)
 
             if form.validate():
-                user = User.create_user(
-                    email=form.email.data,
-                    password=form.password.data
+                user = app.user_datastore.create_user(
+                    email=email,
                 )
-                user.roles = [superuser_role]
-                user.save()
+                user.set_password(password)
+                app.user_datastore.add_role_to_user(user, superuser_role)
+
+                db.session.commit()
 
                 break
 
@@ -37,8 +47,13 @@ class CreateSuperUser(Command):
 class SyncRoles(Command):
     def run(self):
         for name, description in app.config['ROLES'].iteritems():
-            if Role.objects.filter(name=name).count() == 0:
-                role = Role()
-                role.name = name
-                role.name = description
-                role.save()
+            if db.session.query(Role).filter_by(
+                name=name
+            ).first() is None:
+                role = Role(
+                    name=name,
+                    description=description
+                )
+
+                db.session.add(role)
+                db.session.commit()

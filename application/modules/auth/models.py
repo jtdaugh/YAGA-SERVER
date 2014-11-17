@@ -5,51 +5,70 @@ from flask.ext.security.utils import verify_password
 from application.helpers import now, db
 
 
-class Role(db.Document, RoleMixin):
-    name = db.StringField(
-        max_length=80,
-        required=True, unique=True
+roles_users = db.Table(
+    'roles_users',
+    db.Column(
+        'user_id',
+        db.Integer(),
+        db.ForeignKey('user.id')
+    ),
+    db.Column(
+        'role_id',
+        db.Integer(),
+        db.ForeignKey('role.id')
+    )
+)
+
+
+class Role(db.Model, RoleMixin):
+    id = db.Column(
+        db.Integer(),
+        primary_key=True
     )
 
-    description = db.StringField(
-        max_length=255
+    name = db.Column(
+        db.String(80),
+        unique=True
+    )
+
+    description = db.Column(
+        db.String(255)
     )
 
     def __unicode__(self):
         return self.name
 
 
-class User(db.Document, UserMixin):
-    email = db.StringField(
-        max_length=255,
-        required=True, unique=True
+class User(db.Model, UserMixin):
+    id = db.Column(
+        db.Integer,
+        primary_key=True
     )
 
-    password = db.StringField(
-        max_length=255,
-        required=True,
+    email = db.Column(
+        db.String(255),
+        unique=True
     )
 
-    active = db.BooleanField(
+    password = db.Column(
+        db.String(255)
+    )
+
+    active = db.Column(
+        db.Boolean(),
         default=True
     )
 
-    created_at = db.DateTimeField(
+    created_at = db.Column(
+        db.DateTime(),
         default=now
     )
 
-    roles = db.ListField(
-        db.ReferenceField(Role), default=[]
+    roles = db.relationship(
+        'Role',
+        secondary=roles_users,
+        backref=db.backref('users', lazy='dynamic')
     )
-
-    @classmethod
-    def create_user(cls, email, password):
-        user = cls()
-        user.email = email
-        user.set_password(password)
-        user.save()
-
-        return user
 
     def set_password(self, password):
         self.password = encrypt_password(password)

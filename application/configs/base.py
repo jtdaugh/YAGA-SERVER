@@ -7,5 +7,4 @@ class BaseConfig(object):
 
     ROLES = {
         'superuser': 'superuser',
-        'test': 'test'
     }

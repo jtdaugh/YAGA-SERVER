@@ -1,7 +1,7 @@
 from flanker.addresslib import address
 from flask.ext.babelex import lazy_gettext as _
 
-from application.helpers import Validator
+from application.helpers import Validator, db
 from .models import User
 
 
@@ -22,9 +22,9 @@ class NotRegisteredUser(Validator):
     MESSAGE = _('User already registered.')
 
     def __call__(self, form, field):
-        if User.objects.filter(
+        if db.session.query(User).filter_by(
             email=field.data
-        ).count() != 0:
+        ).first() is not None:
             raise self.fail
 
 
@@ -32,9 +32,11 @@ class ValidActiveUser(Validator):
     MESSAGE = _('Unknown user or bad password.')
 
     def __call__(self, form, field):
-        try:
-            user = User.objects.get(email=field.data)
-        except User.DoesNotExist:
+        user = db.session.query(User).filter_by(
+            email=field.data
+        ).first()
+
+        if user is None:
             raise self.fail
 
         if not user.is_active():

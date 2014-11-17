@@ -1,6 +1,6 @@
-from flask.ext.admin.contrib.mongoengine import ModelView
+from flask.ext.admin.contrib.sqla import ModelView
 
-from application.helpers import BaseAdminView
+from application.helpers import BaseAdminView, db
 from .models import User, Role
 
 
@@ -21,5 +21,5 @@ class RoleModelView(BaseAdminView, ModelView):
     form_columns = ['description']
 
 
-user_admin = UserModelView(User)
-role_admin = RoleModelView(Role)
+user_admin = UserModelView(User, db.session)
+role_admin = RoleModelView(Role, db.session)

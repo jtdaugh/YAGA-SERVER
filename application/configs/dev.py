@@ -12,8 +12,7 @@ class Config(BaseConfig):
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = 'cache'
 
-    MONGODB_HOST = '127.0.0.1'
-    MONGODB_DB = 'clique'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://hell:@127.0.0.1:5432/yaga'
 
     APP_HOST = '127.0.0.1'
     APP_PORT = 5000
