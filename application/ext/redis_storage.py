@@ -40,6 +40,8 @@ class RedisSessionInterface(SessionInterface):
         self.prefix = prefix
         self.session_class = RedisSession
         self.serializer = json_serializer
+
+        Random.atfork()
         self.random = Random.new().read
 
     def get_random_string(self):
