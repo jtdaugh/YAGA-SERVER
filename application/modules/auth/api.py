@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app as app
+from flask import Blueprint, g, current_app as app
 from flask.ext.security import login_user, logout_user
 
 from application.helpers import (
@@ -23,7 +23,7 @@ class RegisterResource(Resource):
         login_user(user)
 
         return {
-            'email': user.email
+            'email': g.user.email
         }
 
 
@@ -34,7 +34,7 @@ class LoginResource(Resource):
         login_user(self.form.user)
 
         return {
-            'email': self.form.user.email
+            'email': g.user.email
         }
 
 
