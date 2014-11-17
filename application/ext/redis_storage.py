@@ -41,11 +41,11 @@ class RedisSessionInterface(SessionInterface):
         self.session_class = RedisSession
         self.serializer = json_serializer
 
-        Random.atfork()
-        self.random = Random.new().read
-
     def get_random_string(self):
-        return hexlify(self.random(self.RANDOM_STRING_LENGTH))
+        random = Random
+        random.atfork()
+        random = random.new().read
+        return hexlify(random(self.RANDOM_STRING_LENGTH))
 
     def key(self, suffix):
         return '{prefix}:{suffix}'.format(
