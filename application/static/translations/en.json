@@ -1,11 +1,18 @@
 {
  "Info": "Info", 
  "description": "description", 
- "Title": "Title", 
+ "Unauthorized": "Unauthorized", 
+ "Internal Server Error": "Internal Server Error", 
  "Company": "Company", 
+ "Title": "Title", 
+ "Not Found": "Not Found", 
  "Project": "Project", 
+ "Bad Request": "Bad Request", 
  "Toggle navigation": "Toggle navigation", 
- "Email address is already in use.": "Email address is already in use.", 
  "This field is required.": "This field is required.", 
+ "Unknown user or bad password.": "Unknown user or bad password.", 
+ "User already registered.": "User already registered.", 
+ "Forbidden": "Forbidden", 
+ "Method Not Allowed": "Method Not Allowed", 
  "Invalid email address.": "Invalid email address."
 }
