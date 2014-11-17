@@ -53,7 +53,7 @@ class RedisSessionInterface(SessionInterface):
 
     def new_session(self):
         while True:
-            sid = self.random_string()
+            sid = self.get_random_string()
 
             if self.redis.setnx(self.key(sid), '{}'):
                 break
