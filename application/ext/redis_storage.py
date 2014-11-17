@@ -133,6 +133,7 @@ class Redis(object):
         self.connection = StrictRedis(
             host=self.config('HOST', '127.0.0.1'),
             port=self.config('PORT', 6379),
+            password=self.config('PASSWORD', None),
             db=self.config('DB', 0),
         )
 
