@@ -1,0 +1,11 @@
+{
+ "Info": "Info", 
+ "description": "description", 
+ "Title": "Title", 
+ "Company": "Company", 
+ "Project": "Project", 
+ "Toggle navigation": "Toggle navigation", 
+ "Email address is already in use.": "Email address is already in use.", 
+ "This field is required.": "This field is required.", 
+ "Invalid email address.": "Invalid email address."
+}
