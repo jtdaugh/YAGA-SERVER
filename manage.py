@@ -8,10 +8,9 @@ import envoy
 from flask.ext.script import Command
 from IPython import embed
 from babel import support
-
+from flask.ext.migrate import MigrateCommand
 
 from application.core import app
-from application.helpers import db
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
 
@@ -120,12 +119,6 @@ class CompileMessages(Command, ShellMixin):
                 f.write(result.encode('utf8'))
 
 
-class CreateAll(Command):
-    def run(self):
-        db.create_all()
-        db.session.commit()
-
-
 app.manager.add_command('shell', Shell())
 app.manager.add_command('runserver', RunServer())
 app.manager.add_command('urlmap', UrlMap())
@@ -134,7 +127,7 @@ app.manager.add_command('makemessages', MakeMessages())
 app.manager.add_command('compilemessages', CompileMessages())
 app.manager.add_command('createsuperuser', CreateSuperUser())
 app.manager.add_command('syncroles', SyncRoles())
-app.manager.add_command('createall', CreateAll())
+app.manager.add_command('db', MigrateCommand)
 
 
 if __name__ == '__main__':
