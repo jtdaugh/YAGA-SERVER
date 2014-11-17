@@ -85,7 +85,12 @@ def create_app():
 
     @app.before_request
     def set_locale():
-        g.locale = request.accept_languages.best_match(app.config['LOCALES'])
+        locale = request.accept_languages.best_match(app.config['LOCALES'])
+
+        if locale is None:
+            locale = app.config['BABEL_DEFAULT_LOCALE']
+
+        g.locale = locale
 
     @app.before_request
     def set_user():
