@@ -13,7 +13,7 @@ from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 
 from application.core import app
-from application.helpers import assets, db
+from application.helpers import assets, db, cache
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
 from application.modules.auth.models import User, Role
@@ -120,6 +120,11 @@ class CompileMessages(Command, ShellMixin):
                 f.write(result.encode('utf8'))
 
 
+class ClearCache(Command):
+    def run(self):
+        cache.clear()
+
+
 manager.add_command('shell', Shell())
 manager.add_command('runserver', RunServer())
 manager.add_command('urlmap', UrlMap())
@@ -130,6 +135,7 @@ manager.add_command('createsuperuser', CreateSuperUser())
 manager.add_command('syncroles', SyncRoles())
 manager.add_command('db', MigrateCommand)
 manager.add_command('assets', ManageAssets(assets))
+manager.add_command('clearcache', ClearCache())
 
 
 if __name__ == '__main__':
