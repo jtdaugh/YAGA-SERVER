@@ -1,6 +1,3 @@
-import os
-import datetime
-
 from flask import jsonify
 from flask.ext.cache import Cache
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -12,10 +9,10 @@ from flask.ext.security import Security
 from flask.ext.migrate import Migrate
 from flask.ext.assets import Environment
 from flask.ext.babelex import lazy_gettext as _
-from Crypto.Hash import SHA256
 
 from .decorators import marshal_with_form, anonymous_user_required, login_required  # noqa
 from .ext.redis_storage import Redis
+from .ext.s3 import S3
 
 
 HTTP_STATUS_CODES = {
@@ -60,23 +57,14 @@ def output_json(data, code, headers=None):
     return response
 
 
-def now():
-    return datetime.datetime.utcnow()
-
-
-pid_hash = SHA256.new(str(os.getpid())).hexdigest()[:16]
-
-
 cache = Cache()
 db = SQLAlchemy()
 babel = Babel()
 sentry = Sentry()
-s3 = FlaskS3()
+s3static = FlaskS3()
 toolbar = DebugToolbarExtension()
 security = Security()
 redis = Redis()
 migrate = Migrate()
 assets = Environment()
-
-
-from .mixins import Api, Resource, Form, Validator, BaseAdminView, DummyDict  # noqa
+s3 = S3()

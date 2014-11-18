@@ -1,7 +1,7 @@
 from flask.ext.admin import AdminIndexView as BaseAdminIndexView, Admin
 
 from .modules.auth.admin import user_admin, role_admin
-from .helpers import BaseAdminView
+from .mixins import BaseAdminView
 
 
 class AdminIndexView(BaseAdminView, BaseAdminIndexView):

@@ -2,10 +2,9 @@ from flask import Blueprint, g, current_app as app
 from flask.ext.security import login_user, logout_user
 
 from application.helpers import (
-    Api, Resource,
-    marshal_with_form, anonymous_user_required, login_required,
-    db
+    db, marshal_with_form, anonymous_user_required, login_required
 )
+from application.mixins import Api, Resource
 from .forms import UserRegisterForm, UserLoginForm
 
 

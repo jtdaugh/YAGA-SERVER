@@ -1,7 +1,8 @@
 from flanker.addresslib import address
 from flask.ext.babelex import lazy_gettext as _
 
-from application.helpers import Validator, db
+from application.helpers import db
+from application.mixins import Validator
 from .models import User
 
 

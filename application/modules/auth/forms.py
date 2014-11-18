@@ -2,7 +2,7 @@ from wtforms import validators
 from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
-from application.helpers import Form
+from application.mixins import Form
 from .validators import DNSMXEmail, NotRegisteredUser, ValidActiveUser
 
 

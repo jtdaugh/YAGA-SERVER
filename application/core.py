@@ -22,9 +22,10 @@ from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
 
 from .helpers import (
-    cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
-    assets, json_error, now, DummyDict, pid_hash
+    cache, db, babel, sentry, s3static, toolbar, security, redis, migrate,
+    assets, s3, json_error
 )
+from .utils import now, DummyDict
 from .admin import create_admin
 from .modules.auth.models import User, Role
 from .modules.frontend.index import blueprint as index_blueprint
@@ -67,11 +68,12 @@ def create_app():
     db.init_app(app)
     babel.init_app(app)
     sentry.init_app(app)
-    s3.init_app(app)
+    s3static.init_app(app)
     toolbar.init_app(app)
     redis.init_app(app)
     migrate.init_app(app, db, directory='application/migrations')
     assets.init_app(app)
+    s3.init_app(app)
 
     app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
@@ -112,12 +114,6 @@ def create_app():
     def now_context():
         return {
             'now': now()
-        }
-
-    @app.context_processor
-    def pid_hash_context():
-        return {
-            'pid_hash': pid_hash
         }
 
     @app.errorhandler(400)

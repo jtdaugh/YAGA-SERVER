@@ -1,14 +1,10 @@
-from collections import MutableMapping
-
 from flask import g
 from flask.views import View as BaseView
 from flask_wtf import Form as BaseForm
 from flask.ext.restful import Api as BaseApi, Resource as BaseResource
 from flask.ext.restful import DEFAULT_REPRESENTATIONS
 from wtforms.validators import ValidationError
-from webassets.version import Version
 
-from application.helpers import pid_hash
 from .helpers import output_json
 
 
@@ -56,39 +52,3 @@ class BaseAdminView(object):
             and
             g.user.has_role('superuser')
         )
-
-
-class DummyDict(MutableMapping):
-    @property
-    def dct(self):
-        return self.__dict__
-
-    def __getitem__(self, key):
-        try:
-            return self.dct[key]
-        except KeyError:
-            return None
-
-    def __setitem__(self, key, value):
-        self.dct[key] = value
-
-        return self[key]
-
-    def __delitem__(self, key):
-        try:
-            del self.dct[key]
-        except KeyError:
-            pass
-
-    def __iter__(self):
-        return self.dct.__iter__()
-
-    def __len__(self):
-        return self.dct.__len__()
-
-
-class PidHashVersion(Version):
-    id = 'pid_hash'
-
-    def determine_version(self, bundle, env, hunk=None):
-        return pid_hash

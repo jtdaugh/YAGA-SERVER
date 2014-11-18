@@ -1,10 +1,9 @@
-from binascii import hexlify
-
 from flask.json import dumps, loads
 from redis import StrictRedis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
-from Crypto import Random
+
+from application.utils import get_random_string
 
 
 class JsonSerializer(object):
@@ -41,12 +40,6 @@ class RedisSessionInterface(SessionInterface):
         self.session_class = RedisSession
         self.serializer = json_serializer
 
-    def get_random_string(self):
-        random = Random
-        random.atfork()
-        random = random.new().read
-        return hexlify(random(self.RANDOM_STRING_LENGTH))
-
     def key(self, suffix):
         return '{prefix}:{suffix}'.format(
             prefix=self.prefix,
@@ -55,7 +48,7 @@ class RedisSessionInterface(SessionInterface):
 
     def new_session(self):
         while True:
-            sid = self.get_random_string()
+            sid = get_random_string(self.RANDOM_STRING_LENGTH)
 
             if self.redis.setnx(self.key(sid), '{}'):
                 break

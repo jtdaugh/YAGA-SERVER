@@ -1,6 +1,7 @@
 from flask.ext.admin.contrib.sqla import ModelView
 
-from application.helpers import BaseAdminView, db
+from application.helpers import db
+from application.mixins import BaseAdminView
 from .models import User, Role
 
 

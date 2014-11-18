@@ -15,8 +15,8 @@ class Config(BaseConfig):
     ASSETS_AUTO_BUILD = False
     ASSETS_CACHE = False
     ASSETS_MANIFEST = False
-    ASSETS_VERSIONS = 'pid_hash'
-    ASSETS_URL_EXPIRE = True
+    ASSETS_VERSIONS = False
+    ASSETS_URL_EXPIRE = False
 
     SECRET_KEY = environ['SECRET_KEY']
     SECURITY_PASSWORD_SALT = environ['SECURITY_PASSWORD_SALT']
