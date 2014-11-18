@@ -12,7 +12,7 @@ class Config(BaseConfig):
     ASSETS_AUTO_BUILD = True
     ASSETS_CACHE = False
     ASSETS_MANIFEST = False
-    ASSETS_VERSION = True
+    ASSETS_VERSIONS = 'hash'
     ASSETS_URL_EXPIRE = True
 
     SECRET_KEY = 'SECRET_KEY'

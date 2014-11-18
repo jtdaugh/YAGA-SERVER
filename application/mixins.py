@@ -6,7 +6,9 @@ from flask_wtf import Form as BaseForm
 from flask.ext.restful import Api as BaseApi, Resource as BaseResource
 from flask.ext.restful import DEFAULT_REPRESENTATIONS
 from wtforms.validators import ValidationError
+from webassets.version import Version
 
+from application.helpers import pid_hash
 from .helpers import output_json
 
 
@@ -83,3 +85,10 @@ class DummyDict(MutableMapping):
 
     def __len__(self):
         return self.dct.__len__()
+
+
+class PidHashVersion(Version):
+    id = 'pid_hash'
+
+    def determine_version(self, bundle, env, hunk=None):
+        return pid_hash

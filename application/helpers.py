@@ -1,3 +1,4 @@
+import os
 import datetime
 
 from flask import jsonify
@@ -11,6 +12,7 @@ from flask.ext.security import Security
 from flask.ext.migrate import Migrate
 from flask.ext.assets import Environment
 from flask.ext.babelex import lazy_gettext as _
+from Crypto.Hash import SHA256
 
 from .decorators import marshal_with_form, anonymous_user_required, login_required  # noqa
 from .ext.redis_storage import Redis
@@ -60,6 +62,9 @@ def output_json(data, code, headers=None):
 
 def now():
     return datetime.datetime.utcnow()
+
+
+pid_hash = SHA256.new(str(os.getpid())).hexdigest()[:16]
 
 
 cache = Cache()

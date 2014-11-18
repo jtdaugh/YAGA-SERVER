@@ -23,7 +23,7 @@ from flanker.addresslib import set_mx_cache
 
 from .helpers import (
     cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
-    assets, json_error, now, DummyDict
+    assets, json_error, now, DummyDict, pid_hash
 )
 from .admin import create_admin
 from .modules.auth.models import User, Role
@@ -112,6 +112,12 @@ def create_app():
     def now_context():
         return {
             'now': now()
+        }
+
+    @app.context_processor
+    def pid_hash_context():
+        return {
+            'pid_hash': pid_hash
         }
 
     @app.errorhandler(400)
