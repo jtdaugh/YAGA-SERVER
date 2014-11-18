@@ -13,23 +13,18 @@ from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 
 from application.core import app
-from application.helpers import assets
+from application.helpers import assets, db
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
+from application.modules.auth.models import User, Role
 
 
 manager = Manager(app)
 
 
 class Shell(Command):
-    @property
-    def context(self):
-        return {
-            'app': app
-        }
-
     def run(self):
-        embed(user_ns=self.context)
+        embed()
 
 
 class RunServer(Command):

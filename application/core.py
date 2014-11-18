@@ -22,7 +22,7 @@ from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
 
 from .helpers import (
-    heroku, cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
+    cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
     assets, json_error, now, DummyDict
 )
 from .admin import create_admin
@@ -33,7 +33,10 @@ from .ext.redis_storage import RedisSessionInterface
 
 
 def load_config():
-    config = os.environ.get('ENV', 'dev')
+    if os.environ.get('DYNO'):
+        config = 'heroku'
+    else:
+        config = 'local'
 
     config = 'application.configs.{config}.Config'.format(config=config)
 
@@ -60,7 +63,6 @@ def create_app():
     app.wsgi_app = ProxyFix(app.wsgi_app)
     app.json_encoder = CustomJSONEncoder
 
-    heroku.init_app(app)
     cache.init_app(app)
     db.init_app(app)
     babel.init_app(app)
