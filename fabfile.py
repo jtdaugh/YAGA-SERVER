@@ -32,8 +32,8 @@ def deploy():
 
 
 @task
-def release(stop=True):
-    if stop:
+def release(initial=False):
+    if not initial:
         stop()
 
     local('git st')
@@ -45,8 +45,6 @@ def release(stop=True):
     local('heroku run python manage.py collectstatic')
 
     start()
-
-    open()
 
 
 @task
@@ -70,7 +68,7 @@ def logs():
 
 
 @task
-def open():
+def view():
     local('heroku open')
 
 
@@ -82,10 +80,12 @@ def stop():
 
 
 @task
-def start():
+def start(initial=False):
     local('heroku ps:scale web={workers}'.format(workers=WEB_WORKERS))
     sleep(START_TIMEOUT)
     local('heroku maintenance:off')
+
+    view()
 
 
 @task
@@ -160,4 +160,4 @@ def create():
     local('heroku config:set SECRET_KEY={value}'.format(value=SECRET_KEY))
     local('heroku config:set SECURITY_PASSWORD_SALT={value}'.format(value=SECURITY_PASSWORD_SALT))
 
-    release(stop=False)
+    release(initial=False)
