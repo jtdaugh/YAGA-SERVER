@@ -160,4 +160,4 @@ def create():
     local('heroku config:set SECRET_KEY={value}'.format(value=SECRET_KEY))
     local('heroku config:set SECURITY_PASSWORD_SALT={value}'.format(value=SECURITY_PASSWORD_SALT))
 
-    release(initial=False)
+    release(initial=True)
