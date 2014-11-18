@@ -6,8 +6,12 @@ class Config(BaseConfig):
     AWS_SECRET_ACCESS_KEY = 'OdxAVZMH4Hg/dmTUWUNuzKPgktJwTo65VrtY3K4x'
     S3_BUCKET_NAME = 'hellysmile'
     S3_USE_HTTPS = False
-    USE_S3 = False
+    USE_S3 = True
     USE_S3_DEBUG = True
+    FLASK_ASSETS_USE_S3 = True
+    ASSETS_AUTO_BUILD = False
+    ASSETS_CACHE = False
+    ASSETS_MANIFEST = False
 
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = 'cache'

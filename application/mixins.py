@@ -64,7 +64,7 @@ class DummyDict(MutableMapping):
     def __getitem__(self, key):
         try:
             return self.dct[key]
-        except:
+        except KeyError:
             return None
 
     def __setitem__(self, key, value):

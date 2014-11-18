@@ -10,6 +10,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.security import Security
 from flask.ext.heroku import Heroku
 from flask.ext.migrate import Migrate
+from flask.ext.assets import Environment
 from flask.ext.babelex import lazy_gettext as _
 
 from .decorators import marshal_with_form, anonymous_user_required, login_required  # noqa
@@ -72,6 +73,7 @@ security = Security()
 heroku = Heroku()
 redis = Redis()
 migrate = Migrate()
+assets = Environment()
 
 
 from .mixins import Api, Resource, Form, Validator, BaseAdminView, DummyDict  # noqa

@@ -24,7 +24,7 @@ from flanker.addresslib import set_mx_cache
 
 from .helpers import (
     heroku, cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
-    json_error, now, DummyDict
+    assets, json_error, now, DummyDict, Environment
 )
 from .admin import create_admin
 from .modules.auth.models import User, Role
@@ -70,6 +70,7 @@ def create_app():
     toolbar.init_app(app)
     redis.init_app(app)
     migrate.init_app(app, db, directory='application/migrations')
+    app.assets = Environment(app)
 
     app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 

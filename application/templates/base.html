@@ -18,20 +18,14 @@
             {% endblock %}
 
             {% block css %}
-                <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-                <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-            {% endblock %}
-
-            {% block gettext %}
-                <link href="{{ url_for('static', filename='translations/' + g.locale + '.json') }}" lang="{{ g.locale }}" rel="gettext" />
-            {% endblock %}
-
-            {% block js %}
-                <script src="{{ url_for('static', filename='js/vendor/modernizr-2.6.2-respond-1.1.0.min.js') }}"></script>
-                <script src="{{ url_for('static', filename='js/vendor/jquery-1.11.1.min.js') }}"></script>
-                <script src="{{ url_for('static', filename='js/vendor/bootstrap.min.js') }}"></script>
-                <script src="{{ url_for('static', filename='js/vendor/jquery.gettext.js') }}"></script>
-                <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+                {% assets
+                    filters='cssmin',
+                    output='packed/packed.css',
+                    'css/bootstrap.min.css',
+                    'css/main.css'
+                %}
+                    <link rel="stylesheet" href="{{ ASSET_URL }}">
+                {% endassets %}
             {% endblock %}
         {% endblock %}
     </head>
@@ -76,6 +70,24 @@
                     {% endblock %}
                 </div>
             {% endblock %}
+        {% endblock %}
+
+        {% block gettext %}
+            <link href="{{ url_for('static', filename='translations/' + g.locale + '.json') }}" lang="{{ g.locale }}" rel="gettext" />
+        {% endblock %}
+
+        {% block js %}
+            {% assets
+                filters='rjsmin',
+                output='packed/packed.js',
+                'js/vendor/modernizr-2.6.2-respond-1.1.0.min.js',
+                'js/vendor/jquery-1.11.1.min.js',
+                'js/vendor/bootstrap.min.js',
+                'js/vendor/jquery.gettext.js',
+                'js/main.js'
+            %}
+                <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+            {% endassets %}
         {% endblock %}
     </body>
 </html>

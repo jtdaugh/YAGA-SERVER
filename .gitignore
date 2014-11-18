@@ -6,3 +6,5 @@ messages.pot
 *.sublime*
 cache
 *.sqlite
+application/static/packed
+application/static/.webassets-cache

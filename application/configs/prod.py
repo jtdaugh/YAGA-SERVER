@@ -8,6 +8,10 @@ class Config(BaseConfig):
     S3_USE_HTTPS = True
     USE_S3 = True
     USE_S3_DEBUG = False
+    FLASK_ASSETS_USE_S3 = True
+    ASSETS_AUTO_BUILD = False
+    ASSETS_CACHE = False
+    ASSETS_MANIFEST = False
 
     CACHE_TYPE = 'simple'
 

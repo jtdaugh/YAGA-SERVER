@@ -9,8 +9,10 @@ from flask.ext.script import Command
 from IPython import embed
 from babel import support
 from flask.ext.migrate import MigrateCommand
+from flask.ext.assets import ManageAssets
 
 from application.core import app
+# from application.helpers import assets
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
 
@@ -128,6 +130,7 @@ app.manager.add_command('compilemessages', CompileMessages())
 app.manager.add_command('createsuperuser', CreateSuperUser())
 app.manager.add_command('syncroles', SyncRoles())
 app.manager.add_command('db', MigrateCommand)
+app.manager.add_command('assets', ManageAssets(app.assets))
 
 
 if __name__ == '__main__':
