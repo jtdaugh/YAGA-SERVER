@@ -10,7 +10,7 @@ class Config(BaseConfig):
 
     FLASK_ASSETS_USE_S3 = False
     ASSETS_AUTO_BUILD = True
-    ASSETS_CACHE = True
+    ASSETS_CACHE = False
     ASSETS_MANIFEST = False
     ASSETS_VERSION = True
     ASSETS_URL_EXPIRE = True

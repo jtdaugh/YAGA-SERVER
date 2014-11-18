@@ -26,9 +26,7 @@ def deploy():
 
     local('python manage.py db upgrade')
     local('python manage.py syncroles')
-    local('python manage.py compilemessages')
     local('python manage.py assets --parse-templates build')
-    local('python manage.py collectstatic')
 
 
 @task
@@ -41,8 +39,7 @@ def release(initial=False):
 
     local('heroku run python manage.py db upgrade')
     local('heroku run python manage.py syncroles')
-    local('heroku run python manage.py assets --parse-templates build')
-    local('heroku run python manage.py collectstatic')
+    local('heroku run "python manage.py assets --parse-templates build && python manage.py collectstatic"')
 
     start()
 
