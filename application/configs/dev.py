@@ -6,12 +6,17 @@ class Config(BaseConfig):
     AWS_SECRET_ACCESS_KEY = 'OdxAVZMH4Hg/dmTUWUNuzKPgktJwTo65VrtY3K4x'
     S3_BUCKET_NAME = 'hellysmile'
     S3_USE_HTTPS = False
-    USE_S3 = True
-    USE_S3_DEBUG = True
-    FLASK_ASSETS_USE_S3 = True
-    ASSETS_AUTO_BUILD = False
-    ASSETS_CACHE = False
+    USE_S3 = False
+
+    FLASK_ASSETS_USE_S3 = False
+    ASSETS_AUTO_BUILD = True
+    ASSETS_CACHE = True
     ASSETS_MANIFEST = False
+    ASSETS_VERSION = True
+    ASSETS_URL_EXPIRE = True
+
+    SECRET_KEY = 'SECRET_KEY'
+    SECURITY_PASSWORD_SALT = 'SALT'
 
     CACHE_TYPE = 'filesystem'
     CACHE_DIR = 'cache'
@@ -20,9 +25,6 @@ class Config(BaseConfig):
 
     APP_HOST = '127.0.0.1'
     APP_PORT = 5000
-
-    SECRET_KEY = 'SECRET_KEY'
-    SECURITY_PASSWORD_SALT = 'SALT'
 
     DEBUG_TB_ENABLED = True
     DEBUG_TB_INTERCEPT_REDIRECTS = False
