@@ -5,8 +5,8 @@ def manage(cmd):
     local('python manage.py {cmd}'.format(cmd=cmd))
 
 
-def heroku_run(cmd):
-    local('heroku run {cmd}'.format(cmd=cmd))
+def heroku_manage(cmd):
+    local('heroku run python manage.py {cmd}'.format(cmd=cmd))
 
 
 @task
@@ -25,10 +25,10 @@ def release():
     local('git st')
     local('git push heroku master')
 
-    heroku_run('db upgrade')
-    heroku_run('syncroles')
-    manage('assets --parse-templates build')
-    manage('collectstatic')
+    heroku_manage('db upgrade')
+    heroku_manage('syncroles')
+    heroku_manage('assets --parse-templates build')
+    heroku_manage('collectstatic')
 
 
 @task
