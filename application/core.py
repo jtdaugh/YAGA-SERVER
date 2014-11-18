@@ -18,13 +18,12 @@ from flask.json import JSONEncoder
 from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.utils import import_string
 from speaklater import is_lazy_string
-from flask.ext.script import Manager
 from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
 
 from .helpers import (
     heroku, cache, db, babel, sentry, s3, toolbar, security, redis, migrate,
-    assets, json_error, now, DummyDict, Environment
+    assets, json_error, now, DummyDict
 )
 from .admin import create_admin
 from .modules.auth.models import User, Role
@@ -70,7 +69,7 @@ def create_app():
     toolbar.init_app(app)
     redis.init_app(app)
     migrate.init_app(app, db, directory='application/migrations')
-    app.assets = Environment(app)
+    assets.init_app(app)
 
     app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
@@ -80,7 +79,6 @@ def create_app():
         register_blueprint=False
     )
 
-    app.manager = Manager(app)
     app.session_interface = RedisSessionInterface(redis)
 
     create_admin(app)

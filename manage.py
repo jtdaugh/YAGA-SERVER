@@ -8,13 +8,17 @@ import envoy
 from flask.ext.script import Command
 from IPython import embed
 from babel import support
+from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 
 from application.core import app
-# from application.helpers import assets
+from application.helpers import assets
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
+
+
+manager = Manager(app)
 
 
 class Shell(Command):
@@ -121,17 +125,17 @@ class CompileMessages(Command, ShellMixin):
                 f.write(result.encode('utf8'))
 
 
-app.manager.add_command('shell', Shell())
-app.manager.add_command('runserver', RunServer())
-app.manager.add_command('urlmap', UrlMap())
-app.manager.add_command('collectstatic', Collectstatic())
-app.manager.add_command('makemessages', MakeMessages())
-app.manager.add_command('compilemessages', CompileMessages())
-app.manager.add_command('createsuperuser', CreateSuperUser())
-app.manager.add_command('syncroles', SyncRoles())
-app.manager.add_command('db', MigrateCommand)
-app.manager.add_command('assets', ManageAssets(app.assets))
+manager.add_command('shell', Shell())
+manager.add_command('runserver', RunServer())
+manager.add_command('urlmap', UrlMap())
+manager.add_command('collectstatic', Collectstatic())
+manager.add_command('makemessages', MakeMessages())
+manager.add_command('compilemessages', CompileMessages())
+manager.add_command('createsuperuser', CreateSuperUser())
+manager.add_command('syncroles', SyncRoles())
+manager.add_command('db', MigrateCommand)
+manager.add_command('assets', ManageAssets(assets))
 
 
 if __name__ == '__main__':
-    app.manager.run()
+    manager.run()
