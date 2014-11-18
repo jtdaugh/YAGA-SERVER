@@ -73,7 +73,7 @@
         {% endblock %}
 
         {% block gettext %}
-            <link href="{{ url_for('static', filename='translations/' + g.locale + '.json') }}?{{ pid_hash }}" lang="{{ g.locale }}" rel="gettext" />
+            <link href="{{ url_for('static', filename='translations/' + g.locale + '.json') }}" lang="{{ g.locale }}" rel="gettext" />
         {% endblock %}
 
         {% block js %}
