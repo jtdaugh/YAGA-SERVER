@@ -1,7 +1,9 @@
 from celery import Celery as CeleryCls
 
+from .base import BaseStorage
 
-class Celery(object):
+
+class Celery(BaseStorage):
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)
@@ -30,9 +32,4 @@ class Celery(object):
     def init_app(self, app):
         celery = self.create_celery(app)
 
-        self.patch(celery)
-
-    def patch(self, celery):
-        for key in dir(celery):
-            if not hasattr(self, key):
-                setattr(self, key, getattr(celery, key))
+        self.merge(celery)

@@ -1,7 +1,9 @@
 from boto.s3.connection import S3Connection
 
+from .base import BaseStorage
 
-class S3(object):
+
+class S3(BaseStorage):
     def __init__(self, app=None):
         if app is not None:
             self.init_app(app)

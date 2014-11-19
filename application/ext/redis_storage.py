@@ -4,6 +4,7 @@ from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
 
 from application.utils import get_random_string
+from .base import BaseStorage
 
 
 class JsonSerializer(object):
@@ -106,7 +107,7 @@ class RedisSessionInterface(SessionInterface):
         )
 
 
-class Redis(object):
+class Redis(BaseStorage):
     def __init__(self, app=None,):
         self.prefix = 'REDIS'
 
@@ -132,9 +133,4 @@ class Redis(object):
             db=self.config('DB', 0),
         )
 
-        self.patch(redis)
-
-    def patch(self, redis):
-        for key in dir(redis):
-            if not hasattr(self, key):
-                setattr(self, key, getattr(redis, key))
+        self.merge(redis)
