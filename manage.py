@@ -1,8 +1,8 @@
+#!/usr/bin/env python
 from __future__ import (
     absolute_import, division, unicode_literals, print_function
 )
 
-#!/usr/bin/env python
 import os
 import json
 from urllib import unquote
