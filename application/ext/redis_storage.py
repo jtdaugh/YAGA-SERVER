@@ -1,9 +1,11 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask.json import dumps, loads
 from redis import StrictRedis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
 
-from application.utils import get_random_string
+from ..utils import get_random_string
 from .base import BaseStorage
 
 

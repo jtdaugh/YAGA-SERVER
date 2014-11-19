@@ -1,8 +1,10 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask import current_app as app
 from flask.ext.script import Command, prompt, prompt_pass
 from werkzeug.datastructures import MultiDict
 
-from application.helpers import db
+from ...helpers import db
 from .models import Role
 from .forms import UserRegisterForm
 

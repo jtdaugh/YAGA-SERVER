@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask.ext.admin import AdminIndexView as BaseAdminIndexView, Admin
 
 from .modules.auth.admin import user_admin, role_admin

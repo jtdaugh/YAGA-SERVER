@@ -1,5 +1,8 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask import Blueprint, render_template
-from application.helpers import View
+from ...helpers import View
+from ...utils import b
 
 
 blueprint = Blueprint('index', __name__,)
@@ -15,5 +18,5 @@ class LogoutView(View):
         return render_template('index.html')
 
 
-blueprint.add_url_rule('/login', view_func=LoginView.as_view('login'))
-blueprint.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
+blueprint.add_url_rule('/login', view_func=LoginView.as_view(b('login')))
+blueprint.add_url_rule('/logout', view_func=LogoutView.as_view(b('logout')))

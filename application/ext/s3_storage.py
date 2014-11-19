@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from boto.s3.connection import S3Connection
 
 from .base import BaseStorage

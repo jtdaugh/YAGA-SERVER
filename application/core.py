@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, unicode_literals
+
 import sys
 import locale
 
@@ -5,7 +7,11 @@ import locale
 def fix_locale():
     reload(sys)
     sys.setdefaultencoding('utf-8')
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+    try:
+        locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+    except ValueError:
+        locale.setlocale(locale.LC_ALL, ('en_US', 'UTF-8'))
 
 
 fix_locale()
@@ -37,7 +43,12 @@ def load_config():
     else:
         config = 'local'
 
-    config = 'application.configs.{config}.Config'.format(config=config)
+    module = __name__.split('.')[0]
+
+    config = '{module}.configs.{config}.Config'.format(
+        module=module,
+        config=config
+    )
 
     config = import_string(config)
 
@@ -71,7 +82,7 @@ def create_app():
     s3static.init_app(app)
     toolbar.init_app(app)
     redis.init_app(app)
-    migrate.init_app(app, db, directory='application/migrations')
+    migrate.init_app(app, db, directory='../migrations')
     assets.init_app(app)
     s3media.init_app(app)
     celery.init_app(app)

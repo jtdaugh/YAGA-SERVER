@@ -1,8 +1,10 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flanker.addresslib import address
 from flask.ext.babelex import lazy_gettext as _
 
-from application.helpers import db
-from application.mixins import Validator
+from ...helpers import db
+from ...mixins import Validator
 from .models import User
 
 

@@ -1,8 +1,10 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from wtforms import validators
 from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
-from application.mixins import Form
+from ...mixins import Form
 from .validators import DNSMXEmail, NotRegisteredUser, ValidActiveUser
 
 

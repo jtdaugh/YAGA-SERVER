@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask import g
 from flask.views import View as BaseView
 from flask_wtf import Form as BaseForm

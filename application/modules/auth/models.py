@@ -1,9 +1,11 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask.ext.security import UserMixin, RoleMixin
 from flask.ext.security.utils import encrypt_password
 from flask.ext.security.utils import verify_password
 
-from application.helpers import db
-from application.utils import now
+from ...helpers import db
+from ...utils import now
 
 
 roles_users = db.Table(

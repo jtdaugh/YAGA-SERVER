@@ -1,7 +1,9 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask.ext.admin.contrib.sqla import ModelView
 
-from application.helpers import db
-from application.mixins import BaseAdminView
+from ...helpers import db
+from ...mixins import BaseAdminView
 from .models import User, Role
 
 

@@ -1,7 +1,12 @@
+from __future__ import absolute_import, division, unicode_literals
+
+from ..utils import b
+
+
 class BaseConfig(object):
     LOCALES = ['en']
     BABEL_DEFAULT_LOCALE = 'en'
-    SECURITY_PASSWORD_HASH = 'bcrypt'
+    SECURITY_PASSWORD_HASH = b('bcrypt')
     WTF_CSRF_ENABLED = False
     SECURITY_DEFAULT_REMEMBER_ME = True
 

@@ -1,8 +1,25 @@
+from __future__ import absolute_import, division, unicode_literals
+
 import datetime
 from binascii import hexlify
 from collections import MutableMapping
 
 from Crypto import Random
+from six import binary_type, string_types
+
+
+def u(value):
+    if isinstance(value, binary_type):
+        value = value.decode()
+
+    return value
+
+
+def b(value):
+    if isinstance(value, string_types):
+        value = value.encode()
+
+    return value
 
 
 def get_random_string(length):
