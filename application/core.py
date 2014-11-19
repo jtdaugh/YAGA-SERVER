@@ -101,6 +101,13 @@ def create_app():
     def set_user():
         g.user = current_user
 
+    @app.after_request
+    def after_request_callbacks(response):
+        for callback in g.get('after_request_callbacks', []):
+            callback(response)
+
+        return response
+
     @babel.localeselector
     def get_locale():
         return g.locale

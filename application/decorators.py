@@ -54,3 +54,16 @@ def marshal_with_form(form_obj):
         return wrapper
 
     return wrapped
+
+
+def after_this_request(fn):
+    @wraps(fn)
+    def wrapper(response):
+        if not hasattr(g, 'after_request_callbacks'):
+            g.after_request_callbacks = []
+
+        g.after_request_callbacks.append(fn)
+
+        return fn(response)
+
+    return wrapper
