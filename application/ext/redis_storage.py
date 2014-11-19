@@ -32,7 +32,7 @@ class RedisSession(CallbackDict, SessionMixin):
 
 
 class RedisSessionInterface(SessionInterface):
-    RANDOM_STRING_LENGTH = 32
+    RANDOM_STRING_LENGTH = 64
 
     def __init__(self, redis, prefix=None):
         if prefix is None:
