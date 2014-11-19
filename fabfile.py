@@ -99,6 +99,11 @@ def status():
 
 
 @task
+def events():
+    local('heroku run celery -A application.core.celery events')
+
+
+@task
 def ssh():
     local('heroku run bash')
 
