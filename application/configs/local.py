@@ -5,6 +5,7 @@ class Config(BaseConfig):
     AWS_ACCESS_KEY_ID = 'AKIAJSOKYB6HRKACSAMA'
     AWS_SECRET_ACCESS_KEY = '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'
     S3_BUCKET_NAME = 'yaga-dev-static'
+    S3_BUCKET_NAME_MEDIA = 'yaga-dev-media'
     S3_USE_HTTPS = False
     USE_S3 = False
 
@@ -18,10 +19,12 @@ class Config(BaseConfig):
     SECRET_KEY = 'SECRET_KEY'
     SECURITY_PASSWORD_SALT = 'SALT'
 
-    CACHE_TYPE = 'filesystem'
-    CACHE_DIR = 'cache'
+    CACHE_TYPE = 'memcached'
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://hell:@127.0.0.1:5432/yaga'
+
+    CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+    CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
 
     APP_HOST = '127.0.0.1'
     APP_PORT = 5000

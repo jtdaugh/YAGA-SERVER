@@ -13,5 +13,5 @@ class S3(object):
         )
 
         self.bucket = self.connection.get_bucket(
-            app.config['S3_BUCKET_NAME']
+            app.config['S3_BUCKET_NAME_MEDIA']
         )

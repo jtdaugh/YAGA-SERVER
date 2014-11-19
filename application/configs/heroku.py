@@ -8,6 +8,7 @@ class Config(BaseConfig):
     AWS_ACCESS_KEY_ID = environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = environ['AWS_SECRET_ACCESS_KEY']
     S3_BUCKET_NAME = environ['S3_BUCKET_NAME']
+    S3_BUCKET_NAME_MEDIA = environ['S3_BUCKET_NAME_MEDIA']
     S3_USE_HTTPS = True
     USE_S3 = True
 
@@ -27,6 +28,9 @@ class Config(BaseConfig):
     CACHE_MEMCACHED_PASSWORD = environ['MEMCACHIER_PASSWORD']
 
     SQLALCHEMY_DATABASE_URI = environ['DATABASE_URL']
+
+    CELERY_BROKER_URL = environ['RABBITMQ_BIGWIG_URL']
+    CELERY_RESULT_BACKEND = environ['RABBITMQ_BIGWIG_URL']
 
     SENTRY_DSN = environ['SENTRY_DSN']
 

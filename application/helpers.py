@@ -12,8 +12,8 @@ from flask.ext.babelex import lazy_gettext as _
 
 from .decorators import marshal_with_form, anonymous_user_required, login_required  # noqa
 from .ext.redis_storage import Redis
-from .ext.s3 import S3
-
+from .ext.s3_storage import S3
+from .ext.celery_storage import Celery
 
 HTTP_STATUS_CODES = {
     400: _('Bad Request'),
@@ -67,4 +67,5 @@ security = Security()
 redis = Redis()
 migrate = Migrate()
 assets = Environment()
-s3 = S3()
+s3media = S3()
+celery = Celery()

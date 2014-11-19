@@ -147,11 +147,13 @@ def create():
 
     AWS_ACCESS_KEY_ID = ensure_prompt('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = ensure_prompt('AWS_SECRET_ACCESS_KEY')
-    S3_BUCKET_NAME = ensure_prompt('S3_BUCKET_NAME')
+    S3_BUCKET_NAME = ensure_prompt('S3_BUCKET_NAME (static)')
+    S3_BUCKET_NAME_MEDIA = ensure_prompt('S3_BUCKET_NAME (media)')
 
     local('heroku config:set AWS_ACCESS_KEY_ID={value}'.format(value=AWS_ACCESS_KEY_ID))
     local('heroku config:set AWS_SECRET_ACCESS_KEY={value}'.format(value=AWS_SECRET_ACCESS_KEY))
     local('heroku config:set S3_BUCKET_NAME={value}'.format(value=S3_BUCKET_NAME))
+    local('heroku config:set S3_BUCKET_NAME_MEDIA={value}'.format(value=S3_BUCKET_NAME_MEDIA))
 
     SECRET_KEY = ensure_prompt('SECRET_KEY')
     SECURITY_PASSWORD_SALT = ensure_prompt('SECURITY_PASSWORD_SALT')

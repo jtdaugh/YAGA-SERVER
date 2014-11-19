@@ -8,3 +8,4 @@ cache
 *.sqlite
 application/static/packed
 application/static/.webassets-cache
+celerybeat-schedule

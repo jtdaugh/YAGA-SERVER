@@ -125,18 +125,16 @@ class Redis(object):
     def init_app(self, app):
         self.app = app
 
-        self.connection = StrictRedis(
+        redis = StrictRedis(
             host=self.config('HOST', '127.0.0.1'),
             port=self.config('PORT', 6379),
             password=self.config('PASSWORD', None),
             db=self.config('DB', 0),
         )
 
-        self._include_connection_methods(self.connection)
+        self.patch(redis)
 
-    def _include_connection_methods(self, connection):
-        for attr in dir(connection):
-            value = getattr(connection, attr)
-            if attr.startswith('_') or not callable(value):
-                continue
-            self.__dict__[attr] = value
+    def patch(self, redis):
+        for key in dir(redis):
+            if not hasattr(self, key):
+                setattr(self, key, getattr(redis, key))

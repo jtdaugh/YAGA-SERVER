@@ -23,13 +23,11 @@ from flanker.addresslib import set_mx_cache
 
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis, migrate,
-    assets, s3, json_error
+    assets, s3media, celery, json_error
 )
 from .utils import now, DummyDict
 from .admin import create_admin
 from .modules.auth.models import User, Role
-from .modules.frontend.index import blueprint as index_blueprint
-from .modules.auth.api import blueprint as api_auth_blueprint
 from .ext.redis_storage import RedisSessionInterface
 
 
@@ -56,6 +54,8 @@ class CustomJSONEncoder(JSONEncoder):
 
 
 def create_app():
+    global celery
+
     mx_cache = DummyDict()
     set_mx_cache(mx_cache)
 
@@ -73,7 +73,8 @@ def create_app():
     redis.init_app(app)
     migrate.init_app(app, db, directory='application/migrations')
     assets.init_app(app)
-    s3.init_app(app)
+    s3media.init_app(app)
+    celery.init_app(app)
 
     app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
@@ -139,6 +140,9 @@ def create_app():
     @app.errorhandler(500)
     def error_500(e):
         return json_error(500, e)
+
+    from .modules.frontend.index import blueprint as index_blueprint
+    from .modules.auth.api import blueprint as api_auth_blueprint
 
     app.register_blueprint(index_blueprint)
     app.register_blueprint(api_auth_blueprint, url_prefix='/api')
