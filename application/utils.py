@@ -9,7 +9,7 @@ def get_random_string(length):
     random = Random
     random.atfork()
     random = random.new().read
-    return hexlify(random(length // 2))
+    return hexlify(random(length // 2 + 1))[:length]
 
 
 def now():
