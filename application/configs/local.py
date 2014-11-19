@@ -4,7 +4,7 @@ from .base import BaseConfig
 class Config(BaseConfig):
     AWS_ACCESS_KEY_ID = 'AKIAJSOKYB6HRKACSAMA'
     AWS_SECRET_ACCESS_KEY = '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'
-    S3_BUCKET_NAME = 'yaga-dev'
+    S3_BUCKET_NAME = 'yaga-dev-static'
     S3_USE_HTTPS = False
     USE_S3 = False
 
