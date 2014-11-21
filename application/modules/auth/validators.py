@@ -3,12 +3,11 @@ from __future__ import absolute_import, division, unicode_literals
 from flanker.addresslib import address
 from flask.ext.babelex import lazy_gettext as _
 
-from ...helpers import db
-from ...mixins import Validator
-from .models import User
+from ...mixins import BaseValidator
+from .repository import user_storage
 
 
-class DNSMXEmail(Validator):
+class DNSMXEmail(BaseValidator):
     MESSAGE = _('Invalid email address.')
 
     def __call__(self, form, field):
@@ -21,23 +20,23 @@ class DNSMXEmail(Validator):
             raise self.fail
 
 
-class NotRegisteredUser(Validator):
+class NotRegisteredUser(BaseValidator):
     MESSAGE = _('User already registered.')
 
     def __call__(self, form, field):
-        if db.session.query(User).filter_by(
+        if user_storage.get(
             email=field.data
-        ).first() is not None:
+        ):
             raise self.fail
 
 
-class ValidActiveUser(Validator):
+class ValidActiveUser(BaseValidator):
     MESSAGE = _('Unknown user or bad password.')
 
     def __call__(self, form, field):
-        user = db.session.query(User).filter_by(
+        user = user_storage.get(
             email=field.data
-        ).first()
+        )
 
         if user is None:
             raise self.fail

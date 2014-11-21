@@ -6,6 +6,8 @@ from collections import MutableMapping
 
 from Crypto import Random
 from six import binary_type, string_types
+from flask.json import JSONEncoder as BaseJSONEncoder
+from speaklater import is_lazy_string
 
 
 def u(value):
@@ -31,6 +33,15 @@ def get_random_string(length):
 
 def now():
     return datetime.datetime.utcnow()
+
+
+class JSONEncoder(BaseJSONEncoder):
+    def default(self, obj):
+        if is_lazy_string(obj):
+            obj = str(obj)
+            return obj
+
+        return JSONEncoder.default(self, obj)
 
 
 class DummyDict(MutableMapping):

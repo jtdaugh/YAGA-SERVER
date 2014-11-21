@@ -30,7 +30,7 @@ def login_required(fn):
     return wrapper
 
 
-def marshal_with_form(form_obj):
+def marshal_with_form(form_obj, fail_status_code):
     def wrapped(fn):
         @wraps(fn)
         def wrapper(cls, *args, **kwargs):
@@ -39,19 +39,9 @@ def marshal_with_form(form_obj):
             if form.validate_on_submit():
                 cls.form = form
 
-                response = fn(cls, *args, **kwargs)
-
-                if response is None:
-                    response = {}
-
-                if not response.get('result'):
-                    response['result'] = 'done'
+                return fn(cls, *args, **kwargs)
             else:
-                response = form.errors
-
-                response['result'] = 'fail'
-
-            return response
+                return form.errors, fail_status_code
 
         return wrapper
 

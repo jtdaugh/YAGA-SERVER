@@ -8,7 +8,6 @@ from raven.contrib.flask import Sentry
 from flask_s3 import FlaskS3
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.security import Security
-from flask.ext.migrate import Migrate
 from flask.ext.assets import Environment
 from flask.ext.babelex import lazy_gettext as _
 
@@ -29,18 +28,9 @@ HTTP_STATUS_CODES = {
 def json_error(code, e):
     message = HTTP_STATUS_CODES.get(code)
 
-    if not message:
-        try:
-            message = str(e)
-        except:
-            pass
-
     data = {
-        'result': 'fail'
+        'error': message
     }
-
-    if message:
-        data['message'] = message
 
     response = jsonify(data)
     response.status_code = code
@@ -66,7 +56,6 @@ s3static = FlaskS3()
 toolbar = DebugToolbarExtension()
 security = Security()
 redis = Redis()
-migrate = Migrate()
 assets = Environment()
 s3media = S3()
 celery = Celery()

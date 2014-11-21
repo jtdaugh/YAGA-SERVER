@@ -44,5 +44,4 @@ class Config(BaseConfig):
         'flask_debugtoolbar.panels.sqlalchemy.SQLAlchemyDebugPanel',
         'flask_debugtoolbar.panels.logger.LoggingPanel',
         'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
-        'flask.ext.mongoengine.panels.MongoDebugPanel'
     ]

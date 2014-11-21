@@ -25,16 +25,6 @@ def ensure_prompt(label):
 
 
 @task
-def deploy():
-    local('pip install -r requirements.txt')
-
-    local('python manage.py db upgrade')
-    local('python manage.py syncroles')
-    local('python manage.py clearcache')
-    local('python manage.py assets --parse-templates build')
-
-
-@task
 def release(initial=False):
     if not initial:
         stop()
@@ -48,21 +38,6 @@ def release(initial=False):
     local('heroku run "python manage.py assets --parse-templates build && python manage.py collectstatic"')
 
     start()
-
-
-@task
-def watch():
-    local('python manage.py assets --parse-templates watch')
-
-
-@task
-def debug():
-    local('python manage.py runserver')
-
-
-@task
-def shell():
-    local('python manage.py shell')
 
 
 @task

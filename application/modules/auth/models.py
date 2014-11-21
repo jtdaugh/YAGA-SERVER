@@ -1,11 +1,10 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from flask.ext.security import UserMixin, RoleMixin
-from flask.ext.security.utils import encrypt_password
-from flask.ext.security.utils import verify_password
 
 from ...helpers import db
 from ...utils import now
+from .mixins import BaseUser
 
 
 roles_users = db.Table(
@@ -38,11 +37,11 @@ class Role(db.Model, RoleMixin):
         db.String(255)
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
-class User(db.Model, UserMixin):
+class User(db.Model, BaseUser, UserMixin):
     id = db.Column(
         db.Integer,
         primary_key=True
@@ -73,11 +72,5 @@ class User(db.Model, UserMixin):
         backref=db.backref('users', lazy='dynamic')
     )
 
-    def set_password(self, password):
-        self.password = encrypt_password(password)
-
-    def verify_password(self, password):
-        return verify_password(password, self.password)
-
-    def __unicode__(self):
+    def __str__(self):
         return self.email

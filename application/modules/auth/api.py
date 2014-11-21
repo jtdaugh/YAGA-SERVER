@@ -1,63 +1,55 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask import Blueprint, g, current_app as app
+from flask import Blueprint, g
 from flask.ext.security import login_user, logout_user
 
-from ...helpers import db
-from ...decorators import (
-    marshal_with_form, anonymous_user_required, login_required
-)
-from ...mixins import Api, Resource
+from ...decorators import marshal_with_form, anonymous_user_required
+from ...mixins import BaseApi, BaseResource
 from ...utils import b
 from .forms import UserRegisterForm, UserLoginForm
+from .repository import user_storage
 
 
-class RegisterResource(Resource):
+class RegisterResource(BaseResource):
     @anonymous_user_required
-    @marshal_with_form(UserRegisterForm)
+    @marshal_with_form(UserRegisterForm, 400)
     def post(self):
-        user = app.user_datastore.create_user(
-            email=self.form.email.data
+        user = user_storage.create(
+            email=self.form.email.data,
+            password=self.form.password.data
         )
-        user.set_password(self.form.password.data)
-
-        db.session.commit()
 
         login_user(user)
 
         return {
             'email': g.user.email
-        }
+        }, 201
 
 
-class LoginResource(Resource):
+class LoginResource(BaseResource):
     @anonymous_user_required
-    @marshal_with_form(UserLoginForm)
+    @marshal_with_form(UserLoginForm, 401)
     def post(self):
         login_user(self.form.user)
 
         return {
             'email': g.user.email
-        }
+        }, 200
 
 
-class LogoutResource(Resource):
-    @login_required
+class LogoutResource(BaseResource):
     def post(self):
-        logout_user()
+        if g.user.is_authenticated():
+            logout_user()
 
         return {
-            'status': 'done'
-        }
-
-    def get(self):
-        return self.post()
+        }, 200
 
 
 blueprint = Blueprint('api_auth', __name__)
 
 
-api = Api(blueprint, prefix='/auth')
+api = BaseApi(blueprint, prefix='/auth')
 api.add_resource(RegisterResource, '/register', endpoint=b('register'))
 api.add_resource(LoginResource, '/login', endpoint=b('login'))
 api.add_resource(LogoutResource, '/logout', endpoint=b('logout'))

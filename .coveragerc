@@ -1,0 +1,7 @@
+[run]
+include =
+    application/*
+omit =
+    application/test/*
+    application/migrations/*
+

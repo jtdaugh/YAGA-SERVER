@@ -10,9 +10,7 @@ class BaseConfig(object):
     WTF_CSRF_ENABLED = False
     SECURITY_DEFAULT_REMEMBER_ME = True
 
-    ROLES = {
-        'superuser': 'superuser',
-    }
+    ROLES = ['superuser']
 
     CELERY_ACCEPT_CONTENT = ['json']
     CELERY_TASK_SERIALIZER = 'json'

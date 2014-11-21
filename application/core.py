@@ -1,10 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
+from future import standard_library
+standard_library.install_aliases()
 
 import sys
 import locale
 
 
-def fix_locale():
+def ensure_locale():
     reload(sys)
     sys.setdefaultencoding('utf-8')
 
@@ -14,24 +16,21 @@ def fix_locale():
         locale.setlocale(locale.LC_ALL, ('en_US', 'UTF-8'))
 
 
-fix_locale()
+ensure_locale()
 
 
 import os
 
 from flask import Flask, request, g
-from flask.json import JSONEncoder
 from werkzeug.contrib.fixers import ProxyFix
-from werkzeug.utils import import_string
-from speaklater import is_lazy_string
 from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
 
 from .helpers import (
-    cache, db, babel, sentry, s3static, toolbar, security, redis, migrate,
+    cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, celery, json_error
 )
-from .utils import now, DummyDict
+from .utils import now, DummyDict, JSONEncoder
 from .admin import create_admin
 from .modules.auth.models import User, Role
 from .ext.redis_storage import RedisSessionInterface
@@ -39,29 +38,11 @@ from .ext.redis_storage import RedisSessionInterface
 
 def load_config():
     if os.environ.get('DYNO'):
-        config = 'heroku'
+        from .configs.heroku import Config
     else:
-        config = 'local'
+        from .configs.local import Config
 
-    module = __name__.split('.')[0]
-
-    config = '{module}.configs.{config}.Config'.format(
-        module=module,
-        config=config
-    )
-
-    config = import_string(config)
-
-    return config
-
-
-class CustomJSONEncoder(JSONEncoder):
-    def default(self, obj):
-        if is_lazy_string(obj):
-            obj = str(obj)
-            return obj
-
-        return JSONEncoder.default(self, obj)
+    return Config
 
 
 def create_app():
@@ -73,7 +54,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(load_config())
     app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.json_encoder = CustomJSONEncoder
+    app.json_encoder = JSONEncoder
 
     cache.init_app(app)
     db.init_app(app)
@@ -82,7 +63,6 @@ def create_app():
     s3static.init_app(app)
     toolbar.init_app(app)
     redis.init_app(app)
-    migrate.init_app(app, db, directory='../migrations')
     assets.init_app(app)
     s3media.init_app(app)
     celery.init_app(app)

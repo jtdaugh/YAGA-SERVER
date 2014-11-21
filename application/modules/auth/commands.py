@@ -4,58 +4,36 @@ from flask import current_app as app
 from flask.ext.script import Command, prompt, prompt_pass
 from werkzeug.datastructures import MultiDict
 
-from ...helpers import db
-from .models import Role
 from .forms import UserRegisterForm
+from .repository import role_storage, user_storage
 
 
 class CreateSuperUser(Command):
     def run(self):
-        superuser_role = db.session.query(Role).filter_by(
-            name='superuser'
-        ).first()
-
-        if superuser_role is None:
-            superuser_role = Role(
-                name='superuser',
-                description=app.config['ROLES']['superuser']
-            )
-
-            db.session.add(superuser_role)
-            db.session.commit()
+        superuser_role = role_storage.get_or_create(
+            'superuser'
+        )
 
         while True:
-            email = prompt('email')
-            password = prompt_pass('password')
-
             data = MultiDict()
-            data['email'] = email
-            data['password'] = password
+            data['email'] = prompt('email')
+            data['password'] = prompt_pass('password')
 
             form = UserRegisterForm(data)
 
             if form.validate():
-                user = app.user_datastore.create_user(
-                    email=email,
+                user = user_storage.create(
+                    form.email.data,
+                    form.password.data
                 )
-                user.set_password(password)
-                app.user_datastore.add_role_to_user(user, superuser_role)
-
-                db.session.commit()
+                user_storage.add_role(user, superuser_role)
 
                 break
 
 
 class SyncRoles(Command):
     def run(self):
-        for name, description in app.config['ROLES'].iteritems():
-            if db.session.query(Role).filter_by(
-                name=name
-            ).first() is None:
-                role = Role(
-                    name=name,
-                    description=description
-                )
-
-                db.session.add(role)
-                db.session.commit()
+        for name in app.config['ROLES']:
+            role_storage.get_or_create(
+                name
+            )

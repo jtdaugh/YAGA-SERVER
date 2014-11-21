@@ -1,28 +1,26 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask.ext.admin.contrib.sqla import ModelView
-
-from ...helpers import db
-from ...mixins import BaseAdminView
-from .models import User, Role
+from ...mixins import BaseModelView
+from .repository import user_storage, role_storage
 
 
-class UserModelView(BaseAdminView, ModelView):
+class UserModelView(BaseModelView):
     can_create = False
     can_delete = False
 
-    form_columns = ['email', 'active', 'roles']
+    form_columns = ['active', 'roles']
     column_list = ['email', 'active', 'created_at', 'roles']
 
     column_filters = ['active']
 
 
-class RoleModelView(BaseAdminView, ModelView):
+class RoleModelView(BaseModelView):
     can_create = False
     can_delete = False
 
-    form_columns = ['description']
+    form_columns = ['users']
+    column_list = ['name', 'description']
 
 
-user_admin = UserModelView(User, db.session)
-role_admin = RoleModelView(Role, db.session)
+user_admin = UserModelView.as_view(user_storage)
+role_admin = RoleModelView.as_view(role_storage)

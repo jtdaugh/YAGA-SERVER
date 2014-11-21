@@ -2,28 +2,40 @@
 from __future__ import (
     absolute_import, division, unicode_literals, print_function
 )
+from future import standard_library
+standard_library.install_aliases()
 
 import os
 import json
-from urllib import unquote
+from subprocess import Popen
+from urllib.parse import unquote
 
 import flask_s3
-import envoy
 from flask.ext.script import Command
 from IPython import embed
 from babel import support
+from flask.ext.migrate import Migrate
 from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 
 from application.core import app
-from application.helpers import assets, db, cache
+from application.helpers import assets, cache, db
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
-from application.modules.auth.models import User, Role
 
 
 manager = Manager(app)
+migrate = Migrate(app, db, directory='application/migrations')
+
+
+class ShellMixin(object):
+    def local(self, cmd):
+        shell = Popen(
+            cmd,
+            shell=True
+        )
+        shell.wait()
 
 
 class Shell(Command):
@@ -31,7 +43,7 @@ class Shell(Command):
         embed()
 
 
-class RunServer(Command):
+class Debug(Command):
     def run(self):
         app.run(
             host=app.config['APP_HOST'],
@@ -40,6 +52,11 @@ class RunServer(Command):
             use_debugger=True,
             use_reloader=True
         )
+
+
+class CreateAll(Command):
+    def run(self):
+        db.create_all()
 
 
 class UrlMap(Command):
@@ -59,15 +76,6 @@ class UrlMap(Command):
 class Collectstatic(Command):
     def run(self):
         flask_s3.create_all(app)
-
-
-class ShellMixin(object):
-    def local(self, cmd):
-        shell = envoy.run(cmd)
-
-        if shell.status_code != 0:
-            print(shell.std_err)
-            raise RuntimeError
 
 
 class MakeMessages(Command, ShellMixin):
@@ -129,8 +137,19 @@ class ClearCache(Command):
         cache.clear()
 
 
+class Lint(Command, ShellMixin):
+    def run(self):
+        self.local('flake8 application')
+
+
+class Test(Command, ShellMixin):
+    def run(self):
+        self.local('nosetests --with-coverage')
+
+
 manager.add_command('shell', Shell())
-manager.add_command('runserver', RunServer())
+manager.add_command('runserver', Debug())
+manager.add_command('debug', Debug())
 manager.add_command('urlmap', UrlMap())
 manager.add_command('collectstatic', Collectstatic())
 manager.add_command('makemessages', MakeMessages())
@@ -138,8 +157,11 @@ manager.add_command('compilemessages', CompileMessages())
 manager.add_command('createsuperuser', CreateSuperUser())
 manager.add_command('syncroles', SyncRoles())
 manager.add_command('db', MigrateCommand)
+manager.add_command('createall', CreateAll())
 manager.add_command('assets', ManageAssets(assets))
 manager.add_command('clearcache', ClearCache())
+manager.add_command('lint', Lint())
+manager.add_command('test', Test())
 
 
 if __name__ == '__main__':

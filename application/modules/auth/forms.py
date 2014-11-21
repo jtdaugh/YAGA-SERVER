@@ -4,11 +4,11 @@ from wtforms import validators
 from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
-from ...mixins import Form
+from ...mixins import BaseForm
 from .validators import DNSMXEmail, NotRegisteredUser, ValidActiveUser
 
 
-class PasswordForm(Form):
+class PasswordForm(BaseForm):
     password = PasswordField(
         'password',
         validators=[
