@@ -78,6 +78,7 @@ Internationalization:
 *********************
 
 .. code-block:: bash
+    source env/bin/activate
 
     # create mo files
     python manage.py makemessages
