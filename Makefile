@@ -1,11 +1,12 @@
 ENV_DIR=env
 CMD_ENV=virtualenv
 CMD_PYTHON=python
+CMD_CELERY=celery -A application.core.celery worker -c 1 -B -l INFO
 CMD_MANAGE=$(CMD_PYTHON) manage.py
 CMD_ACTIVATE_ENV=source $(ENV_DIR)/bin/activate
 CMD_DEBUG=$(CMD_MANAGE) runserver
-CMD_TEST=$(CMD_MANAGE) test
-CMD_LINT=$(CMD_MANAGE) lint
+CMD_TEST=TESTING=1 nosetests -v
+CMD_LINT=flake8 application
 CMD_DB_UPGRATE=$(CMD_MANAGE) db upgrade
 CMD_SYNCROLES=$(CMD_MANAGE) syncroles
 CMD_CLEARCACHE=$(CMD_MANAGE) clearcache
@@ -15,6 +16,9 @@ CMD_PIP=pip install -r requirements.txt
 
 debug:
 	$(CMD_ACTIVATE_ENV); $(CMD_DEBUG)
+
+celery:
+	$(CMD_ACTIVATE_ENV); $(CMD_CELERY)
 
 install:
 	test -d $(ENV_DIR) || $(CMD_ENV) $(ENV_DIR)

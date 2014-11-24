@@ -8,10 +8,13 @@ from fabric.api import local, task, warn_only
 from fabric.operations import prompt
 
 
-WEB_WORKERS = 1
-
+APP_WORKERS = 2
+WEB_DYNOS = 1
+USE_NEWRELIC = False
 STOP_TIMEOUT = 5
 START_TIMEOUT = 10
+
+NEWRELIC_CMD = 'newrelic-admin run-program '
 
 
 def ensure_prompt(label):
@@ -22,6 +25,42 @@ def ensure_prompt(label):
         value = prompt(label)
 
     return value.strip()
+
+
+@task
+def uwsgi():
+    cmd = 'uwsgi --module=application.core:app --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+
+    cmd = cmd.format(workers=APP_WORKERS)
+
+    if USE_NEWRELIC:
+        cmd = NEWRELIC_CMD + cmd
+
+    local(cmd)
+
+
+@task
+def celery_broker():
+    cmd = 'celery -A application.core.celery worker -c {workers} -B -l INFO'
+
+    cmd = cmd.format(workers=APP_WORKERS)
+
+    if USE_NEWRELIC:
+        cmd = NEWRELIC_CMD + cmd
+
+    local(cmd)
+
+
+@task
+def celery_wroker():
+    cmd = 'newrelic-admin run-program celery -A application.core.celery worker -c {workers} -l INFO'
+
+    cmd = cmd.format(workers=APP_WORKERS)
+
+    if USE_NEWRELIC:
+        cmd = NEWRELIC_CMD + cmd
+
+    local(cmd)
 
 
 @task
@@ -59,7 +98,7 @@ def stop():
 
 @task
 def start(initial=False):
-    local('heroku ps:scale web={workers}'.format(workers=WEB_WORKERS))
+    local('heroku ps:scale web={dynos}'.format(workers=WEB_DYNOS))
     sleep(START_TIMEOUT)
     local('heroku maintenance:off')
 

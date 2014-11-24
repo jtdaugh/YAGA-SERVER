@@ -2,8 +2,8 @@
 from __future__ import (
     absolute_import, division, unicode_literals, print_function
 )
-from future import standard_library
-standard_library.install_aliases()
+from application.loader import create_app
+
 
 import os
 import json
@@ -19,12 +19,13 @@ from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 
-from application.core import app
+
 from application.helpers import assets, cache, db
 from application.modules.auth.commands import CreateSuperUser
 from application.modules.auth.commands import SyncRoles
 
 
+app, celery = create_app()
 manager = Manager(app)
 migrate = Migrate(app, db, directory='application/migrations')
 
@@ -69,7 +70,9 @@ class UrlMap(Command):
             )
             output.append(line)
 
-        for line in sorted(output):
+        output.sort()
+
+        for line in output:
             print(line)
 
 
@@ -137,16 +140,6 @@ class ClearCache(Command):
         cache.clear()
 
 
-class Lint(Command, ShellMixin):
-    def run(self):
-        self.local('flake8 application')
-
-
-class Test(Command, ShellMixin):
-    def run(self):
-        self.local('nosetests --with-coverage')
-
-
 manager.add_command('shell', Shell())
 manager.add_command('runserver', Debug())
 manager.add_command('debug', Debug())
@@ -160,8 +153,6 @@ manager.add_command('db', MigrateCommand)
 manager.add_command('createall', CreateAll())
 manager.add_command('assets', ManageAssets(assets))
 manager.add_command('clearcache', ClearCache())
-manager.add_command('lint', Lint())
-manager.add_command('test', Test())
 
 
 if __name__ == '__main__':

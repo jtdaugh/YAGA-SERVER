@@ -1,6 +1,5 @@
-fab shorcuts for celery(broker\worker) and web
-fab new relic feature
-create repository **kwargs map
 future.builtins check all
-move to mixins all bases
+repository check all
+api auth tests
 web browser login\logout
+web browser auth tests
