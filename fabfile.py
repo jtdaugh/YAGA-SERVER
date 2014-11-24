@@ -138,6 +138,11 @@ def status():
 
 
 @task
+def psql():
+    local('heroku pg:psql')
+
+
+@task
 def events():
     local('heroku run celery -A application.core.celery events')
 
