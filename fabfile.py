@@ -8,18 +8,24 @@ from fabric.api import local, task, warn_only
 from fabric.operations import prompt
 
 
-APP_WORKERS = 2
-WEB_DYNOS = 1
-USE_NEWRELIC = False
-STOP_TIMEOUT = 5
-START_TIMEOUT = 10
+PROCESS_WORKERS = 2
+DYNOS = {
+    'web': 1,
+    'celery_broker': 1,
+    'celery_worker': 1,
+}
+USE_NEWRELIC = True
+STOP_TIMEOUT = 30
+START_TIMEOUT = 30
 
 NEWRELIC_CMD = 'newrelic-admin run-program '
 
 
 def ensure_prompt(label):
     value = None
-    label = '{label}: '.format(label=label)
+    label = '{label}: '.format(
+        label=label
+    )
 
     while not value:
         value = prompt(label)
@@ -31,7 +37,9 @@ def ensure_prompt(label):
 def uwsgi():
     cmd = 'uwsgi --module=application.core:app --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
 
-    cmd = cmd.format(workers=APP_WORKERS)
+    cmd = cmd.format(
+        workers=PROCESS_WORKERS
+    )
 
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
@@ -43,7 +51,9 @@ def uwsgi():
 def celery_broker():
     cmd = 'celery -A application.core.celery worker -c {workers} -B -l INFO'
 
-    cmd = cmd.format(workers=APP_WORKERS)
+    cmd = cmd.format(
+        workers=PROCESS_WORKERS
+    )
 
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
@@ -52,10 +62,12 @@ def celery_broker():
 
 
 @task
-def celery_wroker():
+def celery_worker():
     cmd = 'newrelic-admin run-program celery -A application.core.celery worker -c {workers} -l INFO'
 
-    cmd = cmd.format(workers=APP_WORKERS)
+    cmd = cmd.format(
+        workers=PROCESS_WORKERS
+    )
 
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
@@ -92,14 +104,22 @@ def view():
 @task
 def stop():
     local('heroku maintenance:on')
-    sleep(STOP_TIMEOUT)
-    local('heroku ps:scale web=0')
+    for name in DYNOS.iterkeys():
+        local('heroku ps:scale {name}=0').format(
+            name=name
+        )
+        sleep(STOP_TIMEOUT)
 
 
 @task
 def start(initial=False):
-    local('heroku ps:scale web={dynos}'.format(workers=WEB_DYNOS))
-    sleep(START_TIMEOUT)
+    for name, dynos in DYNOS.iteritems():
+        local('heroku ps:scale {name}={dynos}'.format(
+            name=name,
+            dynos=dynos
+        ))
+        sleep(START_TIMEOUT)
+
     local('heroku maintenance:off')
 
     view()
@@ -136,7 +156,9 @@ def reset_db():
     name = name.strip()
 
     with warn_only():
-        local('heroku addons:remove heroku-postgresql --confirm {name}').format(name=name)
+        local('heroku addons:remove heroku-postgresql --confirm {name}').format(
+            name=name
+        )
 
     local('heroku addons:add heroku-postgresql')
 
@@ -154,7 +176,9 @@ def reset_db():
 def create():
     name = ensure_prompt('APPLICATION NAME')
 
-    local('heroku create {name}'.format(name=name))
+    local('heroku create {name}'.format(
+        name=name
+    ))
 
     local('heroku addons:add heroku-postgresql')
     local('heroku addons:add memcachier')
@@ -173,15 +197,27 @@ def create():
     S3_BUCKET_NAME = ensure_prompt('S3_BUCKET_NAME (static)')
     S3_BUCKET_NAME_MEDIA = ensure_prompt('S3_BUCKET_NAME (media)')
 
-    local('heroku config:set AWS_ACCESS_KEY_ID={value}'.format(value=AWS_ACCESS_KEY_ID))
-    local('heroku config:set AWS_SECRET_ACCESS_KEY={value}'.format(value=AWS_SECRET_ACCESS_KEY))
-    local('heroku config:set S3_BUCKET_NAME={value}'.format(value=S3_BUCKET_NAME))
-    local('heroku config:set S3_BUCKET_NAME_MEDIA={value}'.format(value=S3_BUCKET_NAME_MEDIA))
+    local('heroku config:set AWS_ACCESS_KEY_ID={value}'.format(
+        value=AWS_ACCESS_KEY_ID
+    ))
+    local('heroku config:set AWS_SECRET_ACCESS_KEY={value}'.format(
+        value=AWS_SECRET_ACCESS_KEY
+    ))
+    local('heroku config:set S3_BUCKET_NAME={value}'.format(
+        value=S3_BUCKET_NAME
+    ))
+    local('heroku config:set S3_BUCKET_NAME_MEDIA={value}'.format(
+        value=S3_BUCKET_NAME_MEDIA
+    ))
 
     SECRET_KEY = ensure_prompt('SECRET_KEY')
     SECURITY_PASSWORD_SALT = ensure_prompt('SECURITY_PASSWORD_SALT')
 
-    local('heroku config:set SECRET_KEY={value}'.format(value=SECRET_KEY))
-    local('heroku config:set SECURITY_PASSWORD_SALT={value}'.format(value=SECURITY_PASSWORD_SALT))
+    local('heroku config:set SECRET_KEY={value}'.format(
+        value=SECRET_KEY
+    ))
+    local('heroku config:set SECURITY_PASSWORD_SALT={value}'.format(
+        value=SECURITY_PASSWORD_SALT
+    ))
 
     release(initial=True)

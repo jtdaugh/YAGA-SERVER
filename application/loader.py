@@ -34,7 +34,7 @@ from .ext.redis_storage import RedisSessionInterface
 def get_environment():
     if environ.get('DYNO'):
         config = 'heroku'
-    if environ.get('TESTING'):
+    elif environ.get('TESTING'):
         config = 'test'
     else:
         config = 'local'
