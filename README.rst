@@ -69,3 +69,44 @@ Tests:
 
     # run tests
     make test
+
+Deployment:
+***********
+
+.. code-block:: bash
+
+    # activate python environment
+    source env/bin/activate
+
+    # create new heroku application
+    fab create
+
+    # release latest code to heroku
+    fab release
+
+    # view application logs
+    fab logs
+
+    # view application status
+    fab status
+
+    # open application via web-browser
+    fab view
+
+    # stop application
+    fab stop
+
+    # start application
+    fab start
+
+    # restart application
+    fab restart
+
+    # connect to heroku via ssh
+    fab ssh
+
+    # connect to heroku postgres psql shell
+    fab psql
+
+    # reset heroku database
+    fab resetdb

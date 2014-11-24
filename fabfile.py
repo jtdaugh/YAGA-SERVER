@@ -153,7 +153,7 @@ def ssh():
 
 
 @task
-def reset_db():
+def resetdb():
     info = local('heroku config', capture=True).splitlines()
     name = info[0]
     name = name.replace('=', '')
