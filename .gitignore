@@ -5,6 +5,7 @@ env
 messages.pot
 *.sublime*
 cache
+.coverage
 *.sqlite
 application/static/packed
 application/static/.webassets-cache

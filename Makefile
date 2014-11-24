@@ -5,7 +5,7 @@ CMD_CELERY=celery -A application.core.celery worker -c 1 -B -l INFO
 CMD_MANAGE=$(CMD_PYTHON) manage.py
 CMD_ACTIVATE_ENV=source $(ENV_DIR)/bin/activate
 CMD_DEBUG=$(CMD_MANAGE) runserver
-CMD_TEST=TESTING=1 nosetests -v
+CMD_TEST=TESTING=1 nosetests -v --with-coverage
 CMD_LINT=flake8 application
 CMD_ENSUREDB=$(CMD_MANAGE) ensuredb
 CMD_DB_UPGRATE=$(CMD_MANAGE) db upgrade
