@@ -23,7 +23,7 @@ class Config(BaseConfig):
 
     CACHE_TYPE = 'memcached'
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://hell:@127.0.0.1:5432/yaga'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://:@127.0.0.1:5432/yaga_dev'
 
     CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
     CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
