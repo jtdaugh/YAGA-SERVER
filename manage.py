@@ -18,6 +18,7 @@ from flask.ext.migrate import Migrate
 from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
+from sqlalchemy_utils.functions import create_database, database_exists
 
 
 from application.helpers import assets, cache, db
@@ -140,6 +141,12 @@ class ClearCache(Command):
         cache.clear()
 
 
+class EnsureDb(Command):
+    def run(self):
+        if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+            create_database(app.config['SQLALCHEMY_DATABASE_URI'])
+
+
 manager.add_command('shell', Shell())
 manager.add_command('runserver', Debug())
 manager.add_command('debug', Debug())
@@ -149,6 +156,7 @@ manager.add_command('makemessages', MakeMessages())
 manager.add_command('compilemessages', CompileMessages())
 manager.add_command('createsuperuser', CreateSuperUser())
 manager.add_command('syncroles', SyncRoles())
+manager.add_command('ensuredb', EnsureDb())
 manager.add_command('db', MigrateCommand)
 manager.add_command('createall', CreateAll())
 manager.add_command('assets', ManageAssets(assets))
