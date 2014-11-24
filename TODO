@@ -3,4 +3,3 @@ repository check all
 api auth tests
 web browser login\logout
 web browser auth tests
-create README.md
