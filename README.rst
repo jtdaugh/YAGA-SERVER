@@ -47,6 +47,10 @@ Back-end development:
     # background tasks
     make celery
 
+    # create superuser
+    source env/bin/activate
+    python manage.py createsuperuser
+
 Visit `http://127.0.0.1:5000/ <http://127.0.0.1:5000/>`_
 
 
@@ -69,6 +73,23 @@ Tests:
 
     # run tests
     make test
+
+Internationalization:
+*********************
+
+.. code-block:: bash
+
+    # create mo files
+    python manage.py makemessages
+
+    # edit application/translations/{locale}
+
+    # compile mo files
+    python manage.py compilemessages
+
+Free po-files editor
+`http://poedit.net/ <http://poedit.net/>`_
+
 
 Deployment:
 ***********

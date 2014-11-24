@@ -22,8 +22,7 @@ from sqlalchemy_utils.functions import create_database, database_exists
 
 
 from application.helpers import assets, cache, db
-from application.modules.auth.commands import CreateSuperUser
-from application.modules.auth.commands import SyncRoles
+from application.modules.auth.commands import CreateSuperUser, SyncRoles
 
 
 app, celery = create_app()
