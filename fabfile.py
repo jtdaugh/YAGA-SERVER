@@ -12,7 +12,7 @@ PROCESS_WORKERS = 2
 DYNOS = {
     'web': 1,
     'celery_broker': 1,
-    'celery_worker': 1,
+    'celery_worker': 0,
 }
 USE_NEWRELIC = True
 STOP_TIMEOUT = 30
