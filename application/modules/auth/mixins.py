@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, unicode_literals
+
 from flask.ext.security.utils import encrypt_password, verify_password
 
 
