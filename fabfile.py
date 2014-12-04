@@ -85,7 +85,7 @@ def release(initial=False):
 
     local('heroku run python manage.py db upgrade')
     local('heroku run python manage.py syncroles')
-    local('python manage.py clearcache')
+    local('heroku run python manage.py clearcache')
     local('heroku run "python manage.py assets --parse-templates build && python manage.py collectstatic"')
 
     start()
