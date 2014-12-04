@@ -23,7 +23,7 @@ class BaseConfig(object):
     AUTH_TOKEN_LENGTH = 128
     SESSION_SID_LENGTH = 128
 
-    SESSION_ENGINE = 'sql'
+    SESSION_ENGINE = 'redis'
 
     CELERY_TIMEZONE = 'UTC'
 
