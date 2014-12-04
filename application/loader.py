@@ -24,7 +24,7 @@ from flanker.addresslib import set_mx_cache
 
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
-    assets, s3media, csrf, celery, compress,
+    assets, s3media, csrf, celery, compress, sslify, cors, reggie,
     error_handler, HTTP_STATUS_CODES, MxCache
 )
 from .utils import now, BaseJSONEncoder, dummy_callback
@@ -89,6 +89,9 @@ def create_app():
     csrf.init_app(app)
     celery.init_app(app)
     compress.init_app(app)
+    sslify.init_app(app)
+    cors.init_app(app, resources=r'/api/*', headers='Content-Type')
+    reggie.init_app(app)
 
     create_admin(app)
 

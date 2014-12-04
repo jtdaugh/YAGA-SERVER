@@ -14,7 +14,10 @@ from flask.ext.assets import Environment
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.babelex import lazy_gettext as _
 from flask.ext.compress import Compress
+from flask.ext.cors import CORS
+from flask_reggie import Reggie
 
+from .ext.ssl import BaseSSLify
 from .ext.redis_storage import Redis
 from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
@@ -72,6 +75,9 @@ s3media = S3()
 celery = Celery()
 csrf = CsrfProtect()
 compress = Compress()
+sslify = BaseSSLify()
+cors = CORS()
+reggie = Reggie()
 
 
 class CacheDict(MutableMapping):

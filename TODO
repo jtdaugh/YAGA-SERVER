@@ -2,7 +2,6 @@ SESSIONS last seen, IP list
 TOKENS last seen, IP list
 
 email user ident field to phone
-BaseValidator raise self.stop
 
 VIDEO MODEl
 VIDEO S3URL
