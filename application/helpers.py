@@ -13,6 +13,7 @@ from flask.ext.security import Security
 from flask.ext.assets import Environment
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.babelex import lazy_gettext as _
+from flask.ext.compress import Compress
 
 from .ext.redis_storage import Redis
 from .ext.s3_storage import S3
@@ -70,6 +71,7 @@ assets = Environment()
 s3media = S3()
 celery = Celery()
 csrf = CsrfProtect()
+compress = Compress()
 
 
 class CacheDict(MutableMapping):

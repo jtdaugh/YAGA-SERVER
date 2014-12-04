@@ -35,7 +35,7 @@ def ensure_prompt(label):
 
 @task
 def uwsgi():
-    cmd = 'uwsgi --module=application.core:app --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+    cmd = 'uwsgi --http-keepalive=15s --module=application.core:app --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS

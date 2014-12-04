@@ -7,6 +7,8 @@ from .base import BaseConfig
 
 
 class Config(BaseConfig):
+    DEBUG = False
+
     AWS_ACCESS_KEY_ID = environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = environ['AWS_SECRET_ACCESS_KEY']
     S3_BUCKET_NAME = environ['S3_BUCKET_NAME']
