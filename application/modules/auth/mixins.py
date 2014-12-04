@@ -7,3 +7,15 @@ class BaseUser(object):
 
     def verify_password(self, password):
         return verify_password(password, self.password)
+
+    @classmethod
+    def add_hook(cls, hook, fn, attr=None, *args, **kwargs):
+        def wrapper(self):
+            res = fn(cls=self)
+
+            if attr is not None:
+                res = getattr(res, attr)
+
+            return res
+
+        setattr(cls, hook, wrapper)

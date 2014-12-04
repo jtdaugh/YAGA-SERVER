@@ -7,8 +7,8 @@ class BaseConfig(object):
     LOCALES = ['en']
     BABEL_DEFAULT_LOCALE = 'en'
     SECURITY_PASSWORD_HASH = b('bcrypt')
-    WTF_CSRF_ENABLED = False
-    SECURITY_DEFAULT_REMEMBER_ME = True
+    WTF_CSRF_ENABLED = True
+    SECURITY_DEFAULT_REMEMBER_ME = False
 
     ROLES = ['superuser']
 
@@ -19,3 +19,12 @@ class BaseConfig(object):
     CELERY_ACKS_LATE = True
     CELERY_SEND_EVENTS = True
     BROKER_HEARTBEAT = True
+
+    AUTH_TOKEN_LENGTH = 128
+    SESSION_SID_LENGTH = 128
+
+    SESSION_ENGINE = 'sql'
+
+    CELERY_TIMEZONE = 'UTC'
+
+    AUTH_HEADER_NAME = 'Auth'

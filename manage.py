@@ -4,28 +4,27 @@ from __future__ import (
 )
 from application.loader import create_app
 
-
 import os
-import json
 from subprocess import Popen
 from urllib.parse import unquote
 
 import flask_s3
-from flask.ext.script import Command
 from IPython import embed
 from babel import support
+from flask.json import dumps
+from flask.ext.script import Command
 from flask.ext.migrate import Migrate
 from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 from sqlalchemy_utils.functions import create_database, database_exists
 
-
 from application.helpers import assets, cache, db
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
 
 
 app, celery = create_app()
+
 manager = Manager(app)
 migrate = Migrate(app, db, directory='application/migrations')
 
@@ -118,7 +117,7 @@ class CompileMessages(Command, ShellMixin):
         except:
             pass
 
-        return json.dumps(ret, ensure_ascii=False, indent=True)
+        return dumps(ret, ensure_ascii=False, indent=True)
 
     def run(self):
         self.local('pybabel compile -f -d application/translations')

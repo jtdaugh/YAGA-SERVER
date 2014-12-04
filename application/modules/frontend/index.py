@@ -1,18 +1,18 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from flask import Blueprint, render_template
-from flask.views import MethodView
 
-from .tasks import test
 from ...utils import b
+from ...mixins import BaseMethodView
+from .tasks import TestTask
 
 
 blueprint = Blueprint('index', __name__,)
 
 
-class IndexView(MethodView):
+class IndexView(BaseMethodView):
     def get(self):
-        test.delay(23, 42)
+        TestTask().delay(23, 42)
 
         return render_template('index.html')
 

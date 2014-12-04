@@ -5,12 +5,14 @@ from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
 from ...mixins import BaseForm
-from .validators import DNSMXEmail, NotRegisteredUser, ValidActiveUser
+from .validators import (
+    DNSMXEmail, NotRegisteredUser, ValidActiveUser, UserToken
+)
 
 
 class PasswordForm(BaseForm):
     password = PasswordField(
-        'password',
+        _('Password'),
         validators=[
             validators.InputRequired(_('This field is required.')),
         ]
@@ -19,7 +21,7 @@ class PasswordForm(BaseForm):
 
 class UserLoginForm(PasswordForm):
     email = TextField(
-        'email',
+        _('Email'),
         validators=[
             validators.InputRequired(_('This field is required.')),
             validators.Email(_('Invalid email address.')),
@@ -30,10 +32,20 @@ class UserLoginForm(PasswordForm):
 
 class UserRegisterForm(PasswordForm):
     email = TextField(
-        'email',
+        _('Email'),
         validators=[
             validators.InputRequired(_('This field is required.')),
             DNSMXEmail(),
             NotRegisteredUser()
+        ]
+    )
+
+
+class TokenDeactivateForm(BaseForm):
+    token = TextField(
+        _('Token'),
+        validators=[
+            validators.InputRequired(_('This field is required.')),
+            UserToken()
         ]
     )

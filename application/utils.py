@@ -1,12 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import datetime
-from binascii import hexlify
+import string
 from collections import MutableMapping
 
-from Crypto import Random
+from Crypto.Random.random import choice
 from six import binary_type, string_types
-from flask.json import JSONEncoder as BaseJSONEncoder
+from flask.json import JSONEncoder
 from speaklater import is_lazy_string
 
 
@@ -25,21 +25,36 @@ def b(value):
 
 
 def get_random_string(length):
-    random = Random
-    random.atfork()
-    random = random.new().read
-    return hexlify(random(length // 2 + 1))[:length]
+    sequence = string.ascii_letters + string.digits
+
+    return ''.join(choice(sequence) for _ in range(length))
 
 
 def now():
     return datetime.datetime.utcnow()
 
 
-class JSONEncoder(BaseJSONEncoder):
+def dummy_callback(*args, **kwarg):
+    pass
+
+
+class BaseJSONEncoder(JSONEncoder):
     def default(self, obj):
+        if hasattr(obj, '__json__'):
+            return obj.__json__()
+
+        if hasattr(obj, 'to_json'):
+            return obj.to_json()
+
+        if hasattr(obj, '__str__'):
+            return str(obj)
+
+        # Python 3 ?
+        if hasattr(obj, '__unicode__'):
+            return unicode(obj)
+
         if is_lazy_string(obj):
-            obj = str(obj)
-            return obj
+            return str(obj)
 
         return JSONEncoder.default(self, obj)
 

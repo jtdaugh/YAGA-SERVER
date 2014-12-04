@@ -1,5 +1,12 @@
-future.builtins check all
-repository check all
-api auth tests
-web browser login\logout
-web browser auth tests
+SESSIONS last seen, IP list
+TOKENS last seen, IP list
+
+email user ident field to phone
+BaseValidator raise self.stop
+
+VIDEO MODEl
+VIDEO S3URL
+VIDEO SQS
+VIDEO CELERY CLEAN
+
+rate-limit ip\user ?

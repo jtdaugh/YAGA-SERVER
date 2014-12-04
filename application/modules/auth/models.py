@@ -30,7 +30,7 @@ class Role(db.Model, RoleMixin):
 
     name = db.Column(
         db.String(80),
-        unique=True
+        unique=True, nullable=False
     )
 
     description = db.Column(
@@ -49,20 +49,23 @@ class User(db.Model, BaseUser, UserMixin):
 
     email = db.Column(
         db.String(255),
-        unique=True
+        unique=True, nullable=False
     )
 
     password = db.Column(
-        db.String(255)
+        db.String(255),
+        nullable=False
     )
 
     active = db.Column(
         db.Boolean(),
+        nullable=False,
         default=True
     )
 
     created_at = db.Column(
         db.DateTime(),
+        nullable=False,
         default=now
     )
 
@@ -72,5 +75,70 @@ class User(db.Model, BaseUser, UserMixin):
         backref=db.backref('users', lazy='dynamic')
     )
 
+    tokens = db.relationship(
+        'Token',
+        backref='user',
+        lazy='dynamic'
+    )
+
+    sessions = db.relationship(
+        'Session',
+        backref='user',
+        lazy='dynamic'
+    )
+
+    def get_auth_token(self):
+        raise NotImplementedError
+
     def __str__(self):
         return self.email
+
+
+class Token(db.Model):
+    token = db.Column(
+        db.String(255),
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime(),
+        nullable=False,
+        default=now
+    )
+
+    def __str__(self):
+        return self.token
+
+
+class Session(db.Model):
+    sid = db.Column(
+        db.String(256),
+        primary_key=True
+    )
+
+    data = db.Column(
+        db.Text(),
+        nullable=False,
+        default='{}'
+    )
+
+    expire_at = db.Column(
+        db.DateTime(),
+        nullable=False,
+        default=now
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id'),
+        nullable=True
+    )
+
+    def __str__(self):
+        return self.sid

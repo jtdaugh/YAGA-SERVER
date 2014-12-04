@@ -6,7 +6,7 @@ from flask_wtf import Form
 from flask.ext.restful import Api, Resource
 from flask.ext.restful import DEFAULT_REPRESENTATIONS
 from flask.ext.admin.contrib.sqla import ModelView
-from wtforms.validators import ValidationError
+from wtforms.validators import ValidationError, StopValidation
 
 from .helpers import db, output_json
 
@@ -46,8 +46,12 @@ class BaseValidator(object):
     def fail(self):
         return ValidationError(self.message)
 
+    @property
+    def stop(self):
+        return StopValidation(self.message)
+
     def __call__(self, form, field):
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class BaseAbstractRepository(object):
@@ -60,6 +64,12 @@ class BaseSqlRepository(object):
     def admin_options(self):
         return [self.model, db.session]
 
+    def delete(self, **kwargs):
+        result = db.session.query(self.model).filter_by(**kwargs).delete()
+        db.session.commit()
+
+        return result
+
     def get(self, **kwargs):
         return db.session.query(self.model).filter_by(**kwargs).first()
 
@@ -68,6 +78,14 @@ class BaseSqlRepository(object):
 
     def count(self, **kwargs):
         return self.filter(**kwargs).count()
+
+    def create(self, **kwargs):
+        obj = self.model(**kwargs)
+
+        db.session.add(obj)
+        db.session.commit()
+
+        return obj
 
 
 class BaseRepository(BaseAbstractRepository, BaseSqlRepository):

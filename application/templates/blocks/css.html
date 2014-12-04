@@ -1,0 +1,10 @@
+<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+{% assets
+    filters='cssmin',
+    output='packed/packed.css',
+    'css/bootstrap.min.css',
+    'css/main.css'
+%}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+{% endassets %}

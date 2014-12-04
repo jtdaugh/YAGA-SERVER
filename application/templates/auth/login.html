@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% from 'helpers.html' import input with context %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3 centered">
+            <div class="well">
+                <form role="form" action="{{ url_for('auth.login') }}" method="post">
+                    {{ form.csrf_token }}
+                    {{ input(field=form.email, placeholder=_('email@example.com'))}}
+                    {{ input(field=form.password, placeholder=_('password'))}}
+                    <button type="submit" class="btn btn-primary">
+                        {{ _('Login') }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

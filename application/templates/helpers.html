@@ -1,0 +1,26 @@
+{% macro input(field, placeholder=None) %}
+    <div class="form-group {% if field.errors %} has-error {% endif %}">
+        <label for="{{ name }}">
+            {{ field.label.text|capitalize }}:
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <p class="text-danger">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+            {% endif %}
+        </label>
+        <input
+            name="{{ field.name }}"
+            type="{{ field.widget.input_type }}"
+            class="form-control"
+            id="{{ field.id }}"
+            {% if field.data and field.widget.input_type != 'password' %}
+                value="{{ field.data }}"
+            {% endif %}
+            {% if placeholder %}
+                placeholder="{{ placeholder }}"
+            {% endif%}
+        >
+    </div>
+{%- endmacro %}

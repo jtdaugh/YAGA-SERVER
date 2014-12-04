@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from celery import Celery as CeleryCls
+from itertools import ifilter, imap
+
+import celery
 
 from .base import BaseStorage
 
@@ -11,7 +13,7 @@ class Celery(BaseStorage):
             self.init_app(app)
 
     def create_celery(self, app):
-        celery_obj = CeleryCls(
+        celery_obj = celery.Celery(
             app.import_name,
             broker=app.config['CELERY_BROKER_URL']
         )
@@ -29,9 +31,41 @@ class Celery(BaseStorage):
 
         celery_obj.Task = ContextTask
 
+        PeriodicTaskBase = celery.task.PeriodicTask
+
+        class ContextPeriodicTask(PeriodicTaskBase):
+            abstract = True
+
+            def __call__(self, *args, **kwargs):
+                with app.app_context():
+                    return PeriodicTaskBase.__call__(self, *args, **kwargs)
+
+        celery_obj.PeriodicTask = ContextPeriodicTask
+
         return celery_obj
 
     def init_app(self, app):
-        celery = self.create_celery(app)
+        celery_obj = self.create_celery(app)
 
-        self.merge(celery)
+        self.merge(celery_obj)
+
+    def autodiscover(self, packages):
+        def is_module(module):
+            if '__' in module:
+                return False
+
+            for skip in [
+                'absolute_import', 'division', 'unicode_literals'
+            ]:
+                if skip in module:
+                    return False
+
+            return True
+
+        modules = imap(
+            lambda module: packages.__name__ + '.' + module, dir(packages)
+        )
+
+        modules = list(ifilter(is_module, list(modules)))
+
+        self.autodiscover_tasks(modules)

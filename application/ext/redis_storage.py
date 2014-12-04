@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask.json import dumps, loads
+from flask import json, current_app as app
 from redis import StrictRedis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
@@ -9,30 +9,24 @@ from ..utils import get_random_string
 from .base import BaseStorage
 
 
-class JsonSerializer(object):
-    def dumps(self, data):
-        return dumps(data)
-
-    def loads(self, data):
-        return loads(data)
-
-
-json_serializer = JsonSerializer()
-
-
 class RedisSession(CallbackDict, SessionMixin):
+    @property
+    def permanent(self):
+        return True
+
     def __init__(self, initial=None, sid=None, new=False):
         def on_update(self):
             self.modified = True
         CallbackDict.__init__(self, initial, on_update)
         self.sid = sid
         self.new = new
-        self.permanent = True
         self.modified = False
 
 
 class RedisSessionInterface(SessionInterface):
-    RANDOM_STRING_LENGTH = 64
+    @property
+    def sid_length(self):
+        return app.config['SESSION_SID_LENGTH']
 
     def __init__(self, redis, prefix=None):
         if prefix is None:
@@ -41,7 +35,7 @@ class RedisSessionInterface(SessionInterface):
         self.redis = redis
         self.prefix = prefix
         self.session_class = RedisSession
-        self.serializer = json_serializer
+        self.serializer = json
 
     def key(self, suffix):
         return '{prefix}:{suffix}'.format(
@@ -49,23 +43,11 @@ class RedisSessionInterface(SessionInterface):
             suffix=suffix
         )
 
-    def new_session(self):
-        while True:
-            sid = get_random_string(self.RANDOM_STRING_LENGTH)
-
-            if self.redis.setnx(self.key(sid), '{}'):
-                break
-
-        return self.session_class(sid=sid, new=True)
-
-    def ttl(self, app):
-        return int(app.permanent_session_lifetime.total_seconds())
-
     def open_session(self, app, request):
         sid = request.cookies.get(app.session_cookie_name)
 
         if not sid:
-            return self.new_session()
+            return self.session_class()
 
         data = self.redis.get(self.key(sid))
 
@@ -74,13 +56,14 @@ class RedisSessionInterface(SessionInterface):
 
             return self.session_class(data, sid=sid)
         else:
-            return self.new_session()
+            return self.session_class()
 
     def save_session(self, app, session, response):
         domain = self.get_cookie_domain(app)
 
         if not session:
-            self.redis.delete(self.key(session.sid))
+            if session.sid:
+                self.redis.delete(self.key(session.sid))
 
             if session.modified:
                 response.delete_cookie(
@@ -90,20 +73,35 @@ class RedisSessionInterface(SessionInterface):
 
             return
 
-        cookie_ttl = self.get_expiration_time(app, session)
-
         data = self.serializer.dumps(dict(session))
 
-        self.redis.setex(
-            self.key(session.sid),
-            self.ttl(app),
-            data
-        )
+        if not session.sid:
+            while True:
+                sid = get_random_string(self.sid_length)
+
+                if self.redis.setnx(
+                    self.key(sid),
+                    data
+                ):
+                    break
+
+            session.sid = sid
+
+            self.redis.expire(
+                self.key(sid),
+                int(app.permanent_session_lifetime.total_seconds())
+            )
+        else:
+            self.redis.setex(
+                self.key(session.sid),
+                int(app.permanent_session_lifetime.total_seconds()),
+                data
+            )
 
         response.set_cookie(
             app.session_cookie_name,
             session.sid,
-            expires=cookie_ttl,
+            expires=self.get_expiration_time(app, session),
             httponly=True,
             domain=domain
         )
