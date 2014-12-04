@@ -162,9 +162,9 @@ def resetdb():
     name = name.strip()
 
     with warn_only():
-        local('heroku addons:remove heroku-postgresql --confirm {name}').format(
+        local('heroku addons:remove heroku-postgresql --confirm {name}'.format(
             name=name
-        )
+        ))
 
     local('heroku addons:add heroku-postgresql')
 
@@ -175,7 +175,7 @@ def resetdb():
             DB_URL = line.split(':')[0].strip()
             break
 
-    local('heroku pg:promote %s' % DB_URL)
+    local('heroku pg:promote {url}'.format(url=DB_URL))
 
 
 @task
