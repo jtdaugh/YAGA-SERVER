@@ -2,7 +2,7 @@ from sqlalchemy.exc import IntegrityError
 
 from flask import current_app as app, g
 
-from ...mixins import BaseRepository
+from ...repository import BaseRepository
 from ...helpers import db
 from ...utils import get_random_string, now
 from .models import User, Role, Token, Session

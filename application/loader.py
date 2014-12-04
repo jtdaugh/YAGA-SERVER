@@ -25,7 +25,7 @@ from flanker.addresslib import set_mx_cache
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, csrf, celery, error_handler, HTTP_STATUS_CODES,
-    CacheDict, session_marker, header_marker
+    MxCache
 )
 from .utils import now, BaseJSONEncoder, dummy_callback
 from .admin import create_admin
@@ -33,10 +33,7 @@ from .modules.auth.models import User, Role
 from .modules.auth.repository import token_storage
 from .ext.redis_storage import RedisSessionInterface
 from .modules.auth.sessions import SqlSessionInterface
-
-
-class MxCache(CacheDict):
-    pass
+from .decorators import session_marker, header_marker
 
 
 class Application(Flask):

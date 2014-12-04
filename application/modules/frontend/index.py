@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from flask import Blueprint, render_template
 
 from ...utils import b
-from ...mixins import BaseMethodView
+from ...views import BaseMethodView
 from .tasks import TestTask
 
 

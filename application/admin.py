@@ -1,11 +1,29 @@
 from __future__ import absolute_import, division, unicode_literals
 
+from flask import g
+from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin import AdminIndexView, Admin
 
-from .modules.auth.admin import (
-    user_admin, role_admin, token_admin, session_admin
-)
-from .mixins import BaseAbstractModelView
+
+class BaseAbstractModelView(object):
+    def is_accessible(self):
+        return (
+            g.user.is_authenticated()
+            and
+            g.user.is_active()
+            and
+            g.user.has_role('superuser')
+        )
+
+
+class BaseSqlModelView(ModelView):
+    @classmethod
+    def as_view(cls, storage):
+        return cls(*storage.admin_options)
+
+
+class BaseModelView(BaseAbstractModelView, BaseSqlModelView):
+    pass
 
 
 class IndexModelView(BaseAbstractModelView, AdminIndexView):
@@ -14,6 +32,10 @@ class IndexModelView(BaseAbstractModelView, AdminIndexView):
 
 def create_admin(app):
     admin = Admin(index_view=IndexModelView(url='/admin'))
+
+    from .modules.auth.admin import (
+        user_admin, role_admin, token_admin, session_admin
+    )
 
     admin.add_view(user_admin)
     admin.add_view(role_admin)

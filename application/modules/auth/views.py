@@ -4,7 +4,7 @@ from flask import g, Blueprint, render_template, redirect, url_for, flash
 from flask.ext.security import login_user, logout_user
 from flask.ext.babelex import lazy_gettext as _
 
-from ...mixins import BaseView
+from ...views import BaseView
 from ...decorators import login_session_required, anonymous_user_required
 from ...utils import b
 from .forms import UserLoginForm, TokenDeactivateForm

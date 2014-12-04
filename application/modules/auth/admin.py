@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from ...mixins import BaseModelView
+from ...admin import BaseModelView
 from .repository import (
     user_storage, role_storage, token_storage, session_storage
 )

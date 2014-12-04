@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from functools import wraps
 from collections import MutableMapping
 
 from flask import jsonify, request, render_template, make_response
@@ -18,7 +17,6 @@ from flask.ext.babelex import lazy_gettext as _
 from .ext.redis_storage import Redis
 from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
-from .signals import auth_ident
 
 
 HTTP_STATUS_CODES = {
@@ -103,25 +101,8 @@ class CacheDict(MutableMapping):
         raise NotImplementedError
 
 
-def session_marker(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        res = fn(*args, **kwargs)
+class MxCache(CacheDict):
+    def __setitem__(self, key, value):
+        value = str(value)
 
-        if res:
-            auth_ident.send('session')
-
-        return res
-    return wrapper
-
-
-def header_marker(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        res = fn(*args, **kwargs)
-
-        if res:
-            auth_ident.send('header')
-
-        return res
-    return wrapper
+        super(MxCache, self).__setitem__(key, value)

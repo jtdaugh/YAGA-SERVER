@@ -5,7 +5,7 @@ from flask import g, Blueprint
 from ....decorators import (
     marshal_with_form, anonymous_user_required, login_header_required
 )
-from ....mixins import BaseApi, BaseResource
+from ....views import BaseApi, BaseResource
 from ....utils import b
 from ....helpers import csrf
 from ..forms import UserRegisterForm, UserLoginForm

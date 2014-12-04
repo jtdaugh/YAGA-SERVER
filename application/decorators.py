@@ -4,6 +4,8 @@ from functools import wraps
 
 from flask import g, abort
 
+from .signals import auth_ident
+
 
 def anonymous_user_required(fn):
     @wraps(fn)
@@ -92,4 +94,28 @@ def after_this_request(fn):
 
         return fn(response)
 
+    return wrapper
+
+
+def session_marker(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        res = fn(*args, **kwargs)
+
+        if res:
+            auth_ident.send('session')
+
+        return res
+    return wrapper
+
+
+def header_marker(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        res = fn(*args, **kwargs)
+
+        if res:
+            auth_ident.send('header')
+
+        return res
     return wrapper
