@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-21 23:46+0200\n"
+"POT-Creation-Date: 2014-12-04 14:40+0200\n"
 "PO-Revision-Date: 2014-11-14 17:38+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: en <LL@li.org>\n"
@@ -42,10 +42,31 @@ msgstr ""
 msgid "Invalid email address."
 msgstr ""
 
+msgid "Password"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Token"
+msgstr ""
+
 msgid "User already registered."
 msgstr ""
 
-msgid "Unknown user or bad password."
+msgid "Unknown user or password incorrect."
+msgstr ""
+
+msgid "Unknown token."
+msgstr ""
+
+msgid "You were successfully logged in."
+msgstr ""
+
+msgid "You were successfully logged out."
+msgstr ""
+
+msgid "Token has has been successfully deactivated."
 msgstr ""
 
 msgid "Title"
@@ -54,15 +75,39 @@ msgstr ""
 msgid "description"
 msgstr ""
 
+msgid "Info"
+msgstr ""
+
+msgid "email@example.com"
+msgstr ""
+
+msgid "password"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Deactivate"
+msgstr ""
+
+msgid "Company"
+msgstr ""
+
 msgid "Toggle navigation"
 msgstr ""
 
 msgid "Project"
 msgstr ""
 
-msgid "Info"
+msgid "Tokens"
 msgstr ""
 
-msgid "Company"
+msgid "Logout"
 msgstr ""
+
+#~ msgid "Unknown user or bad password."
+#~ msgstr ""
 
