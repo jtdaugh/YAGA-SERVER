@@ -24,10 +24,12 @@ class UserRepository(BaseRepository):
         return user
 
     def add_role(self, user, role):
+        if not isinstance(role, Role):
+            role = role_storage.get_or_create(name=role)
+
         if role not in user.roles:
             user.roles.append(role)
 
-            db.session.add(user)
             db.session.commit()
 
 

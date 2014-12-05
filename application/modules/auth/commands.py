@@ -1,4 +1,6 @@
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import (
+    absolute_import, division, unicode_literals, print_function
+)
 
 from flask import current_app as app
 from flask.ext.script import Command, prompt, prompt_pass
@@ -10,10 +12,6 @@ from .repository import role_storage, user_storage
 
 class CreateSuperUser(Command):
     def run(self):
-        superuser_role = role_storage.get_or_create(
-            name='superuser'
-        )
-
         while True:
             data = MultiDict()
             data['email'] = prompt('email')
@@ -26,11 +24,11 @@ class CreateSuperUser(Command):
                     email=form.email.data,
                     password=form.password.data
                 )
-                user_storage.add_role(user, superuser_role)
+                user_storage.add_role(user, 'superuser')
 
                 break
             else:
-                print form.errors
+                print(form.errors)
 
 
 class SyncRoles(Command):

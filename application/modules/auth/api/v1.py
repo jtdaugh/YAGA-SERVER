@@ -1,13 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask import g, Blueprint
+from flask import g
 
 from ....decorators import (
     marshal_with_form, anonymous_user_required, login_header_required
 )
-from ....views import BaseApi, BaseResource
+from ....views import BaseApi, BaseResource, BaseApiBlueprint
 from ....utils import b
-from ....helpers import csrf
 from ..forms import UserRegisterForm, UserLoginForm
 from ..repository import user_storage, token_storage
 
@@ -57,11 +56,27 @@ class InfoResource(BaseResource):
         }, 200
 
 
-blueprint = csrf.exempt(Blueprint('api_auth', __name__))
+blueprint = BaseApiBlueprint('api_auth', __name__)
 
 
 api = BaseApi(blueprint, prefix='/auth')
-api.add_resource(RegisterResource, '/register', endpoint=b('register'))
-api.add_resource(LoginResource, '/login', endpoint=b('login'))
-api.add_resource(LogoutResource, '/logout', endpoint=b('logout'))
-api.add_resource(InfoResource, '/info', endpoint=b('info'))
+api.add_resource(
+    RegisterResource,
+    '/register',
+    endpoint=b('register')
+)
+api.add_resource(
+    LoginResource,
+    '/login',
+    endpoint=b('login')
+)
+api.add_resource(
+    LogoutResource,
+    '/logout',
+    endpoint=b('logout')
+)
+api.add_resource(
+    InfoResource,
+    '/info',
+    endpoint=b('info')
+)

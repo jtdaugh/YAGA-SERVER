@@ -4,6 +4,7 @@ from flask.ext.security import UserMixin, RoleMixin
 
 from ...helpers import db
 from ...utils import now
+from ...models import ModelMixin
 from .mixins import BaseUser
 
 
@@ -41,7 +42,7 @@ class Role(db.Model, RoleMixin):
         return self.name
 
 
-class User(db.Model, BaseUser, UserMixin):
+class User(db.Model, BaseUser, UserMixin, ModelMixin):
     id = db.Column(
         db.Integer,
         primary_key=True

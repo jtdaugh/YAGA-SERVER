@@ -8,7 +8,6 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.babelex import Babel
 from raven.contrib.flask import Sentry
 from flask_s3 import FlaskS3
-from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.security import Security
 from flask.ext.assets import Environment
 from flask_wtf.csrf import CsrfProtect
@@ -16,6 +15,7 @@ from flask.ext.babelex import lazy_gettext as _
 from flask.ext.compress import Compress
 from flask.ext.cors import CORS
 from flask_reggie import Reggie
+from flask_debugtoolbar import DebugToolbarExtension
 
 from .ext.ssl import BaseSSLify
 from .ext.redis_storage import Redis
@@ -67,7 +67,6 @@ db = SQLAlchemy()
 babel = Babel()
 sentry = Sentry()
 s3static = FlaskS3()
-toolbar = DebugToolbarExtension()
 security = Security()
 redis = Redis()
 assets = Environment()
@@ -78,6 +77,8 @@ compress = Compress()
 sslify = BaseSSLify()
 cors = CORS()
 reggie = Reggie()
+
+toolbar = DebugToolbarExtension()
 
 
 class CacheDict(MutableMapping):

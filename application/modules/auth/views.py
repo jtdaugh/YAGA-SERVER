@@ -1,17 +1,17 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask import g, Blueprint, render_template, redirect, url_for, flash
+from flask import g, render_template, redirect, url_for, flash
 from flask.ext.security import login_user, logout_user
 from flask.ext.babelex import lazy_gettext as _
 
-from ...views import BaseView
+from ...views import BaseView, BaseBlueprint
 from ...decorators import login_session_required, anonymous_user_required
 from ...utils import b
 from .forms import UserLoginForm, TokenDeactivateForm
 from .repository import token_storage
 
 
-blueprint = Blueprint('auth', __name__,)
+blueprint = BaseBlueprint('auth', __name__,)
 
 
 class LoginView(BaseView):
@@ -73,22 +73,18 @@ class TokenDeactivateView(BaseView):
 
 
 blueprint.add_url_rule(
-    '/login', view_func=LoginView.as_view(
-        b('login')
-    )
+    '/login',
+    view_func=LoginView.as_view(b('login'))
 )
 blueprint.add_url_rule(
-    '/logout', view_func=LogoutView.as_view(
-        b('logout')
-    )
+    '/logout',
+    view_func=LogoutView.as_view(b('logout'))
 )
 blueprint.add_url_rule(
-    '/tokens', view_func=TokenListView.as_view(
-        b('token_list')
-    )
+    '/tokens',
+    view_func=TokenListView.as_view(b('token_list'))
 )
 blueprint.add_url_rule(
-    '/tokens/deactivate', view_func=TokenDeactivateView.as_view(
-        b('token_deactivate')
-    )
+    '/tokens/deactivate',
+    view_func=TokenDeactivateView.as_view(b('token_deactivate'))
 )

@@ -23,13 +23,14 @@ from flask import Flask, request, g
 from werkzeug.contrib.fixers import ProxyFix
 from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
+from flask_debugtoolbar.panels import sqlalchemy as sqlalchemy_toolbar
 
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, csrf, celery, compress, sslify, cors, reggie,
     error_handler, HTTP_STATUS_CODES, MxCache
 )
-from .utils import now, BaseJSONEncoder, dummy_callback
+from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
 from .admin import create_admin
 from .modules.auth.models import User, Role
 from .modules.auth.repository import token_storage
@@ -68,23 +69,37 @@ def load_config():
     return Config
 
 
-def create_app():
+def setup_mx_cache():
     mx_cache = MxCache()
     set_mx_cache(mx_cache)
 
+
+def setup_sentry():
+    sentry.add_sentry_id_header = dummy_callback
+
+
+def setup_toolbar(csrf):
+    sqlalchemy_toolbar.sql_select = csrf.exempt(
+        sqlalchemy_toolbar.sql_select
+    )
+    sqlalchemy_toolbar.sql_explain = csrf.exempt(
+        sqlalchemy_toolbar.sql_explain
+    )
+
+
+def create_app():
+    setup_mx_cache()
+    setup_sentry()
     app = Application(__name__)
     app.config.from_object(load_config())
     app.wsgi_app = ProxyFix(app.wsgi_app)
     app.json_encoder = BaseJSONEncoder
-
-    sentry.add_sentry_id_header = dummy_callback
 
     cache.init_app(app)
     db.init_app(app)
     babel.init_app(app)
     sentry.init_app(app)
     s3static.init_app(app)
-    toolbar.init_app(app)
     redis.init_app(app)
     assets.init_app(app)
     s3media.init_app(app)
@@ -94,6 +109,9 @@ def create_app():
     sslify.init_app(app)
     cors.init_app(app, resources=r'/api/*', headers='Content-Type')
     reggie.init_app(app)
+
+    setup_toolbar(csrf)
+    toolbar.init_app(app)
 
     create_admin(app)
 
@@ -135,11 +153,7 @@ def create_app():
 
     @app.before_request
     def is_json():
-        accept = request.accept_mimetypes.best_match([
-            'application/json', 'text/html'
-        ])
-
-        request.is_json = accept == 'application/json'
+        request.is_json = detect_json()
 
     @app.before_request
     def set_user():
@@ -154,13 +168,10 @@ def create_app():
 
     @babel.localeselector
     def get_locale():
-        return g.locale
+        if g.get('locale'):
+            return g.locale
 
-    @app.context_processor
-    def locale_context():
-        return {
-            'locale': g.locale
-        }
+        return app.config['BABEL_DEFAULT_LOCALE']
 
     @app.context_processor
     def now_context():
@@ -175,7 +186,7 @@ def create_app():
     def csrf_error(e):
         return error_handler(400, e)
 
-    from .modules.frontend.index import blueprint as index_blueprint
+    from .modules.frontend.views.index import blueprint as index_blueprint
     from .modules.auth.api.v1 import blueprint as api_auth_blueprint_v1
     from .modules.auth.views import blueprint as auth_blueprint
 

@@ -1,13 +1,13 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask import Blueprint, render_template
+from flask import render_template
 
-from ...utils import b
-from ...views import BaseMethodView
-from .tasks import TestTask
+from ....utils import b
+from ....views import BaseMethodView, BaseBlueprint
+from ..tasks import TestTask
 
 
-blueprint = Blueprint('index', __name__,)
+blueprint = BaseBlueprint('index', __name__,)
 
 
 class IndexView(BaseMethodView):

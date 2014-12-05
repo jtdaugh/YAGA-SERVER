@@ -11,16 +11,23 @@ from urllib.parse import unquote
 import flask_s3
 from IPython import embed
 from babel import support
-from flask.json import dumps
+from flask import json, g
 from flask.ext.script import Command
 from flask.ext.migrate import Migrate
 from flask.ext.script import Manager
 from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
+from flask.ext.testing.utils import _make_test_response
+from flask.ext.babelex import lazy_gettext as lazy_gettext, gettext
 from sqlalchemy_utils.functions import create_database, database_exists
 
-from application.helpers import assets, cache, db
+from application.tests.utils import create_json_client
+from application.helpers import assets, cache, db, redis, s3media
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
+from application.modules.auth.models import User, Role, Session, Token
+from application.modules.auth.repository import (
+    user_storage, role_storage, session_storage, token_storage
+)
 
 
 app, celery = create_app()
@@ -40,7 +47,47 @@ class ShellMixin(object):
 
 class Shell(Command):
     def run(self):
-        embed()
+        app.config['TESTING'] = True
+
+        app.response_class = _make_test_response(app.response_class)
+
+        client = app.test_client()
+
+        ctx = app.test_request_context()
+        ctx.push()
+
+        json_client = create_json_client(app, client)
+
+        embed(user_ns={
+            'ctx': ctx,
+
+            'client': client,
+            'json_client': json_client,
+
+            'g': g,
+
+            'app': app,
+            'celery': celery,
+
+            'cache': cache,
+            'db': db,
+            'redis': redis,
+            's3media': s3media,
+
+            'User': User,
+            'Role': Role,
+            'Session': Session,
+            'Token': Token,
+
+            'user_storage': user_storage,
+            'role_storage': role_storage,
+            'session_storage': session_storage,
+            'token_storage': token_storage,
+
+            'json': json,
+            'lazy_gettext': lazy_gettext,
+            'gettext': gettext,
+        })
 
 
 class Debug(Command):
@@ -117,7 +164,7 @@ class CompileMessages(Command, ShellMixin):
         except:
             pass
 
-        return dumps(ret, ensure_ascii=False, indent=True)
+        return json.dumps(ret, ensure_ascii=False, indent=True)
 
     def run(self):
         self.local('pybabel compile -f -d application/translations')

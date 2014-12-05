@@ -6,6 +6,7 @@ from collections import MutableMapping
 
 from Crypto.Random.random import choice
 from six import binary_type, string_types
+from flask import request
 from flask.json import JSONEncoder
 from speaklater import is_lazy_string
 
@@ -38,6 +39,23 @@ def dummy_callback(*args, **kwarg):
     pass
 
 
+def trace():
+    import ipdb
+
+    ipdb.set_trace()
+
+
+def detect_json():
+    accept = request.accept_mimetypes.best_match([
+        'application/json', 'text/html'
+    ])
+
+    if accept == 'application/json':
+        return True
+
+    return False
+
+
 class BaseJSONEncoder(JSONEncoder):
     def default(self, obj):
         if hasattr(obj, '__json__'):
@@ -60,29 +78,25 @@ class BaseJSONEncoder(JSONEncoder):
 
 
 class DummyDict(MutableMapping):
-    @property
-    def dct(self):
-        return self.__dict__
-
     def __getitem__(self, key):
         try:
-            return self.dct[key]
+            return self.__dict__[key]
         except KeyError:
             return None
 
     def __setitem__(self, key, value):
-        self.dct[key] = value
+        self.__dict__[key] = value
 
         return self[key]
 
     def __delitem__(self, key):
         try:
-            del self.dct[key]
+            del self.__dict__[key]
         except KeyError:
             pass
 
     def __iter__(self):
-        return self.dct.__iter__()
+        return self.__dict__.__iter__()
 
     def __len__(self):
-        return self.dct.__len__()
+        return self.__dict__.__len__()
