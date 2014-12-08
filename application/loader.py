@@ -28,7 +28,7 @@ from flask_debugtoolbar.panels import sqlalchemy as sqlalchemy_toolbar
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, csrf, celery, compress, sslify, cors, reggie,
-    error_handler, HTTP_STATUS_CODES, MxCache
+    geoip, error_handler, HTTP_STATUS_CODES, MxCache
 )
 from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
 from .admin import create_admin
@@ -82,9 +82,6 @@ def setup_toolbar(csrf):
     sqlalchemy_toolbar.sql_select = csrf.exempt(
         sqlalchemy_toolbar.sql_select
     )
-    sqlalchemy_toolbar.sql_explain = csrf.exempt(
-        sqlalchemy_toolbar.sql_explain
-    )
 
 
 def create_app():
@@ -109,6 +106,7 @@ def create_app():
     sslify.init_app(app)
     cors.init_app(app, resources=r'/api/*', headers='Content-Type')
     reggie.init_app(app)
+    geoip.init_app(app)
 
     setup_toolbar(csrf)
     toolbar.init_app(app)
@@ -186,13 +184,15 @@ def create_app():
     def csrf_error(e):
         return error_handler(400, e)
 
-    from .modules.frontend.views.index import blueprint as index_blueprint
-    from .modules.auth.api.v1 import blueprint as api_auth_blueprint_v1
-    from .modules.auth.views import blueprint as auth_blueprint
+    from .modules.frontend.views.index import blueprint as index
+    from .modules.auth.api.v1 import blueprint as api_auth_v1
+    from .modules.auth.views import blueprint as auth
+    from .modules.environment.api.v1 import blueprint as api_environment_v1
 
-    app.register_blueprint(index_blueprint)
-    app.register_blueprint(auth_blueprint)
-    app.register_blueprint(api_auth_blueprint_v1, url_prefix='/api/v1')
+    app.register_blueprint(index)
+    app.register_blueprint(auth)
+    app.register_blueprint(api_auth_v1, url_prefix='/api/v1')
+    app.register_blueprint(api_environment_v1, url_prefix='/api/v1')
 
     from . import modules
 
