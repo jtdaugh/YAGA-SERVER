@@ -2,9 +2,10 @@ from __future__ import absolute_import, division, unicode_literals
 
 from functools import wraps
 
-from flask import g, abort
+from flask import g, abort, current_app as app
 
 from .signals import auth_ident
+from .helpers import cache
 
 
 def anonymous_user_required(fn):
@@ -118,4 +119,15 @@ def header_marker(fn):
             auth_ident.send('header')
 
         return res
+    return wrapper
+
+
+def view_cache(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        cached_fn = cache.cached(
+            timeout=app.config['VIEW_CACHE_TIMEOUT']
+        )(fn)
+
+        return cached_fn(*args, **kwargs)
     return wrapper

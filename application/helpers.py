@@ -21,6 +21,7 @@ from .ext.ssl import BaseSSLify
 from .ext.redis_storage import Redis
 from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
+from .ext.geoip_storage import Geoip
 
 
 HTTP_STATUS_CODES = {
@@ -77,6 +78,7 @@ compress = Compress()
 sslify = BaseSSLify()
 cors = CORS()
 reggie = Reggie()
+geoip = Geoip()
 
 toolbar = DebugToolbarExtension()
 

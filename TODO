@@ -12,5 +12,4 @@ rate-limit ip\user ?
 
 repo abstraction fn names
 
-test sentry exception
-check newrelic addon setup
+test celery sentry exception

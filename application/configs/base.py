@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import os
+
 from ..utils import b
 
 
@@ -28,3 +30,15 @@ class BaseConfig(object):
     CELERY_TIMEZONE = 'UTC'
 
     AUTH_HEADER_NAME = 'Auth'
+
+    VIEW_CACHE_TIMEOUT = 60 * 60
+
+    BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+    GEOIP_MMDB = 'GeoLite2-Country.mmdb'
+
+    GEOIP_MMDB = os.path.join(
+        BASE_DIR,
+        'lib',
+        GEOIP_MMDB
+    )
