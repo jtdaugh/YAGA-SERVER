@@ -28,8 +28,7 @@ from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, csrf, celery, compress, sslify, cors, reggie,
     geoip,
-    rate_limit, error_handler, HTTP_STATUS_CODES, MxCache,
-    BaseAnonymousUser
+    rate_limit, error_handler, HTTP_STATUS_CODES, MxCache
 )
 from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
 from .admin import create_admin
@@ -38,6 +37,7 @@ from .modules.auth.repository import token_storage
 from .ext.redis_storage import RedisSessionInterface
 from .modules.auth.sessions import SqlSessionInterface
 from .decorators import ident_marker, auth_rate_limit
+from .mixins import BaseAnonymousUser
 
 
 class Application(Flask):
@@ -96,12 +96,12 @@ def setup_toolbar(csrf):
 
 def setup_hooks(app):
     @app.before_request
-    def ip_rate_limit():
-        rate_limit('IP', request.remote_addr)
+    def is_json_request():
+        request.is_json = detect_json()
 
     @app.before_request
-    def json_request():
-        request.is_json = detect_json()
+    def ip_rate_limit():
+        rate_limit('IP', request.remote_addr)
 
     @app.after_request
     def after_request_callbacks(response):
@@ -174,23 +174,22 @@ def setup_auth(app):
 
 
 def setup_locale(app):
-    @app.before_request
-    def set_locale():
-        print 'before'
-        locale = request.accept_languages.best_match(app.config['LOCALES'])
+    @babel.localeselector
+    def get_locale():
+        try:
+            locale = request.accept_languages.best_match(app.config['LOCALES'])
+        except:
+            locale = None
 
         if locale is None:
             locale = app.config['BABEL_DEFAULT_LOCALE']
 
-        g.locale = locale
+        try:
+            g.locale = locale
+        except:
+            pass
 
-    @babel.localeselector
-    def get_locale():
-        print 'babel'
-        if g.get('locale'):
-            return g.locale
-
-        return app.config['BABEL_DEFAULT_LOCALE']
+        return locale
 
 
 def setup_template_context(app):

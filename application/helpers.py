@@ -10,7 +10,7 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.babelex import Babel
 from raven.contrib.flask import Sentry
 from flask_s3 import FlaskS3
-from flask.ext.security import Security, AnonymousUser
+from flask.ext.security import Security
 from flask.ext.assets import Environment
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.babelex import lazy_gettext as _
@@ -38,17 +38,93 @@ HTTP_STATUS_CODES = {
 }
 
 
+cache = Cache()
+db = SQLAlchemy()
+babel = Babel()
+sentry = Sentry()
+s3static = FlaskS3()
+security = Security()
+redis = Redis()
+assets = Environment()
+s3media = S3()
+celery = Celery()
+csrf = CsrfProtect()
+compress = Compress()
+sslify = BaseSSLify()
+cors = CORS()
+reggie = Reggie()
+geoip = Geoip()
+
+toolbar = DebugToolbarExtension()
+
+
+class CacheDict(MutableMapping):
+    def key(self, key):
+        key = '{cls}:{key}'.format(
+            cls=str(self.__class__),
+            key=key
+        )
+
+        key = key.replace('<class', '')
+        key = key.replace('>', '')
+        key = key.strip()
+
+        return key
+
+    def __getitem__(self, key):
+        return cache.get(self.key(key))
+
+    def __setitem__(self, key, value):
+        return cache.set(self.key(key), value)
+
+    def __delitem__(self, key):
+        return cache.delete(self.key(key))
+
+    def __iter__(self):
+        raise NotImplementedError
+
+    def __len__(self):
+        raise NotImplementedError
+
+
+class MxCache(CacheDict):
+    def __setitem__(self, key, value):
+        value = str(value)
+
+        super(MxCache, self).__setitem__(key, value)
+
+
+class BaseResponse(object):
+    def __init__(self, data=None):
+        self.data = data
+
+    @property
+    def response(self):
+        return {
+            self.FIELD_HOLDER: self.data
+        }
+
+    def __lshift__(self, status_code):
+        return self.response, status_code
+
+
+class SuccessResponse(BaseResponse):
+    FIELD_HOLDER = 'result'
+
+
+class FailResponse(BaseResponse):
+    FIELD_HOLDER = 'errors'
+
+
 def error_handler(code, e):
     message = HTTP_STATUS_CODES[code]
 
     if request.is_xhr or request.is_json:
-        data = {
-            'errors': {
+        response = jsonify(
+            FailResponse({
                 'global': message
-            }
-        }
-
-        response = jsonify(data)
+            }).response
+        )
     else:
         response = make_response(
             render_template('error.html', code=code, message=message)
@@ -112,106 +188,3 @@ def rate_limit(scope, ident):
                 requests,
                 ttl
             )
-
-
-cache = Cache()
-db = SQLAlchemy()
-babel = Babel()
-sentry = Sentry()
-s3static = FlaskS3()
-security = Security()
-redis = Redis()
-assets = Environment()
-s3media = S3()
-celery = Celery()
-csrf = CsrfProtect()
-compress = Compress()
-sslify = BaseSSLify()
-cors = CORS()
-reggie = Reggie()
-geoip = Geoip()
-
-toolbar = DebugToolbarExtension()
-
-
-class CacheDict(MutableMapping):
-    def key(self, key):
-        key = '{cls}:{key}'.format(
-            cls=str(self.__class__),
-            key=key
-        )
-
-        key = key.replace('<class', '')
-        key = key.replace('>', '')
-        key = key.strip()
-
-        return key
-
-    def __getitem__(self, key):
-        return cache.get(self.key(key))
-
-    def __setitem__(self, key, value):
-        return cache.set(self.key(key), value)
-
-    def __delitem__(self, key):
-        return cache.delete(self.key(key))
-
-    def __iter__(self):
-        raise NotImplementedError
-
-    def __len__(self):
-        raise NotImplementedError
-
-
-class MxCache(CacheDict):
-    def __setitem__(self, key, value):
-        value = str(value)
-
-        super(MxCache, self).__setitem__(key, value)
-
-
-class BaseResponse(object):
-    STATUSES = {
-        'success': 'success',
-        'fail': 'fail'
-    }
-    DEFAULT_RESULT = {}
-    DEFAULT_ERRORS = []
-
-    def __init__(self, data=None):
-        self.status = self.DEFAULT_STATUS
-
-        self.result = self.DEFAULT_RESULT
-
-        self.errors = self.DEFAULT_ERRORS
-
-        if data is not None:
-            setattr(self, self.FIELD_HOLDER, data)
-
-    @property
-    def response(self):
-        return {
-            'status': self.STATUSES[self.status],
-            'result': self.result,
-            'errors': self.errors
-        }
-
-    def __lshift__(self, status_code):
-        return self.response, status_code
-
-
-class SuccessResponse(BaseResponse):
-    DEFAULT_STATUS = 'success'
-
-    FIELD_HOLDER = 'result'
-
-
-class FailResponse(BaseResponse):
-    DEFAULT_STATUS = 'fail'
-
-    FIELD_HOLDER = 'errors'
-
-
-class BaseAnonymousUser(AnonymousUser):
-    def __init__(self, *args, **kwargs):
-        super(BaseAnonymousUser, self).__init__(*args, **kwargs)

@@ -13,7 +13,7 @@ class Config(BaseConfig):
     S3_USE_HTTPS = False
     USE_S3 = False
 
-    FLASK_ASSETS_USE_S3 = False
+    FLASK_ASSETS_USE_S3 = USE_S3
     ASSETS_AUTO_BUILD = True
     ASSETS_CACHE = False
     ASSETS_MANIFEST = False

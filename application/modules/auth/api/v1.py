@@ -7,6 +7,7 @@ from ....decorators import (
 )
 from ....views import BaseApi, BaseResource, BaseApiBlueprint
 from ....utils import b
+from ....helpers import SuccessResponse
 from ..forms import UserRegisterForm, UserLoginForm
 from ..repository import user_storage, token_storage
 
@@ -14,26 +15,26 @@ from ..repository import user_storage, token_storage
 class RegisterResource(BaseResource):
     @anonymous_user_required
     @marshal_with_form(UserRegisterForm, 400)
-    def put(self):
+    def post(self):
         user = user_storage.create(
             email=self.form.email.data,
             password=self.form.password.data
         )
 
-        return {
+        return SuccessResponse({
             'email': user.email,
             'token': user.get_auth_token(),
-        }, 201
+        }) << 201
 
 
 class LoginResource(BaseResource):
     @anonymous_user_required
     @marshal_with_form(UserLoginForm, 401)
     def post(self):
-        return {
+        return SuccessResponse({
             'email': self.form.user.email,
             'token': self.form.user.get_auth_token(),
-        }, 200
+        }) << 200
 
 
 class LogoutResource(BaseResource):
@@ -43,17 +44,17 @@ class LogoutResource(BaseResource):
             token=g.token
         )
 
-        return {
+        return SuccessResponse({
             'email': g.user.email,
-        }, 200
+        }) << 200
 
 
 class InfoResource(BaseResource):
     @login_header_required
     def get(self):
-        return {
+        return SuccessResponse({
             'email': g.user.email,
-        }, 200
+        }) << 200
 
 
 blueprint = BaseApiBlueprint('api_auth', __name__)

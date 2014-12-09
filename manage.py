@@ -22,7 +22,7 @@ from flask.ext.babelex import lazy_gettext as lazy_gettext, gettext
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from application.tests.utils import create_json_client
-from application.helpers import assets, cache, db, redis, s3media
+from application.helpers import assets, cache, db, redis, s3media, geoip
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
 from application.modules.auth.models import User, Role, Session, Token
 from application.modules.auth.repository import (
@@ -73,6 +73,7 @@ class Shell(Command):
             'db': db,
             'redis': redis,
             's3media': s3media,
+            'geoip': geoip,
 
             'User': User,
             'Role': Role,

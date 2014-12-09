@@ -50,10 +50,7 @@ def detect_json():
         'application/json', 'text/html'
     ])
 
-    if accept == 'application/json':
-        return True
-
-    return False
+    return accept == 'application/json'
 
 
 class BaseJSONEncoder(JSONEncoder):

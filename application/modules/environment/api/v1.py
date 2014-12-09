@@ -4,7 +4,7 @@ from flask import request
 
 from ....views import BaseApi, BaseResource, BaseApiBlueprint
 from ....utils import b
-from ....helpers import geoip
+from ....helpers import geoip, SuccessResponse
 from ..repository import phone_storage
 
 
@@ -14,12 +14,12 @@ class CodesResource(BaseResource):
 
         codes = phone_storage.get_codes()
 
-        default = iso_code if iso_code in codes else None
+        propose = iso_code if iso_code in codes else None
 
-        return {
+        return SuccessResponse({
             'codes': codes,
-            'default': default
-        }
+            'propose': propose
+        }) << 200
 
 
 blueprint = BaseApiBlueprint('environment', __name__)

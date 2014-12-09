@@ -5,7 +5,7 @@ from functools import wraps
 from flask import g, abort, current_app as app
 
 from .signals import auth_ident
-from .helpers import cache, rate_limit
+from .helpers import cache, rate_limit, FailResponse
 
 
 def anonymous_user_required(fn):
@@ -78,9 +78,9 @@ def marshal_with_form(form_obj, fail_status_code):
 
                 return fn(cls, *args, **kwargs)
             else:
-                return {
-                    'errors': form.errors
-                }, fail_status_code
+                return FailResponse(
+                    form.errors
+                ) << fail_status_code
 
         return wrapper
 
