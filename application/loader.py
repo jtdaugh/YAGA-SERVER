@@ -237,13 +237,13 @@ def create_app():
 
     setup_ext(app)
 
+    setup_locale(app)
+
     setup_session(app)
 
     create_admin(app)
 
     setup_auth(app)
-
-    setup_locale(app)
 
     setup_template_context(app)
 
