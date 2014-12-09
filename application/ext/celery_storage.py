@@ -73,7 +73,7 @@ class Celery(BaseStorage):
         celery_obj = self.create_celery(app)
 
         if sentry is not None:
-            self.sentry_logger = logging.getLogger(__name__)
+            self.sentry_logger = logging.getLogger('root')
             self.sentry_logger.addHandler(SentryHandler(sentry.client))
             self.sentry_logger.propagate = False
 
