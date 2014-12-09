@@ -89,6 +89,8 @@ class Shell(Command):
             'gettext': gettext,
         })
 
+        ctx.pop()
+
 
 class Debug(Command):
     def run(self):

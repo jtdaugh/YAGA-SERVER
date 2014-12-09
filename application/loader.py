@@ -6,7 +6,6 @@ standard_library.install_aliases()
 import sys
 import locale
 
-
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -28,7 +27,9 @@ from flask_debugtoolbar.panels import sqlalchemy as sqlalchemy_toolbar
 from .helpers import (
     cache, db, babel, sentry, s3static, toolbar, security, redis,
     assets, s3media, csrf, celery, compress, sslify, cors, reggie,
-    geoip, error_handler, HTTP_STATUS_CODES, MxCache
+    geoip,
+    rate_limit, error_handler, HTTP_STATUS_CODES, MxCache,
+    BaseAnonymousUser
 )
 from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
 from .admin import create_admin
@@ -36,7 +37,7 @@ from .modules.auth.models import User, Role
 from .modules.auth.repository import token_storage
 from .ext.redis_storage import RedisSessionInterface
 from .modules.auth.sessions import SqlSessionInterface
-from .decorators import session_marker, header_marker
+from .decorators import ident_marker, auth_rate_limit
 
 
 class Application(Flask):
@@ -78,20 +79,39 @@ def setup_sentry():
     sentry.add_sentry_id_header = dummy_callback
 
 
+def get_base_app():
+    app = Application(__name__)
+    app.config.from_object(load_config())
+    app.wsgi_app = ProxyFix(app.wsgi_app)
+    app.json_encoder = BaseJSONEncoder
+
+    return app
+
+
 def setup_toolbar(csrf):
     sqlalchemy_toolbar.sql_select = csrf.exempt(
         sqlalchemy_toolbar.sql_select
     )
 
 
-def create_app():
-    setup_mx_cache()
-    setup_sentry()
-    app = Application(__name__)
-    app.config.from_object(load_config())
-    app.wsgi_app = ProxyFix(app.wsgi_app)
-    app.json_encoder = BaseJSONEncoder
+def setup_hooks(app):
+    @app.before_request
+    def ip_rate_limit():
+        rate_limit('IP', request.remote_addr)
 
+    @app.before_request
+    def json_request():
+        request.is_json = detect_json()
+
+    @app.after_request
+    def after_request_callbacks(response):
+        for callback in g.get('after_request_callbacks', []):
+            callback(response)
+
+        return response
+
+
+def setup_ext(app):
     cache.init_app(app)
     db.init_app(app)
     babel.init_app(app)
@@ -111,8 +131,15 @@ def create_app():
     setup_toolbar(csrf)
     toolbar.init_app(app)
 
-    create_admin(app)
 
+def setup_session(app):
+    if app.config['SESSION_ENGINE'] == 'redis':
+        app.session_interface = RedisSessionInterface(redis)
+    elif app.config['SESSION_ENGINE'] == 'sql':
+        app.session_interface = SqlSessionInterface()
+
+
+def setup_auth(app):
     app.user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
     security.init_app(
@@ -123,17 +150,18 @@ def create_app():
 
     app.login_manager.session_protection = None
 
-    if app.config['SESSION_ENGINE'] == 'redis':
-        app.session_interface = RedisSessionInterface(redis)
-    elif app.config['SESSION_ENGINE'] == 'sql':
-        app.session_interface = SqlSessionInterface()
+    app.login_manager.anonymous_user = BaseAnonymousUser
 
     app.login_manager.user_loader(
-        session_marker(app.login_manager.user_callback)
+        auth_rate_limit(
+            ident_marker('session')(app.login_manager.user_callback),
+        )
     )
 
     app.login_manager.header_loader(
-        header_marker(token_storage.user_header_loader)
+        auth_rate_limit(
+            ident_marker('header')(token_storage.user_header_loader),
+        )
     )
 
     @app.login_manager.token_loader
@@ -141,7 +169,14 @@ def create_app():
         return None
 
     @app.before_request
+    def set_user():
+        g.user = current_user
+
+
+def setup_locale(app):
+    @app.before_request
     def set_locale():
+        print 'before'
         locale = request.accept_languages.best_match(app.config['LOCALES'])
 
         if locale is None:
@@ -149,34 +184,24 @@ def create_app():
 
         g.locale = locale
 
-    @app.before_request
-    def is_json():
-        request.is_json = detect_json()
-
-    @app.before_request
-    def set_user():
-        g.user = current_user
-
-    @app.after_request
-    def after_request_callbacks(response):
-        for callback in g.get('after_request_callbacks', []):
-            callback(response)
-
-        return response
-
     @babel.localeselector
     def get_locale():
+        print 'babel'
         if g.get('locale'):
             return g.locale
 
         return app.config['BABEL_DEFAULT_LOCALE']
 
+
+def setup_template_context(app):
     @app.context_processor
     def now_context():
         return {
             'now': now()
         }
 
+
+def setup_errors(app):
     for code in HTTP_STATUS_CODES:
         app.errorhandler(code)(partial(error_handler, code))
 
@@ -184,6 +209,8 @@ def create_app():
     def csrf_error(e):
         return error_handler(400, e)
 
+
+def setup_views(app):
     from .modules.frontend.views.index import blueprint as index
     from .modules.auth.api.v1 import blueprint as api_auth_v1
     from .modules.auth.views import blueprint as auth
@@ -194,8 +221,37 @@ def create_app():
     app.register_blueprint(api_auth_v1, url_prefix='/api/v1')
     app.register_blueprint(api_environment_v1, url_prefix='/api/v1')
 
+
+def setup_celery(app):
     from . import modules
 
     celery.autodiscover(modules)
+
+
+def create_app():
+    setup_mx_cache()
+    setup_sentry()
+
+    app = get_base_app()
+
+    setup_hooks(app)
+
+    setup_ext(app)
+
+    setup_session(app)
+
+    create_admin(app)
+
+    setup_auth(app)
+
+    setup_locale(app)
+
+    setup_template_context(app)
+
+    setup_errors(app)
+
+    setup_views(app)
+
+    setup_celery(app)
 
     return app, celery

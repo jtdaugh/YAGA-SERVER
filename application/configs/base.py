@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+import datetime
 
 from ..utils import b
 
@@ -42,3 +43,16 @@ class BaseConfig(object):
         'lib',
         GEOIP_MMDB
     )
+
+    RATE_LIMIT = {
+        'AUTH': {
+            'ENABLED': True,
+            'REQUESTS': 1000,
+            'INTERVAL': datetime.timedelta(hours=1)
+        },
+        'IP': {
+            'ENABLED': True,
+            'REQUESTS': 10000,
+            'INTERVAL': datetime.timedelta(hours=1)
+        }
+    }

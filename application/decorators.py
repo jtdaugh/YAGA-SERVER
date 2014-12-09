@@ -5,7 +5,7 @@ from functools import wraps
 from flask import g, abort, current_app as app
 
 from .signals import auth_ident
-from .helpers import cache
+from .helpers import cache, rate_limit
 
 
 def anonymous_user_required(fn):
@@ -78,7 +78,9 @@ def marshal_with_form(form_obj, fail_status_code):
 
                 return fn(cls, *args, **kwargs)
             else:
-                return form.errors, fail_status_code
+                return {
+                    'errors': form.errors
+                }, fail_status_code
 
         return wrapper
 
@@ -98,28 +100,19 @@ def after_this_request(fn):
     return wrapper
 
 
-def session_marker(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        res = fn(*args, **kwargs)
+def ident_marker(ident):
+    def wrapped(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            res = fn(*args, **kwargs)
 
-        if res:
-            auth_ident.send('session')
+            if res:
+                auth_ident.send(ident)
 
-        return res
-    return wrapper
+            return res
+        return wrapper
 
-
-def header_marker(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        res = fn(*args, **kwargs)
-
-        if res:
-            auth_ident.send('header')
-
-        return res
-    return wrapper
+    return wrapped
 
 
 def view_cache(fn):
@@ -130,4 +123,13 @@ def view_cache(fn):
         )(fn)
 
         return cached_fn(*args, **kwargs)
+    return wrapper
+
+
+def auth_rate_limit(fn):
+    @wraps(fn)
+    def wrapper(ident):
+        rate_limit('AUTH', ident)
+
+        return fn(ident)
     return wrapper

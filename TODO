@@ -8,8 +8,6 @@ VIDEO S3URL
 VIDEO SQS
 VIDEO CELERY CLEAN
 
-rate-limit ip\user ?
-
 repo abstraction fn names
 
 test celery sentry exception
