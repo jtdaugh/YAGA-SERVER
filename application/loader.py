@@ -111,7 +111,7 @@ def setup_hooks(app):
         return response
 
 
-def setup_ext(app):
+def init_ext(app):
     cache.init_app(app)
     db.init_app(app)
     babel.init_app(app)
@@ -121,7 +121,7 @@ def setup_ext(app):
     assets.init_app(app)
     s3media.init_app(app)
     csrf.init_app(app)
-    celery.init_app(app)
+    celery.init_app(app, sentry)
     compress.init_app(app)
     sslify.init_app(app)
     cors.init_app(app, resources=r'/api/*', headers='Content-Type')
@@ -235,7 +235,7 @@ def create_app():
 
     setup_hooks(app)
 
-    setup_ext(app)
+    init_ext(app)
 
     setup_locale(app)
 

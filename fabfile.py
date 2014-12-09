@@ -227,3 +227,8 @@ def create():
     ))
 
     release(initial=True)
+
+
+@task
+def config():
+    local('heroku config')
