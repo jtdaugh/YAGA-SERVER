@@ -18,6 +18,7 @@ from flask.ext.compress import Compress
 from flask.ext.cors import CORS
 from flask_reggie import Reggie
 from flask_debugtoolbar import DebugToolbarExtension
+from jinja2.exceptions import TemplateNotFound
 
 from .ext.ssl import BaseSSLify
 from .ext.redis_storage import Redis
@@ -126,9 +127,20 @@ def error_handler(code, e):
             }).response
         )
     else:
-        response = make_response(
-            render_template('error.html', code=code, message=message)
-        )
+        try:
+            response = make_response(
+                render_template(
+                    'errors/{code}.html'.format(
+                        code=code
+                    ),
+                    code=code,
+                    message=message
+                )
+            )
+        except TemplateNotFound:
+            response = make_response(
+                render_template('errors/base.html', code=code, message=message)
+            )
 
     response.status_code = code
 
