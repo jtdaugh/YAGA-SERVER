@@ -29,7 +29,7 @@ MarkupSafe==0.23
 Pygments==2.0.1
 SQLAlchemy==0.9.8
 SQLAlchemy-Utils==0.27.11
-WTForms==1.0.5
+WTForms==2.0.1
 WebOb==1.4
 Werkzeug==0.9.6
 alembic==0.7.1
