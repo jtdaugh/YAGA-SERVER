@@ -59,7 +59,7 @@ Front-end development:
 
 .. code-block:: bash
 
-    # code style check
+    # compress static assets on changes
     make watch
 
 
