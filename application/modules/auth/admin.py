@@ -12,9 +12,9 @@ class UserModelView(BaseModelView):
     can_edit = True
 
     form_columns = ['active', 'roles']
-    column_list = ['email', 'active', 'created_at', 'roles']
+    column_list = ['phone', 'name', 'active', 'created_at', 'verified' 'roles']
 
-    column_filters = ['active']
+    column_filters = ['active', 'verified']
 
 
 class RoleModelView(BaseModelView):

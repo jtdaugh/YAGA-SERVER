@@ -7,7 +7,7 @@ CMD_ACTIVATE_ENV=source $(ENV_DIR)/bin/activate
 CMD_DEBUG=$(CMD_MANAGE) runserver
 CMD_TEST=TESTING=1 nosetests -v --with-coverage
 CMD_LINT=flake8 application
-CMD_ENSUREDB=$(CMD_MANAGE) ensuredb
+CMD_DB_ENSURE=$(CMD_MANAGE) ensuredb
 CMD_DB_UPGRATE=$(CMD_MANAGE) db upgrade
 CMD_SYNCROLES=$(CMD_MANAGE) syncroles
 CMD_CLEARCACHE=$(CMD_MANAGE) clearcache
@@ -24,7 +24,7 @@ celery:
 install:
 	test -d $(ENV_DIR) || $(CMD_ENV) $(ENV_DIR)
 	$(CMD_ACTIVATE_ENV); $(CMD_PIP)
-	$(CMD_ACTIVATE_ENV); $(CMD_ENSUREDB)
+	$(CMD_ACTIVATE_ENV); $(CMD_DB_ENSURE)
 	$(CMD_ACTIVATE_ENV); $(CMD_DB_UPGRATE)
 	$(CMD_ACTIVATE_ENV); $(CMD_SYNCROLES)
 	$(CMD_ACTIVATE_ENV); $(CMD_CLEARCACHE)

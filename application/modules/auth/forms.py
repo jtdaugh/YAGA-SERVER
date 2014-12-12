@@ -4,9 +4,10 @@ from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
 from ...forms import BaseForm
-from ...validators import DataRequired, DNSMXEmail
+from ...validators import DataRequiredValidator, PhoneValidator
 from .validators import (
-    NotRegisteredUser, ValidActiveUser, UserToken
+    UniquePhoneValidator, UniqueNameValidator, ValidActiveUserValidator,
+    UserTokenValidator, CurrentTokenValidator
 )
 
 
@@ -14,29 +15,47 @@ class PasswordForm(BaseForm):
     password = PasswordField(
         _('Password'),
         validators=[
-            DataRequired(),
+            DataRequiredValidator(),
         ]
     )
 
 
 class UserLoginForm(PasswordForm):
-    email = TextField(
-        _('Email'),
+    phone = TextField(
+        _('Phone'),
         validators=[
-            DataRequired(),
-            DNSMXEmail(),
-            ValidActiveUser()
+            DataRequiredValidator(),
+            PhoneValidator(),
+            ValidActiveUserValidator()
         ]
     )
 
 
 class UserRegisterForm(PasswordForm):
-    email = TextField(
-        _('Email'),
+    phone = TextField(
+        _('Phone'),
         validators=[
-            DataRequired(),
-            DNSMXEmail(),
-            NotRegisteredUser()
+            DataRequiredValidator(),
+            PhoneValidator(),
+            UniquePhoneValidator()
+        ]
+    )
+
+    name = TextField(
+        _('Name'),
+        validators=[
+            DataRequiredValidator(),
+            UniqueNameValidator()
+        ]
+    )
+
+
+class UserLogoutForm(BaseForm):
+    token = TextField(
+        _('Token'),
+        validators=[
+            DataRequiredValidator(),
+            CurrentTokenValidator()
         ]
     )
 
@@ -45,7 +64,7 @@ class TokenDeactivateForm(BaseForm):
     token = TextField(
         _('Token'),
         validators=[
-            DataRequired(),
-            UserToken()
+            DataRequiredValidator(),
+            UserTokenValidator()
         ]
     )

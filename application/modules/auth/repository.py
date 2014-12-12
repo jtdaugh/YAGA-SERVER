@@ -13,7 +13,8 @@ from .models import User, Role, Token, Session
 class UserRepository(BaseRepository):
     def create(self, **kwargs):
         user = self.model(
-            email=kwargs['email']
+            phone=kwargs['phone'],
+            name=kwargs['name']
         )
 
         user.set_password(kwargs['password'])
@@ -31,6 +32,13 @@ class UserRepository(BaseRepository):
             user.roles.append(role)
 
             db.session.commit()
+
+    def user_session_loader(self, user_id):
+        user = self.get_user(
+            id=user_id
+        )
+
+        return user
 
 
 class RoleRepository(BaseRepository):
@@ -51,9 +59,9 @@ class RoleRepository(BaseRepository):
 
 
 class TokenRepository(BaseRepository):
-    def get_user(self, **kwargs):
+    def load_user(self, **kwargs):
         token = self.get(
-            token=kwargs['token']
+            **kwargs
         )
 
         if token and token.user.is_active():
@@ -64,12 +72,16 @@ class TokenRepository(BaseRepository):
     def user_header_loader(self, header):
         header = header.strip()
 
-        user = self.get_user(
+        token = self.get(
             token=header
         )
 
-        if user:
+        if token and token.user.is_active():
+            user = token.user
+
             g.token = header
+        else:
+            user = None
 
         return user
 

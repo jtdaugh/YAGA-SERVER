@@ -19,7 +19,9 @@ from flask.ext.migrate import MigrateCommand
 from flask.ext.assets import ManageAssets
 from flask.ext.testing.utils import _make_test_response
 from flask.ext.babelex import lazy_gettext as lazy_gettext, gettext
-from sqlalchemy_utils.functions import create_database, database_exists
+from sqlalchemy_utils.functions import (
+    create_database, database_exists, drop_database
+)
 
 from application.tests.utils import create_json_client
 from application.helpers import assets, cache, db, redis, s3media, geoip
@@ -189,10 +191,28 @@ class ClearCache(Command):
         cache.clear()
 
 
-class EnsureDb(Command):
-    def run(self):
-        if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
-            create_database(app.config['SQLALCHEMY_DATABASE_URI'])
+@MigrateCommand.command
+def create():
+    create_database(app.config['SQLALCHEMY_DATABASE_URI'])
+
+
+@MigrateCommand.command
+def drop():
+    drop_database(app.config['SQLALCHEMY_DATABASE_URI'])
+
+
+@MigrateCommand.command
+def ensure():
+    if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+        create_database(app.config['SQLALCHEMY_DATABASE_URI'])
+
+
+@MigrateCommand.command
+def reset():
+    if database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
+        drop_database(app.config['SQLALCHEMY_DATABASE_URI'])
+
+    create_database(app.config['SQLALCHEMY_DATABASE_URI'])
 
 
 manager.add_command('shell', Shell())
@@ -204,7 +224,6 @@ manager.add_command('makemessages', MakeMessages())
 manager.add_command('compilemessages', CompileMessages())
 manager.add_command('createsuperuser', CreateSuperUser())
 manager.add_command('syncroles', SyncRoles())
-manager.add_command('ensuredb', EnsureDb())
 manager.add_command('db', MigrateCommand)
 manager.add_command('createall', CreateAll())
 manager.add_command('assets', ManageAssets(assets))

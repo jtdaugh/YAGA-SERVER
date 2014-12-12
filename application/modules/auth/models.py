@@ -12,12 +12,12 @@ roles_users = db.Table(
     'roles_users',
     db.Column(
         'user_id',
-        db.Integer(),
+        db.Integer,
         db.ForeignKey('user.id')
     ),
     db.Column(
         'role_id',
-        db.Integer(),
+        db.Integer,
         db.ForeignKey('role.id')
     )
 )
@@ -25,12 +25,12 @@ roles_users = db.Table(
 
 class Role(db.Model, RoleMixin):
     id = db.Column(
-        db.Integer(),
+        db.Integer,
         primary_key=True
     )
 
     name = db.Column(
-        db.String(80),
+        db.String(255),
         unique=True, nullable=False
     )
 
@@ -48,7 +48,12 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
         primary_key=True
     )
 
-    email = db.Column(
+    phone = db.Column(
+        db.String(255),
+        unique=True, nullable=False
+    )
+
+    name = db.Column(
         db.String(255),
         unique=True, nullable=False
     )
@@ -68,6 +73,12 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
         db.DateTime(),
         nullable=False,
         default=now
+    )
+
+    verified = db.Column(
+        db.Boolean(),
+        nullable=False,
+        default=False
     )
 
     roles = db.relationship(
@@ -92,7 +103,7 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
         raise NotImplementedError
 
     def __str__(self):
-        return self.email
+        return self.name
 
 
 class Token(db.Model):

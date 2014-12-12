@@ -8,7 +8,7 @@ from ....decorators import (
 from ....views import BaseApi, BaseResource, BaseApiBlueprint
 from ....utils import b
 from ....helpers import SuccessResponse
-from ..forms import UserRegisterForm, UserLoginForm
+from ..forms import UserRegisterForm, UserLoginForm, UserLogoutForm
 from ..repository import user_storage, token_storage
 
 
@@ -17,12 +17,12 @@ class RegisterResource(BaseResource):
     @marshal_with_form(UserRegisterForm, 400)
     def post(self):
         user = user_storage.create(
-            email=self.form.email.data,
+            name=self.form.name.data,
+            phone=self.form.phone.data,
             password=self.form.password.data
         )
 
         return SuccessResponse({
-            'email': user.email,
             'token': user.get_auth_token(),
         }) << 201
 
@@ -32,20 +32,20 @@ class LoginResource(BaseResource):
     @marshal_with_form(UserLoginForm, 401)
     def post(self):
         return SuccessResponse({
-            'email': self.form.user.email,
-            'token': self.form.user.get_auth_token(),
+            'token': self.form.obj.get_auth_token(),
         }) << 200
 
 
 class LogoutResource(BaseResource):
     @login_header_required
-    def delete(self):
+    @marshal_with_form(UserLogoutForm, 401)
+    def post(self):
         token_storage.delete(
             token=g.token
         )
 
         return SuccessResponse({
-            'email': g.user.email,
+            'token': g.token
         }) << 200
 
 
@@ -53,7 +53,8 @@ class InfoResource(BaseResource):
     @login_header_required
     def get(self):
         return SuccessResponse({
-            'email': g.user.email,
+            'name': g.user.name,
+            'phone': g.user.phone
         }) << 200
 
 

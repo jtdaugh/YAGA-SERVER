@@ -22,7 +22,7 @@ class LoginView(BaseView):
         form = UserLoginForm()
 
         if form.validate_on_submit():
-            login_user(form.user)
+            login_user(form.obj)
 
             flash(_('You were successfully logged in.'), 'success')
 
@@ -32,7 +32,7 @@ class LoginView(BaseView):
 
 
 class LogoutView(BaseView):
-    methods = ['GET', 'POST']
+    methods = ['GET']
 
     @login_session_required
     def dispatch_request(self):

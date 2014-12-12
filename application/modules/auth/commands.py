@@ -14,14 +14,16 @@ class CreateSuperUser(Command):
     def run(self):
         while True:
             data = MultiDict()
-            data['email'] = prompt('email')
+            data['phone'] = prompt('phone')
+            data['name'] = prompt('name')
             data['password'] = prompt_pass('password')
 
             form = UserRegisterForm(data, csrf_enabled=False)
 
             if form.validate():
                 user = user_storage.create(
-                    email=form.email.data,
+                    phone=form.phone.data,
+                    name=form.name.data,
                     password=form.password.data
                 )
                 user_storage.add_role(user, 'superuser')

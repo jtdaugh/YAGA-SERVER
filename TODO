@@ -1,8 +1,6 @@
 SESSIONS last seen, IP list
 TOKENS last seen, IP list
 
-email user ident field to phone
-
 VIDEO MODEl
 VIDEO S3URL
 VIDEO SQS
@@ -10,4 +8,5 @@ VIDEO CELERY CLEAN
 
 repo abstraction fn names
 
-test celery sentry exception
+
+validators to fields

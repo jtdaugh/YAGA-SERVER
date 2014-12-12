@@ -211,12 +211,14 @@ def setup_errors(app):
 
 def setup_views(app):
     from .modules.frontend.views.index import blueprint as index
+    from .modules.frontend.views.profile import blueprint as profile
     from .modules.auth.api.v1 import blueprint as api_auth_v1
     from .modules.auth.views import blueprint as auth
     from .modules.environment.api.v1 import blueprint as api_environment_v1
 
-    app.register_blueprint(index)
-    app.register_blueprint(auth)
+    app.register_blueprint(index, url_prefix='/')
+    app.register_blueprint(profile, url_prefix='/profile')
+    app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(api_auth_v1, url_prefix='/api/v1')
     app.register_blueprint(api_environment_v1, url_prefix='/api/v1')
 

@@ -4,6 +4,7 @@ import datetime
 import string
 from collections import MutableMapping
 
+import phonenumbers
 from Crypto.Random.random import choice
 from six import binary_type, string_types
 from flask import request
@@ -97,3 +98,41 @@ class DummyDict(MutableMapping):
 
     def __len__(self):
         return self.__dict__.__len__()
+
+
+class PhoneTools(object):
+    def get_country_codes(self):
+        _map = {}
+
+        for code, countries in \
+                phonenumbers.COUNTRY_CODE_TO_REGION_CODE.items():
+            for country in countries:
+                if country != '001' and country not in _map:
+                    _map[country] = '+{code}'.format(
+                        code=code
+                    )
+
+        return _map
+
+    def format(self, number):
+        if not number.startswith('+'):
+            number = '+{number}'.format(
+                number=number
+            )
+
+        try:
+            number = phonenumbers.parse(number)
+
+            if phonenumbers.is_valid_number(number):
+                number = phonenumbers.format_number(
+                    number, phonenumbers.PhoneNumberFormat.E164
+                )
+            else:
+                number = None
+        except:
+            number = None
+
+        return number
+
+
+phone_tools = PhoneTools()
