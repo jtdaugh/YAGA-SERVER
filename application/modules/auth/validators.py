@@ -3,29 +3,20 @@ from __future__ import absolute_import, division, unicode_literals
 from flask import g
 from flask.ext.babelex import lazy_gettext as _
 
-from ...validators import BaseValidator, UniqueValidator
+from ...validators import BaseValidator
 from .repository import user_storage, token_storage
 
 
-class UniquePhoneValidator(UniqueValidator):
-    STORAGE = user_storage
-    FIELD = 'phone'
-    MESSAGE = _('Phone is already registered.')
-
-
-class UniqueNameValidator(UniqueValidator):
-    STORAGE = user_storage
-    FIELD = 'name'
-    MESSAGE = _('Name is already registered.')
-
-
 class ValidActiveUserValidator(BaseValidator):
-    FIELD = 'phone'
     MESSAGE = _('Unknown user or password incorrect.')
+    CODE = 'wrong_credentials'
 
-    def __call__(self, form, field):
+    def validate(self, form, field):
+        if form.password.errors:
+            raise self.stop
+
         user = user_storage.get(
-            **self.query(field.data)
+            phone=form.phone.data
         )
 
         if user is None:
@@ -41,24 +32,15 @@ class ValidActiveUserValidator(BaseValidator):
 
 
 class UserTokenValidator(BaseValidator):
-    FIELD = 'token'
     MESSAGE = _('Unknown token.')
 
-    def __call__(self, form, field):
+    def validate(self, form, field):
         token = token_storage.get(
-            **self.query(field.data)
+            token=field.data,
         )
 
         if token is None:
             raise self.stop
 
         if token.user != g.user:
-            raise self.stop
-
-
-class CurrentTokenValidator(BaseValidator):
-    MESSAGE = _('Wrong token.')
-
-    def __call__(self, form, field):
-        if field.data != g.token:
             raise self.stop

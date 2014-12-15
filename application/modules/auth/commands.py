@@ -6,8 +6,12 @@ from flask import current_app as app
 from flask.ext.script import Command, prompt, prompt_pass
 from werkzeug.datastructures import MultiDict
 
-from .forms import UserRegisterForm
+from .api.v1.forms import UserRegisterApiForm
 from .repository import role_storage, user_storage
+
+
+class UserRegisterForm(UserRegisterApiForm):
+    API = False
 
 
 class CreateSuperUser(Command):

@@ -2,19 +2,19 @@ from __future__ import absolute_import, division, unicode_literals
 
 from flask import g
 
-from ....decorators import (
+from .....decorators import (
     marshal_with_form, anonymous_user_required, login_header_required
 )
-from ....views import BaseApi, BaseResource, BaseApiBlueprint
-from ....utils import b
-from ....helpers import SuccessResponse
-from ..forms import UserRegisterForm, UserLoginForm, UserLogoutForm
-from ..repository import user_storage, token_storage
+from .....views import BaseApi, BaseResource, BaseApiBlueprint
+from .....utils import b
+from .....helpers import SuccessResponse
+from .forms import UserRegisterApiForm, UserLoginApiForm, UserLogoutApiForm
+from ...repository import user_storage, token_storage
 
 
 class RegisterResource(BaseResource):
     @anonymous_user_required
-    @marshal_with_form(UserRegisterForm, 400)
+    @marshal_with_form(UserRegisterApiForm, 422)
     def post(self):
         user = user_storage.create(
             name=self.form.name.data,
@@ -29,7 +29,7 @@ class RegisterResource(BaseResource):
 
 class LoginResource(BaseResource):
     @anonymous_user_required
-    @marshal_with_form(UserLoginForm, 401)
+    @marshal_with_form(UserLoginApiForm, 422)
     def post(self):
         return SuccessResponse({
             'token': self.form.obj.get_auth_token(),
@@ -38,7 +38,7 @@ class LoginResource(BaseResource):
 
 class LogoutResource(BaseResource):
     @login_header_required
-    @marshal_with_form(UserLogoutForm, 401)
+    @marshal_with_form(UserLogoutApiForm, 401)
     def post(self):
         token_storage.delete(
             token=g.token

@@ -8,51 +8,54 @@ from .utils import phone_tools
 
 
 class BaseValidator(object):
-    def __init__(self, message=None):
+    MESSAGE = _('General error.')
+    CODE = 'general'
+
+    def __init__(self, message=None, code=None):
         if message is None:
             message = self.MESSAGE
 
+        if code is None:
+            code = self.CODE
+
         self.message = message
 
-    def query(self, data):
-        return {
-            self.FIELD: data
-        }
+        self.code = code
 
     @property
     def chain(self):
-        return ValidationError(self.message)
+        return ValidationError(self.output)
 
     @property
     def stop(self):
-        return StopValidation(self.message)
+        return StopValidation(self.output)
 
     def __call__(self, form, field):
+        if form.API:
+            self.output = self.code
+        else:
+            self.output = self.message
+
+        return self.validate(form, field)
+
+    def validate(self, form, field):
         raise NotImplementedError
-
-
-class UniqueValidator(BaseValidator):
-    def __call__(self, form, field):
-        obj = self.STORAGE.get(
-            **self.query(field.data)
-        )
-
-        if obj:
-            raise self.stop
 
 
 class DataRequiredValidator(BaseValidator):
     MESSAGE = _('This field is required.')
+    CODE = 'required'
 
-    def __call__(self, form, field):
+    def validate(self, form, field):
         if not field.data:
             raise self.stop
 
 
 class EmailValidator(BaseValidator):
     MESSAGE = _('Invalid email address.')
+    CODE = 'invalid_email'
 
-    def __call__(self, form, field):
+    def validate(self, form, field):
         email = field.data
 
         if address.parse(email) is None:
@@ -64,8 +67,9 @@ class EmailValidator(BaseValidator):
 
 class PhoneValidator(BaseValidator):
     MESSAGE = _('Invalid phone number.')
+    CODE = 'invalid_phone'
 
-    def __call__(self, form, field):
+    def validate(self, form, field):
         number = field.data
 
         number = phone_tools.format(number)

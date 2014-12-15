@@ -7,7 +7,7 @@ from flask.ext.babelex import lazy_gettext as _
 from ...views import BaseView, BaseBlueprint
 from ...decorators import login_session_required, anonymous_user_required
 from ...utils import b
-from .forms import UserLoginForm, TokenDeactivateForm
+from .forms import UserLoginWebForm, TokenDeactivateWebForm
 from .repository import token_storage
 
 
@@ -19,7 +19,7 @@ class LoginView(BaseView):
 
     @anonymous_user_required
     def dispatch_request(self):
-        form = UserLoginForm()
+        form = UserLoginWebForm()
 
         if form.validate_on_submit():
             login_user(form.obj)
@@ -58,7 +58,7 @@ class TokenDeactivateView(BaseView):
 
     @login_session_required
     def dispatch_request(self):
-        form = TokenDeactivateForm()
+        form = TokenDeactivateWebForm()
 
         if form.validate_on_submit():
             token_storage.delete(token=form.token.data)

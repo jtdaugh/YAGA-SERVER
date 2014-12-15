@@ -3,12 +3,9 @@ from __future__ import absolute_import, division, unicode_literals
 from wtforms.fields import TextField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
-from ...forms import BaseForm
+from ...forms import BaseWebForm, BaseForm
 from ...validators import DataRequiredValidator, PhoneValidator
-from .validators import (
-    UniquePhoneValidator, UniqueNameValidator, ValidActiveUserValidator,
-    UserTokenValidator, CurrentTokenValidator
-)
+from .validators import ValidActiveUserValidator, UserTokenValidator
 
 
 class PasswordForm(BaseForm):
@@ -31,36 +28,11 @@ class UserLoginForm(PasswordForm):
     )
 
 
-class UserRegisterForm(PasswordForm):
-    phone = TextField(
-        _('Phone'),
-        validators=[
-            DataRequiredValidator(),
-            PhoneValidator(),
-            UniquePhoneValidator()
-        ]
-    )
-
-    name = TextField(
-        _('Name'),
-        validators=[
-            DataRequiredValidator(),
-            UniqueNameValidator()
-        ]
-    )
+class UserLoginWebForm(BaseWebForm, UserLoginForm):
+    pass
 
 
-class UserLogoutForm(BaseForm):
-    token = TextField(
-        _('Token'),
-        validators=[
-            DataRequiredValidator(),
-            CurrentTokenValidator()
-        ]
-    )
-
-
-class TokenDeactivateForm(BaseForm):
+class TokenDeactivateWebForm(BaseWebForm):
     token = TextField(
         _('Token'),
         validators=[
