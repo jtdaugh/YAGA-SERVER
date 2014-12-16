@@ -28,6 +28,12 @@ class BaseSqlRepository(object):
     def count(self, **kwargs):
         return self.filter(**kwargs).count()
 
+    def update(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def update_obj(self, obj, *args, **kwargs):
+        raise NotImplementedError
+
     def create(self, **kwargs):
         obj = self.model(**kwargs)
 

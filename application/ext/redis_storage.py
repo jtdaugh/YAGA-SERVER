@@ -5,7 +5,7 @@ from redis import StrictRedis
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
 
-from ..utils import get_random_string
+from ..utils import get_random_string, encrypt, decrypt
 from .base import BaseStorage
 
 
@@ -48,6 +48,12 @@ class RedisSessionInterface(SessionInterface):
 
         if not sid:
             return self.session_class()
+
+        if app.config['CRYPT_SID']:
+            sid = decrypt(sid)
+
+            if not sid:
+                return self.session_class()
 
         data = self.redis.get(self.key(sid))
 
@@ -98,9 +104,14 @@ class RedisSessionInterface(SessionInterface):
                 data
             )
 
+        sid = session.sid
+
+        if app.config['CRYPT_SID']:
+            sid = encrypt(session.sid)
+
         response.set_cookie(
             app.session_cookie_name,
-            session.sid,
+            sid,
             expires=self.get_expiration_time(app, session),
             httponly=True,
             domain=domain

@@ -24,7 +24,7 @@ from sqlalchemy_utils.functions import (
 )
 
 from application.tests.utils import create_json_client
-from application.helpers import assets, cache, db, redis, s3media, geoip
+from application.helpers import assets, cache, db, redis, s3media, geoip, phone
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
 from application.modules.auth.models import User, Role, Session, Token
 from application.modules.auth.repository import (
@@ -76,6 +76,7 @@ class Shell(Command):
             'redis': redis,
             's3media': s3media,
             'geoip': geoip,
+            'phone': phone,
 
             'User': User,
             'Role': Role,

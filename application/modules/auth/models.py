@@ -124,6 +124,16 @@ class Token(db.Model):
         default=now
     )
 
+    last_ip = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    last_usage = db.Column(
+        db.DateTime(),
+        nullable=False
+    )
+
     def __str__(self):
         return self.token
 
@@ -150,6 +160,16 @@ class Session(db.Model):
         db.Integer,
         db.ForeignKey('user.id'),
         nullable=True
+    )
+
+    last_ip = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    last_usage = db.Column(
+        db.DateTime(),
+        nullable=False
     )
 
     def __str__(self):

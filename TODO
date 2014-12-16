@@ -7,3 +7,8 @@ VIDEO SQS
 VIDEO CELERY CLEAN
 
 repo abstraction fn names
+
+
+fab setup
+    CRYPT_KEY
+    CRYPT_IV

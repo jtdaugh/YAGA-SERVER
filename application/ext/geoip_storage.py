@@ -16,11 +16,28 @@ class Geoip(BaseStorage):
         )
 
     def get_country_iso_code(self, ip):
+        return self.get_geo_data(ip)['iso_code']
+
+    def get_geo_data(self, ip):
+        data = {
+            'city': None,
+            'country': None,
+            'iso_code': None
+        }
+
         try:
-            response = self.reader.country(ip)
+            response = self.reader.city(ip)
 
-            iso_code = response.country.iso_code
+            if response.city.name:
+                data['city'] = response.city.name
+
+            if response.country.name:
+                data['country'] = response.country.name
+
+            if response.country.iso_code:
+                data['iso_code'] = response.country.iso_code
+
         except:
-            iso_code = None
+            pass
 
-        return iso_code
+        return data

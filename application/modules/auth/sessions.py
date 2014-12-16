@@ -4,7 +4,7 @@ from flask import json, g
 from werkzeug.datastructures import CallbackDict
 from flask.sessions import SessionInterface, SessionMixin
 
-from ...utils import now
+from ...utils import now, encrypt, decrypt
 from .repository import session_storage
 
 
@@ -33,6 +33,12 @@ class SqlSessionInterface(SessionInterface):
 
         if not sid:
             return self.session_class()
+
+        if app.config['CRYPT_SID']:
+            sid = decrypt(sid)
+
+            if not sid:
+                return self.session_class()
 
         session = self.storage.get_not_expired(
             sid=sid,
@@ -80,9 +86,14 @@ class SqlSessionInterface(SessionInterface):
             user_id=user_id
         )
 
+        sid = session.sid
+
+        if app.config['CRYPT_SID']:
+            sid = encrypt(session.sid)
+
         response.set_cookie(
             app.session_cookie_name,
-            session.sid,
+            sid,
             expires=self.get_expiration_time(app, session),
             httponly=True,
             domain=domain

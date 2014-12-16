@@ -1,11 +1,16 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import base64
+import binascii
 import datetime
 import string
 from collections import MutableMapping
 
+import requests
 import phonenumbers
+from flask import current_app as app
 from Crypto.Random.random import choice
+from Crypto.Cipher import AES
 from six import binary_type, string_types
 from flask import request
 from flask.json import JSONEncoder
@@ -52,6 +57,45 @@ def detect_json():
     ])
 
     return accept == 'application/json'
+
+
+def get_cipher():
+    return AES.new(
+        app.config['CRYPT_KEY'],
+        AES.MODE_CFB,
+        app.config['CRYPT_IV']
+    )
+
+
+def encrypt(data):
+    try:
+        return binascii.hexlify(base64.b64encode(get_cipher().encrypt(data)))
+    except:
+        return None
+
+
+def decrypt(data):
+    try:
+        return get_cipher().decrypt(base64.b64decode(binascii.unhexlify(data)))
+    except:
+        return None
+
+
+def setup_http_session(session, app):
+    adapter = requests.adapters.HTTPAdapter(
+        max_retries=app.config['HTTP_RETRIES']
+    )
+
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+
+
+def get_http_session(app):
+    session = requests.Session()
+
+    setup_http_session(session, app)
+
+    return session
 
 
 class BaseJSONEncoder(JSONEncoder):
@@ -114,7 +158,7 @@ class PhoneTools(object):
 
         return _map
 
-    def format(self, number):
+    def format_E164(self, number):
         if not number.startswith('+'):
             number = '+{number}'.format(
                 number=number

@@ -25,6 +25,7 @@ from .ext.redis_storage import Redis
 from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
 from .ext.geoip_storage import Geoip
+from .ext.phone_storage import Phone
 from .utils import now
 
 
@@ -55,6 +56,7 @@ sslify = BaseSSLify()
 cors = CORS()
 reggie = Reggie()
 geoip = Geoip()
+phone = Phone()
 
 toolbar = DebugToolbarExtension()
 

@@ -7,6 +7,7 @@ from flask.ext.babelex import lazy_gettext as _
 from ...views import BaseView, BaseBlueprint
 from ...decorators import login_session_required, anonymous_user_required
 from ...utils import b
+from ...helpers import geoip
 from .forms import UserLoginWebForm, TokenDeactivateWebForm
 from .repository import token_storage
 
@@ -50,7 +51,29 @@ class TokenListView(BaseView):
     def dispatch_request(self):
         tokens = token_storage.filter(user=g.user)
 
-        return render_template('auth/token_list.html', tokens=tokens)
+        geo_map = {}
+
+        for token in tokens:
+            if geo_map.get(token.last_ip):
+                continue
+
+            geo_map[token.last_ip] = {}
+
+            geo_data = geoip.get_geo_data(token.last_ip)
+
+            for key in ['city', 'country']:
+                if geo_data.get(key):
+                    data = geo_data[key]
+                else:
+                    data = _('Unknown')
+
+                geo_map[token.last_ip][key] = data
+
+        return render_template(
+            'auth/token_list.html',
+            tokens=tokens,
+            geo_map=geo_map
+        )
 
 
 class TokenDeactivateView(BaseView):

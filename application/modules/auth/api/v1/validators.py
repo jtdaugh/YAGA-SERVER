@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from flask import g
 
 from .....validators import BaseValidator
+from ...repository import user_storage
 
 
 class CurrentTokenValidator(BaseValidator):
@@ -17,7 +18,7 @@ class AvailablePhoneValidator(BaseValidator):
     CODE = 'phone_registered'
 
     def validate(self, form, field):
-        obj = self.user_storage.get(
+        obj = user_storage.get(
             phone=field.data
         )
 
@@ -29,7 +30,7 @@ class AvailableNameValidator(BaseValidator):
     CODE = 'name_registered'
 
     def validate(self, form, field):
-        obj = self.user_storage.get(
+        obj = user_storage.get(
             name=field.data
         )
 

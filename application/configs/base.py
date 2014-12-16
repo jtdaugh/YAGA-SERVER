@@ -25,8 +25,8 @@ class BaseConfig(object):
     CELERY_SEND_EVENTS = True
     BROKER_HEARTBEAT = True
 
-    AUTH_TOKEN_LENGTH = 128
-    SESSION_SID_LENGTH = 128
+    AUTH_TOKEN_LENGTH = 64
+    SESSION_SID_LENGTH = 64
 
     SESSION_ENGINE = 'redis'
 
@@ -38,7 +38,7 @@ class BaseConfig(object):
 
     BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-    GEOIP_MMDB = 'GeoLite2-Country.mmdb'
+    GEOIP_MMDB = 'GeoLite2-City.mmdb'
 
     GEOIP_MMDB = os.path.join(
         BASE_DIR,
@@ -58,3 +58,12 @@ class BaseConfig(object):
             'INTERVAL': datetime.timedelta(hours=1)
         }
     }
+
+    SMS_BRAND = 'yaga'
+    SMS_SENDER = None
+    SMS_KEY = '354d4cc5'
+    SMS_SECRET = '066e303e'
+
+    HTTP_RETRIES = 5
+
+    CRYPT_SID = True

@@ -25,9 +25,9 @@ from flanker.addresslib import set_mx_cache
 from flask_debugtoolbar.panels import sqlalchemy as sqlalchemy_toolbar
 
 from .helpers import (
-    cache, db, babel, sentry, s3static, toolbar, security, redis,
-    assets, s3media, csrf, celery, compress, sslify, cors, reggie,
-    geoip,
+    cache, db, babel, sentry, s3static, security, redis,
+    assets, s3media, csrf, celery, compress, sslify, cors,
+    reggie, geoip, phone, toolbar,
     rate_limit, error_handler, HTTP_STATUS_CODES, MxCache
 )
 from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
@@ -127,6 +127,7 @@ def init_ext(app):
     cors.init_app(app, resources=r'/api/*', headers='Content-Type')
     reggie.init_app(app)
     geoip.init_app(app)
+    phone.init_app(app)
 
     setup_toolbar(csrf)
     toolbar.init_app(app)

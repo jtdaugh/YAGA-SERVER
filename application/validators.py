@@ -72,7 +72,7 @@ class PhoneValidator(BaseValidator):
     def validate(self, form, field):
         number = field.data
 
-        number = phone_tools.format(number)
+        number = phone_tools.format_E164(number)
 
         if number is None:
             raise self.stop
