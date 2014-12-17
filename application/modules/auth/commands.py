@@ -3,7 +3,7 @@ from __future__ import (
 )
 
 from flask import current_app as app
-from flask.ext.script import Command, prompt, prompt_pass
+from flask.ext.script import Command, prompt
 from werkzeug.datastructures import MultiDict
 
 from .api.v1.forms import UserRegisterApiForm
@@ -20,7 +20,6 @@ class CreateSuperUser(Command):
             data = MultiDict()
             data['phone'] = prompt('phone')
             data['name'] = prompt('name')
-            data['password'] = prompt_pass('password')
 
             form = UserRegisterForm(data, csrf_enabled=False)
 

@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from flask import json
 
 from .base import BaseStorage
-from ..utils import get_http_session
+from ..utils import get_http_session, get_locale_string
 
 
 class AbstractProvider(object):
@@ -18,7 +18,7 @@ class AbstractProvider(object):
     def send_verify(self, receiver, message=None, sender=None, locale=None):
         raise NotImplementedError
 
-    def check_verify(self, request, code, ip=None):
+    def check_verify(self, request_id, code, ip=None):
         raise NotImplementedError
 
 
@@ -80,7 +80,7 @@ class NexmoProvider(AbstractProvider):
             params['sender_id'] = sender
 
         if locale is not None:
-            params['lg'] = locale
+            params['lg'] = get_locale_string(locale).replace('_', '-')
 
         if length is not None:
             params['code_length'] = length
@@ -96,11 +96,11 @@ class NexmoProvider(AbstractProvider):
         return False
 
     def check_verify(
-        self, request, code,
+        self, request_id, code,
         ip=None
     ):
         params = {
-            'request_id': request,
+            'request_id': request_id,
             'code': code
         }
 

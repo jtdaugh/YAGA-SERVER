@@ -74,6 +74,10 @@ def encrypt(data):
         return None
 
 
+def get_locale_string(locale):
+    return app.config['LOCALE_MAP'][locale]
+
+
 def decrypt(data):
     try:
         return get_cipher().decrypt(base64.b64decode(binascii.unhexlify(data)))

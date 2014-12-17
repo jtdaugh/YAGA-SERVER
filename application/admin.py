@@ -34,12 +34,13 @@ def create_admin(app):
     admin = Admin(index_view=IndexModelView(url='/admin'))
 
     from .modules.auth.admin import (
-        user_admin, role_admin, token_admin, session_admin
+        user_admin, role_admin, token_admin, session_admin, code_admin
     )
 
     admin.add_view(user_admin)
     admin.add_view(role_admin)
     admin.add_view(token_admin)
     admin.add_view(session_admin)
+    admin.add_view(code_admin)
 
     admin.init_app(app)

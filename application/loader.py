@@ -23,6 +23,7 @@ from werkzeug.contrib.fixers import ProxyFix
 from flask.ext.security import current_user, SQLAlchemyUserDatastore
 from flanker.addresslib import set_mx_cache
 from flask_debugtoolbar.panels import sqlalchemy as sqlalchemy_toolbar
+from flask.ext.babelex import get_locale
 
 from .helpers import (
     cache, db, babel, sentry, s3static, security, redis,
@@ -175,8 +176,12 @@ def setup_auth(app):
 
 
 def setup_locale(app):
+    @app.before_request
+    def get_babel_locale():
+        get_locale()
+
     @babel.localeselector
-    def get_locale():
+    def get_request_locale():
         try:
             locale = request.accept_languages.best_match(app.config['LOCALES'])
         except:

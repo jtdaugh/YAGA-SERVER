@@ -55,12 +55,8 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
 
     name = db.Column(
         db.String(255),
-        unique=True, nullable=False
-    )
-
-    password = db.Column(
-        db.String(255),
         nullable=False
+        # unique=True,
     )
 
     active = db.Column(
@@ -73,12 +69,6 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
         db.DateTime(),
         nullable=False,
         default=now
-    )
-
-    verified = db.Column(
-        db.Boolean(),
-        nullable=False,
-        default=False
     )
 
     roles = db.relationship(
@@ -174,3 +164,29 @@ class Session(db.Model):
 
     def __str__(self):
         return self.sid
+
+
+class Code(db.Model):
+    request_id = db.Column(
+        db.Text(),
+        primary_key=True, nullable=False
+    )
+
+    phone = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    expire_at = db.Column(
+        db.DateTime(),
+        nullable=False
+    )
+
+    validated = db.Column(
+        db.Boolean(),
+        nullable=False,
+        default=False
+    )
+
+    def __str__(self):
+        return self.request_id

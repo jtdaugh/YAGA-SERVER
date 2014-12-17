@@ -1,15 +1,18 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from flask import g
+from flask import g, current_app as app
 
 from .....decorators import (
     marshal_with_form, anonymous_user_required, login_header_required
 )
 from .....views import BaseApi, BaseResource, BaseApiBlueprint
-from .....utils import b
-from .....helpers import SuccessResponse
-from .forms import UserRegisterApiForm, UserLoginApiForm, UserLogoutApiForm
-from ...repository import user_storage, token_storage
+from .....utils import b, now
+from .....helpers import SuccessResponse, FailResponse, phone
+from .forms import (
+    UserRegisterApiForm, UserLoginApiForm, UserLogoutApiForm,
+    CodeRequestApiForm, PhoneApiForm
+)
+from ...repository import user_storage, token_storage, code_storage
 
 
 class RegisterResource(BaseResource):
@@ -19,12 +22,41 @@ class RegisterResource(BaseResource):
         user = user_storage.create(
             name=self.form.name.data,
             phone=self.form.phone.data,
-            password=self.form.password.data
         )
 
         return SuccessResponse({
             'token': user.get_auth_token(),
         }) << 201
+
+
+class CodeRequestResource(BaseResource):
+    @anonymous_user_required
+    @marshal_with_form(CodeRequestApiForm, 422)
+    def post(self):
+        request_id = phone.send_verify(
+            self.form.phone.data,
+            locale=g.locale
+        )
+
+        if not request_id:
+            return FailResponse({
+                'code': ['transport_error'],
+            }) << 200
+
+        code = code_storage.create(
+            request_id=request_id,
+            phone=self.form.phone.data,
+            expire_at=now() + app.config['SMS_VERIFICATION_DELTA']
+        )
+
+        if code is None:
+            return FailResponse({
+                'code': ['transport_error'],
+            }) << 200
+
+        return SuccessResponse({
+            'phone': self.form.phone.data,
+        }) << 200
 
 
 class LoginResource(BaseResource):
@@ -49,7 +81,7 @@ class LogoutResource(BaseResource):
         }) << 200
 
 
-class InfoResource(BaseResource):
+class AboutResource(BaseResource):
     @login_header_required
     def get(self):
         return SuccessResponse({
@@ -58,10 +90,28 @@ class InfoResource(BaseResource):
         }) << 200
 
 
+class InfoResource(BaseResource):
+    @anonymous_user_required
+    @marshal_with_form(PhoneApiForm, 422)
+    def post(self):
+        is_user = user_storage.get(
+            phone=self.form.phone.data
+        )
+
+        return SuccessResponse({
+            'user': bool(is_user)
+        }) << 200
+
+
 blueprint = BaseApiBlueprint('api_auth', __name__)
 
 
 api = BaseApi(blueprint, prefix='/auth')
+api.add_resource(
+    CodeRequestResource,
+    '/request',
+    endpoint=b('request')
+)
 api.add_resource(
     RegisterResource,
     '/register',
@@ -76,6 +126,11 @@ api.add_resource(
     LogoutResource,
     '/logout',
     endpoint=b('logout')
+)
+api.add_resource(
+    AboutResource,
+    '/about',
+    endpoint=b('about')
 )
 api.add_resource(
     InfoResource,

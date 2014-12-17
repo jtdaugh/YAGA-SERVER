@@ -7,7 +7,7 @@ from flask import request, current_app as app, g
 from ...repository import BaseRepository
 from ...helpers import db
 from ...utils import get_random_string, now, encrypt, decrypt
-from .models import User, Role, Token, Session
+from .models import User, Role, Token, Session, Code
 
 
 class UserRepository(BaseRepository):
@@ -17,7 +17,7 @@ class UserRepository(BaseRepository):
             name=kwargs['name']
         )
 
-        user.set_password(kwargs['password'])
+        # user.set_password(kwargs['password'])
 
         db.session.add(user)
         db.session.commit()
@@ -187,9 +187,38 @@ class SessionRepository(BaseRepository):
             setattr(session, 'last_usage', now())
 
 
+class CodeRepository(BaseRepository):
+    def get_latest_request(self, phone):
+        code = db.session.query(self.model).filter_by(
+            phone=phone
+        ).order_by(self.model.expire_at.desc()).first()
+
+        return code
+
+    def create(self, **kwargs):
+        try:
+            obj = self.model(**kwargs)
+
+            db.session.add(obj)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+
+            return None
+
+        return obj
+
+    def mark_as_validated(self, code):
+        code.validated = True
+
+        db.session.commit()
+
+
 user_storage = UserRepository(User)
 role_storage = RoleRepository(Role)
 token_storage = TokenRepository(Token)
 session_storage = SessionRepository(Session)
+code_storage = CodeRepository(Code)
+
 
 User.add_hook('get_auth_token', token_storage.get_auth_token)

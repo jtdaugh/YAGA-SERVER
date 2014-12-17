@@ -9,7 +9,7 @@
                 <form role="form" action="{{ url_for('auth.login') }}" method="post">
                     {{ form.csrf_token }}
                     {{ input(field=form.phone, placeholder=_('+15417543010'))}}
-                    {{ input(field=form.password, placeholder=_('password'))}}
+                    {{ input(field=form.code, placeholder=_('0000'))}}
                     <button type="submit" class="btn btn-primary">
                         {{ _('Login') }}
                     </button>

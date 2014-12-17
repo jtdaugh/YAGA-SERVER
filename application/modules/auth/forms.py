@@ -5,19 +5,36 @@ from flask.ext.babelex import lazy_gettext as _
 
 from ...forms import BaseWebForm, BaseForm
 from ...validators import DataRequiredValidator, PhoneValidator
-from .validators import ValidActiveUserValidator, UserTokenValidator
+from .validators import (
+    ValidActiveUserValidator, UserTokenValidator,
+    VerificationCodeValidator, ValidVerificationCodeValidator,
+    ConcurrentRequestValidator
+)
 
 
-class PasswordForm(BaseForm):
-    password = PasswordField(
-        _('Password'),
+class CodeForm(BaseForm):
+    code = PasswordField(
+        _('Code'),
         validators=[
             DataRequiredValidator(),
+            VerificationCodeValidator(),
+            ValidVerificationCodeValidator()
         ]
     )
 
 
-class UserLoginForm(PasswordForm):
+class CodeRequestForm(BaseForm):
+    phone = TextField(
+        _('Phone'),
+        validators=[
+            DataRequiredValidator(),
+            PhoneValidator(),
+            ConcurrentRequestValidator()
+        ]
+    )
+
+
+class UserLoginForm(CodeForm):
     phone = TextField(
         _('Phone'),
         validators=[
@@ -29,6 +46,10 @@ class UserLoginForm(PasswordForm):
 
 
 class UserLoginWebForm(BaseWebForm, UserLoginForm):
+    pass
+
+
+class CodeRequestWebForm(BaseWebForm, CodeRequestForm):
     pass
 
 

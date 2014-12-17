@@ -26,13 +26,13 @@ class AvailablePhoneValidator(BaseValidator):
             raise self.stop
 
 
-class AvailableNameValidator(BaseValidator):
-    CODE = 'name_registered'
+# class AvailableNameValidator(BaseValidator):
+#     CODE = 'name_registered'
 
-    def validate(self, form, field):
-        obj = user_storage.get(
-            name=field.data
-        )
+#     def validate(self, form, field):
+#         obj = user_storage.get(
+#             name=field.data
+#         )
 
-        if obj:
-            raise self.stop
+#         if obj:
+#             raise self.stop

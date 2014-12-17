@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from ...admin import BaseModelView
 from .repository import (
-    user_storage, role_storage, token_storage, session_storage
+    user_storage, role_storage, token_storage, session_storage, code_storage
 )
 
 
@@ -12,9 +12,9 @@ class UserModelView(BaseModelView):
     can_edit = True
 
     form_columns = ['active', 'roles']
-    column_list = ['phone', 'name', 'active', 'created_at', 'verified' 'roles']
+    column_list = ['phone', 'name', 'active', 'created_at', 'roles']
 
-    column_filters = ['active', 'verified']
+    column_filters = ['active']
 
 
 class RoleModelView(BaseModelView):
@@ -44,7 +44,19 @@ class SessionModelView(BaseModelView):
     column_list = ['user', 'expire_at']
 
 
+class CodeModelView(BaseModelView):
+    can_create = False
+    can_delete = True
+    can_edit = True
+
+    form_columns = ['request_id', 'phone', 'expire_at', 'validated']
+    column_list = ['request_id', 'phone', 'expire_at', 'validated']
+
+    column_filters = ['validated']
+
+
 user_admin = UserModelView.as_view(user_storage)
 role_admin = RoleModelView.as_view(role_storage)
 token_admin = TokenModelView.as_view(token_storage)
 session_admin = SessionModelView.as_view(session_storage)
+code_admin = CodeModelView.as_view(code_storage)

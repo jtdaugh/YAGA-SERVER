@@ -26,7 +26,7 @@ from sqlalchemy_utils.functions import (
 from application.tests.utils import create_json_client
 from application.helpers import assets, cache, db, redis, s3media, geoip, phone
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
-from application.modules.auth.models import User, Role, Session, Token
+from application.modules.auth.models import User, Role, Session, Token, Code
 from application.modules.auth.repository import (
     user_storage, role_storage, session_storage, token_storage
 )
@@ -82,6 +82,7 @@ class Shell(Command):
             'Role': Role,
             'Session': Session,
             'Token': Token,
+            'Code': Code,
 
             'user_storage': user_storage,
             'role_storage': role_storage,

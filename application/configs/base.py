@@ -8,6 +8,10 @@ from ..utils import b
 
 class BaseConfig(object):
     LOCALES = ['en']
+    LOCALE_MAP = {
+        'en': 'en_US'
+    }
+
     BABEL_DEFAULT_LOCALE = 'en'
     SECURITY_PASSWORD_HASH = b('bcrypt')
     WTF_CSRF_ENABLED = True
@@ -63,6 +67,7 @@ class BaseConfig(object):
     SMS_SENDER = None
     SMS_KEY = '354d4cc5'
     SMS_SECRET = '066e303e'
+    SMS_VERIFICATION_DELTA = datetime.timedelta(minutes=5)
 
     HTTP_RETRIES = 5
 
