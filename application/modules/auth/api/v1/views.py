@@ -51,7 +51,7 @@ class CodeRequestResource(BaseResource):
 
         if code is None:
             return FailResponse({
-                'phone': ['transport_error'],
+                'phone': ['storage_error'],
             }) << 200
 
         return SuccessResponse({
