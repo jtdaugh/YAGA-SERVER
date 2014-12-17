@@ -41,7 +41,7 @@ class CodeRequestResource(BaseResource):
         if not request_id:
             return FailResponse({
                 'phone': ['transport_error'],
-            }) << 200
+            }) << 412
 
         code = code_storage.create(
             request_id=request_id,
@@ -52,7 +52,7 @@ class CodeRequestResource(BaseResource):
         if code is None:
             return FailResponse({
                 'phone': ['storage_error'],
-            }) << 200
+            }) << 412
 
         return SuccessResponse({
             'phone': self.form.phone.data,
