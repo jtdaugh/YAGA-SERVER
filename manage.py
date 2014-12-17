@@ -24,11 +24,12 @@ from sqlalchemy_utils.functions import (
 )
 
 from application.tests.utils import create_json_client
+from application.utils import now
 from application.helpers import assets, cache, db, redis, s3media, geoip, phone
 from application.modules.auth.commands import CreateSuperUser, SyncRoles
 from application.modules.auth.models import User, Role, Session, Token, Code
 from application.modules.auth.repository import (
-    user_storage, role_storage, session_storage, token_storage
+    user_storage, role_storage, session_storage, token_storage, code_storage
 )
 
 
@@ -61,6 +62,8 @@ class Shell(Command):
         json_client = create_json_client(app, client)
 
         embed(user_ns={
+            'now': now,
+
             'ctx': ctx,
 
             'client': client,
@@ -88,6 +91,7 @@ class Shell(Command):
             'role_storage': role_storage,
             'session_storage': session_storage,
             'token_storage': token_storage,
+            'code_storage': code_storage,
 
             'json': json,
             'lazy_gettext': lazy_gettext,

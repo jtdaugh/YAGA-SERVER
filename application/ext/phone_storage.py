@@ -9,8 +9,8 @@ from ..utils import get_http_session, get_locale_string
 
 
 class AbstractProvider(object):
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, app):
+        self.app = app
 
     def send_message(self, receiver, message, sender=None):
         raise NotImplementedError
@@ -30,11 +30,11 @@ class NexmoProvider(AbstractProvider):
 
     @property
     def api_key(self):
-        return self.config['SMS_KEY']
+        return self.app.config['SMS_KEY']
 
     @property
     def api_secret(self):
-        return self.config['SMS_SECRET']
+        return self.app.config['SMS_SECRET']
 
     @property
     def auth_credentials(self):
@@ -70,11 +70,11 @@ class NexmoProvider(AbstractProvider):
     ):
         params = {
             'number': int(receiver),
-            'brand': self.config['SMS_BRAND'],
+            'brand': self.app.config['SMS_BRAND'],
         }
 
         if sender is None:
-            sender = self.config['SMS_SENDER']
+            sender = self.app.config['SMS_SENDER']
 
         if sender is not None:
             params['sender_id'] = sender
@@ -89,6 +89,8 @@ class NexmoProvider(AbstractProvider):
             self.SEND_VERIFY_ENDPOINT,
             params
         )
+
+        self.app.logger.info(response)
 
         if response and response.get('request_id'):
             return response['request_id']
@@ -112,6 +114,8 @@ class NexmoProvider(AbstractProvider):
             params
         )
 
+        self.app.logger.info(response)
+
         if response and not response.get('error_text'):
             return True
 
@@ -126,7 +130,7 @@ class Phone(BaseStorage):
             self.init_app(app)
 
     def init_app(self, app):
-        provider = self.PROVIDER(app.config)
+        provider = self.PROVIDER(app)
 
         provider.session = get_http_session(app)
 
