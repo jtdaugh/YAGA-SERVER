@@ -35,7 +35,21 @@ def ensure_prompt(label):
 
 @task
 def uwsgi():
-    cmd = 'uwsgi --http-keepalive=0 --module=application.core:app --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+    cmd = 'uwsgi --module=application.core:app --http-keepalive=0 --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+
+    cmd = cmd.format(
+        workers=PROCESS_WORKERS
+    )
+
+    if USE_NEWRELIC:
+        cmd = NEWRELIC_CMD + cmd
+
+    local(cmd)
+
+
+@task
+def gunicorn():
+    cmd = 'gunicorn application.core:app --keep-alive=0 --workers={workers} --timeout=30 --preload --access-logfile=- --error-logfile=-'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS
