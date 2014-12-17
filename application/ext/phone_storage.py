@@ -52,13 +52,18 @@ class NexmoProvider(AbstractProvider):
         )
 
     def request(self, url, params, method='GET'):
-        method = method.lower()
-
-        method = getattr(self.session, method)
+        method = getattr(self.session, method.lower())
 
         try:
-            return self.parse(method(self.format_request(url, params)))
-        except:
+            respnose = method(self.format_request(url, params))
+        except Exception as e:
+            self.app.logger.error(e)
+            return None
+
+        try:
+            return self.parse(respnose)
+        except Exception as e:
+            self.app.logger.error(e)
             return None
 
     def parse(self, response):
