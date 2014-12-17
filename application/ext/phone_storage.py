@@ -52,18 +52,15 @@ class NexmoProvider(AbstractProvider):
         )
 
     def request(self, url, params, method='GET'):
-        method = getattr(self.session, method.lower())
-
         try:
+            method = getattr(self.session, method.lower())
+
             respnose = method(self.format_request(url, params))
-        except Exception as e:
-            self.app.logger.error(e)
-            return None
 
-        try:
             return self.parse(respnose)
         except Exception as e:
             self.app.logger.error(e)
+
             return None
 
     def parse(self, response):
@@ -95,12 +92,16 @@ class NexmoProvider(AbstractProvider):
             params
         )
 
-        self.app.logger.info(response)
-
-        if response and response.get('request_id'):
+        if (
+            response
+            and
+            isinstance(response, dict)
+            and
+            response.get('request_id')
+        ):
             return response['request_id']
 
-        return False
+        return None
 
     def check_verify(
         self, request_id, code,
@@ -118,8 +119,6 @@ class NexmoProvider(AbstractProvider):
             self.CHECK_VERIFY_ENDPOINT,
             params
         )
-
-        self.app.logger.info(response)
 
         if response and not response.get('error_text'):
             return True

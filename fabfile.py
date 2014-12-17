@@ -14,9 +14,10 @@ DYNOS = {
     'celery_broker': 1,
     'celery_worker': 0,
 }
-USE_NEWRELIC = True
+USE_NEWRELIC = False
 STOP_TIMEOUT = 30
 START_TIMEOUT = 30
+HTTP_TIMEOUT = 30
 
 NEWRELIC_CMD = 'newrelic-admin run-program '
 
@@ -35,10 +36,11 @@ def ensure_prompt(label):
 
 @task
 def uwsgi():
-    cmd = 'uwsgi --module=application.core:app --http-keepalive=0 --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+    cmd = 'uwsgi --module=application.core:app --http-keepalive=0 --master --processes={timeout} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
 
     cmd = cmd.format(
-        workers=PROCESS_WORKERS
+        workers=PROCESS_WORKERS,
+        timeout=HTTP_TIMEOUT
     )
 
     if USE_NEWRELIC:
@@ -49,10 +51,11 @@ def uwsgi():
 
 @task
 def gunicorn():
-    cmd = 'gunicorn application.core:app --keep-alive=0 --workers={workers} --timeout=30 --preload --access-logfile=- --error-logfile=-'
+    cmd = 'gunicorn application.core:app --keep-alive=0 --workers={workers} --timeout={timeout} --preload --access-logfile=- --error-logfile=-'
 
     cmd = cmd.format(
-        workers=PROCESS_WORKERS
+        workers=PROCESS_WORKERS,
+        timeout=HTTP_TIMEOUT
     )
 
     if USE_NEWRELIC:
