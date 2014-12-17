@@ -40,7 +40,7 @@ class CodeRequestResource(BaseResource):
 
         if not request_id:
             return FailResponse({
-                'code': ['transport_error'],
+                'phone': ['transport_error'],
             }) << 200
 
         code = code_storage.create(
@@ -51,7 +51,7 @@ class CodeRequestResource(BaseResource):
 
         if code is None:
             return FailResponse({
-                'code': ['transport_error'],
+                'phone': ['transport_error'],
             }) << 200
 
         return SuccessResponse({
@@ -77,7 +77,7 @@ class LogoutResource(BaseResource):
         )
 
         return SuccessResponse({
-            'token': g.token
+            'token': None
         }) << 200
 
 
