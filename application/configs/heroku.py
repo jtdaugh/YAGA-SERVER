@@ -8,7 +8,8 @@ from .base import BaseConfig
 
 
 class Config(BaseConfig):
-    DEBUG = False
+    # TODO: disable debug mode
+    DEBUG = True
 
     AWS_ACCESS_KEY_ID = environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = environ['AWS_SECRET_ACCESS_KEY']

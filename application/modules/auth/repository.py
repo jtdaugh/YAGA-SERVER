@@ -195,18 +195,18 @@ class CodeRepository(BaseRepository):
 
         return code
 
-    def create(self, **kwargs):
-        try:
-            obj = self.model(**kwargs)
+    # def create(self, **kwargs):
+    #     try:
+    #         obj = self.model(**kwargs)
 
-            db.session.add(obj)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
+    #         db.session.add(obj)
+    #         db.session.commit()
+    #     except IntegrityError:
+    #         db.session.rollback()
 
-            return None
+    #         return None
 
-        return obj
+    #     return obj
 
     def mark_as_validated(self, code):
         code.validated = True

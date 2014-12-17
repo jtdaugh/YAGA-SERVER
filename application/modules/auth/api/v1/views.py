@@ -49,13 +49,8 @@ class CodeRequestResource(BaseResource):
             expire_at=now() + app.config['SMS_VERIFICATION_DELTA']
         )
 
-        if code is None:
-            return FailResponse({
-                'phone': ['storage_error'],
-            }) << 412
-
         return SuccessResponse({
-            'phone': self.form.phone.data,
+            'phone': code.phone,
         }) << 200
 
 
