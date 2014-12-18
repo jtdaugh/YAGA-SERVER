@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from .base import BaseConfig
-from ..utils import b
 
 
 class Config(BaseConfig):
@@ -49,5 +48,5 @@ class Config(BaseConfig):
         'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
     ]
 
-    CRYPT_KEY = b('1234567890123456')  # len == 16
-    CRYPT_IV = b('1234567890123456')  # len == 16
+
+config = Config()

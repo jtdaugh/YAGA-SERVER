@@ -72,3 +72,18 @@ class BaseConfig(object):
     HTTP_RETRIES = 5
 
     CRYPT_SID = True
+
+    def __init__(self, *args, **kwargs):
+        self.configure()
+
+    def get_secret_bytes(self, length=16):
+        if len(self.SECRET_KEY) >= length:
+            return self.SECRET_KEY[:length]
+
+        return (
+            self.SECRET_KEY * (length // len(self.SECRET_KEY) + 1)
+        )[:length]
+
+    def configure(self):
+        self.CRYPT_KEY = b(self.get_secret_bytes(32)[::-1])
+        self.CRYPT_IV = b(self.get_secret_bytes(16))

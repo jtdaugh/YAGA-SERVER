@@ -11,19 +11,6 @@ from .models import User, Role, Token, Session, Code
 
 
 class UserRepository(BaseRepository):
-    def create(self, **kwargs):
-        user = self.model(
-            phone=kwargs['phone'],
-            name=kwargs['name']
-        )
-
-        # user.set_password(kwargs['password'])
-
-        db.session.add(user)
-        db.session.commit()
-
-        return user
-
     def add_role(self, user, role):
         if not isinstance(role, Role):
             role = role_storage.get_or_create(name=role)
@@ -195,18 +182,24 @@ class CodeRepository(BaseRepository):
 
         return code
 
-    # def create(self, **kwargs):
-    #     try:
-    #         obj = self.model(**kwargs)
+    def filter_expired(self, **kwargs):
+        query = [self.model.expire_at <= now()]
 
-    #         db.session.add(obj)
-    #         db.session.commit()
-    #     except IntegrityError:
-    #         db.session.rollback()
+        for key, value in kwargs.items():
+            query.append(
+                getattr(self.model, key) == value
+            )
 
-    #         return None
+        return db.session.query(self.model).filter(
+            *query
+        )
 
-    #     return obj
+    def delete_expired(self):
+        result = self.filter_expired().delete()
+
+        db.session.commit()
+
+        return result
 
     def mark_as_validated(self, code):
         code.validated = True

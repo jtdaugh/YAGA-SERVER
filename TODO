@@ -1,14 +1,6 @@
-SESSIONS last seen, IP list
-TOKENS last seen, IP list
-
 VIDEO MODEl
 VIDEO S3URL
 VIDEO SQS
 VIDEO CELERY CLEAN
 
 repo abstraction fn names
-
-
-fab setup
-    CRYPT_KEY
-    CRYPT_IV

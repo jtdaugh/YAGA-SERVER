@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, unicode_literals
 from os import environ
 from urllib.parse import urlparse
 
-from ..utils import b
 from .base import BaseConfig
 
 
@@ -48,5 +47,5 @@ class Config(BaseConfig):
 
     DEBUG_TB_ENABLED = False
 
-    CRYPT_KEY = b(environ['CRYPT_KEY'])
-    CRYPT_IV = b(environ['CRYPT_IV'])
+
+config = Config()

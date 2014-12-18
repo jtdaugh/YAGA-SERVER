@@ -8,11 +8,11 @@ from .....decorators import (
 from .....views import BaseApi, BaseResource, BaseApiBlueprint
 from .....utils import b, now
 from .....helpers import SuccessResponse, FailResponse, phone
+from ...repository import user_storage, token_storage, code_storage
 from .forms import (
     UserRegisterApiForm, UserLoginApiForm, UserLogoutApiForm,
     CodeRequestApiForm, PhoneApiForm
 )
-from ...repository import user_storage, token_storage, code_storage
 
 
 class RegisterResource(BaseResource):
@@ -20,7 +20,6 @@ class RegisterResource(BaseResource):
     @marshal_with_form(UserRegisterApiForm, 422)
     def post(self):
         user = user_storage.create(
-            name=self.form.name.data,
             phone=self.form.phone.data,
         )
 

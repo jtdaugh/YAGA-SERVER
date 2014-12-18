@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from functools import wraps
 
-from flask import g, abort, current_app as app
+from flask import g, request, abort, current_app as app
 
 from .signals import auth_ident
 from .helpers import cache, rate_limit, FailResponse

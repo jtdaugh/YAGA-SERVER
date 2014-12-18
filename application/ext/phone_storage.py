@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 
 from flask import json
 
-from .base import BaseStorage
 from ..utils import get_http_session, get_locale_string
+from .base import BaseStorage
 
 
 class AbstractProvider(object):

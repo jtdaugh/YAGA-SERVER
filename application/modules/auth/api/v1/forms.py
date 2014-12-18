@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, unicode_literals
 from wtforms.fields import TextField
 from flask.ext.babelex import lazy_gettext as _
 
-from ...forms import UserLoginForm, CodeRequestForm, CodeForm
 from .....validators import DataRequiredValidator, PhoneValidator
 from .....forms import BaseApiForm
+from ...forms import UserLoginForm, CodeRequestForm, CodeForm
 from .validators import CurrentTokenValidator, AvailablePhoneValidator
 
 
@@ -26,14 +26,6 @@ class UserRegisterApiForm(BaseApiForm, CodeForm):
             DataRequiredValidator(),
             PhoneValidator(),
             AvailablePhoneValidator()
-        ]
-    )
-
-    name = TextField(
-        _('Name'),
-        validators=[
-            DataRequiredValidator(),
-            # AvailableNameValidator()
         ]
     )
 

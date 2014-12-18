@@ -60,15 +60,15 @@ def load_config():
     environment = get_environment()
 
     if environment == 'heroku':
-        from .configs.heroku import Config
+        from .configs.heroku import config
     elif environment == 'test':
-        from .configs.test import Config
+        from .configs.test import config
     elif environment == 'local':
-        from .configs.local import Config
+        from .configs.local import config
     else:
         raise ImportError
 
-    return Config
+    return config
 
 
 def setup_mx_cache():

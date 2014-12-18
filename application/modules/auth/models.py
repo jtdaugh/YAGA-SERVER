@@ -55,8 +55,8 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
 
     name = db.Column(
         db.String(255),
-        nullable=False
-        # unique=True,
+        nullable=True,
+        unique=True
     )
 
     active = db.Column(
@@ -74,7 +74,9 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
     roles = db.relationship(
         'Role',
         secondary=roles_users,
-        backref=db.backref('users', lazy='dynamic')
+        backref=db.backref(
+            'users', lazy='dynamic'
+        )
     )
 
     tokens = db.relationship(
@@ -93,7 +95,7 @@ class User(db.Model, BaseUser, UserMixin, ModelMixin):
         raise NotImplementedError
 
     def __str__(self):
-        return self.name
+        return self.phone
 
 
 class Token(db.Model):
