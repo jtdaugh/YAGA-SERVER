@@ -53,12 +53,12 @@ class BaseConfig(object):
     RATE_LIMIT = {
         'AUTH': {
             'ENABLED': True,
-            'REQUESTS': 1000,
+            'AMOUNT': 1000,
             'INTERVAL': datetime.timedelta(hours=1)
         },
         'IP': {
             'ENABLED': True,
-            'REQUESTS': 10000,
+            'AMOUNT': 10000,
             'INTERVAL': datetime.timedelta(hours=1)
         }
     }

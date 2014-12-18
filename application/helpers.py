@@ -26,17 +26,41 @@ from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
 from .ext.geoip_storage import Geoip
 from .ext.phone_storage import Phone
-from .utils import now
 
 
-HTTP_STATUS_CODES = {
-    400: _('Bad Request'),
-    401: _('Unauthorized'),
-    403: _('Forbidden'),
-    404: _('Not Found'),
-    405: _('Method Not Allowed'),
-    429: _('Too Many Requests'),
-    500: _('Internal Server Error')
+HTTP_STATUSES = {
+    400: {
+        'message': _('Bad Request'),
+        'code': 'bad_request'
+    },
+    401: {
+        'message': _('Unauthorized'),
+        'code': 'unauthorized'
+    },
+    403: {
+        'message': _('Forbidden'),
+        'code': 'forbidden',
+    },
+    404: {
+        'message': _('Not Found'),
+        'code': 'not_found',
+    },
+    405: {
+        'message': _('Method Not Allowed'),
+        'code': 'method_not_allowed',
+    },
+    422: {
+        'message': _('Unprocessable Entity'),
+        'code': 'unprocessable_Entity',
+    },
+    429: {
+        'message': _('Too Many Requests'),
+        'code': 'too_many_requests',
+    },
+    500: {
+        'message': _('Internal Server Error'),
+        'code': 'internal_server_error'
+    }
 }
 
 
@@ -120,12 +144,10 @@ class FailResponse(BaseResponse):
 
 
 def error_handler(code, e):
-    message = HTTP_STATUS_CODES[code]
-
     if request.is_xhr or request.is_json:
         response = jsonify(
             FailResponse({
-                'global': message
+                'global': [HTTP_STATUSES[code]['code']]
             }).response
         )
     else:
@@ -135,13 +157,12 @@ def error_handler(code, e):
                     'errors/{code}.html'.format(
                         code=code
                     ),
-                    code=code,
-                    message=message
+                    **HTTP_STATUSES[code]
                 )
             )
         except TemplateNotFound:
             response = make_response(
-                render_template('errors/base.html', code=code, message=message)
+                render_template('errors/base.html', **HTTP_STATUSES[code])
             )
 
     response.status_code = code
@@ -166,6 +187,8 @@ def rate_limit(scope, ident):
 
     config = app.config['RATE_LIMIT'][scope]
 
+    ttl = int(config['INTERVAL'].total_seconds())
+
     if config['ENABLED']:
         key = '{prefix}:{scope}:{ident}'.format(
             prefix=prefix,
@@ -173,32 +196,29 @@ def rate_limit(scope, ident):
             ident=ident
         )
 
-        requests = cache.get(key)
+        amount = redis.get(key)
 
-        if requests is not None:
-            requests['amount'] += 1
+        if amount is not None:
+            amount = int(amount)
 
-            if requests['amount'] > config['REQUESTS']:
+            if amount > config['AMOUNT']:
                 abort(429)
 
-            ttl = int((requests['ttl'] - now()).total_seconds())
+            amount = redis.incr(
+                key,
+                1
+            )
 
-            if ttl > 0:
-                cache.set(
+            if amount == 1:
+                redis.expire(
                     key,
-                    requests,
                     ttl
                 )
         else:
-            requests = {
-                'amount': 1,
-                'ttl': now() + config['INTERVAL']
-            }
+            amount = 0
 
-            ttl = int(config['INTERVAL'].total_seconds())
-
-            cache.set(
+            redis.setex(
                 key,
-                requests,
-                ttl
+                ttl,
+                amount
             )
