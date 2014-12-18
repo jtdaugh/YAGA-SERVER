@@ -7,7 +7,7 @@ from ....views import BaseMethodView, BaseBlueprint
 from ..tasks import TestTask
 
 
-blueprint = BaseBlueprint('index', __name__,)
+blueprint = BaseBlueprint('index', __name__)
 
 
 class IndexView(BaseMethodView):

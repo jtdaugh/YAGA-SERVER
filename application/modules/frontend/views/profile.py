@@ -6,7 +6,7 @@ from ....utils import b
 from ....views import BaseMethodView, BaseBlueprint
 
 
-blueprint = BaseBlueprint('profile', __name__,)
+blueprint = BaseBlueprint('profile', __name__)
 
 
 class SummaryView(BaseMethodView):

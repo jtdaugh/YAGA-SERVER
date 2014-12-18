@@ -12,7 +12,7 @@ from .forms import UserLoginWebForm, TokenDeactivateWebForm
 from .repository import token_storage
 
 
-blueprint = BaseBlueprint('auth', __name__,)
+blueprint = BaseBlueprint('auth', __name__)
 
 
 class LoginView(BaseView):
