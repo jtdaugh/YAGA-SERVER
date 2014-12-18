@@ -71,9 +71,16 @@ def marshal_with_form(form_obj, fail_status_code):
     def wrapped(fn):
         @wraps(fn)
         def wrapper(cls, *args, **kwargs):
-            form = form_obj(csrf_enabled=False)
+            if request.method == 'GET':
+                form = form_obj(request.args, csrf_enabled=False)
 
-            if form.validate_on_submit():
+                is_valid = form.validate
+            else:
+                form = form_obj(csrf_enabled=False)
+
+                is_valid = form.validate_on_submit
+
+            if is_valid():
                 cls.form = form
 
                 return fn(cls, *args, **kwargs)

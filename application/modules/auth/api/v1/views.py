@@ -87,7 +87,7 @@ class AboutResource(BaseResource):
 class InfoResource(BaseResource):
     @anonymous_user_required
     @marshal_with_form(PhoneApiForm, 422)
-    def post(self):
+    def get(self):
         is_user = user_storage.get(
             phone=self.form.phone.data
         )
