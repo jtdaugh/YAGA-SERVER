@@ -194,6 +194,8 @@ def resetdb():
 
     local('heroku pg:promote {url}'.format(url=DB_URL))
 
+    local('heroku run python manage.py db upgrade')
+
 
 @task
 def create():
