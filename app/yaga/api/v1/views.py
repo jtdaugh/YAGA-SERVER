@@ -92,8 +92,16 @@ class CodeRetrieveAPIView(
     def get_queryset(self):
         return Code.objects.all()
 
-    def retrieve(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=self.request.QUERY_PARAMS.dict())
+    def get(self, request):
+        data = self.request.QUERY_PARAMS.dict()
+        return self.retrieve(request, data)
+
+    def post(self, request):
+        data = request.data
+        return self.retrieve(request, data)
+
+    def retrieve(self, request, data):
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
         queryset = self.filter_queryset(self.get_queryset())
