@@ -5,7 +5,16 @@ from django.core.files.storage import get_storage_class
 from storages.backends.s3boto import S3BotoStorage
 
 
+class FixedS3BotoStorage(object):
+    def url(self, name):
+        url = super(FixedS3BotoStorage, self).url(name)
+        if name.endswith('/') and not url.endswith('/'):
+            url += '/'
+        return url
+
+
 class S3StaticStorage(
+    FixedS3BotoStorage,
     S3BotoStorage
 ):
     def __init__(self, *args, **kwargs):
@@ -37,6 +46,7 @@ class CachedS3BotoStorage(
 
 
 class CachedS3StaticStorage(
+    FixedS3BotoStorage,
     CachedS3BotoStorage
 ):
     def __init__(self, *args, **kwargs):
