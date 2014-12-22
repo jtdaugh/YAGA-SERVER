@@ -212,6 +212,8 @@ def resetdb():
 
     local('heroku run "cd app && python manage.py migrate"')
 
+    local('fab restart')
+
 
 @task
 def create():
