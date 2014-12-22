@@ -275,7 +275,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # java configuration configuration
     # -------------------------------------------------------
-    JAVA = '/usr/bin/java'
+    JAVA = 'java'
     # -------------------------------------------------------
     # django compressor configuration
     # -------------------------------------------------------
@@ -460,9 +460,9 @@ class BaseConfiguration(
         ('hell', 'hellysmile@gmail.com'),
     ]
     MANAGERS = ADMINS
-    # LOGGING = {
-    # }
-    # LOGGING_CONFIG = None
+    LOGGING = {
+    }
+    LOGGING_CONFIG = None
     # -------------------------------------------------------
     # celery configuration
     # -------------------------------------------------------

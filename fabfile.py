@@ -105,7 +105,7 @@ def deploy():
     with lcd(APP_DIR):
         local('python manage.py clear_cache')
         local('python manage.py migrate')
-        local('python manage.py bower_install')
+        local('python manage.py bower_install -- --config.interactive=false')
         local('python manage.py collectstatic --noinput')
         local('python manage.py clean_compress')
         local('python manage.py compress')
