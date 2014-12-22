@@ -92,7 +92,7 @@ class NexmoProvider(object):
         except Exception as e:
             logger.error(e)
 
-            return None
+            return NexmoResponse(None)
 
     def parse(self, response):
         return json.loads(response.text)

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+import logging
 
 import closure
 import yuicompressor
@@ -461,8 +462,48 @@ class BaseConfiguration(
     ]
     MANAGERS = ADMINS
     LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': True,
+        'formatters': {
+            'verbose': {
+                'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+            },
+            'simple': {
+                'format': '%(levelname)s %(message)s'
+            },
+        },
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose'
+            },
+            'sentry': {
+                'level': 'ERROR',
+                'class': 'raven.contrib.django.handlers.SentryHandler',  # noqa
+                'formatter': 'verbose'
+            }
+        },
+        'loggers': {
+            'django': {},
+            'django.request': {},
+            'django.security': {},
+            'django.db.backends': {},
+            'requests': {},
+            'yaga.providers': {}
+        },
+        'root': {
+            'handlers': ['console', 'sentry'],
+            'level': 'DEBUG'
+        },
     }
-    LOGGING_CONFIG = None
+
+    root = logging.root
+    existing = root.manager.loggerDict.keys()
+
+    for logger in existing:
+        LOGGING['loggers'][logger] = {}
+    # LOGGING_CONFIG = None
     # -------------------------------------------------------
     # celery configuration
     # -------------------------------------------------------
@@ -482,6 +523,7 @@ class BaseConfiguration(
     CELERY_RESULT_SERIALIZER = MESSAGE_PROTOCOL
     CELERY_ACCEPT_CONTENT = (MESSAGE_PROTOCOL,)
     CELERY_IGNORE_RESULT = False
+    CELERYD_HIJACK_ROOT_LOGGER = False
     # -------------------------------------------------------
     # rest framework configuration
     # -------------------------------------------------------
