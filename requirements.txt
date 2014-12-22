@@ -16,6 +16,7 @@ celery==3.1.17
 cffi==0.8.6
 closure==20140110
 coverage==3.7.1
+dj-database-url==0.3.0
 django-activeurl==0.1.8
 django-appconf==0.6
 django-bower==5.0.1
