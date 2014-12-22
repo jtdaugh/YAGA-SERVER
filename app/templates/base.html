@@ -1,0 +1,134 @@
+{% load static %}
+{% load i18n %}
+
+{% load compress %}
+{% load activeurl %}
+
+{% load pyformat %}
+{% load snless %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}" class="no-js">
+    <head>
+        {% block head %}
+            {% block meta %}
+                <meta charset="utf-8">
+                <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+            {% endblock %}
+            {% snless %}
+                <title>
+                    {% block title %}
+                        {% trans 'Project' %}
+                    {% endblock %}
+                </title>
+            {% endsnless %}
+            {% block seo %}
+                {% snless %}
+                    <meta name="description" content="
+                        {% block description %}
+                            {% trans 'Description' %}
+                        {% endblock %}
+                    ">
+                {% endsnless %}
+            {% endblock %}
+            {% block css %}
+                {% compress css %}
+                    <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" type="text/css">
+                    <link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}" type="text/css">
+                {% endcompress %}
+            {% endblock %}
+            {% block extra_css %}
+                {% compress css %}
+                    <link rel="stylesheet" type="text/stylus" href="{% static 'frontend/stylus/main.styl' %}">
+                {% endcompress %}
+            {% endblock %}
+            {% block extra_css_plain %}
+            {% endblock %}
+            {% block djnagojs %}
+                <script type="text/javascript" src="{% url 'djangojs' %}"></script>
+            {% endblock %}
+            {% block js %}
+                {% compress js %}
+                    <script type="text/javascript" src="{% static 'modernizr/modernizr.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'respond/dest/respond.src.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'json3/lib/json3.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'jquery/dist/jquery.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
+                {% endcompress %}
+            {% endblock %}
+            {% block extra_js_plain %}
+                <script type="text/javascript">
+                    var LANGUAGE_CODE = '{{ LANGUAGE_CODE }}';
+                </script>
+            {% endblock %}
+            {% block extra_js %}
+                {% compress js %}
+                    <script type="text/coffeescript" src="{% static 'frontend/coffee/main.coffee' %}"></script>
+                {% endcompress %}
+            {% endblock %}
+            {% block apple %}
+                <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'frontend/img/apple-touch-icon-144x144-precomposed.png' %}">
+                <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'frontend/img/apple-touch-icon-114x114-precomposed.png' %}">
+                <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'frontend/img/apple-touch-icon-72x72-precomposed.png' %}">
+                <link rel="apple-touch-icon-precomposed" href="{% static 'frontend/img/apple-touch-icon-57x57-precomposed.png' %}">
+            {% endblock %}
+            {% block favicon %}
+                <link rel="shortcut icon" href="{% static favicon %}">
+            {% endblock %}
+            {% block extra_head %}
+            {% endblock %}
+        {% endblock %}
+    </head>
+    <body>
+        {% block body %}
+            {% block nav %}
+                {% include 'nav.html' %}
+            {% endblock %}
+            {% block carousel %}
+            {% endblock %}
+            <div class="section">
+                <div class="container">
+                    {% if messages %}
+                        <div id="messages">
+                            {% for message in messages %}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div{% if message.tags %} class="alert alert-{{ message.tags }}"{% endif %}>
+                                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                            {{ message }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% block container %}
+                        {% block layout %}
+                        {% endblock %}
+                    {% endblock %}
+                </div>
+            </div>
+            {% block footer %}
+                <div class="container">
+                    <hr>
+                    <footer>
+                        {% block footer_layout %}
+                            {% include 'footer.html' %}
+                        {% endblock %}
+                    </footer>
+                </div>
+            {% endblock %}
+        {% endblock %}
+        <script type="text/javascript">
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+            ga('create', '{{ settings.CONSTANTS.GA_ID }}', 'auto');
+            ga('send', 'pageview');
+        </script>
+    </body>
+</html>

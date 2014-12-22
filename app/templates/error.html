@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {{ error }}
+{% endblock %}
+
+{% block container %}
+    <div class="row">
+        <div class="col-md-offset-4 col-md-4 well text-center">
+            <h1>
+                {{ error }}
+            </h1>
+        </div>
+    </div>
+{% endblock %}

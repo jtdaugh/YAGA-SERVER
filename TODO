@@ -1,6 +1,2 @@
-VIDEO MODEl
-VIDEO S3URL
-VIDEO SQS
-VIDEO CELERY CLEAN
-
-repo abstraction fn names
+make install commands
+make release commands

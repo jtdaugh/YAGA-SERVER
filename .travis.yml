@@ -1,6 +1,6 @@
 language: python
 python:
-  - "2.7"
+  - '2.7'
 install:
   - make install
 script:
@@ -11,6 +11,6 @@ services:
   - memcached
   - rabbitmq
 addons:
-  postgresql: "9.3"
+  postgresql: '9.3'
 before_install:
-  - psql -c 'create database yaga_test;' -U postgres
+  - psql -c 'create database app;' -U postgres

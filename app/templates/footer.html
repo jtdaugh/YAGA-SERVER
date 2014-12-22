@@ -1,0 +1,15 @@
+{% load i18n %}
+
+{% load static %}
+
+{% block footer %}
+    <div class="row">
+        <div class="col-md-12">
+            {% block copyright %}
+                <p class="float-right">
+                    {% trans 'copyright' %} {{ now.year }}
+                </p>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

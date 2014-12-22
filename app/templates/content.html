@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% load i18n %}
+
+{% block layout %}
+    <div class="row">
+        <div class="col-md-12">
+            {% block content %}
+                <p>
+                    {% trans 'Page' %}
+                </p>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

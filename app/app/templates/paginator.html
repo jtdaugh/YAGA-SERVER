@@ -1,0 +1,17 @@
+{% block paginator %}
+    {% if pages|length > 3 %}
+        <div class="text-center">
+            <ul class="pagination">
+                {% for page in pages %}
+                    {% if page.class %}
+                        <li class="{{ page.class }}">
+                    {% else %}
+                        <li>
+                    {% endif %}
+                        <a href="{{ page.get }}">{{ page.number }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}

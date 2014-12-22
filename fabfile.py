@@ -4,17 +4,18 @@ from __future__ import (
 
 from time import sleep
 
-from fabric.api import local, task, warn_only
+from fabric.api import local, task, warn_only, lcd
 from fabric.operations import prompt
 
 
+APP_DIR = 'app'
 PROCESS_WORKERS = 2
 DYNOS = {
     'web': 1,
     'celery_broker': 1,
     'celery_worker': 0,
 }
-USE_NEWRELIC = False
+USE_NEWRELIC = True
 STOP_TIMEOUT = 30
 START_TIMEOUT = 30
 HTTP_TIMEOUT = 30
@@ -24,19 +25,20 @@ NEWRELIC_CMD = 'newrelic-admin run-program '
 
 def ensure_prompt(label):
     value = None
+
     label = '{label}: '.format(
         label=label
     )
 
     while not value:
-        value = prompt(label)
+        value = prompt(label).strip()
 
-    return value.strip()
+    return value
 
 
 @task
 def uwsgi():
-    cmd = 'uwsgi --module=application.core:app --http-keepalive=0 --master --processes={timeout} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
+    cmd = 'uwsgi --module=app.wsgi:application --http-keepalive=0 --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS,
@@ -46,12 +48,13 @@ def uwsgi():
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
 
-    local(cmd)
+    with lcd(APP_DIR):
+        local(cmd)
 
 
 @task
 def gunicorn():
-    cmd = 'gunicorn application.core:app --keep-alive=0 --workers={workers} --timeout={timeout} --preload --access-logfile=- --error-logfile=-'
+    cmd = 'gunicorn app.wsgi:application --keep-alive=0 --workers={workers} --timeout={timeout} --preload --access-logfile=- --error-logfile=-'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS,
@@ -61,12 +64,13 @@ def gunicorn():
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
 
-    local(cmd)
+    with lcd(APP_DIR):
+        local(cmd)
 
 
 @task
 def celery_broker():
-    cmd = 'celery -A application.core.celery worker -c {workers} -B -l INFO'
+    cmd = 'celery -A app worker -c {workers} -B'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS
@@ -75,12 +79,13 @@ def celery_broker():
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
 
-    local(cmd)
+    with lcd(APP_DIR):
+        local(cmd)
 
 
 @task
 def celery_worker():
-    cmd = 'newrelic-admin run-program celery -A application.core.celery worker -c {workers} -l INFO'
+    cmd = 'run-program celery -A app worker -c {workers}'
 
     cmd = cmd.format(
         workers=PROCESS_WORKERS
@@ -89,7 +94,19 @@ def celery_worker():
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd
 
-    local(cmd)
+    with lcd(APP_DIR):
+        local(cmd)
+
+
+@task
+def deploy():
+    with lcd(APP_DIR):
+        local('python manage.py clear_cache')
+        local('python manage.py migrate')
+        local('python manage.py bower_install')
+        local('python manage.py collectstatic --noinput')
+        local('python manage.py clean_compress')
+        local('python manage.py compress')
 
 
 @task
@@ -100,10 +117,7 @@ def release(initial=False):
     local('git st')
     local('git push heroku master')
 
-    local('heroku run python manage.py db upgrade')
-    local('heroku run python manage.py syncroles')
-    local('heroku run python manage.py clearcache')
-    local('heroku run "python manage.py assets --parse-templates build && python manage.py collectstatic"')
+    local('heroku run fab deploy')
 
     start()
 
@@ -216,11 +230,11 @@ def create():
     local('heroku addons:add sendgrid')
 
     local('heroku config:set DISABLE_COLLECTSTATIC=1')
+    local('heroku config:add BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git')
 
     AWS_ACCESS_KEY_ID = ensure_prompt('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = ensure_prompt('AWS_SECRET_ACCESS_KEY')
-    S3_BUCKET_NAME = ensure_prompt('S3_BUCKET_NAME (static)')
-    S3_BUCKET_NAME_MEDIA = ensure_prompt('S3_BUCKET_NAME (media)')
+    AWS_STORAGE_BUCKET_NAME = ensure_prompt('AWS_STORAGE_BUCKET_NAME')
 
     local('heroku config:set AWS_ACCESS_KEY_ID={value}'.format(
         value=AWS_ACCESS_KEY_ID
@@ -228,21 +242,14 @@ def create():
     local('heroku config:set AWS_SECRET_ACCESS_KEY={value}'.format(
         value=AWS_SECRET_ACCESS_KEY
     ))
-    local('heroku config:set S3_BUCKET_NAME={value}'.format(
-        value=S3_BUCKET_NAME
-    ))
-    local('heroku config:set S3_BUCKET_NAME_MEDIA={value}'.format(
-        value=S3_BUCKET_NAME_MEDIA
+    local('heroku config:set AWS_STORAGE_BUCKET_NAME={value}'.format(
+        value=AWS_STORAGE_BUCKET_NAME
     ))
 
     SECRET_KEY = ensure_prompt('SECRET_KEY')
-    SECURITY_PASSWORD_SALT = ensure_prompt('SECURITY_PASSWORD_SALT')
 
     local('heroku config:set SECRET_KEY={value}'.format(
         value=SECRET_KEY
-    ))
-    local('heroku config:set SECURITY_PASSWORD_SALT={value}'.format(
-        value=SECURITY_PASSWORD_SALT
     ))
 
     release(initial=True)
