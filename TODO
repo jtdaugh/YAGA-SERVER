@@ -1,2 +1,1 @@
-make install commands
-make release commands
+travis postgres\redis\memcache\rabbit configuration

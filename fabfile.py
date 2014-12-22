@@ -16,8 +16,10 @@ DYNOS = {
     'celery_worker': 0,
 }
 USE_NEWRELIC = True
-STOP_TIMEOUT = 30
-START_TIMEOUT = 30
+# STOP_TIMEOUT = 30
+# START_TIMEOUT = 30
+STOP_TIMEOUT = 0
+START_TIMEOUT = 0
 HTTP_TIMEOUT = 30
 
 NEWRELIC_CMD = 'newrelic-admin run-program '
@@ -208,7 +210,7 @@ def resetdb():
 
     local('heroku pg:promote {url}'.format(url=DB_URL))
 
-    local('heroku run python manage.py db upgrade')
+    local('heroku run "cd app && python manage.py migrate"')
 
 
 @task
