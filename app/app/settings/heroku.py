@@ -139,9 +139,9 @@ class HerokuImplementation(
         # -------------------------------------------------------
         # rest framework configuration
         # -------------------------------------------------------
-        self.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
-            'rest_framework.renderers.JSONRenderer',
-        )
+        # self.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+        #     'rest_framework.renderers.JSONRenderer',
+        # )
         # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
