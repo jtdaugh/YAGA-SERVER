@@ -187,6 +187,8 @@ def ssh():
 
 @task
 def resetdb():
+    stop()
+
     info = local('heroku config', capture=True).splitlines()
     name = info[0]
     name = name.replace('=', '')
@@ -212,7 +214,7 @@ def resetdb():
 
     local('heroku run "cd app && python manage.py migrate"')
 
-    local('fab restart')
+    start()
 
 
 @task
