@@ -5,7 +5,9 @@ CMD_PYTHON=python
 CMD_CELERY=cd $(APP_DIR) && celery -A app worker -c 1 -B
 CMD_MANAGE=cd $(APP_DIR) && $(CMD_PYTHON) manage.py
 CMD_RUNSERVER=$(CMD_MANAGE) runserver
-CMD_BOWER=$(CMD_MANAGE) bower_install
+CMD_SHELL=$(CMD_MANAGE) shell_plus
+CMD_BOWER=$(CMD_MANAGE) bower_install -- --config.interactive=false
+CMD_MIGRATE=$(CMD_MANAGE) migrate
 CMD_TEST=$(CMD_MANAGE) test
 CMD_LINT=flake8 app
 CMD_PIP=pip install -r requirements.txt
@@ -23,6 +25,7 @@ install:
 	test -d $(ENV_DIR) || $(CMD_ENV) $(ENV_DIR)
 	$(CMD_ACTIVATE_ENV); $(CMD_PIP)
 	$(CMD_ACTIVATE_ENV); $(CMD_BOWER)
+	$(CMD_ACTIVATE_ENV); $(CMD_MIGRATE)
 
 test:
 	$(CMD_ACTIVATE_ENV); $(CMD_TEST)
@@ -30,3 +33,5 @@ test:
 lint:
 	$(CMD_ACTIVATE_ENV); $(CMD_LINT)
 
+shell:
+	$(CMD_ACTIVATE_ENV); $(CMD_SHELL)

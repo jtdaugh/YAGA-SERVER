@@ -177,7 +177,9 @@ def psql():
 
 @task
 def events():
-    local('heroku run celery -A application.core.celery events')
+    local('heroku run "cd {app} celery -A app events"'.format(
+        app=APP_DIR
+    ))
 
 
 @task
@@ -212,7 +214,9 @@ def resetdb():
 
     local('heroku pg:promote {url}'.format(url=DB_URL))
 
-    local('heroku run "cd app && python manage.py migrate"')
+    local('heroku run "cd {app} && python manage.py migrate"'.format(
+        app=APP_DIR
+    ))
 
     start()
 
@@ -280,3 +284,10 @@ def create():
 @task
 def config():
     local('heroku config')
+
+
+@task
+def shell():
+    local('heroku run "cd {app} && python manage.py shell_plus"'.format(
+        app=APP_DIR
+    ))
