@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from wtforms.fields import TextField, PasswordField
+from wtforms.fields import StringField, PasswordField
 from flask.ext.babelex import lazy_gettext as _
 
 from ...forms import BaseWebForm, BaseForm
@@ -15,16 +15,16 @@ from .validators import (
 class CodeForm(BaseForm):
     code = PasswordField(
         _('Code'),
-        validators=[
-            DataRequiredValidator(),
-            VerificationCodeValidator(),
-            ValidVerificationCodeValidator()
-        ]
+        # validators=[
+        #     DataRequiredValidator(),
+        #     VerificationCodeValidator(),
+        #     ValidVerificationCodeValidator()
+        # ]
     )
 
 
 class CodeRequestForm(BaseForm):
-    phone = TextField(
+    phone = StringField(
         _('Phone'),
         validators=[
             DataRequiredValidator(),
@@ -35,7 +35,7 @@ class CodeRequestForm(BaseForm):
 
 
 class UserLoginForm(CodeForm):
-    phone = TextField(
+    phone = StringField(
         _('Phone'),
         validators=[
             DataRequiredValidator(),
@@ -54,7 +54,7 @@ class CodeRequestWebForm(BaseWebForm, CodeRequestForm):
 
 
 class TokenDeactivateWebForm(BaseWebForm):
-    token = TextField(
+    token = StringField(
         _('Token'),
         validators=[
             DataRequiredValidator(),

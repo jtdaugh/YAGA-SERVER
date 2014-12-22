@@ -7,7 +7,7 @@ from flask.ext.babelex import lazy_gettext as _
 from ...views import BaseView, BaseBlueprint
 from ...decorators import login_session_required, anonymous_user_required
 from ...utils import b
-from ...helpers import geoip
+from ...helpers import geoip, http
 from .forms import UserLoginWebForm, TokenDeactivateWebForm
 from .repository import token_storage
 
@@ -27,9 +27,14 @@ class LoginView(BaseView):
 
             flash(_('You were successfully logged in.'), 'success')
 
-            return redirect(url_for('index.index'))
+            return redirect(url_for('index.index')), http.FOUND
 
-        return render_template('auth/login.html', form=form)
+        if form.errors:
+            status = http.UNPROCESSABLE_ENTITY
+        else:
+            status = http.OK
+
+        return render_template('auth/login.html', form=form), status
 
 
 class LogoutView(BaseView):
@@ -41,7 +46,7 @@ class LogoutView(BaseView):
 
         flash(_('You were successfully logged out.'), 'success')
 
-        return redirect(url_for('index.index'))
+        return redirect(url_for('index.index')), http.FOUND
 
 
 class TokenListView(BaseView):
@@ -73,7 +78,7 @@ class TokenListView(BaseView):
             'auth/token_list.html',
             tokens=tokens,
             geo_map=geo_map
-        )
+        ), http.FOUND
 
 
 class TokenDeactivateView(BaseView):
@@ -92,7 +97,7 @@ class TokenDeactivateView(BaseView):
             for error in form.errors['token']:
                 flash(error, 'danger')
 
-        return redirect(url_for('auth.token_list'))
+        return redirect(url_for('auth.token_list')), http.FOUND
 
 
 blueprint.add_url_rule(

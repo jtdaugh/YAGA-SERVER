@@ -175,9 +175,14 @@ class SessionRepository(BaseRepository):
 
 
 class CodeRepository(BaseRepository):
-    def get_latest_request(self, phone):
-        code = db.session.query(self.model).filter_by(
-            phone=phone
+    def get_latest_code(self, phone):
+        query = [
+            self.model.expire_at > now(),
+            self.model.phone == phone
+        ]
+
+        code = db.session.query(self.model).filter(
+            *query
         ).order_by(self.model.expire_at.desc()).first()
 
         return code

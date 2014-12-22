@@ -9,18 +9,18 @@ from .utils import phone_tools
 
 class BaseValidator(object):
     MESSAGE = _('General error.')
-    CODE = 'general'
+    JSON_MESSAGE = 'general'
 
-    def __init__(self, message=None, code=None):
+    def __init__(self, message=None, json_message=None):
         if message is None:
             message = self.MESSAGE
 
-        if code is None:
-            code = self.CODE
+        if json_message is None:
+            json_message = self.JSON_MESSAGE
 
         self.message = message
 
-        self.code = code
+        self.json_message = json_message
 
     @property
     def chain(self):
@@ -32,7 +32,7 @@ class BaseValidator(object):
 
     def __call__(self, form, field):
         if form.API:
-            self.output = self.code
+            self.output = self.json_message
         else:
             self.output = self.message
 
@@ -44,7 +44,7 @@ class BaseValidator(object):
 
 class DataRequiredValidator(BaseValidator):
     MESSAGE = _('This field is required.')
-    CODE = 'required'
+    JSON_MESSAGE = 'required'
 
     def validate(self, form, field):
         if not field.data:
@@ -53,7 +53,7 @@ class DataRequiredValidator(BaseValidator):
 
 class EmailValidator(BaseValidator):
     MESSAGE = _('Invalid email address.')
-    CODE = 'invalid_email'
+    JSON_MESSAGE = 'invalid_email'
 
     def validate(self, form, field):
         email = field.data
@@ -67,7 +67,7 @@ class EmailValidator(BaseValidator):
 
 class PhoneValidator(BaseValidator):
     MESSAGE = _('Invalid phone number.')
-    CODE = 'invalid_phone'
+    JSON_MESSAGE = 'invalid_phone'
 
     def validate(self, form, field):
         number = field.data

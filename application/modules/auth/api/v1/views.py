@@ -7,7 +7,7 @@ from .....decorators import (
 )
 from .....views import BaseApi, BaseResource, BaseApiBlueprint
 from .....utils import b, now
-from .....helpers import SuccessResponse, FailResponse, phone
+from .....helpers import SuccessResponse, FailResponse, phone, http
 from ...repository import user_storage, token_storage, code_storage
 from .forms import (
     UserRegisterApiForm, UserLoginApiForm, UserLogoutApiForm,
@@ -25,12 +25,12 @@ class RegisterResource(BaseResource):
 
         return SuccessResponse({
             'token': user.get_auth_token(),
-        }) << 201
+        }), http.CREATED
 
 
 class CodeRequestResource(BaseResource):
     @anonymous_user_required
-    @marshal_with_form(CodeRequestApiForm, 422)
+    @marshal_with_form(CodeRequestApiForm, http.UNPROCESSABLE_ENTITY)
     def post(self):
         request_id = phone.send_verify(
             self.form.phone.data,
@@ -40,7 +40,7 @@ class CodeRequestResource(BaseResource):
         if not request_id:
             return FailResponse({
                 'phone': ['transport_error'],
-            }) << 412
+            }), http.PRECONDITION_FAILED
 
         code = code_storage.create(
             request_id=request_id,
@@ -50,7 +50,7 @@ class CodeRequestResource(BaseResource):
 
         return SuccessResponse({
             'phone': code.phone,
-        }) << 200
+        }), http.OK
 
 
 class LoginResource(BaseResource):
@@ -59,7 +59,7 @@ class LoginResource(BaseResource):
     def post(self):
         return SuccessResponse({
             'token': self.form.obj.get_auth_token(),
-        }) << 200
+        }), http.OK
 
 
 class LogoutResource(BaseResource):
@@ -71,8 +71,8 @@ class LogoutResource(BaseResource):
         )
 
         return SuccessResponse({
-            'token': None
-        }) << 200
+            'token': g.token
+        }), http.OK
 
 
 class AboutResource(BaseResource):
@@ -81,7 +81,7 @@ class AboutResource(BaseResource):
         return SuccessResponse({
             'name': g.user.name,
             'phone': g.user.phone
-        }) << 200
+        }), http.OK
 
 
 class InfoResource(BaseResource):
@@ -94,7 +94,7 @@ class InfoResource(BaseResource):
 
         return SuccessResponse({
             'user': bool(is_user)
-        }) << 200
+        }), http.OK
 
 
 blueprint = BaseApiBlueprint('api_auth', __name__)

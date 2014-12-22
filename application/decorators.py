@@ -67,7 +67,7 @@ def login_header_required(fn):
     return wrapper
 
 
-def marshal_with_form(form_obj, fail_status_code):
+def marshal_with_form(form_obj, fail_status):
     def wrapped(fn):
         @wraps(fn)
         def wrapper(cls, *args, **kwargs):
@@ -87,7 +87,7 @@ def marshal_with_form(form_obj, fail_status_code):
             else:
                 return FailResponse(
                     form.errors
-                ) << fail_status_code
+                ), fail_status
 
         return wrapper
 

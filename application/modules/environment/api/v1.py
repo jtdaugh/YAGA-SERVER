@@ -4,7 +4,7 @@ from flask import request
 
 from ....views import BaseApi, BaseResource, BaseApiBlueprint
 from ....utils import b, phone_tools
-from ....helpers import geoip, SuccessResponse
+from ....helpers import geoip, SuccessResponse, http
 
 
 class CodesResource(BaseResource):
@@ -18,7 +18,7 @@ class CodesResource(BaseResource):
         return SuccessResponse({
             'codes': codes,
             'propose': propose
-        }) << 200
+        }), http.OK
 
 
 blueprint = BaseApiBlueprint('environment', __name__)

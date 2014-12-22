@@ -55,16 +55,18 @@ class NexmoProvider(AbstractProvider):
         try:
             method = getattr(self.session, method.lower())
 
-            respnose = method(self.format_request(url, params))
+            response = method(self.format_request(url, params))
 
-            return self.parse(respnose)
+            self.app.logger.info(response.text)
+
+            return self.parse(response.text)
         except Exception as e:
             self.app.logger.error(e)
 
             return None
 
-    def parse(self, response):
-        return json.loads(response.text)
+    def parse(self, text):
+        return json.loads(text)
 
     def send_verify(
         self, receiver,

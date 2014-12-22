@@ -11,7 +11,7 @@ from .repository import user_storage, token_storage, code_storage
 
 class ValidActiveUserValidator(BaseValidator):
     MESSAGE = _('Unknown user.')
-    CODE = 'unknown_user'
+    JSON_MESSAGE = 'unknown_user'
 
     def validate(self, form, field):
         if form.code.errors:
@@ -47,7 +47,7 @@ class UserTokenValidator(BaseValidator):
 
 class VerificationCodeValidator(BaseValidator):
     MESSAGE = _('Malformed code.')
-    CODE = 'malformed_code'
+    JSON_MESSAGE = 'malformed_code'
 
     def validate(self, form, field):
         if not 4 <= len(field.data) <= 6:
@@ -61,10 +61,10 @@ class VerificationCodeValidator(BaseValidator):
 
 class ValidVerificationCodeValidator(BaseValidator):
     MESSAGE = _('Invalid code.')
-    CODE = 'invalid_code'
+    JSON_MESSAGE = 'invalid_code'
 
     def validate(self, form, field):
-        code = code_storage.get_latest_request(form.phone.data)
+        code = code_storage.get_latest_code(form.phone.data)
 
         if not code:
             raise self.stop
@@ -82,10 +82,10 @@ class ValidVerificationCodeValidator(BaseValidator):
 
 class ConcurrentRequestValidator(BaseValidator):
     MESSAGE = _('Concurrent code request.')
-    CODE = 'concurrent_request'
+    JSON_MESSAGE = 'concurrent_request'
 
     def validate(self, form, field):
-        code = code_storage.get_latest_request(form.phone.data)
+        code = code_storage.get_latest_code(form.phone.data)
 
         if code:
             if not code.validated and code.expire_at > now():

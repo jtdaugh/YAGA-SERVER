@@ -29,7 +29,7 @@ from .helpers import (
     cache, db, babel, sentry, s3static, security, redis,
     assets, s3media, csrf, celery, compress, sslify, cors,
     reggie, geoip, phone, toolbar,
-    rate_limit, error_handler, HTTP_STATUSES, MxCache
+    rate_limit, error_handler, MxCache, http
 )
 from .utils import now, BaseJSONEncoder, dummy_callback, detect_json
 from .admin import create_admin
@@ -207,12 +207,12 @@ def setup_template_context(app):
 
 
 def setup_errors(app):
-    for code in HTTP_STATUSES:
-        app.errorhandler(code)(partial(error_handler, code))
+    for status in http:
+        app.errorhandler(status)(partial(error_handler, status))
 
     @csrf.error_handler
     def csrf_error(e):
-        return error_handler(400, e)
+        return error_handler(http.PRECONDITION_FAILED, e)
 
 
 def setup_views(app):

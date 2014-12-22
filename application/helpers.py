@@ -13,12 +13,12 @@ from flask_s3 import FlaskS3
 from flask.ext.security import Security
 from flask.ext.assets import Environment
 from flask_wtf.csrf import CsrfProtect
-from flask.ext.babelex import lazy_gettext as _
 from flask.ext.compress import Compress
 from flask.ext.cors import CORS
 from flask_reggie import Reggie
 from flask_debugtoolbar import DebugToolbarExtension
 from jinja2.exceptions import TemplateNotFound
+from flask.ext.babelex import lazy_gettext as _
 
 from .ext.ssl import BaseSSLify
 from .ext.redis_storage import Redis
@@ -26,42 +26,6 @@ from .ext.s3_storage import S3
 from .ext.celery_storage import Celery
 from .ext.geoip_storage import Geoip
 from .ext.phone_storage import Phone
-
-
-HTTP_STATUSES = {
-    400: {
-        'message': _('Bad Request'),
-        'code': 'bad_request'
-    },
-    401: {
-        'message': _('Unauthorized'),
-        'code': 'unauthorized'
-    },
-    403: {
-        'message': _('Forbidden'),
-        'code': 'forbidden',
-    },
-    404: {
-        'message': _('Not Found'),
-        'code': 'not_found',
-    },
-    405: {
-        'message': _('Method Not Allowed'),
-        'code': 'method_not_allowed',
-    },
-    422: {
-        'message': _('Unprocessable Entity'),
-        'code': 'unprocessable_Entity',
-    },
-    429: {
-        'message': _('Too Many Requests'),
-        'code': 'too_many_requests',
-    },
-    500: {
-        'message': _('Internal Server Error'),
-        'code': 'internal_server_error'
-    }
-}
 
 
 cache = Cache()
@@ -131,8 +95,9 @@ class BaseResponse(object):
             self.FIELD_HOLDER: self.data
         }
 
-    def __lshift__(self, status_code):
-        return self.response, status_code
+    def __iter__(self):
+        for key, value in self.response.items():
+            yield key, value
 
 
 class SuccessResponse(BaseResponse):
@@ -143,36 +108,139 @@ class FailResponse(BaseResponse):
     FIELD_HOLDER = 'errors'
 
 
-def error_handler(code, e):
+class HttpStatus(int):
+    def __new__(cls, *args, **kwargs):
+        return super(HttpStatus, cls).__new__(cls, kwargs.pop('status'))
+
+    def __init__(self, *args, **kwargs):
+        self.message = kwargs['message']
+        self.json_message = kwargs['json_message']
+
+
+class Http(object):
+    HTTP_STATUSES = {
+        'OK': {
+            'message': _('OK'),
+            'json_message': 'ok',
+            'status': 200
+        },
+        'CREATED': {
+            'message': _('Created'),
+            'json_message': 'created',
+            'status': 201
+        },
+        'NO_CONTENT': {
+            'message': _('No Content'),
+            'json_message': 'no_content',
+            'status': 204
+        },
+        'MOVED_PERMANENTLY': {
+            'message': _('Moved Permanently'),
+            'json_message': 'moved_permanently',
+            'status': 301
+        },
+        'FOUND': {
+            'message': _('Found'),
+            'json_message': 'found',
+            'status': 302
+        },
+        'BAD_REQUEST': {
+            'message': _('Bad Request'),
+            'json_message': 'bad_request',
+            'status': 400
+        },
+        'UNAUTHORIZED': {
+            'message': _('Unauthorized'),
+            'json_message': 'unauthorized',
+            'status': 401
+        },
+        'FORBIDDEN': {
+            'message': _('Forbidden'),
+            'json_message': 'forbidden',
+            'status': 403
+        },
+        'NOT_FOUND': {
+            'message': _('Not Found'),
+            'json_message': 'not_found',
+            'status': 404
+        },
+        'METHOD_NOT_ALLOWED': {
+            'message': _('Method Not Allowed'),
+            'json_message': 'method_not_allowed',
+            'status': 405
+        },
+        'PRECONDITION_FAILED': {
+            'message': _('Precondition Failed'),
+            'json_message': 'precondition_failed',
+            'status': 412
+        },
+        'UNPROCESSABLE_ENTITY': {
+            'message': _('Unprocessable Entity'),
+            'json_message': 'unprocessable_entity',
+            'status': 422
+        },
+        'TOO_MANY_REQUESTS': {
+            'message': _('Too Many Requests'),
+            'json_message': 'too_many_requests',
+            'status': 429
+        },
+        'INTERNAL_SERVER_ERROR': {
+            'message': _('Internal Server Error'),
+            'json_message': 'internal_server_error',
+            'status': 500
+        }
+    }
+
+    def __init__(self):
+        for ident, options in self.HTTP_STATUSES.items():
+            status = HttpStatus(**options)
+
+            setattr(self, ident, status)
+
+    def __iter__(self):
+        for obj in self.__dict__.values():
+            if isinstance(obj, HttpStatus):
+                yield obj
+
+
+def error_handler(status, e):
     if request.is_xhr or request.is_json:
         response = jsonify(
             FailResponse({
-                'global': [HTTP_STATUSES[code]['code']]
+                'global': [status.json_message]
             }).response
         )
     else:
+        context = {
+            'status': status,
+            'message': status.message
+        }
+
         try:
             response = make_response(
                 render_template(
-                    'errors/{code}.html'.format(
-                        code=code
+                    'errors/{status}.html'.format(
+                        status=status
                     ),
-                    **HTTP_STATUSES[code]
+                    **context
                 )
             )
         except TemplateNotFound:
             response = make_response(
-                render_template('errors/base.html', **HTTP_STATUSES[code])
+                render_template(
+                    'errors/base.html',
+                    **context
+                )
             )
 
-    response.status_code = code
+    response.status_code = status
 
     return response
 
 
-def output_json(data, code, headers=None):
+def output_json(data, status, headers=None):
     response = jsonify(data)
-    response.status_code = code
+    response.status_code = status
 
     response.data += '\n'
 
@@ -222,3 +290,6 @@ def rate_limit(scope, ident):
                 ttl,
                 amount
             )
+
+
+http = Http()

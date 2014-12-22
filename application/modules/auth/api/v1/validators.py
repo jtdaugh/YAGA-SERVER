@@ -7,7 +7,7 @@ from ...repository import user_storage
 
 
 class CurrentTokenValidator(BaseValidator):
-    CODE = 'unknown_token'
+    JSON_MESSAGE = 'unknown_token'
 
     def validate(self, form, field):
         if field.data != g.token:
@@ -15,7 +15,7 @@ class CurrentTokenValidator(BaseValidator):
 
 
 class AvailablePhoneValidator(BaseValidator):
-    CODE = 'phone_registered'
+    JSON_MESSAGE = 'phone_registered'
 
     def validate(self, form, field):
         obj = user_storage.get(
@@ -27,7 +27,7 @@ class AvailablePhoneValidator(BaseValidator):
 
 
 # class AvailableNameValidator(BaseValidator):
-#     CODE = 'name_registered'
+#     JSON_MESSAGE = 'name_registered'
 
 #     def validate(self, form, field):
 #         obj = user_storage.get(
