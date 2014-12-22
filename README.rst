@@ -31,7 +31,7 @@ Development:
     cd app
     python manage.py createsuperuser
 
-Visit `http://127.0.0.1:5000/ <http://127.0.0.1:5000/>`_
+Visit `http://127.0.0.1:8000/ <http://127.0.0.1:8000/>`_
 
 Tests:
 ******
@@ -81,6 +81,9 @@ Deployment:
 
     # connect to heroku postgres psql shell
     fab psql
+
+    # connect to heroku application shell
+    fab shell
 
     # reset heroku database
     fab resetdb
