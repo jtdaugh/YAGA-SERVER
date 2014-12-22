@@ -34,7 +34,6 @@ django-extensions==1.4.9
 django-guardian==1.2.4
 django-heroku-memcacheify==0.8
 django-mailviews==0.6.3
-django-memcached-pool==0.5
 django-mobile==0.4.0
 django-multiurl==1.0.1
 django-phonenumber-field==0.6
@@ -91,7 +90,6 @@ sqlparse==0.1.14
 tox==1.8.1
 uWSGI==2.0.8
 ujson==1.33
-umemcache==1.6.3
 virtualenv==1.11.6
 wsgiref==0.1.2
 yuicompressor==2.4.8
