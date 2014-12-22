@@ -1,18 +1,120 @@
-from __future__ import absolute_import, division, unicode_literals
-
 from app.settings.base import BaseConfiguration, Implementation, Initialization
+
+import dj_database_url
 
 
 class TravisConfiguration(
     BaseConfiguration
 ):
-    pass
+    # -------------------------------------------------------
+    # debug mode configuration
+    # -------------------------------------------------------
+    DEBUG = True
+    # -------------------------------------------------------
+    # templates configuration
+    # -------------------------------------------------------
+    TEMPLATE_DEBUG = True
+    # -------------------------------------------------------
+    # template cache configuration
+    # -------------------------------------------------------
+    TEMPLATE_CACHE = False
+    # -------------------------------------------------------
+    # etag configuration
+    # -------------------------------------------------------
+    USE_ETAGS = True
+    # -------------------------------------------------------
+    # gzip configuration
+    # -------------------------------------------------------
+    GZIP = True
+    # -------------------------------------------------------
+    # debug toolbar configuration
+    # -------------------------------------------------------
+    DEBUG_TOOLBAR = False
+    # -------------------------------------------------------
+    # docs configuration
+    # -------------------------------------------------------
+    USE_DOCS = True
+    # -------------------------------------------------------
+    # crispy forms configuration
+    # -------------------------------------------------------
+    CRISPY_FAIL_SILENTLY = True
+    # -------------------------------------------------------
+    # local cache configuration
+    # -------------------------------------------------------
+    VIEW_CACHE = True
+    # -------------------------------------------------------
+    # hosts configuration
+    # -------------------------------------------------------
+    ALLOWED_HOSTS = [
+        '*'
+    ]
+    USE_X_FORWARDED_HOST = True
+    BEHIND_PROXY = False
+    # -------------------------------------------------------
+    # database configuration
+    # -------------------------------------------------------
+    DATABASES = {}
+    DATABASES['default'] = dj_database_url.parse(
+        'postgresql://:@127.0.0.1:5432/app'
+    )
+    DATABASES['default'].update({
+        'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+        'ATOMIC_REQUESTS': True,
+        'AUTOCOMMIT': True,
+        'CONN_MAX_AGE': 30
+    })
+    # -------------------------------------------------------
+    # cache configuration
+    # -------------------------------------------------------
+    CACHES = CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+    }
+    # -------------------------------------------------------
+    # sessions\message configuration
+    # -------------------------------------------------------
+    SESSION_REDIS_ENV_URLS = []
+    SESSION_REDIS_HOST = '127.0.0.1'
+    SESSION_REDIS_PORT = 6379
+    SESSION_REDIS_DB = 3
+    SESSION_REDIS_PASSWORD = None
+    SESSION_REDIS_PREFIX = None
+    SESSION_ENGINE = 'redis_sessions_fork.session'
+    # -------------------------------------------------------
+    # cookies configuration
+    # -------------------------------------------------------
+    SESSION_COOKIE_DOMAIN = None
+    CSRF_COOKIE_DOMAIN = None
+    # -------------------------------------------------------
+    # celery configuration
+    # -------------------------------------------------------
+    CELERY_ALWAYS_EAGER = False
+    BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+    CELERYD_LOG_LEVEL = 'INFO'
+    CELERY_RESULT_BACKEND = 'amqp://guest:guest@localhost:5672//'
+    # BROKER_POOL_LIMIT = 1
+    # -------------------------------------------------------
+    # model auto registration configuration
+    # -------------------------------------------------------
+    MODELS_AUTO_REGISTRATION = False
 
 
 class TravisImplementation(
     Implementation
 ):
-    pass
+    def implement(self):
+        super(TravisImplementation, self).implement()
+        # -------------------------------------------------------
+        # rest framework configuration
+        # -------------------------------------------------------
+        self.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+            'rest_framework.renderers.JSONRenderer',
+        )
+
+    def connect(self):
+        pass
 
 
 class Configuration(
