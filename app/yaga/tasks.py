@@ -9,7 +9,7 @@ from .models import Code
 
 
 class CodeCleanup(celery.PeriodicTask):
-    run_every = datetime.timedelta(seconds=3)
+    run_every = datetime.timedelta(seconds=15)
 
     def run(self, *args, **kwargs):
         Code.objects.filter(
