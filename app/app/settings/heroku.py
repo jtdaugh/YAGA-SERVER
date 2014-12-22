@@ -104,11 +104,9 @@ class HerokuConfiguration(
     # celery configuration
     # -------------------------------------------------------
     CELERY_ALWAYS_EAGER = False
-    BROKER_URL = os.environ['RABBITMQ_BIGWIG_URL'].replace(
-        'amqp://', 'librabbitmq://'
-    )
+    BROKER_URL = os.environ['RABBITMQ_BIGWIG_URL']
     CELERYD_LOG_LEVEL = 'INFO'
-    CELERY_RESULT_BACKEND = os.environ['REDISTOGO_URL']
+    CELERY_RESULT_BACKEND = os.environ['RABBITMQ_BIGWIG_URL']
     # BROKER_POOL_LIMIT = 1
     # -------------------------------------------------------
     # model auto registration configuration
