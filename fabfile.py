@@ -256,6 +256,22 @@ def create():
 
     release(initial=True)
 
+    print('SET {bucket} CORS'.format(
+        bucket=AWS_STORAGE_BUCKET_NAME
+    ))
+    print('''
+<CORSConfiguration>
+    <CORSRule>
+        <AllowedOrigin>*</AllowedOrigin>
+        <AllowedMethod>PUT</AllowedMethod>
+        <AllowedMethod>POST</AllowedMethod>
+        <AllowedMethod>GET</AllowedMethod>
+        <MaxAgeSeconds>3000</MaxAgeSeconds>
+        <AllowedHeader>*</AllowedHeader>
+    </CORSRule>
+</CORSConfiguration>
+''')
+
 
 @task
 def config():
