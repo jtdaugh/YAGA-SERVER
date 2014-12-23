@@ -1,3 +1,1 @@
-travis postgres\redis\memcache\rabbit configuration
-
-celery sentry
+ID to PK at Serializers

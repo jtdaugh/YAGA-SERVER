@@ -131,7 +131,7 @@ class GroupAPIview(
     object
 ):
     def get_queryset(self):
-        return Group.objects.filter(
+        return Group.objects.prefetch_related('members').filter(
             members=self.request.user
         )
 
@@ -151,11 +151,6 @@ class GroupRetrieveUpdateAPIView(
 ):
     permission_classes = (IsAuthenticated,)
     serializer_class = GroupRetrieveSerializer
-
-    def get_queryset(self):
-        return Group.objects.filter(
-            members=self.request.user
-        )
 
 
 class GroupCreateAPIView(
