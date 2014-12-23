@@ -146,7 +146,7 @@ def stop():
 
 
 @task
-def start(initial=False):
+def start():
     for name, dynos in DYNOS.iteritems():
         local('heroku ps:scale {name}={dynos}'.format(
             name=name,
