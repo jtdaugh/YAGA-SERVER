@@ -8,6 +8,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView, ListCreateAPIView,
     get_object_or_404
 )
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -204,11 +205,10 @@ class GroupManageAddAPIView(
 ):
     def perform_action(self, instance, user):
         if not user.is_active:
-            return Response(
+            raise ValidationError(
                 {
                     'phone': [_('User account is disabled.')]
-                },
-                status=status.HTTP_400_BAD_REQUEST
+                }
             )
 
         instance.members.add(user)
