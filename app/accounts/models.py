@@ -111,7 +111,13 @@ class AbstractUser(
     )
 
     date_joined = models.DateTimeField(
-        verbose_name=_('Date joined'), default=timezone.now
+        verbose_name=_('Date joined'),
+        default=timezone.now
+    )
+
+    verified = models.BooleanField(
+        verbose_name=_('Verified'),
+        default=False
     )
 
     objects = UserManager()

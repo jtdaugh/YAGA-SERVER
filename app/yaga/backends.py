@@ -32,6 +32,10 @@ class CodeBackend(object):
                 phone=phone
             )
 
+            if not user.verified:
+                user.verified = True
+                user.save()
+
             return user
 
         # invalid code was many times

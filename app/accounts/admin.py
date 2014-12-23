@@ -17,7 +17,8 @@ class UserAdmin(
             'fields': (
                 'phone',
                 'name',
-                'password'
+                'password',
+                'verified'
             )
         }),
         (_('Permissions'), {
@@ -43,7 +44,8 @@ class UserAdmin(
                 'phone',
                 'name',
                 'password1',
-                'password2'
+                'password2',
+                'verified'
             )
         }),
     )
@@ -51,10 +53,12 @@ class UserAdmin(
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('phone', 'name', 'is_staff', 'is_active', 'is_superuser')
+    list_display = (
+        'phone', 'name', 'verified', 'is_active', 'is_staff', 'is_superuser'
+    )
 
     list_filter = (
-        'is_staff', 'is_superuser', 'is_active', 'is_superuser', 'groups'
+        'verified', 'is_active', 'is_staff', 'is_superuser', 'groups'
     )
 
     search_fields = ('phone', 'name')
