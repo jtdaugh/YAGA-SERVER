@@ -1,51 +1,45 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
-    RetrieveAPIView, CreateAPIView, get_object_or_404
+    RetrieveAPIView, CreateAPIView, UpdateAPIView, ListAPIView,
+    get_object_or_404
 )
 from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import (
-    UserSerializer,
+    UserRetrieveSerializer, UserUpdateSerializer,
+    CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
-    CodeCreateSerializer, CodeRetrieveSerializer
+    GroupRetrieveSerializer, GroupCreateSerializer, GroupInviteSerializer
 )
-from ...models import Code
+from ...models import Code, Group
+
+
+class UserApiView(
+    object
+):
+    def get_object(self):
+        return self.request.user
 
 
 class UserRetrieveAPIView(
-    RetrieveAPIView
+    UserApiView,
+    RetrieveAPIView,
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-
-    def retrieve(self, request):
-        serializer = self.get_serializer(request.user)
-
-        self.check_object_permissions(self.request, serializer.instance)
-
-        return Response(serializer.data)
+    serializer_class = UserRetrieveSerializer
 
 
-class TokenCreateAPIView(
-    CreateAPIView
+class UserUpdateAPIView(
+    UserApiView,
+    UpdateAPIView,
 ):
-    serializer_class = TokenSerializer
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        return Response(
-            {
-                'token': serializer.instance.key
-            },
-            status=status.HTTP_201_CREATED,
-        )
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserUpdateSerializer
 
 
 class CodeCreateAPIView(
@@ -113,3 +107,115 @@ class CodeRetrieveAPIView(
         return Response({
             'expire_at': code.expire_at
         })
+
+
+class TokenCreateAPIView(
+    CreateAPIView
+):
+    serializer_class = TokenSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        return Response(
+            {
+                'token': serializer.instance.key
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class GroupAPIview(
+    object
+):
+    def get_queryset(self):
+        return Group.objects.filter(
+            members=self.request.user
+        )
+
+
+class GroupListAPIView(
+    GroupAPIview,
+    ListAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupRetrieveSerializer
+
+
+class GroupRetrieveUpdateAPIView(
+    GroupAPIview,
+    UpdateAPIView,
+    RetrieveAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupRetrieveSerializer
+
+    def get_queryset(self):
+        return Group.objects.filter(
+            members=self.request.user
+        )
+
+
+class GroupCreateAPIView(
+    CreateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupCreateSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        serializer.instance.members.add(request.user)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class GroupAddUpdateAPIView(
+    GroupAPIview,
+    UpdateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupInviteSerializer
+    action = 'add'
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        model = get_user_model()
+
+        user = model.objects.get_or_create(
+            phone=serializer.data['phone']
+        )
+
+        if user.is_active:
+            getattr(instance.members, self.action)(user)
+        else:
+            return Response(
+                {
+                    'phone': [_('User account is disabled.')]
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = GroupRetrieveSerializer(instance)
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_201_CREATED
+        )
+
+
+class GroupDeleteUpdateAPIView(
+    GroupAddUpdateAPIView
+):
+    action = 'remove'

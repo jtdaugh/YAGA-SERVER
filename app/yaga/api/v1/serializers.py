@@ -9,15 +9,24 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.models import Token
 from .fields import PhoneField, CodeField
-from ...models import Code
+from ...models import Code, Group
 
 
-class UserSerializer(
+class UserRetrieveSerializer(
     ModelSerializer
 ):
     class Meta:
         model = get_user_model()
         fields = ('phone', 'name')
+
+
+class UserUpdateSerializer(
+    UserRetrieveSerializer
+):
+    class Meta(
+        UserRetrieveSerializer.Meta
+    ):
+        fields = ('name',)
 
 
 class TokenSerializer(
@@ -62,8 +71,18 @@ class TokenSerializer(
         return token
 
 
-class CodeCreateSerializer(
+class CodeRetrieveSerializer(
     ModelSerializer
+):
+    phone = PhoneField()
+
+    class Meta:
+        model = Code
+        fields = ('phone',)
+
+
+class CodeCreateSerializer(
+    CodeRetrieveSerializer
 ):
     phone = PhoneField(
         validators=[
@@ -74,16 +93,43 @@ class CodeCreateSerializer(
         ]
     )
 
-    class Meta:
-        model = Code
-        fields = ('phone',)
+    def validate(self, attrs):
+        phone = attrs['phone']
+
+        model = get_user_model()
+
+        if model.objects.filter(
+            phone=phone,
+            is_active=False
+        ).exists():
+            msg = _('User account is disabled.')
+            raise ValidationError(msg)
+
+        return attrs
 
 
-class CodeRetrieveSerializer(
+class GroupRetrieveSerializer(
     ModelSerializer
+):
+    members = UserRetrieveSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Group
+        fields = ('name', 'members', 'id')
+
+
+class GroupCreateSerializer(
+    GroupRetrieveSerializer
+):
+    pass
+
+
+class GroupInviteSerializer(
+    GroupRetrieveSerializer
 ):
     phone = PhoneField()
 
-    class Meta:
-        model = Code
+    class Meta(
+        GroupRetrieveSerializer.Meta
+    ):
         fields = ('phone',)

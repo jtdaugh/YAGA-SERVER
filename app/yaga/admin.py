@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from django.contrib import admin
 
-from .models import Code
+from .models import Code, Group
 
 
 class CodeAdmin(
@@ -13,4 +13,13 @@ class CodeAdmin(
     ordering = ('-expire_at',)
 
 
+class GroupAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('name', 'created_at', 'members_count')
+
+    ordering = ('-created_at',)
+
+
+admin.site.register(Group, GroupAdmin)
 admin.site.register(Code, CodeAdmin)

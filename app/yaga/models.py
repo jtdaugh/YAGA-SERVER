@@ -50,5 +50,41 @@ class Code(
 
         return self.request_id
 
-    def __str__(self):
+    class Meta:
+        verbose_name = _('Code')
+        verbose_name_plural = _('Codes')
+
+    def __unicode__(self):
         return self.request_id
+
+
+class Group(
+    models.Model
+):
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=255,
+    )
+
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Members'),
+        db_index=True
+    )
+
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
+    def members_count(self):
+        return self.members.count()
+
+    members_count.short_description = _('Members Count')
+
+    class Meta:
+        verbose_name = _('Group')
+        verbose_name_plural = _('Groups')
+
+    def __unicode__(self):
+        return self.name

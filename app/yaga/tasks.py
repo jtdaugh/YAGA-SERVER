@@ -5,7 +5,7 @@ import datetime
 from django.utils import timezone
 
 from app import celery
-from .models import Code
+from .models import Code, Group
 
 
 class CodeCleanup(celery.PeriodicTask):
@@ -14,4 +14,13 @@ class CodeCleanup(celery.PeriodicTask):
     def run(self, *args, **kwargs):
         Code.objects.filter(
             expire_at__lte=timezone.now()
+        ).delete()
+
+
+class GroupCleanup(celery.PeriodicTask):
+    run_every = datetime.timedelta(minutes=1)
+
+    def run(self, *args, **kwargs):
+        Group.objects.filter(
+            members=None
         ).delete()

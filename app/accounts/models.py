@@ -125,8 +125,8 @@ class AbstractUser(
         verbose_name_plural = _('Users')
 
     def get_username(self):
-        if self.name:
-            return self.name
+        # if self.name:
+        #     return self.name
 
         return self.phone.as_e164
 
