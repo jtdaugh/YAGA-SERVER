@@ -354,7 +354,6 @@ class BaseConfiguration(
     # middleware classes configuration
     # -------------------------------------------------------
     MIDDLEWARE_CLASSES = [
-        'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',  # noqa
         # request cookies
         'app.middleware.RequestCookiesMiddleware',
         # 'django.contrib.sites.middleware.CurrentSiteMiddleware',
@@ -374,6 +373,8 @@ class BaseConfiguration(
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         # requestprovider
         'requestprovider.middleware.RequestProviderMiddleware',
+        # sentry 404
+        'raven.contrib.django.middleware.Sentry404CatchMiddleware',
     ]
     # -------------------------------------------------------
     # django south migrations
@@ -426,7 +427,7 @@ class BaseConfiguration(
         'rest_framework',
         'debug_toolbar',
         'template_timings_panel',
-        'raven.contrib.django.raven_compat',
+        'raven.contrib.django',
     ]
     # -------------------------------------------------------
     # template context processors configuration
@@ -461,6 +462,11 @@ class BaseConfiguration(
         ('hell', 'hellysmile@gmail.com'),
     ]
     MANAGERS = ADMINS
+    LOGGER = {
+        'level': 'DEBUG',
+        'handlers': ['console', 'sentry'],
+        'propagate': False,
+    }
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': True,
@@ -480,29 +486,46 @@ class BaseConfiguration(
             },
             'sentry': {
                 'level': 'ERROR',
-                'class': 'raven.contrib.django.handlers.SentryHandler',  # noqa
+                'class': 'raven.contrib.django.handlers.SentryHandler',
                 'formatter': 'verbose'
             }
         },
         'loggers': {
-            'django': {},
-            'django.request': {},
-            'django.security': {},
-            'django.db.backends': {},
-            'requests': {},
-            'yaga.providers': {}
+            'amqp': LOGGER,
+            'kombu': LOGGER,
+            'kombu.common': LOGGER,
+            'kombu.connection': LOGGER,
+            'celery': LOGGER,
+            'celery.worker': LOGGER,
+            'celery.task': LOGGER,
+            'celery.app.builtins': LOGGER,
+            'celery.app': LOGGER,
+
+            'gunicorn': LOGGER,
+            'gunicorn.http': LOGGER,
+            'gunicorn.http.wsgi': LOGGER,
+            'gunicorn.access': LOGGER,
+            'gunicorn.error': LOGGER,
+
+            'configurations.importer': LOGGER,
+            'configurations': LOGGER,
+
+            'multiprocessing': LOGGER,
+
+            'django': LOGGER,
+            'django.request': LOGGER,
+            'django.security': LOGGER,
+            'django.db.backends': LOGGER,
+
+            'requests': LOGGER,
+
+            'yaga.providers': LOGGER
         },
-        'root': {
-            'handlers': ['console', 'sentry'],
-            'level': 'DEBUG'
-        },
+        'root': LOGGER,
     }
 
-    root = logging.root
-    existing = root.manager.loggerDict.keys()
-
-    for logger in existing:
-        LOGGING['loggers'][logger] = {}
+    # for logger in logging.root.manager.loggerDict:
+    #     LOGGING['loggers'][logger] = LOGGER
     # LOGGING_CONFIG = None
     # -------------------------------------------------------
     # celery configuration
@@ -524,6 +547,10 @@ class BaseConfiguration(
     CELERY_ACCEPT_CONTENT = (MESSAGE_PROTOCOL,)
     CELERY_IGNORE_RESULT = False
     CELERYD_HIJACK_ROOT_LOGGER = False
+    CELERY_ACKS_LATE = True
+    CELERY_REDIRECT_STDOUTS = False
+    # CELERYD_TASK_TIME_LIMIT = 60
+    # CELERYD_TASK_SOFT_TIME_LIMIT = 30
     # -------------------------------------------------------
     # rest framework configuration
     # -------------------------------------------------------

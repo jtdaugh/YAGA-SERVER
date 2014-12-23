@@ -18,14 +18,14 @@ class NexmoResponse(object):
 
     def is_valid(self):
         if self.response:
-            if self.response['status'] == '0':
+            if self.response.get('status') == '0':
                 return True
 
         return False
 
     def exceeded(self):
         if self.response:
-            if self.response['status'] == '17':
+            if self.response.get('status') == '17':
                 return True
 
         return False
@@ -41,7 +41,7 @@ class NexmoResponse(object):
 
 class NexmoProvider(object):
     FORMAT = 'json'
-    VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
+    VERIFY_ENDPOINT = 'https://1api.nexmo.com/verify/'
     SEND_VERIFY_ENDPOINT = VERIFY_ENDPOINT + FORMAT
     CHECK_VERIFY_ENDPOINT = VERIFY_ENDPOINT + 'check/' + FORMAT
 
@@ -82,17 +82,17 @@ class NexmoProvider(object):
 
     def request(self, url, params):
         try:
-            respnose = self.session.get(self.format_request(url, params))
+            response = self.session.get(self.format_request(url, params))
 
-            data = self.validate(self.parse(respnose))
+            data = self.validate(self.parse(response))
 
             logger.info(data)
-
-            return NexmoResponse(data)
         except Exception as e:
             logger.error(e)
 
-            return NexmoResponse(None)
+            data = None
+
+        return NexmoResponse(data)
 
     def parse(self, response):
         return json.loads(response.text)

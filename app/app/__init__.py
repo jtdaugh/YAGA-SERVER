@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db import transaction
 
 
-celery = Celery('app')
+celery = Celery(__name__)
 
 
 TaskBase = celery.Task
