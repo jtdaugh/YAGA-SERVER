@@ -6,9 +6,8 @@ from .views import (
     UserRetrieveAPIView, UserUpdateAPIView,
     CodeRetrieveAPIView, CodeCreateAPIView,
     TokenCreateAPIView,
-    GroupListAPIView, GroupRetrieveUpdateAPIView,
-    GroupCreateAPIView, GroupAddUpdateAPIView,
-    GroupDeleteUpdateAPIView,
+    GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
+    GroupManageAddAPIView, GroupManageRemoveAPIView
 )
 
 
@@ -51,29 +50,24 @@ group_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        GroupListAPIView.as_view(),
-        name='list'
+        GroupListCreateAPIView.as_view(),
+        name='list-create'
     ),
     url(
         r'^(?P<pk>[0-9]+)/$',
         GroupRetrieveUpdateAPIView.as_view(),
-        name='retrieve'
+        name='retrieve-update'
+    ),
+    url(
+        r'^(?P<pk>[0-9]+)/remove/$',
+        GroupManageRemoveAPIView.as_view(),
+        name='manage-remove'
     ),
     url(
         r'^(?P<pk>[0-9]+)/add/$',
-        GroupAddUpdateAPIView.as_view(),
-        name='add'
+        GroupManageAddAPIView.as_view(),
+        name='manage-add'
     ),
-    url(
-        r'^(?P<pk>[0-9]+)/delete/$',
-        GroupDeleteUpdateAPIView.as_view(),
-        name='delete'
-    ),
-    url(
-        r'^create/$',
-        GroupCreateAPIView.as_view(),
-        name='create'
-    )
 )
 
 

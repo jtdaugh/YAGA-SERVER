@@ -108,7 +108,7 @@ class CodeCreateSerializer(
         return attrs
 
 
-class GroupRetrieveSerializer(
+class GroupSerializer(
     ModelSerializer
 ):
     members = UserRetrieveSerializer(many=True, read_only=True)
@@ -118,18 +118,12 @@ class GroupRetrieveSerializer(
         fields = ('name', 'members', 'id')
 
 
-class GroupCreateSerializer(
-    GroupRetrieveSerializer
-):
-    pass
-
-
-class GroupInviteSerializer(
-    GroupRetrieveSerializer
+class GroupManageSerializer(
+    GroupSerializer
 ):
     phone = PhoneField()
 
     class Meta(
-        GroupRetrieveSerializer.Meta
+        GroupSerializer.Meta
     ):
         fields = ('phone',)

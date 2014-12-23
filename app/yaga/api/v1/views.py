@@ -4,7 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
-    RetrieveAPIView, CreateAPIView, UpdateAPIView, ListAPIView,
+    RetrieveAPIView, CreateAPIView, UpdateAPIView,
+    RetrieveUpdateAPIView, ListCreateAPIView,
     get_object_or_404
 )
 from rest_framework.response import Response
@@ -14,7 +15,7 @@ from .serializers import (
     UserRetrieveSerializer, UserUpdateSerializer,
     CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
-    GroupRetrieveSerializer, GroupCreateSerializer, GroupInviteSerializer
+    GroupSerializer, GroupManageSerializer
 )
 from ...models import Code, Group
 
@@ -73,7 +74,7 @@ class CodeCreateAPIView(
                 )
         else:
             return Response(
-                serializer.errors,
+                dict(serializer.errors),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -136,28 +137,12 @@ class GroupAPIview(
         )
 
 
-class GroupListAPIView(
+class GroupListCreateAPIView(
     GroupAPIview,
-    ListAPIView
+    ListCreateAPIView
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = GroupRetrieveSerializer
-
-
-class GroupRetrieveUpdateAPIView(
-    GroupAPIview,
-    UpdateAPIView,
-    RetrieveAPIView
-):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = GroupRetrieveSerializer
-
-
-class GroupCreateAPIView(
-    CreateAPIView
-):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = GroupCreateSerializer
+    serializer_class = GroupSerializer
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -167,18 +152,30 @@ class GroupCreateAPIView(
         serializer.instance.members.add(request.user)
 
         return Response(
-            serializer.data,
+            dict(serializer.data),
             status=status.HTTP_201_CREATED,
         )
 
 
-class GroupAddUpdateAPIView(
+class GroupRetrieveUpdateAPIView(
+    GroupAPIview,
+    RetrieveUpdateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupSerializer
+
+
+class GroupManageAPIView(
     GroupAPIview,
     UpdateAPIView
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = GroupInviteSerializer
-    action = 'add'
+    serializer_class = GroupManageSerializer
+
+    def get_queryset(self):
+        return Group.objects.filter(
+            members=self.request.user
+        )
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -192,9 +189,21 @@ class GroupAddUpdateAPIView(
             phone=serializer.data['phone']
         )
 
-        if user.is_active:
-            getattr(instance.members, self.action)(user)
-        else:
+        self.perform_action(instance, user)
+
+        serializer = GroupSerializer(instance)
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+
+class GroupManageAddAPIView(
+    GroupManageAPIView
+):
+    def perform_action(self, instance, user):
+        if not user.is_active:
             return Response(
                 {
                     'phone': [_('User account is disabled.')]
@@ -202,15 +211,11 @@ class GroupAddUpdateAPIView(
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = GroupRetrieveSerializer(instance)
-
-        return Response(
-            dict(serializer.data),
-            status=status.HTTP_201_CREATED
-        )
+        instance.members.add(user)
 
 
-class GroupDeleteUpdateAPIView(
-    GroupAddUpdateAPIView
+class GroupManageRemoveAPIView(
+    GroupManageAPIView
 ):
-    action = 'remove'
+    def perform_action(self, instance, user):
+        instance.members.remove(user)
