@@ -41,7 +41,7 @@ class NexmoResponse(object):
 
 class NexmoProvider(object):
     FORMAT = 'json'
-    VERIFY_ENDPOINT = 'https://1api.nexmo.com/verify/'
+    VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
     SEND_VERIFY_ENDPOINT = VERIFY_ENDPOINT + FORMAT
     CHECK_VERIFY_ENDPOINT = VERIFY_ENDPOINT + 'check/' + FORMAT
 
