@@ -183,6 +183,7 @@ class BaseConfiguration(
     FILE_UPLOAD_HANDLERS = (
         'django.core.files.uploadhandler.MemoryFileUploadHandler',
     )
+    FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600
     # -------------------------------------------------------
     # password hashers configuration
     # -------------------------------------------------------
