@@ -21,6 +21,7 @@ class GroupCleanup(celery.PeriodicTask):
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
-        Group.objects.filter(
+        for group in Group.objects.filter(
             members=None
-        ).delete()
+        ):
+            group.delete()

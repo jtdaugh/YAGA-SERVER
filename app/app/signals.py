@@ -17,10 +17,17 @@ class ModelSignal(
         if self.receiver is None:
             raise NotImplemented('Receiver is not defined')
 
-    def connect(self):
-        for signal in self.signals:
-            _receiver = getattr(self.receiver, signal)
+    @classmethod
+    def connect(cls):
+        instance = cls()
 
-            _signal = getattr(signals, signal)
+        for signal in instance.signals:
+            receiver = getattr(instance.receiver, signal)
 
-            _signal.connect(_receiver, sender=self.model)
+            model_signal = getattr(signals, signal)
+
+            model_signal.connect(receiver, sender=instance.model)
+
+
+def register(obj):
+    obj.connect()

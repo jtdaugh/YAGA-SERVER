@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.db.models import Prefetch
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     RetrieveAPIView, CreateAPIView, UpdateAPIView,
@@ -16,9 +17,10 @@ from .serializers import (
     UserRetrieveSerializer, UserUpdateSerializer,
     CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
-    GroupSerializer, GroupManageSerializer
+    GroupSerializer, GroupManageMemberSerializer,
+    MemberSerializer
 )
-from ...models import Code, Group
+from ...models import Code, Group, Post, Member
 
 
 class UserApiView(
@@ -133,7 +135,32 @@ class GroupAPIview(
     object
 ):
     def get_queryset(self):
-        return Group.objects.prefetch_related('members').filter(
+        user_queryset = get_user_model().objects.filter(
+            is_active=True
+        )
+
+        return Group.objects.prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.prefetch_related(
+                    Prefetch(
+                        'user',
+                        queryset=user_queryset
+                    )
+                )
+            ),
+            Prefetch(
+                'post_set',
+                queryset=Post.objects.prefetch_related(
+                    Prefetch(
+                        'user',
+                        queryset=user_queryset
+                    )
+                ).filter(
+                    ready=True
+                ).order_by('-ready_at'),
+            )
+        ).filter(
             members=self.request.user
         )
 
@@ -150,7 +177,10 @@ class GroupListCreateAPIView(
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        serializer.instance.members.add(request.user)
+        member = Member()
+        member.group = serializer.instance
+        member.user = request.user
+        member.save()
 
         return Response(
             dict(serializer.data),
@@ -167,16 +197,20 @@ class GroupRetrieveUpdateAPIView(
 
 
 class GroupManageAPIView(
-    GroupAPIview,
-    UpdateAPIView
+    object
 ):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = GroupManageSerializer
-
     def get_queryset(self):
         return Group.objects.filter(
             members=self.request.user
         )
+
+
+class GroupManageMemberAPIView(
+    GroupManageAPIView,
+    UpdateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupManageMemberSerializer
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -200,8 +234,8 @@ class GroupManageAPIView(
         )
 
 
-class GroupManageAddAPIView(
-    GroupManageAPIView
+class GroupManageMemberAddAPIView(
+    GroupManageMemberAPIView
 ):
     def perform_action(self, instance, user):
         if not user.is_active:
@@ -211,11 +245,48 @@ class GroupManageAddAPIView(
                 }
             )
 
-        instance.members.add(user)
+        if not instance.member_set.filter(
+            group=instance,
+            user=user
+        ).exists():
+            member = Member()
+            member.group = instance
+            member.user = user
+            member.save()
 
 
-class GroupManageRemoveAPIView(
-    GroupManageAPIView
+class GroupManageMemberRemoveAPIView(
+    GroupManageMemberAPIView
 ):
     def perform_action(self, instance, user):
-        instance.members.remove(user)
+        member = instance.member_set.filter(
+            group=instance,
+            user=user
+        ).first()
+
+        if member:
+            member.delete()
+
+
+class GroupManageMemberMuteAPIView(
+    GroupManageMemberAPIView
+):
+    serializer_class = MemberSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        member = instance.member_set.get(
+            user=self.request.user
+        )
+
+        serializer = self.get_serializer(member, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        serializer = GroupSerializer(instance)
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )

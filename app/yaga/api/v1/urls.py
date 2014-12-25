@@ -7,7 +7,8 @@ from .views import (
     CodeRetrieveAPIView, CodeCreateAPIView,
     TokenCreateAPIView,
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
-    GroupManageAddAPIView, GroupManageRemoveAPIView
+    GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
+    GroupManageMemberMuteAPIView
 )
 
 
@@ -60,13 +61,18 @@ group_urlpatterns = patterns(
     ),
     url(
         r'^(?P<pk>[0-9]+)/remove/$',
-        GroupManageRemoveAPIView.as_view(),
+        GroupManageMemberRemoveAPIView.as_view(),
         name='manage-remove'
     ),
     url(
         r'^(?P<pk>[0-9]+)/add/$',
-        GroupManageAddAPIView.as_view(),
+        GroupManageMemberAddAPIView.as_view(),
         name='manage-add'
+    ),
+    url(
+        r'^(?P<pk>[0-9]+)/mute/$',
+        GroupManageMemberMuteAPIView.as_view(),
+        name='manage-mute'
     ),
 )
 

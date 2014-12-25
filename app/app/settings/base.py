@@ -525,7 +525,7 @@ class BaseConfiguration(
 
     # for logger in logging.root.manager.loggerDict:
     #     LOGGING['loggers'][logger] = LOGGER
-    # LOGGING_CONFIG = None
+    LOGGING_CONFIG = None
     # -------------------------------------------------------
     # celery configuration
     # -------------------------------------------------------

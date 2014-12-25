@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 
 from accounts.models import Token
 from .fields import PhoneField, CodeField
-from ...models import Code, Group
+from ...models import Code, Group, Post, Member
 
 
 class UserRetrieveSerializer(
@@ -108,17 +108,38 @@ class CodeCreateSerializer(
         return attrs
 
 
+class PostSerializer(
+    ModelSerializer
+):
+    user = UserRetrieveSerializer(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ('attachment', 'ready_at', 'user')
+
+
+class MemberSerializer(
+    ModelSerializer
+):
+    user = UserRetrieveSerializer(read_only=True)
+
+    class Meta:
+        model = Member
+        fields = ('user', 'joined_at', 'mute')
+
+
 class GroupSerializer(
     ModelSerializer
 ):
-    members = UserRetrieveSerializer(many=True, read_only=True)
+    members = MemberSerializer(many=True, read_only=True, source='member_set')
+    posts = PostSerializer(many=True, read_only=True, source='post_set')
 
     class Meta:
         model = Group
-        fields = ('name', 'members', 'id')
+        fields = ('name', 'members', 'posts', 'id')
 
 
-class GroupManageSerializer(
+class GroupManageMemberSerializer(
     GroupSerializer
 ):
     phone = PhoneField()

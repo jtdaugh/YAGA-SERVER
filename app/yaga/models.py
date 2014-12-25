@@ -58,6 +58,44 @@ class Code(
         return self.request_id
 
 
+class Member(
+    models.Model
+):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        db_index=True
+    )
+
+    group = models.ForeignKey(
+        'Group',
+        verbose_name=_('Group'),
+        db_index=True
+    )
+
+    mute = models.BooleanField(
+        verbose_name=_('Mute'),
+        db_index=True,
+        default=False
+    )
+
+    joined_at = models.DateTimeField(
+        verbose_name=_('Joined At'),
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = _('Member')
+        verbose_name_plural = _('Members')
+        # auto_created = True
+        unique_together = (
+            ('user', 'group'),
+        )
+
+    def __unicode__(self):
+        return '%s | %s' % (self.user, self.group)
+
+
 class Group(
     models.Model
 ):
@@ -68,6 +106,7 @@ class Group(
 
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
+        through='Member',
         verbose_name=_('Members'),
         db_index=True
     )
@@ -79,7 +118,6 @@ class Group(
 
     def members_count(self):
         return self.members.count()
-
     members_count.short_description = _('Members Count')
 
     class Meta:
@@ -88,3 +126,58 @@ class Group(
 
     def __unicode__(self):
         return self.name
+
+
+class Post(
+    models.Model
+):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        db_index=True
+    )
+
+    group = models.ForeignKey(
+        Group,
+        verbose_name=_('Group'),
+        db_index=True
+
+    )
+
+    attachment = models.FileField(
+        verbose_name=_('Attachment'),
+        db_index=True,
+        upload_to='posts',
+        blank=True,
+        null=True
+    )
+
+    ready = models.BooleanField(
+        verbose_name=_('Ready'),
+        db_index=True,
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
+    ready_at = models.DateTimeField(
+        verbose_name=_('Ready At'),
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = _('Post')
+        verbose_name_plural = _('Posts')
+
+    def __unicode__(self):
+        if self.attachment:
+            return self.attachment.name
+
+        return str(self.created_at)
+
+
+from . import dispatch  # noqa

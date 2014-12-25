@@ -43,7 +43,11 @@ class UserManager(
             date_joined=now,
             **extra_fields
         )
-        user.set_password(password)
+
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
 
         user.save(using=self._db)
 
@@ -207,5 +211,5 @@ class Token(models.Model):
     def generate_key(self):
         return get_random_string(self.KEY_LENGTH, self.KEY_CHARS)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.key
