@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ListField
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
@@ -139,7 +139,20 @@ class GroupSerializer(
         fields = ('name', 'members', 'posts', 'id')
 
 
-class GroupManageMemberSerializer(
+class GroupManageMemberAddSerializer(
+    GroupSerializer
+):
+    phones = ListField(
+        child=PhoneField()
+    )
+
+    class Meta(
+        GroupSerializer.Meta
+    ):
+        fields = ('phones', )
+
+
+class GroupManageMemberRemoveSerializer(
     GroupSerializer
 ):
     phone = PhoneField()
@@ -147,4 +160,4 @@ class GroupManageMemberSerializer(
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('phone',)
+        fields = ('phone', )

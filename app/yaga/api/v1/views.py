@@ -9,7 +9,7 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView, ListCreateAPIView,
     get_object_or_404
 )
-from rest_framework.exceptions import ValidationError
+# from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -17,7 +17,8 @@ from .serializers import (
     UserRetrieveSerializer, UserUpdateSerializer,
     CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
-    GroupSerializer, GroupManageMemberSerializer,
+    GroupSerializer,
+    GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
     MemberSerializer
 )
 from ...models import Code, Group, Post, Member
@@ -210,7 +211,6 @@ class GroupManageMemberAPIView(
     UpdateAPIView
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = GroupManageMemberSerializer
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -220,11 +220,7 @@ class GroupManageMemberAPIView(
 
         model = get_user_model()
 
-        user = model.objects.get_or_create(
-            phone=serializer.data['phone']
-        )
-
-        self.perform_action(instance, user)
+        self.perform_action(instance, model, serializer.data)
 
         serializer = GroupSerializer(instance)
 
@@ -237,28 +233,37 @@ class GroupManageMemberAPIView(
 class GroupManageMemberAddAPIView(
     GroupManageMemberAPIView
 ):
-    def perform_action(self, instance, user):
-        if not user.is_active:
-            raise ValidationError(
-                {
-                    'phone': [_('User account is disabled.')]
-                }
+    serializer_class = GroupManageMemberAddSerializer
+
+    def perform_action(self, instance, model, data):
+        for phone in data['phones']:
+            user = model.objects.get_or_create(
+                phone=phone
             )
 
-        if not instance.member_set.filter(
-            group=instance,
-            user=user
-        ).exists():
-            member = Member()
-            member.group = instance
-            member.user = user
-            member.save()
+            if user.is_active:
+                member = instance.member_set.filter(
+                    group=instance,
+                    user=user
+                ).first()
+
+                if not member:
+                    member = Member()
+                    member.group = instance
+                    member.user = user
+                    member.save()
 
 
 class GroupManageMemberRemoveAPIView(
     GroupManageMemberAPIView
 ):
-    def perform_action(self, instance, user):
+    serializer_class = GroupManageMemberRemoveSerializer
+
+    def perform_action(self, instance, model, data):
+        user = model.objects.get_or_create(
+            phone=data['phone']
+        )
+
         member = instance.member_set.filter(
             group=instance,
             user=user

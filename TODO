@@ -10,3 +10,4 @@ user date_joined -> joined_at
 admin search fields
 admin tabular
 admin filter
+disable PATCH
