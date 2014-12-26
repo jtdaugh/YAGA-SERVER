@@ -291,3 +291,10 @@ def shell():
     local('heroku run "cd {app} && python manage.py shell_plus"'.format(
         app=APP_DIR
     ))
+
+
+@task
+def superuser():
+    local('heroku run "cd {app} && python manage.py createsuperuser"'.format(
+        app=APP_DIR
+    ))
