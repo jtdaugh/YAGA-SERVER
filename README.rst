@@ -8,7 +8,12 @@ Installation Mac OS X:
 
 .. code-block:: bash
 
-    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt
+    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql
+
+    # postgresql
+    ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
+    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
+    # or postgres -D /usr/local/var/postgres
 
     sudo pip install virtualenv
 

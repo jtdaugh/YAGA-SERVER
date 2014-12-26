@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from django.conf.urls import patterns, url, include
 
 from .views import (
-    UserRetrieveAPIView, UserUpdateAPIView,
+    UserRetrieveUpdateAPIView,
     CodeRetrieveAPIView, CodeCreateAPIView,
     TokenCreateAPIView,
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
@@ -35,13 +35,8 @@ auth_urlpatterns = patterns(
 user_urlpatterns = patterns(
     '',
     url(
-        r'^info/$',
-        UserRetrieveAPIView.as_view(),
-        name='info'
-    ),
-    url(
         r'^profile/$',
-        UserUpdateAPIView.as_view(),
+        UserRetrieveUpdateAPIView.as_view(),
         name='profile'
     ),
 )
@@ -55,22 +50,22 @@ group_urlpatterns = patterns(
         name='list-create'
     ),
     url(
-        r'^(?P<pk>[0-9]+)/$',
+        r'^(?P<pk>[a-z0-9]{32})/$',
         GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
     ),
     url(
-        r'^(?P<pk>[0-9]+)/remove/$',
+        r'^(?P<pk>[a-z0-9]{32})/remove/$',
         GroupManageMemberRemoveAPIView.as_view(),
         name='manage-remove'
     ),
     url(
-        r'^(?P<pk>[0-9]+)/add/$',
+        r'^(?P<pk>[a-z0-9]{32})/add/$',
         GroupManageMemberAddAPIView.as_view(),
         name='manage-add'
     ),
     url(
-        r'^(?P<pk>[0-9]+)/mute/$',
+        r'^(?P<pk>[a-z0-9]{32})/mute/$',
         GroupManageMemberMuteAPIView.as_view(),
         name='manage-mute'
     ),

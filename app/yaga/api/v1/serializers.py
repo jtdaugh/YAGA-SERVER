@@ -12,21 +12,13 @@ from .fields import PhoneField, CodeField
 from ...models import Code, Group, Post, Member
 
 
-class UserRetrieveSerializer(
+class UserSerializer(
     ModelSerializer
 ):
     class Meta:
         model = get_user_model()
-        fields = ('phone', 'name')
-
-
-class UserUpdateSerializer(
-    UserRetrieveSerializer
-):
-    class Meta(
-        UserRetrieveSerializer.Meta
-    ):
-        fields = ('name',)
+        read_only_fields = ('phone',)
+        fields = ('phone', 'name', 'id')
 
 
 class TokenSerializer(
@@ -111,17 +103,17 @@ class CodeCreateSerializer(
 class PostSerializer(
     ModelSerializer
 ):
-    user = UserRetrieveSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Post
-        fields = ('attachment', 'ready_at', 'user')
+        fields = ('attachment', 'ready_at', 'user', 'id')
 
 
 class MemberSerializer(
     ModelSerializer
 ):
-    user = UserRetrieveSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Member

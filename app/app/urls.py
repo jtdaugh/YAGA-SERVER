@@ -21,11 +21,11 @@ from content.sitemaps import IndexSitemap
 admin.autodiscover()
 
 
-# if settings.DISABLE_DELETE_SELECTED:
-#     try:
-#         admin.site.disable_action('delete_selected')
-#     except KeyError:
-#         pass
+if settings.DISABLE_DELETE_SELECTED:
+    try:
+        admin.site.disable_action('delete_selected')
+    except KeyError:
+        pass
 
 
 if settings.MODELS_AUTO_REGISTRATION:

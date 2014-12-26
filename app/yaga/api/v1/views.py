@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     RetrieveAPIView, CreateAPIView, UpdateAPIView,
     RetrieveUpdateAPIView, ListCreateAPIView,
+    DestroyAPIView,
     get_object_or_404
 )
 # from rest_framework.exceptions import ValidationError
@@ -14,7 +15,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .serializers import (
-    UserRetrieveSerializer, UserUpdateSerializer,
+    UserSerializer,
     CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
     GroupSerializer,
@@ -22,6 +23,7 @@ from .serializers import (
     MemberSerializer
 )
 from ...models import Code, Group, Post, Member
+from .permissions import CanCreateOrDestroyToken
 
 
 class UserApiView(
@@ -31,20 +33,12 @@ class UserApiView(
         return self.request.user
 
 
-class UserRetrieveAPIView(
+class UserRetrieveUpdateAPIView(
     UserApiView,
-    RetrieveAPIView,
+    RetrieveUpdateAPIView,
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = UserRetrieveSerializer
-
-
-class UserUpdateAPIView(
-    UserApiView,
-    UpdateAPIView,
-):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserUpdateSerializer
+    serializer_class = UserSerializer
 
 
 class CodeCreateAPIView(
@@ -115,9 +109,14 @@ class CodeRetrieveAPIView(
 
 
 class TokenCreateAPIView(
-    CreateAPIView
+    CreateAPIView,
+    DestroyAPIView
 ):
     serializer_class = TokenSerializer
+    permission_classes = (CanCreateOrDestroyToken, )
+
+    def get_object(self):
+        return self.request.auth
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -135,6 +134,10 @@ class TokenCreateAPIView(
 class GroupAPIview(
     object
 ):
+    # def get_queryset(self):
+    #     return Group.objects.filter(
+    #         members=self.request.user
+    #     )
     def get_queryset(self):
         user_queryset = get_user_model().objects.filter(
             is_active=True

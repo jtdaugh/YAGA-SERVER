@@ -1,13 +1,11 @@
-ID to PK at Serializers
 form phone auto +
 validation raise
 msg_cods
-user create las login
 rate limit use
 rate limit ip
 rate limit sms
-user date_joined -> joined_at
 admin search fields
 admin tabular
 admin filter
 disable PATCH
+logout

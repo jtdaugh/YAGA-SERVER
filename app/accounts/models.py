@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ObjectDoesNotExist
+from uuidfield import UUIDField
 from phonenumber_field.modelfields import PhoneNumberField
 
 from app.utils import reverse_host
@@ -83,6 +84,12 @@ class AbstractUser(
     AbstractBaseUser,
     PermissionsMixin
 ):
+    id = UUIDField(
+        primary_key=True,
+        auto=True,
+        version=4
+    )
+
     phone = PhoneNumberField(
         verbose_name=_('Phone Number'),
         max_length=255,
@@ -135,9 +142,6 @@ class AbstractUser(
         verbose_name_plural = _('Users')
 
     def get_username(self):
-        # if self.name:
-        #     return self.name
-
         return self.phone.as_e164
 
     def get_full_name(self):
@@ -185,6 +189,7 @@ class Token(models.Model):
 
     key = models.CharField(
         verbose_name=_('Key'),
+        primary_key=True,
         max_length=255,
         blank=True,
         unique=True,

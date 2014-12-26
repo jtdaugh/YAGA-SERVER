@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import yaga.models
 from django.conf import settings
+import uuidfield.fields
 import phonenumber_field.modelfields
 
 
@@ -17,8 +18,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Code',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('request_id', models.CharField(unique=True, max_length=255, verbose_name='Request Id', db_index=True)),
+                ('request_id', models.CharField(primary_key=True, serialize=False, max_length=255, unique=True, verbose_name='Request Id', db_index=True)),
                 ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number', db_index=True)),
                 ('expire_at', models.DateTimeField(default=yaga.models.expire_at, verbose_name='Expire At', db_index=True)),
             ],
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Group',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
             ],
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Member',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
                 ('mute', models.BooleanField(default=False, db_index=True, verbose_name='Mute')),
                 ('joined_at', models.DateTimeField(auto_now_add=True, verbose_name='Joined At')),
                 ('group', models.ForeignKey(verbose_name='Group', to='yaga.Group')),
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
                 ('attachment', models.FileField(db_index=True, upload_to='posts', null=True, verbose_name='Attachment', blank=True)),
                 ('ready', models.BooleanField(default=False, db_index=True, verbose_name='Ready')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),

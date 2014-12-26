@@ -147,8 +147,10 @@ class BaseConfiguration(
     # -------------------------------------------------------
     DATABASES = {
         'default': {
-            'ENGINE': 'transaction_hooks.backends.sqlite3',
-            'NAME': os.path.abspath(os.path.join(PROJECT_ROOT, 'app.sqlite')),
+            'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+            'NAME': 'app',
+            # 'ENGINE': 'transaction_hooks.backends.sqlite3',
+            # 'NAME': os.path.abspath(os.path.join(PROJECT_ROOT, 'app.sqlite')),
             'ATOMIC_REQUESTS': True,
             'AUTOCOMMIT': True,
             'CONN_MAX_AGE': None
@@ -166,8 +168,8 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # sessions\message configuration
     # -------------------------------------------------------
-    SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-    SESSION_FILE_PATH = os.path.abspath(os.path.join(PROJECT_ROOT, 'sessions'))
+    # SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+    # SESSION_FILE_PATH = os.path.abspath(os.path.join(PROJECT_ROOT, 'sessions'))
     MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
     SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
     SESSION_SAVE_EVERY_REQUEST = False
@@ -367,8 +369,8 @@ class BaseConfiguration(
         # 'django.middleware.locale.LocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
-        # 'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'cached_auth.Middleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        # 'cached_auth.Middleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         # requestprovider

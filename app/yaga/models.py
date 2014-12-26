@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
+from uuidfield import UUIDField
 
 from .providers import NexmoProvider
 
@@ -20,6 +21,7 @@ class Code(
 
     request_id = models.CharField(
         verbose_name=_('Request Id'),
+        primary_key=True,
         max_length=255,
         unique=True,
         db_index=True
@@ -61,6 +63,12 @@ class Code(
 class Member(
     models.Model
 ):
+    id = UUIDField(
+        primary_key=True,
+        auto=True,
+        version=4
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
@@ -93,12 +101,18 @@ class Member(
         )
 
     def __unicode__(self):
-        return '%s | %s' % (self.user, self.group)
+        return self.pk.hex
 
 
 class Group(
     models.Model
 ):
+    id = UUIDField(
+        primary_key=True,
+        auto=True,
+        version=4
+    )
+
     name = models.CharField(
         verbose_name=_('Name'),
         max_length=255,
@@ -125,12 +139,18 @@ class Group(
         verbose_name_plural = _('Groups')
 
     def __unicode__(self):
-        return self.name
+        return self.pk.hex
 
 
 class Post(
     models.Model
 ):
+    id = UUIDField(
+        primary_key=True,
+        auto=True,
+        version=1
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
@@ -174,10 +194,7 @@ class Post(
         verbose_name_plural = _('Posts')
 
     def __unicode__(self):
-        if self.attachment:
-            return self.attachment.name
-
-        return str(self.created_at)
+        return self.pk.hex
 
 
 from . import dispatch  # noqa
