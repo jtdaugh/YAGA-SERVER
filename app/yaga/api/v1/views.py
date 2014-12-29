@@ -110,7 +110,7 @@ class CodeRetrieveAPIView(
         })
 
 
-class TokenCreateAPIView(
+class TokenCreateDestroyAPIView(
     CreateAPIView,
     DestroyAPIView
 ):

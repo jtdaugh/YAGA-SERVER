@@ -5,7 +5,7 @@ from django.conf.urls import patterns, url, include
 from .views import (
     UserRetrieveUpdateAPIView,
     CodeRetrieveAPIView, CodeCreateAPIView,
-    TokenCreateAPIView,
+    TokenCreateDestroyAPIView,
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
     GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
     GroupManageMemberMuteAPIView
@@ -26,7 +26,7 @@ auth_urlpatterns = patterns(
     ),
     url(
         r'^token/$',
-        TokenCreateAPIView.as_view(),
+        TokenCreateDestroyAPIView.as_view(),
         name='token'
     )
 )
