@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from urlparse import urljoin
 from functools import wraps
 
+import ujson
 import regex
 import requests
 from django.conf import settings
@@ -13,6 +14,11 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.utils.functional import SimpleLazyObject
 from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import Site
+from django.utils import six
+from rest_framework.parsers import BaseParser
+from rest_framework.exceptions import ParseError
+from rest_framework.renderers import BaseRenderer
+from rest_framework.settings import api_settings
 
 from requestprovider import get_request
 
@@ -139,3 +145,38 @@ def create_requests_session():
     session.mount('https://', adapter)
 
     return session
+
+
+class UJSONRenderer(BaseRenderer):
+    media_type = 'application/json'
+    format = 'json'
+    ensure_ascii = not api_settings.UNICODE_JSON
+    charset = None
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        if data is None:
+            return bytes()
+
+        renderer_context = renderer_context or {}
+
+        ret = ujson.dumps(
+            data,
+            ensure_ascii=self.ensure_ascii
+        )
+
+        return ret
+
+
+class UJSONParser(BaseParser):
+    media_type = 'application/json'
+    renderer_class = UJSONRenderer
+
+    def parse(self, stream, media_type=None, parser_context=None):
+        parser_context = parser_context or {}
+        encoding = parser_context.get('encoding', settings.DEFAULT_CHARSET)
+
+        try:
+            data = stream.read().decode(encoding)
+            return ujson.loads(data)
+        except Exception as exc:
+            raise ParseError('JSON parse error - %s' % six.text_type(exc))

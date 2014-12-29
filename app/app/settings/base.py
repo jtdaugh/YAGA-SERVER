@@ -150,7 +150,9 @@ class BaseConfiguration(
             'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
             'NAME': 'app',
             # 'ENGINE': 'transaction_hooks.backends.sqlite3',
-            # 'NAME': os.path.abspath(os.path.join(PROJECT_ROOT, 'app.sqlite')),
+            # 'NAME': os.path.abspath(
+            #     os.path.join(PROJECT_ROOT, 'app.sqlite')
+            # ),
             'ATOMIC_REQUESTS': True,
             'AUTOCOMMIT': True,
             'CONN_MAX_AGE': None
@@ -169,7 +171,9 @@ class BaseConfiguration(
     # sessions\message configuration
     # -------------------------------------------------------
     # SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-    # SESSION_FILE_PATH = os.path.abspath(os.path.join(PROJECT_ROOT, 'sessions'))
+    # SESSION_FILE_PATH = os.path.abspath(
+    #      os.path.join(PROJECT_ROOT, 'sessions')
+    # )
     MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
     SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
     SESSION_SAVE_EVERY_REQUEST = False
@@ -557,8 +561,13 @@ class BaseConfiguration(
     # rest framework configuration
     # -------------------------------------------------------
     REST_FRAMEWORK = {
+        # 'DEFAULT_PARSER_CLASSES': (
+        #     'app.utils.UJSONParser',
+        # ),
+        'DATETIME_FORMAT': '%s',
         'DEFAULT_RENDERER_CLASSES': (
             # 'drf_ujson.renderers.UJSONRenderer',
+            # 'app.utils.UJSONRenderer',
             'rest_framework.renderers.JSONRenderer',
             'rest_framework.renderers.BrowsableAPIRenderer',
         ),

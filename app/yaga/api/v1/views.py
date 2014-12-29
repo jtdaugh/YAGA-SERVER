@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import datetime
+
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
@@ -18,7 +20,7 @@ from .serializers import (
     UserSerializer,
     CodeRetrieveSerializer, CodeCreateSerializer,
     TokenSerializer,
-    GroupSerializer,
+    GroupListSerializer, GroupRetrieveSerializer,
     GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
     MemberSerializer
 )
@@ -131,50 +133,23 @@ class TokenCreateAPIView(
         )
 
 
-class GroupAPIview(
-    object
+class GroupListCreateAPIView(
+    ListCreateAPIView
 ):
-    # def get_queryset(self):
-    #     return Group.objects.filter(
-    #         members=self.request.user
-    #     )
-    def get_queryset(self):
-        user_queryset = get_user_model().objects.filter(
-            is_active=True
-        )
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GroupListSerializer
 
+    def get_queryset(self):
         return Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
                 queryset=Member.objects.prefetch_related(
-                    Prefetch(
-                        'user',
-                        queryset=user_queryset
-                    )
+                    'user',
                 )
             ),
-            Prefetch(
-                'post_set',
-                queryset=Post.objects.prefetch_related(
-                    Prefetch(
-                        'user',
-                        queryset=user_queryset
-                    )
-                ).filter(
-                    ready=True
-                ).order_by('-ready_at'),
-            )
         ).filter(
             members=self.request.user
         )
-
-
-class GroupListCreateAPIView(
-    GroupAPIview,
-    ListCreateAPIView
-):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = GroupSerializer
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -193,11 +168,49 @@ class GroupListCreateAPIView(
 
 
 class GroupRetrieveUpdateAPIView(
-    GroupAPIview,
     RetrieveUpdateAPIView
 ):
+    def get_queryset(self):
+        post_filter = {
+            'ready': True
+        }
+
+        since = self.request.QUERY_PARAMS.get('since', None)
+
+        if since is not None:
+            try:
+                since = datetime.datetime.fromtimestamp(
+                    float(since)
+                )
+                post_filter['ready_at__gte'] = since
+            except:
+                pass
+
+        queryset = Group.objects.prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.prefetch_related(
+                    'user',
+                )
+            ),
+            Prefetch(
+                'post_set',
+                queryset=Post.objects.prefetch_related(
+                    Prefetch(
+                        'user',
+                    )
+                ).filter(
+                    **post_filter
+                ).order_by('-ready_at'),
+            )
+        ).filter(
+            members=self.request.user
+        )
+
+        return queryset
+
+    serializer_class = GroupRetrieveSerializer
     permission_classes = (IsAuthenticated,)
-    serializer_class = GroupSerializer
 
 
 class GroupManageAPIView(
@@ -225,7 +238,7 @@ class GroupManageMemberAPIView(
 
         self.perform_action(instance, model, serializer.data)
 
-        serializer = GroupSerializer(instance)
+        serializer = GroupListSerializer(instance)
 
         return Response(
             dict(serializer.data),
@@ -292,7 +305,7 @@ class GroupManageMemberMuteAPIView(
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        serializer = GroupSerializer(instance)
+        serializer = GroupListSerializer(instance)
 
         return Response(
             dict(serializer.data),

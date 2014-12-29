@@ -124,10 +124,28 @@ class GroupSerializer(
     ModelSerializer
 ):
     members = MemberSerializer(many=True, read_only=True, source='member_set')
-    posts = PostSerializer(many=True, read_only=True, source='post_set')
 
     class Meta:
         model = Group
+
+
+class GroupListSerializer(
+    GroupSerializer
+):
+    class Meta(
+        GroupSerializer.Meta
+    ):
+        fields = ('name', 'members', 'id')
+
+
+class GroupRetrieveSerializer(
+    GroupSerializer
+):
+    posts = PostSerializer(many=True, read_only=True, source='post_set')
+
+    class Meta(
+        GroupSerializer.Meta
+    ):
         fields = ('name', 'members', 'posts', 'id')
 
 
