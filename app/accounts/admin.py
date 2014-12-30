@@ -1,17 +1,42 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
+from django.conf.urls import patterns, url
 
 from .forms import UserChangeForm, UserCreationForm
 from .models import Token
 
 
 class UserAdmin(
-    UserAdmin
+    BaseUserAdmin
 ):
+    def get_urls(self):
+        password_urlpatterns = patterns(
+            '',
+            url(
+                r'^([a-z0-9]{32})/password/$',
+                self.admin_site.admin_view(self.user_change_password)
+            )
+        )
+
+        base_urlpatterns = super(UserAdmin, self).get_urls()
+
+        for urlpattern in base_urlpatterns:
+            if '/password/' in urlpattern._regex:
+                password_pattern = urlpattern
+                break
+
+        base_urlpatterns.remove(password_pattern)
+
+        urlpatterns = password_urlpatterns + base_urlpatterns
+
+        print urlpatterns
+
+        return urlpatterns
+
     fieldsets = (
         (None, {
             'fields': (
