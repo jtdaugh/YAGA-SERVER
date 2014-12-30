@@ -184,7 +184,7 @@ class UJSONParser(BaseParser):
             raise ParseError('JSON parse error - %s' % six.text_type(exc))
 
 
-class SentryClient(DjangoClient):
+class SentryCeleryClient(DjangoClient):
     def get_user_info(self, user):
         if not user.is_authenticated():
             return {'is_authenticated': False}
@@ -192,9 +192,8 @@ class SentryClient(DjangoClient):
         user_info = {
             'id': user.pk.hex,
             'is_authenticated': True,
+            'username': user.get_username()
         }
-
-        user_info['username'] = user.get_username()
 
         return user_info
 
@@ -208,10 +207,10 @@ class SentryClient(DjangoClient):
 @celery.task
 def send_raw_integrated(kwargs):
     from raven.contrib.django.models import get_client
-    super(SentryClient, get_client()).send_integrated(kwargs)
+    super(SentryCeleryClient, get_client()).send_integrated(kwargs)
 
 
 @celery.task
 def send_raw(*args, **kwargs):
     from raven.contrib.django.models import get_client
-    super(SentryClient, get_client()).send_encoded(*args, **kwargs)
+    super(SentryCeleryClient, get_client()).send_encoded(*args, **kwargs)
