@@ -44,9 +44,10 @@ class PostCleanup(celery.PeriodicTask):
 class PostProcess(celery.Task):
     def run(self, key):
         key = key.replace(settings.MEDIA_LOCATION, '')
+
         key = key.strip('/')
 
-        group_pk, post_pk = key.split('/')
+        folder, group_pk, post_pk = key.split('/')
 
         post = Post.objects.get(
             group__pk=group_pk,
