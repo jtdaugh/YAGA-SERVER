@@ -93,15 +93,13 @@ class AbstractUser(
     phone = PhoneNumberField(
         verbose_name=_('Phone Number'),
         max_length=255,
-        unique=True,
-        db_index=True
+        unique=True
     )
 
     name = models.CharField(
         verbose_name=_('Name'),
         max_length=255,
         unique=True,
-        db_index=True,
         null=True,
         blank=True
     )
@@ -192,8 +190,6 @@ class Token(models.Model):
         primary_key=True,
         max_length=255,
         blank=True,
-        unique=True,
-        db_index=True
     )
 
     created_at = models.DateTimeField(

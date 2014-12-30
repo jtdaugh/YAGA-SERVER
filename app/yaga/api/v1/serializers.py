@@ -3,7 +3,9 @@ from __future__ import absolute_import, division, unicode_literals
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
-from rest_framework.serializers import ModelSerializer, ListField
+from rest_framework.serializers import (
+    ModelSerializer, ListField, DateTimeField
+)
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
@@ -142,11 +144,12 @@ class GroupRetrieveSerializer(
     GroupSerializer
 ):
     posts = PostSerializer(many=True, read_only=True, source='post_set')
+    since = DateTimeField()
 
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('name', 'members', 'posts', 'id')
+        fields = ('name', 'members', 'posts', 'id', 'since')
 
 
 class GroupManageMemberAddSerializer(

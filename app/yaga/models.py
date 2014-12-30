@@ -1,5 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import os
+import hashlib
+import json
+import hmac
+import base64
+
+import magic
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -10,8 +17,16 @@ from uuidfield import UUIDField
 from .providers import NexmoProvider
 
 
-def expire_at():
+def code_expire_at():
     return timezone.now() + settings.CONSTANTS.SMS_EXPIRATION
+
+
+def post_upload_to(instance, filename=None):
+    return os.path.join(
+        'posts',
+        str(instance.group.pk),
+        str(instance.pk)
+    )
 
 
 class Code(
@@ -22,21 +37,18 @@ class Code(
     request_id = models.CharField(
         verbose_name=_('Request Id'),
         primary_key=True,
-        max_length=255,
-        unique=True,
-        db_index=True
+        max_length=255
     )
 
     phone = PhoneNumberField(
         verbose_name=_('Phone Number'),
         max_length=255,
-        unique=True,
-        db_index=True
+        unique=True
     )
 
     expire_at = models.DateTimeField(
         verbose_name=_('Expire At'),
-        default=expire_at,
+        default=code_expire_at,
         db_index=True,
     )
 
@@ -101,7 +113,7 @@ class Member(
         )
 
     def __unicode__(self):
-        return self.pk.hex
+        return self.user.phone.as_e164
 
 
 class Group(
@@ -139,7 +151,7 @@ class Group(
         verbose_name_plural = _('Groups')
 
     def __unicode__(self):
-        return self.pk.hex
+        return self.name
 
 
 class Post(
@@ -161,13 +173,28 @@ class Post(
         Group,
         verbose_name=_('Group'),
         db_index=True
-
     )
 
     attachment = models.FileField(
         verbose_name=_('Attachment'),
         db_index=True,
-        upload_to='posts',
+        upload_to=post_upload_to,
+        blank=True,
+        null=True
+    )
+
+    checksum = models.CharField(
+        verbose_name=_('Checksum'),
+        max_length=255,
+        db_index=True,
+        blank=True,
+        null=True
+    )
+
+    mime = models.CharField(
+        verbose_name=_('MIme'),
+        max_length=255,
+        db_index=True,
         blank=True,
         null=True
     )
@@ -187,11 +214,102 @@ class Post(
         verbose_name=_('Ready At'),
         blank=True,
         null=True,
+        db_index=True,
     )
 
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
+
+    # def get_checksum(self, chunks):
+    #     md5 = hashlib.md5()
+
+    #     for data in chunks:
+    #         md5.update(data)
+
+    #     return md5.hexdigest()
+
+    def get_mime(self, stream):
+        return magic.from_buffer(stream, mime=True)
+
+    def set_meta(self):
+        stream = self.attachment.file.key.read(1024)
+
+        self.mime = self.get_mime(stream)
+
+        self.checksum = self.attachment.file.key.etag.strip('"')
+
+    # def save(self, *args, **kwargs):
+    #     super(Post, self).save(*args, **kwargs)
+
+    def sign_s3(self):
+        access_key = settings.AWS_ACCESS_KEY_ID
+        secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+
+        content_type = 'video/quicktime'
+
+        expires_in = timezone.now() + settings.CONSTANTS.AWS_UPLOAD_EXPIRES
+
+        expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+        acl = 'public-read'
+
+        key = os.path.join(
+            settings.MEDIA_LOCATION,
+            post_upload_to(self)
+        )
+
+        policy_object = json.dumps({
+            'expiration': expires,
+            'conditions': [
+                {
+                    'bucket': bucket
+                },
+                {
+                    'acl': acl
+                },
+                {
+                    'Content-Type': content_type
+                },
+                {
+                    'key': key
+                },
+                {
+                    'success_action_status': '201'
+                },
+                [
+                    'content-length-range',
+                    0,
+                    settings.CONSTANTS.AWS_UPLOAD_LENGTH
+                ],
+            ]
+        })
+
+        policy = base64.b64encode(
+            policy_object.replace('\n', '').replace('\r', '').encode()
+        )
+
+        signature = hmac.new(
+            secret_access_key.encode(), policy, hashlib.sha1
+        ).digest()
+
+        signature = base64.b64encode(signature)
+
+        bucket_url = settings.S3_HOST
+
+        return {
+            'endpoint': bucket_url,
+            'fields': {
+                'key': key,
+                'acl': acl,
+                'success_action_status': '201',
+                'policy': policy,
+                'signature': signature,
+                'AWSAccessKeyId': access_key,
+                'Content-Type': content_type
+            }
+        }
 
     def __unicode__(self):
         return self.pk.hex

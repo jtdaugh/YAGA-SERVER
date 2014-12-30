@@ -33,6 +33,10 @@ class BaseConfiguration(
     Configuration
 ):
     # -------------------------------------------------------
+    # constants configuration
+    # -------------------------------------------------------
+    CONSTANTS = Constants()
+    # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------
     DEBUG = True
@@ -335,14 +339,27 @@ class BaseConfiguration(
     # storages configuration
     # -------------------------------------------------------
     MEDIA_LOCATION = 'media'
-    MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'media'))
-    MEDIA_URL = '/%s/' % MEDIA_LOCATION
+    # MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'media'))
+    # MEDIA_URL = '/%s/' % MEDIA_LOCATION
     STATIC_LOCATION = 'static'
     STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'static'))
     STATIC_URL = '/%s/' % STATIC_LOCATION
     FAVICON_STATIC = 'frontend/img/favicon.ico'
     COMPRESS_ROOT = STATIC_ROOT
     COMPRESS_URL = STATIC_URL
+
+    AWS_ACCESS_KEY_ID = CONSTANTS.AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = CONSTANTS.AWS_SECRET_ACCESS_KEY
+    AWS_STORAGE_BUCKET_NAME = CONSTANTS.AWS_STORAGE_BUCKET_NAME
+
+    DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
+    S3_HOST = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+    MEDIA_URL = '%smedia/' % S3_HOST
+
+    AWS_PRELOAD_METADATA = False
+    AWS_S3_SECURE_URLS = True
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
     # -------------------------------------------------------
     # django accounting configuration
     # -------------------------------------------------------
@@ -589,10 +606,6 @@ class BaseConfiguration(
         'char2': '\w{2,2}',
     }
     # -------------------------------------------------------
-    # constants configuration
-    # -------------------------------------------------------
-    CONSTANTS = Constants()
-    # -------------------------------------------------------
     # static werkzeug configuration
     # -------------------------------------------------------
     HANDLE_STATIC = False
@@ -644,6 +657,8 @@ class Implementation(
         # -------------------------------------------------------
         # template debug implementation
         # -------------------------------------------------------
+        self.TEMPLATE_DEBUG = self.DEBUG
+
         if self.TEMPLATE_DEBUG:
             fallback = InvalidTemplateObject()
         else:

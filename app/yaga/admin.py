@@ -8,9 +8,11 @@ from .models import Code, Group, Post, Member
 class CodeAdmin(
     admin.ModelAdmin
 ):
-    list_display = ('request_id', 'phone', 'expire_at')
+    list_display = ('phone', 'request_id', 'expire_at')
 
     ordering = ('-expire_at',)
+
+    search_fields = ('phone', 'request_id',)
 
 
 class GroupAdmin(
@@ -20,23 +22,30 @@ class GroupAdmin(
 
     ordering = ('-created_at',)
 
+    search_fields = ('name',)
+
 
 class PostAdmin(
     admin.ModelAdmin
 ):
     list_display = (
-        'user', 'attachment', 'group', 'ready', 'created_at', 'ready_at'
+        'user', 'attachment', 'group', 'mime',
+        'ready', 'created_at', 'ready_at'
     )
 
     ordering = ('-created_at',)
 
-    list_filter = ('ready',)
+    list_filter = ('ready', 'mime')
+
+    search_fields = ('attachment',)
 
 
 class MemberAdmin(
     admin.ModelAdmin
 ):
     list_display = ('user', 'group', 'mute', 'joined_at')
+
+    ordering = ('-joined_at', 'mute')
 
 
 admin.site.register(Group, GroupAdmin)

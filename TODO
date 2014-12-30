@@ -9,3 +9,6 @@ admin tabular
 admin filter
 disable PATCH
 separate render and parse serialezers
+
+kwargs - group_id
+url

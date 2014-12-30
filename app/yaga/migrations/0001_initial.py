@@ -18,9 +18,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Code',
             fields=[
-                ('request_id', models.CharField(primary_key=True, serialize=False, max_length=255, unique=True, verbose_name='Request Id', db_index=True)),
-                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number', db_index=True)),
-                ('expire_at', models.DateTimeField(default=yaga.models.expire_at, verbose_name='Expire At', db_index=True)),
+                ('request_id', models.CharField(max_length=255, serialize=False, verbose_name='Request Id', primary_key=True)),
+                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
+                ('expire_at', models.DateTimeField(default=yaga.models.code_expire_at, verbose_name='Expire At', db_index=True)),
             ],
             options={
                 'verbose_name': 'Code',
@@ -60,10 +60,12 @@ class Migration(migrations.Migration):
             name='Post',
             fields=[
                 ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
-                ('attachment', models.FileField(db_index=True, upload_to='posts', null=True, verbose_name='Attachment', blank=True)),
+                ('attachment', models.FileField(db_index=True, upload_to=yaga.models.post_upload_to, null=True, verbose_name='Attachment', blank=True)),
+                ('checksum', models.CharField(db_index=True, max_length=255, null=True, verbose_name='Checksum', blank=True)),
+                ('mime', models.CharField(db_index=True, max_length=255, null=True, verbose_name='MIme', blank=True)),
                 ('ready', models.BooleanField(default=False, db_index=True, verbose_name='Ready')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
-                ('ready_at', models.DateTimeField(null=True, verbose_name='Ready At', blank=True)),
+                ('ready_at', models.DateTimeField(db_index=True, null=True, verbose_name='Ready At', blank=True)),
                 ('group', models.ForeignKey(verbose_name='Group', to='yaga.Group')),
                 ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
             ],

@@ -25,10 +25,6 @@ class HerokuConfiguration(
     COMPRESS_OFFLINE = True
     COMPRESS_ENABLED = True
     # -------------------------------------------------------
-    # templates configuration
-    # -------------------------------------------------------
-    TEMPLATE_DEBUG = False
-    # -------------------------------------------------------
     # template cache configuration
     # -------------------------------------------------------
     TEMPLATE_CACHE = True
@@ -125,10 +121,6 @@ class HerokuConfiguration(
     STATIC_URL = '%sstatic/' % S3_HOST
     COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
     COMPRESS_URL = STATIC_URL
-    AWS_PRELOAD_METADATA = False
-    AWS_S3_SECURE_URLS = True
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
 
 
 class HerokuImplementation(

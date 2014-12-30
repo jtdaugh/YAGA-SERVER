@@ -6,7 +6,7 @@ from rest_framework.permissions import BasePermission
 from accounts.models import Token
 
 
-class CanCreateOrDestroyToken(BasePermission):
+class CanDestroyToken(BasePermission):
     def has_permission(self, request, view):
         if request.method == 'DELETE':
             return request.auth and isinstance(request.auth, Token)

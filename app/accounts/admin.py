@@ -75,6 +75,8 @@ class TokenAdmin(
 
     ordering = ('-created_at',)
 
+    search_fields = ('key',)
+
 
 admin.site.register(get_user_model(), UserAdmin)
 admin.site.register(Token, TokenAdmin)

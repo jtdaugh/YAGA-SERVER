@@ -22,8 +22,8 @@ class Migration(migrations.Migration):
                 ('last_login', models.DateTimeField(default=django.utils.timezone.now, verbose_name='last login')),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
                 ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
-                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number', db_index=True)),
-                ('name', models.CharField(null=True, max_length=255, blank=True, unique=True, verbose_name='Name', db_index=True)),
+                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
+                ('name', models.CharField(max_length=255, unique=True, null=True, verbose_name='Name', blank=True)),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='Staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='Active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date joined')),
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Token',
             fields=[
-                ('key', models.CharField(primary_key=True, serialize=False, max_length=255, blank=True, unique=True, verbose_name='Key', db_index=True)),
+                ('key', models.CharField(max_length=255, serialize=False, verbose_name='Key', primary_key=True, blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
                 ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
             ],

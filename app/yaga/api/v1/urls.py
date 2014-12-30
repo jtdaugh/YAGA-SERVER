@@ -50,22 +50,22 @@ group_urlpatterns = patterns(
         name='list-create'
     ),
     url(
-        r'^(?P<pk>[a-z0-9]{32})/$',
+        r'^(?P<group_id>[a-z0-9]{32})/$',
         GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
     ),
     url(
-        r'^(?P<pk>[a-z0-9]{32})/remove/$',
+        r'^(?P<group_id>[a-z0-9]{32})/remove/$',
         GroupManageMemberRemoveAPIView.as_view(),
         name='manage-remove'
     ),
     url(
-        r'^(?P<pk>[a-z0-9]{32})/add/$',
+        r'^(?P<group_id>[a-z0-9]{32})/add/$',
         GroupManageMemberAddAPIView.as_view(),
         name='manage-add'
     ),
     url(
-        r'^(?P<pk>[a-z0-9]{32})/mute/$',
+        r'^(?P<group_id>[a-z0-9]{32})/mute/$',
         GroupManageMemberMuteAPIView.as_view(),
         name='manage-mute'
     ),
@@ -83,7 +83,7 @@ urlpatterns = patterns(
         include(user_urlpatterns, namespace='user')
     ),
     url(
-        r'^group/',
+        r'^groups/',
         include(group_urlpatterns, namespace='group')
     ),
 )

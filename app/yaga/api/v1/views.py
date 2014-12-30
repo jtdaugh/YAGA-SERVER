@@ -25,20 +25,15 @@ from .serializers import (
     MemberSerializer
 )
 from ...models import Code, Group, Post, Member
-from .permissions import CanCreateOrDestroyToken
+from .permissions import CanDestroyToken
 
 
-class UserApiView(
-    object
+class UserRetrieveUpdateAPIView(
+    RetrieveUpdateAPIView,
 ):
     def get_object(self):
         return self.request.user
 
-
-class UserRetrieveUpdateAPIView(
-    UserApiView,
-    RetrieveUpdateAPIView,
-):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 
@@ -115,7 +110,7 @@ class TokenCreateDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = TokenSerializer
-    permission_classes = (CanCreateOrDestroyToken, )
+    permission_classes = (CanDestroyToken, )
 
     def get_object(self):
         return self.request.auth
@@ -170,6 +165,10 @@ class GroupListCreateAPIView(
 class GroupRetrieveUpdateAPIView(
     RetrieveUpdateAPIView
 ):
+    lookup_url_kwarg = 'group_id'
+    serializer_class = GroupRetrieveSerializer
+    permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         post_filter = {
             'ready': True
@@ -209,24 +208,32 @@ class GroupRetrieveUpdateAPIView(
 
         return queryset
 
-    serializer_class = GroupRetrieveSerializer
+    def get_object(self):
+        obj = super(GroupRetrieveUpdateAPIView, self).get_object()
+
+        since = None
+
+        for post in obj.post_set.all():
+            if since is not None and since > post.ready_at:
+                continue
+
+            since = post.ready_at
+
+        obj.since = since
+
+        return obj
+
+
+class GroupManageMemberAPIView(
+    UpdateAPIView
+):
+    lookup_url_kwarg = 'group_id'
     permission_classes = (IsAuthenticated,)
 
-
-class GroupManageAPIView(
-    object
-):
     def get_queryset(self):
         return Group.objects.filter(
             members=self.request.user
         )
-
-
-class GroupManageMemberAPIView(
-    GroupManageAPIView,
-    UpdateAPIView
-):
-    permission_classes = (IsAuthenticated,)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
