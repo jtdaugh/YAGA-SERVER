@@ -199,12 +199,10 @@ class SentryClient(DjangoClient):
         return user_info
 
     def send_integrated(self, kwargs):
-        print kwargs
-        print send_raw_integrated.delay(kwargs)
+        return send_raw_integrated.delay(kwargs)
 
     def send_encoded(self, *args, **kwargs):
-        print args, kwargs
-        print send_raw.delay(*args, **kwargs)
+        return send_raw.delay(*args, **kwargs)
 
 
 @celery.task
