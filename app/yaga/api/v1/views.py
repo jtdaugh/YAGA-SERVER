@@ -351,3 +351,14 @@ class PostRetrieveAPIView(
             group__pk=self.kwargs['group_id'],
             pk=self.kwargs['post_id'],
         )
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+
+        response = dict(serializer.data)
+
+        if not instance.ready:
+            response['meta'] = instance.sign_s3()
+
+        return Response(response)
