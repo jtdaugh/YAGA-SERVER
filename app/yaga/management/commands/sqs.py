@@ -33,6 +33,9 @@ class Command(
                 for event in events:
                     try:
                         data = json.loads(event.get_body())
+
+                        logger.info(data)
+
                         if (
                             data['Records'][0]['eventName']
                             ==
