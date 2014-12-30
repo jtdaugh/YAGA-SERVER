@@ -43,7 +43,7 @@ class Command(
                         ):
                             key = data['Records'][0]['s3']['object']['key']
 
-                            PostProcess.delay(
+                            PostProcess().delay(
                                 key
                             )
 
