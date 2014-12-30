@@ -206,21 +206,6 @@ class GroupRetrieveUpdateAPIView(
 
         return queryset
 
-    def get_object(self):
-        obj = super(GroupRetrieveUpdateAPIView, self).get_object()
-
-        since = None
-
-        for post in obj.post_set.all():
-            if since is not None and since > post.ready_at:
-                continue
-
-            since = post.ready_at
-
-        obj.since = since
-
-        return obj
-
 
 class GroupManageMemberAPIView(
     UpdateAPIView
