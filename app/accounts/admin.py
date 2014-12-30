@@ -33,8 +33,6 @@ class UserAdmin(
 
         urlpatterns = password_urlpatterns + base_urlpatterns
 
-        print urlpatterns
-
         return urlpatterns
 
     fieldsets = (
