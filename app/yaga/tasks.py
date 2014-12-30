@@ -5,11 +5,11 @@ import datetime
 from django.utils import timezone
 
 from app import celery
-from .models import Code, Group
+from .models import Code, Group, Post
 
 
 class CodeCleanup(celery.PeriodicTask):
-    run_every = datetime.timedelta(seconds=15)
+    run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
         Code.objects.filter(
@@ -25,3 +25,16 @@ class GroupCleanup(celery.PeriodicTask):
             members=None
         ):
             group.delete()
+
+
+class PostCleanup(celery.PeriodicTask):
+    run_every = datetime.timedelta(minutes=1)
+
+    def run(self, *args, **kwargs):
+        expired = timezone.now() - datetime.timedelta(hours=1)
+
+        for post in Post.objects.filter(
+            created_at__lte=expired,
+            ready_at=None
+        ):
+            post.delete()

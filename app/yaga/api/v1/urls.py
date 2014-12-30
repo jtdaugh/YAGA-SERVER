@@ -9,7 +9,7 @@ from .views import (
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
     GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
     GroupManageMemberMuteAPIView,
-    PostCreateAPIView, PostRetrieveAPIView
+    PostCreateAPIView, PostDestroyAPIView
 )
 
 
@@ -77,8 +77,8 @@ group_urlpatterns = patterns(
     ),
     url(
         r'^(?P<group_id>[a-z0-9]{32})/posts/(?P<post_id>[a-z0-9]{32})/$',
-        PostRetrieveAPIView.as_view(),
-        name='post-retrieve'
+        PostDestroyAPIView.as_view(),
+        name='post-remove'
     ),
 )
 

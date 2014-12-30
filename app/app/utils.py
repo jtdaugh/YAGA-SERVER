@@ -19,7 +19,9 @@ from rest_framework.parsers import BaseParser
 from rest_framework.exceptions import ParseError
 from rest_framework.renderers import BaseRenderer
 from rest_framework.settings import api_settings
+from raven.contrib.django import DjangoClient
 
+from app import celery
 from requestprovider import get_request
 
 
@@ -180,3 +182,38 @@ class UJSONParser(BaseParser):
             return ujson.loads(data)
         except Exception as exc:
             raise ParseError('JSON parse error - %s' % six.text_type(exc))
+
+
+class SentryClient(DjangoClient):
+    def get_user_info(self, user):
+        if not user.is_authenticated():
+            return {'is_authenticated': False}
+
+        user_info = {
+            'id': user.pk.hex,
+            'is_authenticated': True,
+        }
+
+        user_info['username'] = user.get_username()
+
+        return user_info
+
+    def send_integrated(self, kwargs):
+        print kwargs
+        print send_raw_integrated.delay(kwargs)
+
+    def send_encoded(self, *args, **kwargs):
+        print args, kwargs
+        print send_raw.delay(*args, **kwargs)
+
+
+@celery.task
+def send_raw_integrated(kwargs):
+    from raven.contrib.django.models import get_client
+    super(SentryClient, get_client()).send_integrated(kwargs)
+
+
+@celery.task
+def send_raw(*args, **kwargs):
+    from raven.contrib.django.models import get_client
+    super(SentryClient, get_client()).send_encoded(*args, **kwargs)
