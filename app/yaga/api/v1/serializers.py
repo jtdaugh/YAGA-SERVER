@@ -108,7 +108,7 @@ class CodeCreateSerializer(
         return attrs
 
 
-class PostSerializer(
+class PostRetrieveSerializer(
     ModelSerializer
 ):
     user = UserSerializer(read_only=True)
@@ -116,6 +116,15 @@ class PostSerializer(
     class Meta:
         model = Post
         fields = ('attachment', 'ready_at', 'user', 'id')
+
+
+class PostCreateSerializer(
+    PostRetrieveSerializer
+):
+    class Meta(
+        PostRetrieveSerializer.Meta
+    ):
+        read_only_fields = ('attachment', 'ready_at', 'user')
 
 
 class MemberSerializer(
@@ -149,7 +158,9 @@ class GroupListSerializer(
 class GroupRetrieveSerializer(
     GroupSerializer
 ):
-    posts = PostSerializer(many=True, read_only=True, source='post_set')
+    posts = PostRetrieveSerializer(
+        many=True, read_only=True, source='post_set'
+    )
 
     class Meta(
         GroupSerializer.Meta

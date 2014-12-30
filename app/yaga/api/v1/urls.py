@@ -8,7 +8,8 @@ from .views import (
     TokenCreateDestroyAPIView,
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
     GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
-    GroupManageMemberMuteAPIView
+    GroupManageMemberMuteAPIView,
+    PostCreateAPIView, PostRetrieveAPIView
 )
 
 
@@ -55,19 +56,29 @@ group_urlpatterns = patterns(
         name='retrieve-update'
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/remove/$',
+        r'^(?P<group_id>[a-z0-9]{32})/remove_member/$',
         GroupManageMemberRemoveAPIView.as_view(),
-        name='manage-remove'
+        name='member-remove'
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/add/$',
+        r'^(?P<group_id>[a-z0-9]{32})/add_member/$',
         GroupManageMemberAddAPIView.as_view(),
-        name='manage-add'
+        name='member-add'
     ),
     url(
         r'^(?P<group_id>[a-z0-9]{32})/mute/$',
         GroupManageMemberMuteAPIView.as_view(),
-        name='manage-mute'
+        name='member-mute'
+    ),
+    url(
+        r'^(?P<group_id>[a-z0-9]{32})/add_post/$',
+        PostCreateAPIView.as_view(),
+        name='post-add'
+    ),
+    url(
+        r'^(?P<group_id>[a-z0-9]{32})/posts/(?P<post_id>[a-z0-9]{32})/$',
+        PostRetrieveAPIView.as_view(),
+        name='post-retrieve'
     ),
 )
 

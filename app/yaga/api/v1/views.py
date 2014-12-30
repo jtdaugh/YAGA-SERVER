@@ -22,7 +22,8 @@ from .serializers import (
     GroupListSerializer, GroupRetrieveSerializer,
     GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
     MemberSerializer,
-    SinceSerializer
+    SinceSerializer,
+    PostCreateSerializer, PostRetrieveSerializer
 )
 from ...models import Code, Group, Post, Member
 from .permissions import CanDestroyToken
@@ -300,4 +301,53 @@ class GroupManageMemberMuteAPIView(
         return Response(
             dict(serializer.data),
             status=status.HTTP_200_OK
+        )
+
+
+class PostCreateAPIView(
+    CreateAPIView
+):
+    lookup_url_kwarg = 'group_id'
+    serializer_class = PostCreateSerializer
+
+    def get_queryset(self):
+        return Group.objects.filter(
+            members=self.request.user
+        )
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        group = self.get_object()
+
+        post = Post()
+        post.user = request.user
+        post.group = group
+        post.save()
+
+        serializer = self.get_serializer(post)
+        response = dict(serializer.data)
+
+        response['meta'] = post.sign_s3()
+
+        return Response(
+            response,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class PostRetrieveAPIView(
+    RetrieveAPIView
+):
+    serializer_class = PostRetrieveSerializer
+
+    def get_object(self):
+        queryset = Post.objects.all()
+
+        return get_object_or_404(
+            queryset,
+            user=self.request.user,
+            group__pk=self.kwargs['group_id'],
+            pk=self.kwargs['post_id'],
         )
