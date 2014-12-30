@@ -21,3 +21,5 @@ class Constants(
     AWS_ACCESS_KEY_ID = 'AKIAJSOKYB6HRKACSAMA'
     AWS_SECRET_ACCESS_KEY = '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'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
+
+    SQS_QUEUE = 's3_yaga-dev_sqs'

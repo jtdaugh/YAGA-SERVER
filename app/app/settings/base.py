@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+# import logging
 
 import closure
 import yuicompressor
@@ -373,7 +374,7 @@ class BaseConfiguration(
     # RAVEN_CONFIG = {
     #     'dsn': '',
     # }
-    SENTRY_CLIENT = 'app.utils.SentryClient'
+    SENTRY_CLIENT = 'app.utils.SentryCeleryClient'
     # -------------------------------------------------------
     # middleware classes configuration
     # -------------------------------------------------------
@@ -486,8 +487,13 @@ class BaseConfiguration(
         ('hell', 'hellysmile@gmail.com'),
     ]
     MANAGERS = ADMINS
-    LOGGER = {
+    DEBUG_LOGGER = {
         'level': 'DEBUG',
+        'handlers': ['console', 'sentry'],
+        'propagate': False,
+    }
+    ERROR_LOGGER = {
+        'level': 'ERROR',
         'handlers': ['console', 'sentry'],
         'propagate': False,
     }
@@ -515,41 +521,42 @@ class BaseConfiguration(
             }
         },
         'loggers': {
-            'amqp': LOGGER,
-            'kombu': LOGGER,
-            'kombu.common': LOGGER,
-            'kombu.connection': LOGGER,
-            'celery': LOGGER,
-            'celery.worker': LOGGER,
-            'celery.task': LOGGER,
-            'celery.app.builtins': LOGGER,
-            'celery.app': LOGGER,
+            'amqp': DEBUG_LOGGER,
+            'kombu': DEBUG_LOGGER,
+            # 'kombu.common': DEBUG_LOGGER,
+            # 'kombu.connection': DEBUG_LOGGER,
+            'celery': DEBUG_LOGGER,
+            # 'celery.worker': DEBUG_LOGGER,
+            # 'celery.task': DEBUG_LOGGER,
+            # 'celery.app.builtins': DEBUG_LOGGER,
+            # 'celery.app': DEBUG_LOGGER,
 
-            'gunicorn': LOGGER,
-            'gunicorn.http': LOGGER,
-            'gunicorn.http.wsgi': LOGGER,
-            'gunicorn.access': LOGGER,
-            'gunicorn.error': LOGGER,
+            'gunicorn': DEBUG_LOGGER,
+            # 'gunicorn.http': DEBUG_LOGGER,
+            # 'gunicorn.http.wsgi': DEBUG_LOGGER,
+            # 'gunicorn.access': DEBUG_LOGGER,
+            # 'gunicorn.error': DEBUG_LOGGER,
 
-            'configurations.importer': LOGGER,
-            'configurations': LOGGER,
+            # 'configurations.importer': DEBUG_LOGGER,
+            'configurations': DEBUG_LOGGER,
 
-            'multiprocessing': LOGGER,
+            'multiprocessing': DEBUG_LOGGER,
 
-            'django': LOGGER,
-            'django.request': LOGGER,
-            'django.security': LOGGER,
-            'django.db.backends': LOGGER,
+            'django': DEBUG_LOGGER,
+            # 'django.request': DEBUG_LOGGER,
+            # 'django.security': DEBUG_LOGGER,
+            # 'django.db.backends': DEBUG_LOGGER,
 
-            'requests': LOGGER,
+            'boto': ERROR_LOGGER,
 
-            'yaga.providers': LOGGER
+            'requests': DEBUG_LOGGER,
+
+            'yaga': DEBUG_LOGGER
         },
-        'root': LOGGER,
+        'root': DEBUG_LOGGER,
     }
-
     # for logger in logging.root.manager.loggerDict:
-    #     LOGGING['loggers'][logger] = LOGGER
+    #     LOGGING['loggers'][logger] = DEBUG_LOGGER
     # LOGGING_CONFIG = None
     # -------------------------------------------------------
     # celery configuration

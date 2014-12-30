@@ -275,9 +275,6 @@ class Post(
                 {
                     'key': key
                 },
-                {
-                    'success_action_status': '201'
-                },
                 [
                     'content-length-range',
                     0,
@@ -303,7 +300,6 @@ class Post(
             'fields': {
                 'key': key,
                 'acl': acl,
-                'success_action_status': '201',
                 'policy': policy,
                 'signature': signature,
                 'AWSAccessKeyId': access_key,

@@ -14,6 +14,7 @@ DYNOS = {
     'web': 1,
     'celery_broker': 1,
     'celery_worker': 0,
+    'sqs': 1
 }
 USE_NEWRELIC = True
 # STOP_TIMEOUT = 30
@@ -62,6 +63,17 @@ def gunicorn():
         workers=PROCESS_WORKERS,
         timeout=HTTP_TIMEOUT
     )
+
+    if USE_NEWRELIC:
+        cmd = NEWRELIC_CMD + cmd
+
+    with lcd(APP_DIR):
+        local(cmd)
+
+
+@task
+def sqs():
+    cmd = 'python manage.py sqs'
 
     if USE_NEWRELIC:
         cmd = NEWRELIC_CMD + cmd

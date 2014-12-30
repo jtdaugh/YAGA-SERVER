@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 import datetime
 
 from django.utils import timezone
+from django.conf import settings
 
 from app import celery
 from .models import Code, Group, Post
@@ -38,3 +39,22 @@ class PostCleanup(celery.PeriodicTask):
             ready_at=None
         ):
             post.delete()
+
+
+class PostProcess(celery.Task):
+    def run(self, key):
+        key = key.replace(settings.MEDIA_LOCATION, '')
+        key = key.strip('/')
+
+        group_pk, post_pk = key.split('/')
+
+        post = Post.objects.get(
+            group__pk=group_pk,
+            pk=post_pk
+        )
+
+        post.attachment = key
+        post.set_meta()
+        post.ready = True
+        post.ready_at = timezone.now()
+        post.save()
