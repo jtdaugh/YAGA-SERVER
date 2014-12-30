@@ -4,14 +4,20 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.serializers import (
-    ModelSerializer, ListField, DateTimeField
+    ModelSerializer, ListField, DateTimeField, Serializer
 )
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import Token
-from .fields import PhoneField, CodeField
+from .fields import PhoneField, CodeField, TimeStampField
 from ...models import Code, Group, Post, Member
+
+
+class SinceSerializer(
+    Serializer
+):
+    since = TimeStampField()
 
 
 class UserSerializer(

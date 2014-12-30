@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import datetime
-
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
@@ -22,7 +21,8 @@ from .serializers import (
     TokenSerializer,
     GroupListSerializer, GroupRetrieveSerializer,
     GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
-    MemberSerializer
+    MemberSerializer,
+    SinceSerializer
 )
 from ...models import Code, Group, Post, Member
 from .permissions import CanDestroyToken
@@ -174,16 +174,14 @@ class GroupRetrieveUpdateAPIView(
             'ready': True
         }
 
-        since = self.request.QUERY_PARAMS.get('since', None)
+        serializer = SinceSerializer(data=self.request.QUERY_PARAMS.dict())
 
-        if since is not None:
-            try:
-                since = datetime.datetime.fromtimestamp(
-                    float(since)
-                )
-                post_filter['ready_at__gte'] = since
-            except:
-                pass
+        if serializer.is_valid():
+            post_filter['ready_at__gte'] = (
+                serializer.validated_data['since']
+                -
+                settings.CONSTANTS.SLOP_FACTOR
+            )
 
         queryset = Group.objects.prefetch_related(
             Prefetch(
