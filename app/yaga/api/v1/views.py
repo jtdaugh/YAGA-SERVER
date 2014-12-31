@@ -309,6 +309,7 @@ class PostCreateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = PostCreateSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return Group.objects.filter(
@@ -341,6 +342,7 @@ class PostDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = PostRetrieveSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_object(self):
         queryset = Post.objects.exclude(
