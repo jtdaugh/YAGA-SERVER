@@ -36,19 +36,21 @@ class Command(
 
                         logger.info(data)
 
-                        if (
-                            data['Records'][0]['eventName']
-                            ==
-                            'ObjectCreated:Post'
-                        ):
-                            key = data['Records'][0]['s3']['object']['key']
+                        if data.get('Records'):
+                            if (
+                                data['Records'][0]['eventName']
+                                ==
+                                'ObjectCreated:Post'
+                            ):
+                                key = data['Records'][0]['s3']['object']['key']
 
-                            PostProcess().delay(
-                                key
-                            )
+                                if key.starswith(settings.MEDIA_LOCATION):
+                                    PostProcess().delay(
+                                        key
+                                    )
 
                         event.delete()
                     except Exception as e:
-                        logger.error(e)
+                        logger.exception(e)
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)

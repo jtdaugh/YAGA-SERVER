@@ -25,6 +25,11 @@ class GroupCleanup(celery.PeriodicTask):
         for group in Group.objects.filter(
             members=None
         ):
+            for post in Post.objects.filter(
+                group=group
+            ):
+                post.delete()
+
             group.delete()
 
 

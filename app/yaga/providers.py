@@ -88,7 +88,7 @@ class NexmoProvider(object):
 
             logger.info(data)
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
 
             data = None
 
