@@ -33,7 +33,11 @@ class UserRetrieveUpdateAPIView(
     RetrieveUpdateAPIView,
 ):
     def get_object(self):
-        return self.request.user
+        obj = self.request.user
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
 
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
@@ -114,7 +118,11 @@ class TokenCreateDestroyAPIView(
     permission_classes = (CanDestroyToken, )
 
     def get_object(self):
-        return self.request.auth
+        obj = self.request.auth
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -338,20 +346,40 @@ class PostCreateAPIView(
         )
 
 
-class PostDestroyAPIView(
+class PostRetrieveDestroyAPIView(
+    RetrieveAPIView,
     DestroyAPIView
 ):
     serializer_class = PostRetrieveSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
-        queryset = Post.objects.exclude(
-            ready_at=None
-        )
+        queryset = Post.objects.all()
 
-        return get_object_or_404(
+        obj = get_object_or_404(
             queryset,
             user=self.request.user,
             group__pk=self.kwargs['group_id'],
             pk=self.kwargs['post_id'],
         )
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if instance.ready:
+            self.perform_destroy(instance)
+
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
+            )
+        else:
+            return Response(
+                {
+                    'ready': [_('Can not remove not ready post.')]
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
