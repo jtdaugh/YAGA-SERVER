@@ -44,7 +44,7 @@ class Command(
                             ):
                                 key = data['Records'][0]['s3']['object']['key']
 
-                                if key.starswith(settings.MEDIA_LOCATION):
+                                if key.startswith(settings.MEDIA_LOCATION):
                                     PostProcess().delay(
                                         key
                                     )
