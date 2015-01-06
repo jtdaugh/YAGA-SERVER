@@ -1,8 +1,8 @@
 Collectfast==0.2.1
-Django==1.7.1
+Django==1.7.2
 Fabric==1.10.1
 Markdown==2.5.2
-Pillow==2.6.1
+Pillow==2.7.0
 PyYAML==3.11
 Pygments==2.0.1
 SQLAlchemy==0.9.8
@@ -41,7 +41,7 @@ django-pickling==0.1
 django-pylibmc==0.5.0
 django-pylibmc-sasl==0.2.4
 django-redis-sessions-fork==0.6.2
-django-rest-swagger==0.2.6
+django-rest-swagger==0.2.7
 django-reversion==1.8.5
 django-secure==1.0.1
 django-storages==1.1.8
@@ -52,7 +52,7 @@ docutils==0.12
 drf-extensions==0.2.6
 drf-ujson==1.1
 ecdsa==0.11
-flake8==2.2.5
+flake8==2.3.0
 geoip2==2.1.0
 gnureadline==6.3.3
 gunicorn==19.1.1
@@ -80,7 +80,7 @@ pycparser==2.10
 pycrypto==2.6.1
 pyflakes==0.8.1
 pylibmc==1.4.1
-python-dateutil==2.3
+python-dateutil==2.4.0
 python-magic==0.4.6
 pytz==2014.10
 raven==5.1.1
@@ -88,11 +88,11 @@ redis==2.10.3
 regex==2014.12.24
 requests==2.5.1
 rest-condition==1.0.1
-six==1.8.0
+six==1.9.0
 sqlparse==0.1.14
 tox==1.8.1
 uWSGI==2.0.9
 ujson==1.33
-virtualenv==12.0.4
+virtualenv==12.0.5
 wsgiref==0.1.2
 yuicompressor==2.4.8
