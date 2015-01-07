@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from app.settings.base import BaseConfiguration, Implementation, Initialization
-
 import dj_database_url
+
+from app.settings.base import BaseConfiguration, Implementation, Initialization
 
 
 class TravisConfiguration(
