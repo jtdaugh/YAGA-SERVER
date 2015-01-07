@@ -4,26 +4,21 @@ from __future__ import (
 
 from time import sleep
 
-from fabric.api import local, task, warn_only, lcd
+from fabric.api import local, task, warn_only
 from fabric.operations import prompt
 
 
 APP_DIR = 'app'
-PROCESS_WORKERS = 2
 DYNOS = {
     'web': 1,
     'celery_broker': 1,
     'celery_worker': 0,
     'sqs': 1
 }
-USE_NEWRELIC = True
 # STOP_TIMEOUT = 30
 # START_TIMEOUT = 30
 STOP_TIMEOUT = 0
 START_TIMEOUT = 0
-HTTP_TIMEOUT = 30
-
-NEWRELIC_CMD = 'newrelic-admin run-program '
 
 
 def ensure_prompt(label):
@@ -40,90 +35,6 @@ def ensure_prompt(label):
 
 
 @task
-def uwsgi():
-    cmd = 'uwsgi --module=app.wsgi:application --http-keepalive=0 --master --processes={workers} --harakiri=30 --vacuum --single-interpreter --enable-threads --http :$PORT'
-
-    cmd = cmd.format(
-        workers=PROCESS_WORKERS,
-        timeout=HTTP_TIMEOUT
-    )
-
-    if USE_NEWRELIC:
-        cmd = NEWRELIC_CMD + cmd
-
-    with lcd(APP_DIR):
-        local(cmd)
-
-
-@task
-def gunicorn():
-    cmd = 'gunicorn app.wsgi:application --keep-alive=0 --workers={workers} --timeout={timeout} --preload --access-logfile=- --error-logfile=-'
-
-    cmd = cmd.format(
-        workers=PROCESS_WORKERS,
-        timeout=HTTP_TIMEOUT
-    )
-
-    if USE_NEWRELIC:
-        cmd = NEWRELIC_CMD + cmd
-
-    with lcd(APP_DIR):
-        local(cmd)
-
-
-@task
-def sqs():
-    cmd = 'python manage.py sqs'
-
-    if USE_NEWRELIC:
-        cmd = NEWRELIC_CMD + cmd
-
-    with lcd(APP_DIR):
-        local(cmd)
-
-
-@task
-def celery_broker():
-    cmd = 'celery -A app worker -c {workers} -B'
-
-    cmd = cmd.format(
-        workers=PROCESS_WORKERS
-    )
-
-    if USE_NEWRELIC:
-        cmd = NEWRELIC_CMD + cmd
-
-    with lcd(APP_DIR):
-        local(cmd)
-
-
-@task
-def celery_worker():
-    cmd = 'run-program celery -A app worker -c {workers}'
-
-    cmd = cmd.format(
-        workers=PROCESS_WORKERS
-    )
-
-    if USE_NEWRELIC:
-        cmd = NEWRELIC_CMD + cmd
-
-    with lcd(APP_DIR):
-        local(cmd)
-
-
-@task
-def deploy():
-    with lcd(APP_DIR):
-        local('python manage.py clear_cache')
-        local('python manage.py migrate')
-        local('python manage.py bower_install -- --config.interactive=false')
-        local('python manage.py collectstatic --noinput')
-        local('python manage.py clean_compress')
-        local('python manage.py compress')
-
-
-@task
 def release(initial=False):
     if not initial:
         stop()
@@ -131,7 +42,7 @@ def release(initial=False):
     local('git st')
     local('git push heroku master')
 
-    local('heroku run fab deploy')
+    local('heroku run rake deploy')
 
     start()
 
