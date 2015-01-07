@@ -13,10 +13,6 @@ class TravisConfiguration(
     # -------------------------------------------------------
     DEBUG = True
     # -------------------------------------------------------
-    # templates configuration
-    # -------------------------------------------------------
-    TEMPLATE_DEBUG = True
-    # -------------------------------------------------------
     # template cache configuration
     # -------------------------------------------------------
     TEMPLATE_CACHE = False
@@ -106,16 +102,6 @@ class TravisConfiguration(
 class TravisImplementation(
     Implementation
 ):
-    def implement(self):
-        super(TravisImplementation, self).implement()
-        # -------------------------------------------------------
-        # rest framework configuration
-        # -------------------------------------------------------
-        self.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
-            'rest_framework.renderers.JSONRenderer',
-        )
-
-    def connect(self):
         pass
 
 
