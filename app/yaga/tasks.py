@@ -37,7 +37,7 @@ class PostCleanup(celery.PeriodicTask):
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
-        expired = timezone.now() - datetime.timedelta(hours=1)
+        expired = timezone.now() - datetime.timedelta(days=1)
 
         for post in Post.objects.filter(
             created_at__lte=expired,

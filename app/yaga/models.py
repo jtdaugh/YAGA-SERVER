@@ -11,6 +11,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 from phonenumber_field.modelfields import PhoneNumberField
 from uuidfield import UUIDField
 
@@ -29,6 +30,7 @@ def post_upload_to(instance, filename=None):
     )
 
 
+@python_2_unicode_compatible
 class Code(
     models.Model
 ):
@@ -68,16 +70,17 @@ class Code(
         verbose_name = _('Code')
         verbose_name_plural = _('Codes')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.request_id
 
 
+@python_2_unicode_compatible
 class Member(
     models.Model
 ):
     id = UUIDField(
-        primary_key=True,
         auto=True,
+        primary_key=True,
         version=4
     )
 
@@ -112,16 +115,17 @@ class Member(
             ('user', 'group'),
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.user.phone.as_e164
 
 
+@python_2_unicode_compatible
 class Group(
     models.Model
 ):
     id = UUIDField(
-        primary_key=True,
         auto=True,
+        primary_key=True,
         version=4
     )
 
@@ -150,17 +154,25 @@ class Group(
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class Post(
     models.Model
 ):
     id = UUIDField(
-        primary_key=True,
         auto=True,
+        primary_key=True,
         version=1
+    )
+
+    name = models.CharField(
+        verbose_name=_('Name'),
+        max_length=255,
+        blank=True,
+        null=True
     )
 
     user = models.ForeignKey(
@@ -228,6 +240,9 @@ class Post(
     #         md5.update(data)
 
     #     return md5.hexdigest()
+
+    def likes(self):
+        return self.like_set.count()
 
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
@@ -300,14 +315,52 @@ class Post(
             'fields': {
                 'key': key,
                 'acl': acl,
-                'policy': policy,
-                'signature': signature,
+                'policy': policy.decode(),
+                'signature': signature.decode(),
                 'AWSAccessKeyId': access_key,
                 'Content-Type': content_type
             }
         }
 
-    def __unicode__(self):
+    def __str__(self):
+        return self.pk.hex
+
+
+@python_2_unicode_compatible
+class Like(
+    models.Model
+):
+    id = UUIDField(
+        auto=True,
+        primary_key=True,
+        version=4
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        db_index=True
+    )
+
+    post = models.ForeignKey(
+        Post,
+        verbose_name=_('Post'),
+        db_index=True
+    )
+
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = _('Like')
+        verbose_name_plural = _('Likes')
+        unique_together = (
+            ('user', 'post'),
+        )
+
+    def __str__(self):
         return self.pk.hex
 
 

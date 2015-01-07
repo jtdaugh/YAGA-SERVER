@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, division, unicode_literals
 
+import six
 import locale
 import os
 import sys
+import imp
 
 
 def fix_locale():
-    reload(sys)
-    sys.setdefaultencoding('utf-8')
+    if not six.PY3:
+        imp.reload(sys)
+        sys.setdefaultencoding('utf-8')
+
     try:
         locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
     except ValueError:

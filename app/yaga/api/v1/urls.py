@@ -9,7 +9,8 @@ from .views import (
     GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
     GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
     GroupManageMemberMuteAPIView,
-    PostCreateAPIView, PostRetrieveDestroyAPIView
+    PostCreateAPIView, PostRetrieveUpdateDestroyAPIView,
+    LikeCreateDestroyAPIView
 )
 
 
@@ -42,6 +43,44 @@ user_urlpatterns = patterns(
     ),
 )
 
+post_urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        PostCreateAPIView.as_view(),
+        name='add'
+    ),
+    url(
+        r'^(?P<post_id>[a-z0-9]{32})/like/$',
+        LikeCreateDestroyAPIView.as_view(),
+        name='like'
+    ),
+    url(
+        r'^(?P<post_id>[a-z0-9]{32})/$',
+        PostRetrieveUpdateDestroyAPIView.as_view(),
+        name='detail'
+    ),
+)
+
+member_urlpatterns = patterns(
+    '',
+    url(
+        r'^remove/$',
+        GroupManageMemberRemoveAPIView.as_view(),
+        name='remove'
+    ),
+    url(
+        r'^add/$',
+        GroupManageMemberAddAPIView.as_view(),
+        name='add'
+    ),
+    url(
+        r'^mute/$',
+        GroupManageMemberMuteAPIView.as_view(),
+        name='mute'
+    ),
+)
+
 
 group_urlpatterns = patterns(
     '',
@@ -56,30 +95,13 @@ group_urlpatterns = patterns(
         name='retrieve-update'
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/remove_member/$',
-        GroupManageMemberRemoveAPIView.as_view(),
-        name='member-remove'
+        r'^(?P<group_id>[a-z0-9]{32})/members/',
+        include(member_urlpatterns, namespace='members')
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/add_member/$',
-        GroupManageMemberAddAPIView.as_view(),
-        name='member-add'
-    ),
-    url(
-        r'^(?P<group_id>[a-z0-9]{32})/mute/$',
-        GroupManageMemberMuteAPIView.as_view(),
-        name='member-mute'
-    ),
-    url(
-        r'^(?P<group_id>[a-z0-9]{32})/add_post/$',
-        PostCreateAPIView.as_view(),
-        name='post-add'
-    ),
-    url(
-        r'^(?P<group_id>[a-z0-9]{32})/posts/(?P<post_id>[a-z0-9]{32})/$',
-        PostRetrieveDestroyAPIView.as_view(),
-        name='post-remove'
-    ),
+        r'^(?P<group_id>[a-z0-9]{32})/posts/',
+        include(post_urlpatterns, namespace='posts')
+    )
 )
 
 

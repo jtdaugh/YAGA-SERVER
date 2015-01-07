@@ -1,13 +1,15 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from urlparse import urljoin
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
 from functools import wraps
 
 import ujson
-import regex
 import requests
+import regex
 from django.conf import settings
-from django.conf.urls import url
 from django.utils.http import urlquote
 from django.views.decorators.cache import cache_page
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -23,23 +25,6 @@ from raven.contrib.django import DjangoClient
 
 from app import celery
 from requestprovider import get_request
-
-
-rurl_re = regex.compile('<((\w+:)?\w+)>')
-
-
-def regex_substituter(match):
-    rule = match.groups()[0]
-    name, pattern = rule.split(':')
-    return '(?P<%s>%s)' % (name, settings.URL_REGEX_REPLACES[pattern])
-
-
-def translate_regex(pattern):
-    return rurl_re.sub(regex_substituter, pattern)[1:]
-
-
-def rurl(pattern, *args, **kwargs):
-    return url(translate_regex(pattern), *args, **kwargs)
 
 
 def nless(content):

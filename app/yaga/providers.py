@@ -2,7 +2,10 @@ from __future__ import absolute_import, division, unicode_literals
 
 import json
 import logging
-from urllib import urlencode
+try:
+    from urllib import urlencode
+except ImportError:
+    from urllib.parse import urlencode
 
 from django.conf import settings
 

@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     RetrieveAPIView, CreateAPIView, UpdateAPIView,
     RetrieveUpdateAPIView, ListCreateAPIView,
-    DestroyAPIView,
+    DestroyAPIView, RetrieveUpdateDestroyAPIView,
     get_object_or_404
 )
 # from rest_framework.exceptions import ValidationError
@@ -23,9 +23,9 @@ from .serializers import (
     GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
     MemberSerializer,
     SinceSerializer,
-    PostCreateSerializer, PostRetrieveSerializer
+    PostSerializer
 )
-from ...models import Code, Group, Post, Member
+from ...models import Code, Group, Post, Member, Like
 from .permissions import CanDestroyToken
 
 
@@ -316,7 +316,7 @@ class PostCreateAPIView(
     CreateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    serializer_class = PostCreateSerializer
+    serializer_class = PostSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -346,11 +346,10 @@ class PostCreateAPIView(
         )
 
 
-class PostRetrieveDestroyAPIView(
-    RetrieveAPIView,
-    DestroyAPIView
+class PostRetrieveUpdateDestroyAPIView(
+    RetrieveUpdateDestroyAPIView
 ):
-    serializer_class = PostRetrieveSerializer
+    serializer_class = PostSerializer
     permission_classes = (IsAuthenticated,)
 
     def get_object(self):
@@ -383,3 +382,69 @@ class PostRetrieveDestroyAPIView(
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class LikeCreateDestroyAPIView(
+    CreateAPIView,
+    DestroyAPIView
+):
+    serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        queryset = Post.objects.all()
+
+        obj = get_object_or_404(
+            queryset,
+            group__pk=self.kwargs['group_id'],
+            pk=self.kwargs['post_id'],
+        )
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
+
+    def check_object_permissions(self, request, obj):
+        if not obj.group.member_set.filter(
+            user=request.user
+        ).exists():
+            self.permission_denied(request)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+
+        instance = self.get_object().like_set.filter(
+            user=request.user
+        ).first()
+
+        if instance:
+            instance.delete()
+
+        serializer = self.get_serializer(obj)
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+    def create(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        self.perform_create(serializer)
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+    def perform_create(self, serializer):
+        if not serializer.instance.like_set.filter(
+            user=self.request.user
+        ).exists():
+            obj = Like()
+            obj.user = self.request.user
+            obj.post = serializer.instance
+            obj.save()

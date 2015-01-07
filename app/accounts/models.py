@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.encoding import python_2_unicode_compatible
 from uuidfield import UUIDField
 from phonenumber_field.modelfields import PhoneNumberField
 
@@ -80,13 +81,14 @@ class UserManager(
         return user
 
 
+@python_2_unicode_compatible
 class AbstractUser(
     AbstractBaseUser,
     PermissionsMixin
 ):
     id = UUIDField(
-        primary_key=True,
         auto=True,
+        primary_key=True,
         version=4
     )
 
@@ -151,9 +153,6 @@ class AbstractUser(
     def username(self):
         return self.get_username()
 
-    def __unicode__(self):
-        return self.get_username()
-
     def __str__(self):
         return self.get_username()
 
@@ -175,6 +174,7 @@ class User(
         swappable = 'AUTH_USER_MODEL'
 
 
+@python_2_unicode_compatible
 class Token(models.Model):
     KEY_LENGTH = 128
     KEY_CHARS = string.ascii_letters + string.digits
@@ -212,5 +212,5 @@ class Token(models.Model):
     def generate_key(self):
         return get_random_string(self.KEY_LENGTH, self.KEY_CHARS)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.key

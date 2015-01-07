@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from django.contrib import admin
 
-from .models import Code, Group, Post, Member
+from .models import Code, Group, Post, Member, Like
 
 
 class CodeAdmin(
@@ -29,7 +29,7 @@ class PostAdmin(
     admin.ModelAdmin
 ):
     list_display = (
-        'user', 'attachment', 'group', 'mime',
+        'name', 'user', 'likes', 'attachment', 'group', 'mime',
         'ready', 'created_at', 'ready_at'
     )
 
@@ -48,7 +48,16 @@ class MemberAdmin(
     ordering = ('-joined_at', 'mute')
 
 
+class LikeAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('user', 'post',)
+
+    ordering = ('-created_at',)
+
+
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Code, CodeAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Member, MemberAdmin)
+admin.site.register(Like, LikeAdmin)

@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.serializers import (
-    ModelSerializer, ListField, Serializer
+    ModelSerializer, ListField, IntegerField, Serializer
 )
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
@@ -108,23 +108,16 @@ class CodeCreateSerializer(
         return attrs
 
 
-class PostRetrieveSerializer(
+class PostSerializer(
     ModelSerializer
 ):
     user = UserSerializer(read_only=True)
+    likes = IntegerField(read_only=True)
 
     class Meta:
         model = Post
-        fields = ('attachment', 'ready_at', 'user', 'id')
-
-
-class PostCreateSerializer(
-    PostRetrieveSerializer
-):
-    class Meta(
-        PostRetrieveSerializer.Meta
-    ):
-        read_only_fields = ('attachment', 'ready_at', 'user')
+        fields = ('attachment', 'ready_at', 'user', 'id', 'likes', 'name')
+        read_only_fields = ('attachment', 'ready_at')
 
 
 class MemberSerializer(
@@ -158,7 +151,7 @@ class GroupListSerializer(
 class GroupRetrieveSerializer(
     GroupSerializer
 ):
-    posts = PostRetrieveSerializer(
+    posts = PostSerializer(
         many=True, read_only=True, source='post_set'
     )
 
