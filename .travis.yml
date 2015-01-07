@@ -1,11 +1,12 @@
 language: python
 python:
   - '2.7'
+  - '3.4'
 install:
-  - make install
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; pip install -r requirements3.txt; else pip install -r requirements.txt; fi
 script:
-  - make lint
-  - make test
+  - flake8 app
+  - cd app && python manage.py test
 services:
   - redis-server
   - memcached
