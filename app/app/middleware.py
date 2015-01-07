@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 from types import MethodType
 
+import six
 from django.http import SimpleCookie, HttpRequest
 from django.contrib.sites.models import Site
 
@@ -52,12 +53,21 @@ class RequestCookiesMiddleware(
 ):
     def process_request(self, request):
         request._resp_cookies = SimpleCookie()
-        request.set_cookie = MethodType(
-            _set_cookie, request, HttpRequest
-        )
-        request.delete_cookie = MethodType(
-            _delete_cookie, request, HttpRequest
-        )
+
+        if six.PY3:
+            request.set_cookie = MethodType(
+                _set_cookie, request
+            )
+            request.delete_cookie = MethodType(
+                _delete_cookie, request
+            )
+        else:
+            request.set_cookie = MethodType(
+                _set_cookie, request, HttpRequest
+            )
+            request.delete_cookie = MethodType(
+                _delete_cookie, request, HttpRequest
+            )
 
     def process_response(self, request, response):
         if hasattr(request, '_resp_cookies'):

@@ -1,9 +1,13 @@
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import absolute_import, division, smart_text_literals
 
 from django import template
 from django.utils.html import mark_safe
 from django.utils.encoding import iri_to_uri
 from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.encoding import smart_text
+except ImportError:
+    from django.utils.encoding import smart_unicode as smart_text
 from classytags.core import Options
 from classytags.arguments import Argument
 from classytags.helpers import InclusionTag
@@ -54,20 +58,20 @@ class Paginator(
             pages.append({
                 'class': 'disabled',
                 'get': render_link(page_obj.number),
-                'number': '%s %s' % (mark_safe('<<'), unicode(_('First')))
+                'number': '%s %s' % (mark_safe('<<'), smart_text(_('First')))
             })
         else:
             pages.append({
                 'class': '',
                 'get': render_link(1),
-                'number': '%s %s' % (mark_safe('<<'), unicode(_('First')))
+                'number': '%s %s' % (mark_safe('<<'), smart_text(_('First')))
             })
 
         if page_obj.has_previous():
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.previous_page_number()),
-                'number': '%s %s' % (mark_safe('<'), unicode(_('Previous')))
+                'number': '%s %s' % (mark_safe('<'), smart_text(_('Previous')))
             })
 
         for page in page_range:
@@ -88,20 +92,20 @@ class Paginator(
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.next_page_number()),
-                'number': '%s %s' % (unicode(_('Next')), mark_safe('>'))
+                'number': '%s %s' % (smart_text(_('Next')), mark_safe('>'))
             })
 
         if page_obj.number == page_obj.paginator.num_pages:
             pages.append({
                 'class': 'disabled',
                 'get': render_link(page_obj.paginator.num_pages),
-                'number': '%s %s' % (unicode(_('Last')), mark_safe('>>'))
+                'number': '%s %s' % (smart_text(_('Last')), mark_safe('>>'))
             })
         else:
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.paginator.num_pages),
-                'number': '%s %s' % (unicode(_('Last')), mark_safe('>>'))
+                'number': '%s %s' % (smart_text(_('Last')), mark_safe('>>'))
             })
 
         return {

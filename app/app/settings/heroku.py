@@ -129,12 +129,6 @@ class HerokuImplementation(
     def implement(self):
         super(HerokuImplementation, self).implement()
         # -------------------------------------------------------
-        # rest framework configuration
-        # -------------------------------------------------------
-        # self.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
-        #     'rest_framework.renderers.JSONRenderer',
-        # )
-        # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
         self.INSTALLED_APPS.append('collectfast')

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
+import six
 # import logging
 
 import closure
@@ -94,7 +95,6 @@ class BaseConfiguration(
         'debug_toolbar.panels.signals.SignalsPanel',
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
-        'template_timings_panel.panels.TemplateTimings.TemplateTimings',
     ]
     # -------------------------------------------------------
     # debuger configuration
@@ -440,7 +440,6 @@ class BaseConfiguration(
         'clear_cache',
         'django_mobile',
         'redis_sessions_fork',
-        'django_pickling',
         'reversion',
         'djcelery_email',
         'django_activeurl',
@@ -451,7 +450,6 @@ class BaseConfiguration(
         'configurations',
         'rest_framework',
         'debug_toolbar',
-        'template_timings_panel',
         'raven.contrib.django',
     ]
     # -------------------------------------------------------
@@ -605,22 +603,14 @@ class BaseConfiguration(
             'rest_framework.throttling.UserRateThrottle'
         ),
         'DEFAULT_THROTTLE_RATES': {
-            'anon': '50/hour',
-            'user': '100/hour'
+            'anon': '500/hour',
+            'user': '1000/hour'
         }
     }
     SWAGGER_SETTINGS = {
         'is_superuser': True
     }
     REST_FRAMEWORK_EXTENSIONS = {}
-    # -------------------------------------------------------
-    # url replaces configuration
-    # -------------------------------------------------------
-    URL_REGEX_REPLACES = {
-        'slug': '[\_\-\w]+?',
-        'int': '\d+?',
-        'char2': '\w{2,2}',
-    }
     # -------------------------------------------------------
     # static werkzeug configuration
     # -------------------------------------------------------
@@ -643,6 +633,15 @@ class Implementation(
     object
 ):
     def implement(self):
+        # Python 2 capability features
+        if not six.PY3:
+            self.INSTALLED_APPS.extend((
+                'template_timings_panel',
+                'django_pickling'
+            ))
+            self.DEBUG_TOOLBAR_PANELS.append(
+                'template_timings_panel.panels.TemplateTimings.TemplateTimings'
+            )
         # -------------------------------------------------------
         # debug context processor implementation
         # -------------------------------------------------------
