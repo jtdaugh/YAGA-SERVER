@@ -5,12 +5,19 @@ import os
 import dj_database_url
 from memcacheify import memcacheify
 
-from app.settings.base import BaseConfiguration, Implementation, Initialization
+from app.settings.base.config import (
+    BaseConfiguration, Implementation, Initialization
+)
+from app.settings.heroku.constants import HerokuConstants
 
 
 class HerokuConfiguration(
     BaseConfiguration
 ):
+    # -------------------------------------------------------
+    # constants configuration
+    # -------------------------------------------------------
+    CONSTANTS = HerokuConstants()
     # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------

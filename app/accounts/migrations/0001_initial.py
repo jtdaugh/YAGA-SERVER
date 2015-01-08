@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import django.utils.timezone
 from django.conf import settings
-import uuidfield.fields
-import phonenumber_field.modelfields
+import app.model_fields
 
 
 class Migration(migrations.Migration):
@@ -21,8 +20,8 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, verbose_name='password')),
                 ('last_login', models.DateTimeField(default=django.utils.timezone.now, verbose_name='last login')),
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
-                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
+                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
+                ('phone', app.model_fields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
                 ('name', models.CharField(max_length=255, unique=True, null=True, verbose_name='Name', blank=True)),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='Staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='Active')),

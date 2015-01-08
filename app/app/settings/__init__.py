@@ -4,11 +4,11 @@ import os
 
 
 if os.environ.get('DYNO'):
-    from app.settings import heroku as settings
+    from app.settings.heroku import config as settings
 elif os.environ.get('TRAVIS'):
-    from app.settings import travis as settings
+    from app.settings.travis import config as settings
 else:
-    from app.settings import local as settings
+    from app.settings.local import config as settings
 
 
 Configuration = settings.Configuration

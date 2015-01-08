@@ -29,6 +29,7 @@ from .serializers import (
 )
 from ...models import Code, Group, Post, Member, Like
 from .permissions import CanDestroyToken
+from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
 
 
 class UserRetrieveUpdateAPIView(
@@ -50,6 +51,7 @@ class CodeCreateAPIView(
 ):
     model = Code
     serializer_class = CodeCreateSerializer
+    throttle_classes = (CodeScopedRateThrottle, )
 
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):
@@ -122,6 +124,7 @@ class TokenCreateDestroyAPIView(
 ):
     serializer_class = TokenSerializer
     permission_classes = (CanDestroyToken, )
+    throttle_classes = (TokenScopedRateThrottle, )
 
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):

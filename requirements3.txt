@@ -49,7 +49,6 @@ django-reversion==1.8.5
 django-secure==1.0.1
 django-storages-redux==1.2.1
 django-transaction-hooks==0.2
--e git://github.com/hellysmile/django-uuidfield@68cddae7d8381ba5d95d20bf5b8566747f7b53be#egg=django_uuidfield-master
 djangorestframework==3.0.2
 docutils==0.12
 drf-extensions==0.2.6

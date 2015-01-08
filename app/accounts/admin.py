@@ -17,7 +17,7 @@ class UserAdmin(
         password_urlpatterns = patterns(
             '',
             url(
-                r'^([a-z0-9]{32})/password/$',
+                r'^([\-a-z0-9]{32,36})/password/$',
                 self.admin_site.admin_view(self.user_change_password)
             )
         )

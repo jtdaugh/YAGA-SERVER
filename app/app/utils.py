@@ -22,6 +22,16 @@ from rest_framework.exceptions import ParseError
 from rest_framework.renderers import BaseRenderer
 from rest_framework.settings import api_settings
 from raven.contrib.django import DjangoClient
+try:
+    from django.utils.encoding import (  # noqa
+        smart_text, force_text, smart_bytes, force_bytes
+    )
+except ImportError:
+    from django.utils.encoding import (  # noqa
+        smart_unicode as smart_text,
+        force_unicode as force_text,
+        smart_bytes, force_bytes
+    )
 
 from app import celery
 from requestprovider import get_request

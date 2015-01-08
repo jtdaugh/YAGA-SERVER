@@ -1,3 +1,5 @@
 source 'https://rubygems.org'
 ruby '2.2.0'
 gem 'foreman', '~> 0.77.0'
+gem 'rubocop', '~> 0.28.0'
+gem 'capistrano', '~> 3.3.5'

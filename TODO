@@ -1,14 +1,4 @@
-form phone auto +
 validation raise
 msg_cods
-rate limit use
-rate limit ip
 rate limit sms
-admin search fields
-admin tabular
-admin filter
 disable PATCH
-separate render and parse serialezers
-
-kwargs - group_id
-url

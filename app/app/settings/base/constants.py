@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 import datetime
 
 
-class Constants(
+class BaseConstants(
     object
 ):
     GA_ID = 'XXXXX'

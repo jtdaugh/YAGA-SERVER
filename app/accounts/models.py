@@ -13,10 +13,9 @@ from django.core.urlresolvers import reverse
 from django.utils.crypto import get_random_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import python_2_unicode_compatible
-from uuidfield import UUIDField
-from phonenumber_field.modelfields import PhoneNumberField
 
 from app.utils import reverse_host
+from app.model_fields import UUIDField, PhoneNumberField
 
 
 class UserManager(

@@ -2,10 +2,9 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import yaga.models
 from django.conf import settings
-import uuidfield.fields
-import phonenumber_field.modelfields
+import app.model_fields
+import yaga.models
 
 
 class Migration(migrations.Migration):
@@ -19,7 +18,7 @@ class Migration(migrations.Migration):
             name='Code',
             fields=[
                 ('request_id', models.CharField(max_length=255, serialize=False, verbose_name='Request Id', primary_key=True)),
-                ('phone', phonenumber_field.modelfields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
+                ('phone', app.model_fields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
                 ('expire_at', models.DateTimeField(default=yaga.models.code_expire_at, verbose_name='Expire At', db_index=True)),
             ],
             options={
@@ -31,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Group',
             fields=[
-                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
+                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
             ],
@@ -42,9 +41,21 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
+            name='Like',
+            fields=[
+                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
+            ],
+            options={
+                'verbose_name': 'Like',
+                'verbose_name_plural': 'Likes',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='Member',
             fields=[
-                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
+                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
                 ('mute', models.BooleanField(default=False, db_index=True, verbose_name='Mute')),
                 ('joined_at', models.DateTimeField(auto_now_add=True, verbose_name='Joined At')),
                 ('group', models.ForeignKey(verbose_name='Group', to='yaga.Group')),
@@ -59,7 +70,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', uuidfield.fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, blank=True, unique=True)),
+                ('id', app.model_fields.UUIDField(primary_key=True, serialize=False, editable=False, version=1, blank=True)),
+                ('name', models.CharField(max_length=255, null=True, verbose_name='Name', blank=True)),
                 ('attachment', models.FileField(db_index=True, upload_to=yaga.models.post_upload_to, null=True, verbose_name='Attachment', blank=True)),
                 ('checksum', models.CharField(db_index=True, max_length=255, null=True, verbose_name='Checksum', blank=True)),
                 ('mime', models.CharField(db_index=True, max_length=255, null=True, verbose_name='MIme', blank=True)),
@@ -78,6 +90,22 @@ class Migration(migrations.Migration):
         migrations.AlterUniqueTogether(
             name='member',
             unique_together=set([('user', 'group')]),
+        ),
+        migrations.AddField(
+            model_name='like',
+            name='post',
+            field=models.ForeignKey(verbose_name='Post', to='yaga.Post'),
+            preserve_default=True,
+        ),
+        migrations.AddField(
+            model_name='like',
+            name='user',
+            field=models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='like',
+            unique_together=set([('user', 'post')]),
         ),
         migrations.AddField(
             model_name='group',

@@ -51,12 +51,12 @@ post_urlpatterns = patterns(
         name='add'
     ),
     url(
-        r'^(?P<post_id>[a-z0-9]{32})/like/$',
+        r'^(?P<post_id>[\-a-z0-9]{32,36})/like/$',
         LikeCreateDestroyAPIView.as_view(),
         name='like'
     ),
     url(
-        r'^(?P<post_id>[a-z0-9]{32})/$',
+        r'^(?P<post_id>[\-a-z0-9]{32,36})/$',
         PostRetrieveUpdateDestroyAPIView.as_view(),
         name='detail'
     ),
@@ -90,16 +90,16 @@ group_urlpatterns = patterns(
         name='list-create'
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/$',
+        r'^(?P<group_id>[\-a-z0-9]{32,36})/$',
         GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/members/',
+        r'^(?P<group_id>[\-a-z0-9]{32,36})/members/',
         include(member_urlpatterns, namespace='members')
     ),
     url(
-        r'^(?P<group_id>[a-z0-9]{32})/posts/',
+        r'^(?P<group_id>[\-a-z0-9]{32,36})/posts/',
         include(post_urlpatterns, namespace='posts')
     )
 )

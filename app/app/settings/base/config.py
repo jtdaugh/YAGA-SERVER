@@ -9,7 +9,7 @@ import yuicompressor
 from django.utils.translation import ugettext_lazy as _
 from configurations import Configuration
 
-from .constants import Constants
+from app.settings.base.constants import BaseConstants
 
 
 class InvalidTemplateObjectException(
@@ -37,7 +37,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # constants configuration
     # -------------------------------------------------------
-    CONSTANTS = Constants()
+    CONSTANTS = BaseConstants()
     # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------
@@ -97,10 +97,6 @@ class BaseConfiguration(
         'debug_toolbar.panels.redirects.RedirectsPanel',
     ]
     # -------------------------------------------------------
-    # debuger configuration
-    # -------------------------------------------------------
-    USE_DEBUGER = True
-    # -------------------------------------------------------
     # docs configuration
     # -------------------------------------------------------
     USE_DOCS = True
@@ -123,6 +119,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     PROJECT_ROOT = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
+        '..',
         '..',
         '..',
         '..'
@@ -352,13 +349,7 @@ class BaseConfiguration(
     COMPRESS_ROOT = STATIC_ROOT
     COMPRESS_URL = STATIC_URL
 
-    AWS_ACCESS_KEY_ID = CONSTANTS.AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY = CONSTANTS.AWS_SECRET_ACCESS_KEY
-    AWS_STORAGE_BUCKET_NAME = CONSTANTS.AWS_STORAGE_BUCKET_NAME
-
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
-    S3_HOST = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    MEDIA_URL = '%smedia/' % S3_HOST
 
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True
@@ -544,7 +535,7 @@ class BaseConfiguration(
 
             'multiprocessing': DEBUG_LOGGER,
 
-            'django': DEBUG_LOGGER,
+            'django': ERROR_LOGGER,
             # 'django.request': DEBUG_LOGGER,
             # 'django.security': DEBUG_LOGGER,
             # 'django.db.backends': DEBUG_LOGGER,
@@ -605,11 +596,12 @@ class BaseConfiguration(
         ),
         'DEFAULT_THROTTLE_CLASSES': (
             'rest_framework.throttling.AnonRateThrottle',
-            'rest_framework.throttling.UserRateThrottle'
+            'rest_framework.throttling.UserRateThrottle',
+            'rest_framework.throttling.ScopedRateThrottle',
         ),
         'DEFAULT_THROTTLE_RATES': {
-            'anon': '500/hour',
-            'user': '1000/hour'
+            'anon': '100/hour',
+            'user': '500/hour',
         }
     }
     SWAGGER_SETTINGS = {
@@ -624,6 +616,10 @@ class BaseConfiguration(
     # requests configuration
     # -------------------------------------------------------
     HTTP_RETRIES = 5
+    # -------------------------------------------------------
+    # uuid configuration
+    # -------------------------------------------------------
+    UUID_HYPHENATE = False
 
 
 class Initialization(
@@ -638,7 +634,19 @@ class Implementation(
     object
 ):
     def implement(self):
+        # -------------------------------------------------------
+        # storages implementation
+        # -------------------------------------------------------
+        self.AWS_ACCESS_KEY_ID = self.CONSTANTS.AWS_ACCESS_KEY_ID
+        self.AWS_SECRET_ACCESS_KEY = self.CONSTANTS.AWS_SECRET_ACCESS_KEY
+        self.AWS_STORAGE_BUCKET_NAME = self.CONSTANTS.AWS_STORAGE_BUCKET_NAME
+        self.S3_HOST = 'https://%s.s3.amazonaws.com/' % (
+            self.AWS_STORAGE_BUCKET_NAME,
+        )
+        self.MEDIA_URL = '%smedia/' % self.S3_HOST
+        # -------------------------------------------------------
         # Python 2 capability features
+        # -------------------------------------------------------
         if not six.PY3:
             self.INSTALLED_APPS.extend((
                 'template_timings_panel',
