@@ -153,6 +153,7 @@ class BaseConfiguration(
     DATABASES = {
         'default': {
             'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+            # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': 'app',
             # 'ENGINE': 'transaction_hooks.backends.sqlite3',
             # 'NAME': os.path.abspath(
@@ -181,6 +182,8 @@ class BaseConfiguration(
     # )
     MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
     SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+    # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+    # SESSION_SERIALIZER = 'redis_sessions_fork.serializers.UjsonSerializer'
     SESSION_SAVE_EVERY_REQUEST = False
     # -------------------------------------------------------
     # cookies configuration
@@ -392,8 +395,9 @@ class BaseConfiguration(
         # 'django.middleware.locale.LocaleMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
         # 'cached_auth.Middleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
         # requestprovider
@@ -584,9 +588,10 @@ class BaseConfiguration(
     # rest framework configuration
     # -------------------------------------------------------
     REST_FRAMEWORK = {
-        # 'DEFAULT_PARSER_CLASSES': (
-        #     'app.utils.UJSONParser',
-        # ),
+        'DEFAULT_PARSER_CLASSES': (
+            # 'app.utils.UJSONParser',
+            'rest_framework.parsers.JSONParser',
+        ),
         'DATETIME_FORMAT': '%s',
         'DEFAULT_RENDERER_CLASSES': (
             # 'drf_ujson.renderers.UJSONRenderer',

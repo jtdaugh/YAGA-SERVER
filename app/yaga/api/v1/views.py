@@ -4,6 +4,8 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
+from django.utils.decorators import method_decorator
+from django.db import transaction
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     RetrieveAPIView, CreateAPIView, UpdateAPIView,
@@ -48,6 +50,10 @@ class CodeCreateAPIView(
 ):
     model = Code
     serializer_class = CodeCreateSerializer
+
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, *args, **kwargs):
+        return super(CodeCreateAPIView, self).dispatch(*args, **kwargs)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -116,6 +122,10 @@ class TokenCreateDestroyAPIView(
 ):
     serializer_class = TokenSerializer
     permission_classes = (CanDestroyToken, )
+
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, *args, **kwargs):
+        return super(TokenCreateDestroyAPIView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         obj = self.request.auth

@@ -15,29 +15,29 @@ from django.db import transaction
 celery = Celery(__name__)
 
 
-TaskBase = celery.Task
-
-
-class TransactionTask(TaskBase):
+class AtomicTask(celery.Task):
     abstract = True
 
     def __call__(self, *args, **kwargs):
         with transaction.atomic():
-            return TaskBase.__call__(self, *args, **kwargs)
+            return super(AtomicTask, self).__call__(
+                *args, **kwargs
+            )
 
 
-celery.Task = TransactionTask
-
-
-class TransactionPeriodicTask(PeriodicTask):
+class AtomicPeriodicTask(PeriodicTask):
     abstract = True
 
     def __call__(self, *args, **kwargs):
         with transaction.atomic():
-            return PeriodicTask.__call__(self, *args, **kwargs)
+            return super(AtomicPeriodicTask, self).__call__(
+                *args, **kwargs
+            )
 
 
-celery.PeriodicTask = TransactionPeriodicTask
+celery.AtomicTask = AtomicTask
+celery.AtomicPeriodicTask = AtomicPeriodicTask
+celery.PeriodicTask = PeriodicTask
 
 
 celery.config_from_object('django.conf:settings')

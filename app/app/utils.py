@@ -134,6 +134,14 @@ def create_requests_session():
     return session
 
 
+def get_sentry_client():
+    def _get_sentry_cleint():
+        from raven.contrib.django.models import get_client
+        return get_client()
+
+    return SimpleLazyObject(_get_sentry_cleint)
+
+
 class UJSONRenderer(BaseRenderer):
     media_type = 'application/json'
     format = 'json'
@@ -183,19 +191,20 @@ class SentryCeleryClient(DjangoClient):
         return user_info
 
     def send_integrated(self, kwargs):
-        return send_raw_integrated.delay(kwargs)
+        return SendRawIntegrated().delay(kwargs)
 
     def send_encoded(self, *args, **kwargs):
-        return send_raw.delay(*args, **kwargs)
+        return SendRaw().delay(*args, **kwargs)
 
 
-@celery.task
-def send_raw_integrated(kwargs):
-    from raven.contrib.django.models import get_client
-    super(SentryCeleryClient, get_client()).send_integrated(kwargs)
+class SendRawIntegrated(celery.Task):
+    def run(self, kwargs):
+        super(SentryCeleryClient, sentry_client).send_integrated(kwargs)
 
 
-@celery.task
-def send_raw(*args, **kwargs):
-    from raven.contrib.django.models import get_client
-    super(SentryCeleryClient, get_client()).send_encoded(*args, **kwargs)
+class SendRaw(celery.Task):
+    def run(self, *args, **kwargs):
+        super(SentryCeleryClient, sentry_client).send_encoded(*args, **kwargs)
+
+
+sentry_client = get_sentry_client()
