@@ -346,6 +346,8 @@ class PostCreateAPIView(
         post = Post()
         post.user = request.user
         post.group = group
+        if serializer.validated_data.get('name'):
+            post.name = serializer.validated_data['name']
         post.save()
 
         serializer = self.get_serializer(post)

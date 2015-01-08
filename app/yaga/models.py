@@ -14,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
 
 from app.model_fields import UUIDField, PhoneNumberField
+from app.utils import smart_text
 from .providers import NexmoProvider
 
 
@@ -322,7 +323,7 @@ class Post(
         }
 
     def __str__(self):
-        return self.pk.hex
+        return smart_text(self.pk)
 
 
 @python_2_unicode_compatible
@@ -360,7 +361,7 @@ class Like(
         )
 
     def __str__(self):
-        return self.pk.hex
+        return smart_text(self.pk)
 
 
 from . import dispatch  # noqa

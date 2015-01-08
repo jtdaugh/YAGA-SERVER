@@ -193,7 +193,7 @@ class SentryCeleryClient(DjangoClient):
             return {'is_authenticated': False}
 
         user_info = {
-            'id': user.pk.hex,
+            'id': smart_text(user.pk),
             'is_authenticated': True,
             'username': user.get_username()
         }
