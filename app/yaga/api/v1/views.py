@@ -28,13 +28,18 @@ from .serializers import (
     PostSerializer
 )
 from ...models import Code, Group, Post, Member, Like
-from .permissions import CanDestroyToken
+from .permissions import (
+    TokenAuth, IsAnonymous, GroupMemeber, PostOwner, PostGroupMember
+)
 from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
 
 
 class UserRetrieveUpdateAPIView(
     RetrieveUpdateAPIView,
 ):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = UserSerializer
+
     def get_object(self):
         obj = self.request.user
 
@@ -42,16 +47,14 @@ class UserRetrieveUpdateAPIView(
 
         return obj
 
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
-
 
 class CodeCreateAPIView(
     CreateAPIView
 ):
     model = Code
     serializer_class = CodeCreateSerializer
-    throttle_classes = (CodeScopedRateThrottle, )
+    throttle_classes = (CodeScopedRateThrottle,)
+    permission_classes = (IsAnonymous,)
 
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):
@@ -91,6 +94,7 @@ class CodeRetrieveAPIView(
     RetrieveAPIView
 ):
     serializer_class = CodeRetrieveSerializer
+    permission_classes = (IsAnonymous,)
 
     def get_queryset(self):
         return Code.objects.all()
@@ -118,17 +122,16 @@ class CodeRetrieveAPIView(
         })
 
 
-class TokenCreateDestroyAPIView(
-    CreateAPIView,
-    DestroyAPIView
+class TokenCreateAPIView(
+    CreateAPIView
 ):
     serializer_class = TokenSerializer
-    permission_classes = (CanDestroyToken, )
-    throttle_classes = (TokenScopedRateThrottle, )
+    permission_classes = (IsAnonymous,)
+    throttle_classes = (TokenScopedRateThrottle,)
 
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):
-        return super(TokenCreateDestroyAPIView, self).dispatch(*args, **kwargs)
+        return super(TokenCreateAPIView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         obj = self.request.auth
@@ -148,6 +151,19 @@ class TokenCreateDestroyAPIView(
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class TokenDestroyAPIView(
+    DestroyAPIView
+):
+    permission_classes = (IsAuthenticated, TokenAuth)
+
+    def get_object(self):
+        obj = self.request.auth
+
+        self.check_object_permissions(self.request, obj)
+
+        return obj
 
 
 class GroupListCreateAPIView(
@@ -173,10 +189,10 @@ class GroupListCreateAPIView(
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        member = Member()
-        member.group = serializer.instance
-        member.user = request.user
-        member.save()
+        obj = Member()
+        obj.group = serializer.instance
+        obj.user = request.user
+        obj.save()
 
         return Response(
             dict(serializer.data),
@@ -189,7 +205,7 @@ class GroupRetrieveUpdateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = GroupRetrieveSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GroupMemeber)
 
     def get_queryset(self):
         post_filter = {
@@ -222,8 +238,6 @@ class GroupRetrieveUpdateAPIView(
                     **post_filter
                 ).order_by('-ready_at'),
             )
-        ).filter(
-            members=self.request.user
         )
 
         return queryset
@@ -233,12 +247,10 @@ class GroupManageMemberAPIView(
     UpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GroupMemeber)
 
     def get_queryset(self):
-        return Group.objects.filter(
-            members=self.request.user
-        )
+        return Group.objects.all()
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -270,16 +282,16 @@ class GroupManageMemberAddAPIView(
             )
 
             if user.is_active:
-                member = instance.member_set.filter(
+                obj = instance.member_set.filter(
                     group=instance,
                     user=user
                 ).first()
 
-                if not member:
-                    member = Member()
-                    member.group = instance
-                    member.user = user
-                    member.save()
+                if not obj:
+                    obj = Member()
+                    obj.group = instance
+                    obj.user = user
+                    obj.save()
 
 
 class GroupManageMemberRemoveAPIView(
@@ -292,13 +304,13 @@ class GroupManageMemberRemoveAPIView(
             phone=data['phone']
         )
 
-        member = instance.member_set.filter(
+        obj = instance.member_set.filter(
             group=instance,
             user=user
         ).first()
 
-        if member:
-            member.delete()
+        if obj:
+            obj.delete()
 
 
 class GroupManageMemberMuteAPIView(
@@ -309,11 +321,11 @@ class GroupManageMemberMuteAPIView(
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        member = instance.member_set.get(
+        obj = instance.member_set.get(
             user=self.request.user
         )
 
-        serializer = self.get_serializer(member, data=request.data)
+        serializer = self.get_serializer(obj, data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -330,12 +342,10 @@ class PostCreateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, GroupMemeber)
 
     def get_queryset(self):
-        return Group.objects.filter(
-            members=self.request.user
-        )
+        return Group.objects.all()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -343,17 +353,17 @@ class PostCreateAPIView(
 
         group = self.get_object()
 
-        post = Post()
-        post.user = request.user
-        post.group = group
+        obj = Post()
+        obj.user = request.user
+        obj.group = group
         if serializer.validated_data.get('name'):
-            post.name = serializer.validated_data['name']
-        post.save()
+            obj.name = serializer.validated_data['name']
+        obj.save()
 
-        serializer = self.get_serializer(post)
+        serializer = self.get_serializer(obj)
         response = dict(serializer.data)
 
-        response['meta'] = post.sign_s3()
+        response['meta'] = obj.sign_s3()
 
         return Response(
             response,
@@ -365,14 +375,16 @@ class PostRetrieveUpdateDestroyAPIView(
     RetrieveUpdateDestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, PostOwner)
+
+    def get_queryset(self):
+        return Post.objects.all()
 
     def get_object(self):
-        queryset = Post.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         obj = get_object_or_404(
             queryset,
-            user=self.request.user,
             group__pk=self.kwargs['group_id'],
             pk=self.kwargs['post_id'],
         )
@@ -404,10 +416,13 @@ class LikeCreateDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, PostGroupMember)
+
+    def get_queryset(self):
+        return Post.objects.all()
 
     def get_object(self):
-        queryset = Post.objects.all()
+        queryset = self.filter_queryset(self.get_queryset())
 
         obj = get_object_or_404(
             queryset,
@@ -418,12 +433,6 @@ class LikeCreateDestroyAPIView(
         self.check_object_permissions(self.request, obj)
 
         return obj
-
-    def check_object_permissions(self, request, obj):
-        if not obj.group.member_set.filter(
-            user=request.user
-        ).exists():
-            self.permission_denied(request)
 
     def destroy(self, request, *args, **kwargs):
         obj = self.get_object()
