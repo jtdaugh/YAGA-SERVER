@@ -4,13 +4,9 @@ from __future__ import absolute_import, division, unicode_literals
 from rest_framework.permissions import BasePermission
 
 
-class TokenAuth(BasePermission):
+class TokenOwner(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (
-            request.auth
-            and
-            request.auth == obj
-        )
+        return request.user == obj.user
 
 
 class GroupMemeber(BasePermission):

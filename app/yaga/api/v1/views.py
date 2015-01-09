@@ -29,7 +29,7 @@ from .serializers import (
 )
 from ...models import Code, Group, Post, Member, Like
 from .permissions import (
-    TokenAuth, IsAnonymous, GroupMemeber, PostOwner, PostGroupMember
+    TokenOwner, IsAnonymous, GroupMemeber, PostOwner, PostGroupMember
 )
 from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
 
@@ -156,7 +156,10 @@ class TokenCreateAPIView(
 class TokenDestroyAPIView(
     DestroyAPIView
 ):
-    permission_classes = (IsAuthenticated, TokenAuth)
+    permission_classes = (IsAuthenticated, TokenOwner)
+
+    def get_serializer_class(self):
+        return None
 
     def get_object(self):
         obj = self.request.auth
