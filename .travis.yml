@@ -8,13 +8,15 @@ env:
 install:
   - if [[ "$TRAVIS_PYTHON_VERSION" == '3.4' ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
   - REQUIREMENTS="requirements$REQ_VERSION.txt"
-  - pip install -r "$REQUIREMENTS" --download-cache $HOME/pip-cache
-  - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
+  - pip install isort
+  # - pip install -r "$REQUIREMENTS" --download-cache $HOME/pip-cache
+  # - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
 script:
-  - flake8 app
+  # - flake8 app
   - echo "[settings]" > $HOME/.isort.cfg && echo "skip=migrations" >> $HOME/.isort.cfg
+  - cd app
   - isort --check-only -rc app
-  - cd app && python manage.py test
+  - python manage.py test
 services:
   - redis-server
   - memcached
