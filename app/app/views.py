@@ -6,7 +6,7 @@ from django.template import Context, loader
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 
-from app.utils import cache_view, user_cache_view
+from .utils import cache_view, user_cache_view
 
 
 def csrf(request, reason=''):

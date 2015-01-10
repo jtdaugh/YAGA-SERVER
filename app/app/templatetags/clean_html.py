@@ -4,7 +4,7 @@ import nltk
 from django import template
 from django.utils.safestring import mark_safe
 
-from app.utils import snless
+from ..utils import snless
 
 register = template.Library()
 

@@ -8,7 +8,7 @@ from django.utils.encoding import iri_to_uri
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from app.utils import smart_text
+from ..utils import smart_text
 
 register = template.Library()
 

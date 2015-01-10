@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, unicode_literals
 from classytags.core import Options, Tag
 from django import template
 
-from app.utils import snless
+from ..utils import snless
 
 register = template.Library()
 

@@ -9,8 +9,8 @@ from django.utils.encoding import python_2_unicode_compatible
 from phonenumber_field.modelfields import \
     PhoneNumberField as BasePhoneNumberField
 
-from app.form_fields import PhoneNumberField as FormPhoneNumberField
-from app.utils import smart_text
+from .form_fields import PhoneNumberField as FormPhoneNumberField
+from .utils import smart_text
 
 try:
     # Django > 1.8
