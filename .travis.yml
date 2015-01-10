@@ -28,3 +28,5 @@ addons:
   postgresql: "9.3"
 before_install:
   - psql -c "create database app;" -U postgres
+notifications:
+  slack: yaga:ESVnfpnyr7Xxr0CXzxB7q4ye
