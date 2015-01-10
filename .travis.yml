@@ -16,7 +16,7 @@ install:
   - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
 script:
   - flake8 app
-  - echo "[settings]" > $HOME/.isort.cfg && echo "skip=migrations" >> $HOME/.isort.cfg ** echo "multi_line_output=3" >> $HOME/.isort.cfg
+  - cp .isort.cfg $HOME/.isort.cfg
   - isort --check-only -rc app --diff
   - cd app
   - python manage.py test
