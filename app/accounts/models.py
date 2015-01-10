@@ -40,7 +40,6 @@ class UserManager(
             is_active=is_active,
             is_staff=is_staff,
             is_superuser=is_superuser,
-            last_login=now,
             date_joined=now,
             **extra_fields
         )
@@ -162,6 +161,11 @@ class AbstractUser(
 
     def get_admin_absolute_url(self):
         return reverse_host(self.get_admin_url())
+
+
+AbstractUser._meta.get_field('last_login').default = models.fields.NOT_PROVIDED
+AbstractUser._meta.get_field('last_login').blank = True
+AbstractUser._meta.get_field('last_login').null = True
 
 
 class User(

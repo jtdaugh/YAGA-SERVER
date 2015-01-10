@@ -8,7 +8,7 @@ env:
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
   - pip install -r requirements$(echo $REQ_VERSION).txt --download-cache /home/travis/pip-cache
-  - pip uninstall django
+  - echo y | pip uninstall django
   - pip install $DJANGO
 script:
   - flake8 app
