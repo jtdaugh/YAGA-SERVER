@@ -4,7 +4,7 @@ from functools import wraps
 
 import regex
 import requests
-import ujson  # isort:skip  # weird isort Python 3.4 bug
+import ujson
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
@@ -179,12 +179,10 @@ class UJSONRenderer(
 
         renderer_context = renderer_context or {}
 
-        ret = ujson.dumps(
+        return ujson.dumps(
             data,
             ensure_ascii=self.ensure_ascii
         )
-
-        return ret
 
 
 class UJSONParser(
@@ -199,6 +197,7 @@ class UJSONParser(
 
         try:
             data = stream.read().decode(encoding)
+
             return ujson.loads(data)
         except Exception as exc:
             raise ParseError('JSON parse error - %s' % six.text_type(exc))
