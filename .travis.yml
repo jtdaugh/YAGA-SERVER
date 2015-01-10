@@ -12,12 +12,12 @@ install:
   - virtualenv env
   - source env/bin/activate
   - pip install setuptools==9.1
-  - pip install -r "$REQUIREMENTS" --download-cache $HOME/pip-cache
+  - pip install -r "$REQUIREMENTS"
   - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
 script:
   - flake8 app
   - echo "[settings]" > $HOME/.isort.cfg && echo "skip=migrations" >> $HOME/.isort.cfg
-  - isort --check-only -rc app
+  - isort --check-only -rc app --diff
   - cd app
   - python manage.py test
 services:
@@ -28,6 +28,3 @@ addons:
   postgresql: "9.3"
 before_install:
   - psql -c "create database app;" -U postgres
-cache:
-  directories:
-    - $HOME/pip-cache
