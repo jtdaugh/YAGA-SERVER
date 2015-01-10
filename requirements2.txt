@@ -52,7 +52,7 @@ django-reversion==1.8.5
 django-secure==1.0.1
 django-storages==1.1.8
 django-transaction-hooks==0.2
-djangorestframework==3.0.2
+djangorestframework==3.0.3
 docutils==0.12
 drf-extensions==0.2.6
 drf-ujson==1.1
