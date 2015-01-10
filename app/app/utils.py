@@ -37,6 +37,20 @@ from app import celery
 from requestprovider import get_request
 
 
+def u(value):
+    if isinstance(value, six.binary_type):
+        value = value.decode()
+
+    return value
+
+
+def b(value):
+    if isinstance(value, six.string_types):
+        value = value.encode()
+
+    return value
+
+
 def nless(content):
     content = regex.sub('\n{2,}', '\n', content)
     content = regex.sub('\n', ' ', content)

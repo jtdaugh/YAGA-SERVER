@@ -139,12 +139,12 @@ class BaseConfiguration(
     # -------------------------------------------------------
     DATABASES = {
         'default': {
-            # 'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
-            # 'NAME': 'app',
-            'ENGINE': 'transaction_hooks.backends.sqlite3',
-            'NAME': os.path.abspath(
-                os.path.join(PROJECT_ROOT, 'app.sqlite')
-            ),
+            'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
+            'NAME': 'app',
+            # 'ENGINE': 'transaction_hooks.backends.sqlite3',
+            # 'NAME': os.path.abspath(
+            #     os.path.join(PROJECT_ROOT, 'app.sqlite')
+            # ),
             'ATOMIC_REQUESTS': True,
             'AUTOCOMMIT': True,
             'CONN_MAX_AGE': None

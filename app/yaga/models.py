@@ -14,8 +14,9 @@ from django.utils.encoding import python_2_unicode_compatible
 
 from app.model_fields import UUIDField, PhoneNumberField
 from app.utils import smart_text
-from .providers import NexmoProvider
+
 from .conf import settings
+from .providers import NexmoProvider
 
 
 def code_expire_at():

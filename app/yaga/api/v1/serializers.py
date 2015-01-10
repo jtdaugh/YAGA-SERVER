@@ -10,8 +10,9 @@ from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import Token
-from .fields import PhoneField, CodeField, TimeStampField
-from ...models import Code, Group, Post, Member
+
+from .fields import CodeField, PhoneField, TimeStampField
+from ...models import Code, Group, Member, Post
 
 
 class SinceSerializer(

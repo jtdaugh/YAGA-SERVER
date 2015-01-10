@@ -4,10 +4,11 @@ import logging
 import json
 
 import boto
+
 from django.core.management.base import NoArgsCommand
 
-from ...tasks import PostProcess
 from ...conf import settings
+from ...tasks import PostProcess
 
 
 logger = logging.getLogger(__name__)

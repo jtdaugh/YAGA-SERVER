@@ -1,10 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import uuid
-
-from django.db import connection
+from django.db import connection, models
 from django.utils import six
-from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 from django.core.exceptions import ImproperlyConfigured
 try:
@@ -35,7 +33,12 @@ class UUIDRepresentation(
     uuid.UUID
 ):
     def __str__(self):
-        return self.hex
+        if connection.vendor != 'postgresql':
+            value = self.hex
+        else:
+            value = super(UUIDRepresentation, self).__str__()
+
+        return value
 
     def __len__(self):
         return len(self.__str__())
@@ -110,7 +113,9 @@ class UUIDField(
         return value
 
     def to_python(self, value):
-        return uuid_representation(value)
+        value = uuid_representation(value)
+
+        return value
 
     def formfield(self, **kwargs):
         if self.auto:
