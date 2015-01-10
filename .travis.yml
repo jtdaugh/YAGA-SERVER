@@ -10,8 +10,7 @@ install:
   - REQUIREMENTS="requirements$REQ_VERSION.txt"
   # - pip install -r "$REQUIREMENTS" --download-cache /home/travis/pip-cache
   # - echo y | pip uninstall django
-  - echo "$REQUIREMENTS"
-  - echo "$DJANGO"
+  - cat "$REQUIREMENTS" | grep 'django=='
   - if [[ "$DJANGO" == 'requirements' ]]; then DJANGO=$(cat "$REQUIREMENTS" | grep 'django=='); fi
   - pip install $DJANGO
 script:
