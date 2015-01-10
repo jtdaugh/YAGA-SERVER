@@ -2,9 +2,9 @@ from __future__ import absolute_import, division, unicode_literals
 
 from types import MethodType
 
-import six
 from django.contrib.sites.models import Site
 from django.http import HttpRequest, SimpleCookie
+from django.utils import six
 
 
 def _set_cookie(

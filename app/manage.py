@@ -6,7 +6,7 @@ import locale
 import os
 import sys
 
-import six
+from django.utils import six
 
 
 def fix_locale():

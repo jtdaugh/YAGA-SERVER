@@ -3,9 +3,9 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 import closure
-import six
 import yuicompressor
 from configurations import Configuration
+from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 
 
