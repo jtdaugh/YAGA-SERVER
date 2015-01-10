@@ -4,7 +4,7 @@ from functools import wraps
 
 import regex
 import requests
-import ujson
+import ujson  # isort:skip  # weird isort Python 3.4 bug
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured

@@ -389,7 +389,7 @@ class BaseConfiguration(
         # requestprovider
         'requestprovider.middleware.RequestProviderMiddleware',
         # sentry 404
-        'raven.contrib.django.middleware.Sentry404CatchMiddleware',
+        # 'raven.contrib.django.middleware.Sentry404CatchMiddleware',
     ]
     # -------------------------------------------------------
     # django south migrations
