@@ -14,7 +14,9 @@ from .conf import settings
 logger = logging.getLogger(__name__)
 
 
-class NexmoResponse(object):
+class NexmoResponse(
+    object
+):
     def __init__(self, response):
         self.response = response
 
@@ -41,7 +43,9 @@ class NexmoResponse(object):
         return False
 
 
-class NexmoProvider(object):
+class NexmoProvider(
+    object
+):
     FORMAT = 'json'
     VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
     SEND_VERIFY_ENDPOINT = VERIFY_ENDPOINT + FORMAT

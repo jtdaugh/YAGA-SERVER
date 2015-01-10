@@ -152,7 +152,9 @@ def get_sentry_client():
     return SimpleLazyObject(_get_sentry_cleint)
 
 
-class UJSONRenderer(BaseRenderer):
+class UJSONRenderer(
+    BaseRenderer
+):
     media_type = 'application/json'
     format = 'json'
     ensure_ascii = not api_settings.UNICODE_JSON
@@ -172,7 +174,9 @@ class UJSONRenderer(BaseRenderer):
         return ret
 
 
-class UJSONParser(BaseParser):
+class UJSONParser(
+    BaseParser
+):
     media_type = 'application/json'
     renderer_class = UJSONRenderer
 
@@ -187,7 +191,9 @@ class UJSONParser(BaseParser):
             raise ParseError('JSON parse error - %s' % six.text_type(exc))
 
 
-class SentryCeleryClient(DjangoClient):
+class SentryCeleryClient(
+    DjangoClient
+):
     def get_user_info(self, user):
         if not user.is_authenticated():
             return {'is_authenticated': False}
@@ -207,12 +213,16 @@ class SentryCeleryClient(DjangoClient):
         return SendRaw().delay(*args, **kwargs)
 
 
-class SendRawIntegrated(celery.Task):
+class SendRawIntegrated(
+    celery.Task
+):
     def run(self, kwargs):
         super(SentryCeleryClient, sentry_client).send_integrated(kwargs)
 
 
-class SendRaw(celery.Task):
+class SendRaw(
+    celery.Task
+):
     def run(self, *args, **kwargs):
         super(SentryCeleryClient, sentry_client).send_encoded(*args, **kwargs)
 

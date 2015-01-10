@@ -16,7 +16,9 @@ def set_scope(fn):
     return wrapper
 
 
-class BaseScopedRateThrottle(ScopedRateThrottle):
+class BaseScopedRateThrottle(
+    ScopedRateThrottle
+):
     def get_rate(self):
         return self.rate
 
@@ -27,9 +29,13 @@ class BaseScopedRateThrottle(ScopedRateThrottle):
         )
 
 
-class CodeScopedRateThrottle(BaseScopedRateThrottle):
+class CodeScopedRateThrottle(
+    BaseScopedRateThrottle
+):
     rate = '10/hour'
 
 
-class TokenScopedRateThrottle(BaseScopedRateThrottle):
+class TokenScopedRateThrottle(
+    BaseScopedRateThrottle
+):
     rate = '50/hour'

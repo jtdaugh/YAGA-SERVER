@@ -4,7 +4,9 @@ from django.conf import settings  # noqa
 from appconf import AppConf
 
 
-class ContentAppConf(AppConf):
+class ContentAppConf(
+    AppConf
+):
     GA_ID = 'XXXXX'
 
     class Meta:

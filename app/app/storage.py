@@ -5,7 +5,9 @@ from django.core.files.storage import get_storage_class
 from storages.backends.s3boto import S3BotoStorage
 
 
-class FixedS3BotoStorage(object):
+class FixedS3BotoStorage(
+    object
+):
     def url(self, name):
         url = super(FixedS3BotoStorage, self).url(name)
         if name.endswith('/') and not url.endswith('/'):

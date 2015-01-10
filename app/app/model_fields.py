@@ -31,7 +31,9 @@ from app.utils import smart_text
 
 
 @python_2_unicode_compatible
-class UUIDRepresentation(uuid.UUID):
+class UUIDRepresentation(
+    uuid.UUID
+):
     def __str__(self):
         return self.hex
 

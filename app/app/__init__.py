@@ -15,7 +15,9 @@ from django.db import transaction
 celery = Celery(__name__)
 
 
-class AtomicTask(celery.Task):
+class AtomicTask(
+    celery.Task
+):
     abstract = True
 
     def __call__(self, *args, **kwargs):
@@ -25,7 +27,9 @@ class AtomicTask(celery.Task):
             )
 
 
-class AtomicPeriodicTask(PeriodicTask):
+class AtomicPeriodicTask(
+    PeriodicTask
+):
     abstract = True
 
     def __call__(self, *args, **kwargs):

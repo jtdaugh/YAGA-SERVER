@@ -6,7 +6,9 @@ from django.conf import settings  # noqa
 from appconf import AppConf
 
 
-class YagaAppConf(AppConf):
+class YagaAppConf(
+    AppConf
+):
     SMS_EXPIRATION = datetime.timedelta(minutes=5)
     SMS_TITLE = 'yaga'
     SMS_KEY = '354d4cc5'

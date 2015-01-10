@@ -5,7 +5,9 @@ from django.contrib.auth import get_user_model
 from .models import Code
 
 
-class CodeBackend(object):
+class CodeBackend(
+    object
+):
     supports_object_permissions = False
     supports_anonymous_user = False
     supports_inactive_user = False

@@ -9,7 +9,9 @@ from .models import Code, Group, Post
 from .conf import settings
 
 
-class CodeCleanup(celery.AtomicPeriodicTask):
+class CodeCleanup(
+    celery.AtomicPeriodicTask
+):
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
@@ -18,7 +20,9 @@ class CodeCleanup(celery.AtomicPeriodicTask):
         ).delete()
 
 
-class GroupCleanup(celery.AtomicPeriodicTask):
+class GroupCleanup(
+    celery.AtomicPeriodicTask
+):
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
@@ -33,7 +37,9 @@ class GroupCleanup(celery.AtomicPeriodicTask):
             group.delete()
 
 
-class PostCleanup(celery.AtomicPeriodicTask):
+class PostCleanup(
+    celery.AtomicPeriodicTask
+):
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
@@ -46,7 +52,9 @@ class PostCleanup(celery.AtomicPeriodicTask):
             post.delete()
 
 
-class PostProcess(celery.AtomicTask):
+class PostProcess(
+    celery.AtomicTask
+):
     def run(self, key):
         key = key.replace(settings.MEDIA_LOCATION, '')
 

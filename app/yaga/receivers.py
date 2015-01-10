@@ -5,7 +5,9 @@ from django.db import connection
 from app.receivers import ModelReceiver
 
 
-class PostReceiver(ModelReceiver):
+class PostReceiver(
+    ModelReceiver
+):
     @staticmethod
     def post_delete(sender, **kwargs):
         instance = kwargs['instance']

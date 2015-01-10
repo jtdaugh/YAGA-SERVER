@@ -5,6 +5,8 @@ from .models import Post
 from .receivers import PostReceiver
 
 
-class PostSignal(ModelSignal):
+class PostSignal(
+    ModelSignal
+):
     model = Post
     receiver = PostReceiver

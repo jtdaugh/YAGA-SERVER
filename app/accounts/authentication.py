@@ -6,5 +6,7 @@ from rest_framework.authentication import TokenAuthentication \
 from .models import Token
 
 
-class TokenAuthentication(BaseTokenAuthentication):
+class TokenAuthentication(
+    BaseTokenAuthentication
+):
     model = Token

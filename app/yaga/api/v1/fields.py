@@ -9,7 +9,9 @@ from rest_framework.serializers import (
 from phonenumber_field.phonenumber import to_python
 
 
-class PhoneField(CharField):
+class PhoneField(
+    CharField
+):
     def to_internal_value(self, data):
         data = super(PhoneField, self).to_internal_value(data)
 
@@ -24,7 +26,9 @@ class PhoneField(CharField):
         return phone_number.as_e164
 
 
-class CodeField(CharField):
+class CodeField(
+    CharField
+):
     def to_internal_value(self, data):
         data = super(CodeField, self).to_internal_value(data)
 
@@ -36,7 +40,9 @@ class CodeField(CharField):
         return data
 
 
-class TimeStampField(DateTimeField):
+class TimeStampField(
+    DateTimeField
+):
     def to_internal_value(self, data):
         try:
             data = datetime.datetime.fromtimestamp(float(data))

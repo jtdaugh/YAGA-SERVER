@@ -178,7 +178,9 @@ class User(
 
 
 @python_2_unicode_compatible
-class Token(models.Model):
+class Token(
+    models.Model
+):
     KEY_LENGTH = 128
     KEY_CHARS = string.ascii_letters + string.digits
 
