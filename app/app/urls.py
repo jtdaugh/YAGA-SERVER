@@ -1,12 +1,5 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from app.utils import cache_view
-from content.sitemaps import IndexSitemap
-from content.views import (
-    FaviconRedirectView,
-    IndexTemplateView,
-    RobotsTemplateView
-)
 from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
@@ -15,6 +8,15 @@ from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.sitemaps.views import sitemap
 from django.db.models import get_models
 from django.views.i18n import javascript_catalog
+
+from content.sitemaps import IndexSitemap
+from content.views import (
+    FaviconRedirectView,
+    IndexTemplateView,
+    RobotsTemplateView
+)
+
+from .utils import cache_view
 
 admin.autodiscover()
 

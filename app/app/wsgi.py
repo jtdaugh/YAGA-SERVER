@@ -2,9 +2,10 @@ from __future__ import absolute_import
 
 from configurations.wsgi import get_wsgi_application
 from django.conf import settings
-from manage import setup
 from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.wsgi import SharedDataMiddleware
+
+from manage import setup
 
 setup()
 

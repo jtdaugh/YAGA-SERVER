@@ -2,9 +2,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 from functools import wraps
 
-import requests
-
 import regex
+import requests
 import ujson
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -16,11 +15,12 @@ from django.utils.http import urlquote
 from django.utils.six.moves.urllib.parse import urljoin
 from django.views.decorators.cache import cache_page
 from raven.contrib.django import DjangoClient
-from requestprovider import get_request
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import BaseParser
 from rest_framework.renderers import BaseRenderer
 from rest_framework.settings import api_settings
+
+from requestprovider import get_request
 
 from . import celery
 
