@@ -147,15 +147,21 @@ class Group(
     )
 
     def members_count(self):
-        return self.members.count()
+        return self.member_set.count()
     members_count.short_description = _('Members Count')
+
+    def posts_count(self):
+        return Post.objects.filter(
+            group=self
+        ).count()
+    posts_count.short_description = _('Posts Count')
 
     class Meta:
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
 
     def __str__(self):
-        return self.name
+        return smart_text(self.pk)
 
 
 @python_2_unicode_compatible

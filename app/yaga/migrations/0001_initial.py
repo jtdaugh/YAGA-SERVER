@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Group',
             fields=[
-                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
+                ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
             ],
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Like',
             fields=[
-                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
+                ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
             ],
             options={
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Member',
             fields=[
-                ('id', app.model_fields.UUIDField(serialize=False, editable=False, primary_key=True, blank=True)),
+                ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
                 ('mute', models.BooleanField(default=False, db_index=True, verbose_name='Mute')),
                 ('joined_at', models.DateTimeField(auto_now_add=True, verbose_name='Joined At')),
                 ('group', models.ForeignKey(verbose_name='Group', to='yaga.Group')),
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', app.model_fields.UUIDField(primary_key=True, serialize=False, editable=False, version=1, blank=True)),
+                ('id', app.model_fields.UUIDField(primary_key=True, serialize=False, editable=False, max_length=32, version=1, blank=True)),
                 ('name', models.CharField(max_length=255, null=True, verbose_name='Name', blank=True)),
                 ('attachment', models.FileField(db_index=True, upload_to=yaga.models.post_upload_to, null=True, verbose_name='Attachment', blank=True)),
                 ('checksum', models.CharField(db_index=True, max_length=255, null=True, verbose_name='Checksum', blank=True)),

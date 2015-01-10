@@ -18,26 +18,26 @@ class CodeAdmin(
 class GroupAdmin(
     admin.ModelAdmin
 ):
-    list_display = ('name', 'created_at', 'members_count')
+    list_display = ('pk', 'name', 'created_at', 'members_count', 'posts_count')
 
     ordering = ('-created_at',)
 
-    search_fields = ('name',)
+    search_fields = ('name', 'pk')
 
 
 class PostAdmin(
     admin.ModelAdmin
 ):
     list_display = (
-        'name', 'user', 'likes', 'attachment', 'group', 'mime',
-        'ready', 'created_at', 'ready_at'
+        'pk', 'name', 'user', 'likes', 'group', 'mime',
+        'ready', 'ready_at'
     )
 
-    ordering = ('-created_at',)
+    ordering = ('-ready_at',)
 
     list_filter = ('ready', 'mime')
 
-    search_fields = ('attachment',)
+    search_fields = ('attachment', 'name', 'pk')
 
 
 class MemberAdmin(

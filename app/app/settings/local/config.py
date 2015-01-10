@@ -19,7 +19,7 @@ class LocalImplementation(
 
 class Configuration(
     Initialization,
-    LocalImplementation,
-    LocalConfiguration
+    LocalConfiguration,
+    LocalImplementation
 ):
     pass

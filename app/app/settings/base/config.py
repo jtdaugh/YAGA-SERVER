@@ -66,10 +66,6 @@ class BaseConfiguration(
     # -------------------------------------------------------
     GZIP = False
     # -------------------------------------------------------
-    # accounting configuration
-    # -------------------------------------------------------
-    ACCOUNTING = True
-    # -------------------------------------------------------
     # debug toolbar configuration
     # -------------------------------------------------------
     DEBUG_TOOLBAR = True
@@ -616,10 +612,6 @@ class BaseConfiguration(
     # requests configuration
     # -------------------------------------------------------
     HTTP_RETRIES = 5
-    # -------------------------------------------------------
-    # uuid configuration
-    # -------------------------------------------------------
-    UUID_HYPHENATE = False
 
 
 class Initialization(

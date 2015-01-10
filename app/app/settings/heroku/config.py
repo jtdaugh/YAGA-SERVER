@@ -141,7 +141,7 @@ class HerokuImplementation(
 
 class Configuration(
     Initialization,
+    HerokuConfiguration,
     HerokuImplementation,
-    HerokuConfiguration
 ):
     pass

@@ -113,12 +113,12 @@ class TravisConfiguration(
 class TravisImplementation(
     Implementation
 ):
-        pass
+    pass
 
 
 class Configuration(
     Initialization,
-    TravisImplementation,
-    TravisConfiguration
+    TravisConfiguration,
+    TravisImplementation
 ):
     pass
