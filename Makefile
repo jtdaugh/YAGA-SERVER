@@ -9,7 +9,7 @@ CMD_SHELL=$(CMD_MANAGE) shell_plus
 CMD_BOWER=$(CMD_MANAGE) bower_install -- --config.interactive=false
 CMD_MIGRATE=$(CMD_MANAGE) migrate
 CMD_TEST=$(CMD_MANAGE) test
-CMD_LINT=flake8 app && isort --check-only -rc app
+CMD_LINT=flake8 app && frosted -r app && isort --check-only -rc app
 CMD_PIP=pip install -r requirements.txt
 CMD_NPM=npm install
 CMD_ACTIVATE_ENV=source $(ENV_DIR)/bin/activate
