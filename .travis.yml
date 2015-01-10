@@ -2,9 +2,14 @@ language: python
 python:
   - '2.7'
   - '3.4'
+env:
+  - DJANGO="django>=1.7,<1.8"
+  - DJANGO="https://github.com/django/django/archive/master.zip#egg=django"
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
   - pip install -r requirements$(echo $REQ_VERSION).txt --download-cache /home/travis/pip-cache
+  - pip uninstall django
+  - pip install $DJANGO
 script:
   - flake8 app
   - cd app && python manage.py test
