@@ -11,6 +11,7 @@ install:
   - pip install virtualenv
   - virtualenv env
   - source env/bin/activate
+  - pip install setuptools==9.1
   - pip install -r "$REQUIREMENTS" --download-cache $HOME/pip-cache
   - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
 script:
