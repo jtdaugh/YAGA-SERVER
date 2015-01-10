@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
@@ -28,6 +27,7 @@ from .serializers import (
     PostSerializer
 )
 from ...models import Code, Group, Post, Member, Like
+from ...conf import settings
 from .permissions import (
     TokenOwner, IsAnonymous, GroupMemeber, PostOwner, PostGroupMember
 )
@@ -221,7 +221,7 @@ class GroupRetrieveUpdateAPIView(
             post_filter['ready_at__gte'] = (
                 serializer.validated_data['since']
                 -
-                settings.CONSTANTS.SLOP_FACTOR
+                settings.YAGA_SLOP_FACTOR
             )
 
         queryset = Group.objects.prefetch_related(

@@ -8,7 +8,6 @@ import base64
 
 import magic
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
@@ -16,10 +15,11 @@ from django.utils.encoding import python_2_unicode_compatible
 from app.model_fields import UUIDField, PhoneNumberField
 from app.utils import smart_text
 from .providers import NexmoProvider
+from .conf import settings
 
 
 def code_expire_at():
-    return timezone.now() + settings.CONSTANTS.SMS_EXPIRATION
+    return timezone.now() + settings.YAGA_SMS_EXPIRATION
 
 
 def post_upload_to(instance, filename=None):
@@ -264,7 +264,7 @@ class Post(
 
         content_type = 'video/quicktime'
 
-        expires_in = timezone.now() + settings.CONSTANTS.AWS_UPLOAD_EXPIRES
+        expires_in = timezone.now() + settings.YAGA_AWS_UPLOAD_EXPIRES
 
         expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
@@ -293,7 +293,7 @@ class Post(
                 [
                     'content-length-range',
                     0,
-                    settings.CONSTANTS.AWS_UPLOAD_LENGTH
+                    settings.YAGA_AWS_UPLOAD_LENGTH
                 ],
             ]
         })

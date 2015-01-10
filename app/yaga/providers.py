@@ -7,9 +7,8 @@ try:
 except ImportError:
     from urllib.parse import urlencode
 
-from django.conf import settings
-
 from app.utils import create_requests_session
+from .conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -52,11 +51,11 @@ class NexmoProvider(object):
 
     @property
     def api_key(self):
-        return settings.CONSTANTS.SMS_KEY
+        return settings.YAGA_SMS_KEY
 
     @property
     def api_secret(self):
-        return settings.CONSTANTS.SMS_SECRET
+        return settings.YAGA_SMS_SECRET
 
     @property
     def auth_credentials(self):
@@ -106,7 +105,7 @@ class NexmoProvider(object):
     ):
         params = {
             'number': int(receiver),
-            'brand': settings.CONSTANTS.SMS_TITLE,
+            'brand': settings.YAGA_SMS_TITLE,
         }
 
         if sender is not None:

@@ -9,8 +9,6 @@ import yuicompressor
 from django.utils.translation import ugettext_lazy as _
 from configurations import Configuration
 
-from app.settings.base.constants import BaseConstants
-
 
 class InvalidTemplateObjectException(
     Exception
@@ -34,10 +32,6 @@ class InvalidTemplateObject(
 class BaseConfiguration(
     Configuration
 ):
-    # -------------------------------------------------------
-    # constants configuration
-    # -------------------------------------------------------
-    CONSTANTS = BaseConstants()
     # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------
@@ -350,6 +344,13 @@ class BaseConfiguration(
 
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
 
+    AWS_ACCESS_KEY_ID = 'AKIAJSOKYB6HRKACSAMA'
+    AWS_SECRET_ACCESS_KEY = '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'
+    AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
+
+    S3_HOST = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+    MEDIA_URL = '%smedia/' % S3_HOST
+
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True
     AWS_QUERYSTRING_AUTH = False
@@ -633,16 +634,6 @@ class Implementation(
     object
 ):
     def implement(self):
-        # -------------------------------------------------------
-        # storages implementation
-        # -------------------------------------------------------
-        self.AWS_ACCESS_KEY_ID = self.CONSTANTS.AWS_ACCESS_KEY_ID
-        self.AWS_SECRET_ACCESS_KEY = self.CONSTANTS.AWS_SECRET_ACCESS_KEY
-        self.AWS_STORAGE_BUCKET_NAME = self.CONSTANTS.AWS_STORAGE_BUCKET_NAME
-        self.S3_HOST = 'https://%s.s3.amazonaws.com/' % (
-            self.AWS_STORAGE_BUCKET_NAME,
-        )
-        self.MEDIA_URL = '%smedia/' % self.S3_HOST
         # -------------------------------------------------------
         # Python 2 capability features
         # -------------------------------------------------------

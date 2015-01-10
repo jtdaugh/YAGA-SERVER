@@ -5,16 +5,11 @@ import dj_database_url
 from app.settings.base.config import (
     BaseConfiguration, Implementation, Initialization
 )
-from app.settings.travis.constants import TravisConstants
 
 
 class TravisConfiguration(
     BaseConfiguration
 ):
-    # -------------------------------------------------------
-    # constants configuration
-    # -------------------------------------------------------
-    CONSTANTS = TravisConstants()
     # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------

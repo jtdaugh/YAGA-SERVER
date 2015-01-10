@@ -4,10 +4,10 @@ import logging
 import json
 
 import boto
-from django.conf import settings
 from django.core.management.base import NoArgsCommand
 
 from ...tasks import PostProcess
+from ...conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ class Command(
             settings.AWS_SECRET_ACCESS_KEY
         )
 
-        queue = sqs.create_queue(settings.CONSTANTS.SQS_QUEUE)
+        queue = sqs.create_queue(settings.YAGA_SQS_QUEUE)
 
         while True:
             try:

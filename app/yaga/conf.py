@@ -2,24 +2,19 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 
+from django.conf import settings  # noqa
+from appconf import AppConf
 
-class BaseConstants(
-    object
-):
-    GA_ID = 'XXXXX'
 
+class YagaAppConf(AppConf):
     SMS_EXPIRATION = datetime.timedelta(minutes=5)
     SMS_TITLE = 'yaga'
     SMS_KEY = '354d4cc5'
     SMS_SECRET = '066e303e'
-
     SLOP_FACTOR = datetime.timedelta(seconds=5)
-
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
     AWS_UPLOAD_LENGTH = 25 * 1024 * 1024
-
-    AWS_ACCESS_KEY_ID = 'AKIAJSOKYB6HRKACSAMA'
-    AWS_SECRET_ACCESS_KEY = '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'
-    AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
-
     SQS_QUEUE = 's3_yaga-dev_sqs'
+
+    class Meta:
+        prefix = 'yaga'

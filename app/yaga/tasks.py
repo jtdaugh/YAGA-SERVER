@@ -3,10 +3,10 @@ from __future__ import absolute_import, division, unicode_literals
 import datetime
 
 from django.utils import timezone
-from django.conf import settings
 
 from app import celery
 from .models import Code, Group, Post
+from .conf import settings
 
 
 class CodeCleanup(celery.AtomicPeriodicTask):
