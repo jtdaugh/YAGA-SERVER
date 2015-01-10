@@ -6,11 +6,11 @@ env:
   - DJANGO="requirements"
   - DJANGO="https://github.com/django/django/archive/master.zip#egg=django"
 install:
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
-  - REQUIREMENTS=requirements$REQ_VERSION.txt
-  - pip install -r $REQUIREMENTS --download-cache /home/travis/pip-cache
+  - if [[ "$TRAVIS_PYTHON_VERSION" == '3.4' ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
+  - REQUIREMENTS="requirements$REQ_VERSION.txt"
+  - pip install -r "$REQUIREMENTS" --download-cache /home/travis/pip-cache
   - echo y | pip uninstall django
-  - if [[ $DJANGO == 'requirements' ]]; then DJANGO=$(cat $REQUIREMENTS | grep 'django=='); fi
+  - if [[ $DJANGO == 'requirements' ]]; then DJANGO=$(cat "$REQUIREMENTS" | grep 'django=='); fi
   - pip install $DJANGO
 script:
   - flake8 app
