@@ -1,12 +1,14 @@
 from __future__ import (
-    absolute_import, division, unicode_literals, print_function
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals
 )
 
 from time import sleep
 
 from fabric.api import local, task, warn_only
 from fabric.operations import prompt
-
 
 APP_DIR = 'app'
 DYNOS = {

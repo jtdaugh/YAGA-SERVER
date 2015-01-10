@@ -1,12 +1,12 @@
-from __future__ import absolute_import, division, smart_text_literals
+from __future__ import absolute_import, division, unicode_literals
 
-from django import template
-from django.utils.html import mark_safe
-from django.utils.encoding import iri_to_uri
-from django.utils.translation import ugettext_lazy as _
-from classytags.core import Options
 from classytags.arguments import Argument
+from classytags.core import Options
 from classytags.helpers import InclusionTag
+from django import template
+from django.utils.encoding import iri_to_uri
+from django.utils.html import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from app.utils import smart_text
 

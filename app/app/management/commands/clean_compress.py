@@ -3,8 +3,8 @@ from __future__ import absolute_import, division, unicode_literals
 import os
 
 from django.conf import settings
-from django.core.management.base import NoArgsCommand
 from django.core.files.storage import get_storage_class
+from django.core.management.base import NoArgsCommand
 
 
 class Command(
@@ -30,5 +30,5 @@ class Command(
 
         try:
             clean(settings.COMPRESS_OUTPUT_DIR)
-        except:
+        except Exception:
             pass

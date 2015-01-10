@@ -1,15 +1,13 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import logging
 import json
+import logging
 
 import boto
-
 from django.core.management.base import NoArgsCommand
 
 from ...conf import settings
 from ...tasks import PostProcess
-
 
 logger = logging.getLogger(__name__)
 

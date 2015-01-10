@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, division, unicode_literals
 
-import six
+import imp
 import locale
 import os
 import sys
-import imp
+
+import six
 
 
 def fix_locale():

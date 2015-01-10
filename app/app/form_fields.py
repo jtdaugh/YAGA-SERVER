@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from phonenumber_field.formfields import (
+from phonenumber_field.formfields import \
     PhoneNumberField as BasePhoneNumberField
-)
 
 
 class PhoneNumberField(

@@ -1,13 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import os
-import six
-# import logging
 
 import closure
+import six
 import yuicompressor
-from django.utils.translation import ugettext_lazy as _
 from configurations import Configuration
+from django.utils.translation import ugettext_lazy as _
 
 
 class InvalidTemplateObjectException(
@@ -544,6 +543,7 @@ class BaseConfiguration(
         },
         'root': DEBUG_LOGGER,
     }
+    # import logging
     # for logger in logging.root.manager.loggerDict:
     #     LOGGING['loggers'][logger] = DEBUG_LOGGER
     # LOGGING_CONFIG = None

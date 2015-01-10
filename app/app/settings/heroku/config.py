@@ -6,7 +6,9 @@ import dj_database_url
 from memcacheify import memcacheify
 
 from app.settings.base.config import (
-    BaseConfiguration, Implementation, Initialization
+    BaseConfiguration,
+    Implementation,
+    Initialization
 )
 
 

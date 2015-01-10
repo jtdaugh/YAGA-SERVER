@@ -1,22 +1,21 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.conf.urls import patterns, include, url
-from django.db.models import get_models
-from django.contrib.admin.sites import AlreadyRegistered
 from django.conf import settings
+from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.admin.sites import AlreadyRegistered
 from django.contrib.sitemaps.views import sitemap
+from django.db.models import get_models
 from django.views.i18n import javascript_catalog
 
 from app.utils import cache_view
-from content.views import (
-    IndexTemplateView,
-    RobotsTemplateView,
-    FaviconRedirectView
-)
 from content.sitemaps import IndexSitemap
-
+from content.views import (
+    FaviconRedirectView,
+    IndexTemplateView,
+    RobotsTemplateView
+)
 
 admin.autodiscover()
 

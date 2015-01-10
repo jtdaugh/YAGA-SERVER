@@ -1,18 +1,18 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import os
-import hashlib
-import json
-import hmac
 import base64
+import hashlib
+import hmac
+import json
+import os
 
 import magic
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext_lazy as _
 
-from app.model_fields import UUIDField, PhoneNumberField
+from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
 
 from .conf import settings
@@ -371,4 +371,4 @@ class Like(
         return smart_text(self.pk)
 
 
-from . import dispatch  # noqa
+from . import dispatch  # noqa # isort:skip

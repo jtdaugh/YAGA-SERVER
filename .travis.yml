@@ -12,6 +12,7 @@ install:
   - if [[ "requirements" != "$DJANGO" ]]; then pip install --upgrade "$DJANGO"; fi
 script:
   - flake8 app
+  - isort --check-only -rc app
   - cd app && python manage.py test
 services:
   - redis-server

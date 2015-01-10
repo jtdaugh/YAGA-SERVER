@@ -1,18 +1,20 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import ugettext_lazy as _
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (
-    ModelSerializer, ListField, IntegerField, Serializer
+    IntegerField,
+    ListField,
+    ModelSerializer,
+    Serializer
 )
 from rest_framework.validators import UniqueValidator
-from rest_framework.exceptions import ValidationError
 
 from accounts.models import Token
 
-from .fields import CodeField, PhoneField, TimeStampField
 from ...models import Code, Group, Member, Post
+from .fields import CodeField, PhoneField, TimeStampField
 
 
 class SinceSerializer(

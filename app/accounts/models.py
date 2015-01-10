@@ -2,20 +2,22 @@ from __future__ import absolute_import, division, unicode_literals
 
 import string
 
-from django.contrib.auth.models import (
-    AbstractBaseUser, BaseUserManager, PermissionsMixin
-)
 from django.conf import settings
-from django.db import models, IntegrityError
-from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
-from django.utils.crypto import get_random_string
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin
+)
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.db import IntegrityError, models
+from django.utils import timezone
+from django.utils.crypto import get_random_string
 from django.utils.encoding import python_2_unicode_compatible
+from django.utils.translation import ugettext_lazy as _
 
+from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import reverse_host
-from app.model_fields import UUIDField, PhoneNumberField
 
 
 class UserManager(

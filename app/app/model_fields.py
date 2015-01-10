@@ -1,10 +1,17 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import uuid
+
+from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, models
 from django.utils import six
 from django.utils.encoding import python_2_unicode_compatible
-from django.core.exceptions import ImproperlyConfigured
+from phonenumber_field.modelfields import \
+    PhoneNumberField as BasePhoneNumberField
+
+from app.form_fields import PhoneNumberField as FormPhoneNumberField
+from app.utils import smart_text
+
 try:
     # Django > 1.8
     BaseUUIDField = models.UUIDField
@@ -20,12 +27,6 @@ except AttributeError:
         )
     else:
         from django_extensions.db.fields import UUIDField as BaseUUIDField
-from phonenumber_field.modelfields import (
-    PhoneNumberField as BasePhoneNumberField
-)
-
-from app.form_fields import PhoneNumberField as FormPhoneNumberField
-from app.utils import smart_text
 
 
 @python_2_unicode_compatible

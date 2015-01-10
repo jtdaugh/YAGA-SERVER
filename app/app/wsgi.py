@@ -1,12 +1,13 @@
 from __future__ import absolute_import
 
-from manage import setup
-setup()
-
-from django.conf import settings
 from configurations.wsgi import get_wsgi_application
-from werkzeug.wsgi import SharedDataMiddleware
+from django.conf import settings
 from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.wsgi import SharedDataMiddleware
+
+from manage import setup
+
+setup()
 
 
 application = get_wsgi_application()

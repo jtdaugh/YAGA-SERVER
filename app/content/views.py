@@ -1,11 +1,12 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.views.generic import TemplateView
 from django.contrib.staticfiles.templatetags.staticfiles import static
+from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
-from app.views import CacheView, UserCacheView
 from app.utils import reverse_host
+from app.views import CacheView, UserCacheView
+
 from .conf import settings
 
 

@@ -1,18 +1,22 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import include, patterns, url
 
 from .views import (
-    UserRetrieveUpdateAPIView,
-    CodeRetrieveAPIView, CodeCreateAPIView,
-    TokenCreateAPIView, TokenDestroyAPIView,
-    GroupListCreateAPIView, GroupRetrieveUpdateAPIView,
-    GroupManageMemberAddAPIView, GroupManageMemberRemoveAPIView,
+    CodeCreateAPIView,
+    CodeRetrieveAPIView,
+    GroupListCreateAPIView,
+    GroupManageMemberAddAPIView,
     GroupManageMemberMuteAPIView,
-    PostCreateAPIView, PostRetrieveUpdateDestroyAPIView,
-    LikeCreateDestroyAPIView
+    GroupManageMemberRemoveAPIView,
+    GroupRetrieveUpdateAPIView,
+    LikeCreateDestroyAPIView,
+    PostCreateAPIView,
+    PostRetrieveUpdateDestroyAPIView,
+    TokenCreateAPIView,
+    TokenDestroyAPIView,
+    UserRetrieveUpdateAPIView
 )
-
 
 auth_urlpatterns = patterns(
     '',

@@ -1,10 +1,9 @@
 from __future__ import absolute_import, division, unicode_literals
 
+from classytags.core import Options, Tag
 from django import template
-from classytags.core import Tag, Options
 
 from app.utils import sless
-
 
 register = template.Library()
 

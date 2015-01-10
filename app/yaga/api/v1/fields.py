@@ -3,10 +3,12 @@ from __future__ import absolute_import, division, unicode_literals
 import datetime
 
 from django.utils.translation import ugettext_lazy as _
-from rest_framework.serializers import (
-    CharField, ValidationError, DateTimeField
-)
 from phonenumber_field.phonenumber import to_python
+from rest_framework.serializers import (
+    CharField,
+    DateTimeField,
+    ValidationError
+)
 
 
 class PhoneField(
@@ -34,7 +36,7 @@ class CodeField(
 
         try:
             int(data)
-        except:
+        except Exception:
             raise ValidationError(_('Incorrect code format.'))
 
         return data
@@ -46,7 +48,7 @@ class TimeStampField(
     def to_internal_value(self, data):
         try:
             data = datetime.datetime.fromtimestamp(float(data))
-        except:
+        except Exception:
             raise ValidationError(_('Incorrect timestamp format.'))
 
         return data

@@ -1,12 +1,14 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django import forms
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth import get_user_model
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    ReadOnlyPasswordHashField
+)
+from django.utils.translation import ugettext_lazy as _
 
 
 class UserCreationForm(

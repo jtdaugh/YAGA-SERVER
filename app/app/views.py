@@ -1,10 +1,10 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.shortcuts import render
-from django.utils.translation import ugettext_lazy as _
-from django.template import loader, Context
 from django.http import HttpResponseServerError
+from django.shortcuts import render
+from django.template import Context, loader
 from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext_lazy as _
 
 from app.utils import cache_view, user_cache_view
 

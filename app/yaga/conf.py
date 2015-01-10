@@ -2,8 +2,8 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 
-from django.conf import settings  # noqa
 from appconf import AppConf
+from django.conf import settings  # noqa
 
 
 class YagaAppConf(

@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from .views import SignInView, SignOutView
 
-
 urlpatterns = patterns(
     '',
     url(

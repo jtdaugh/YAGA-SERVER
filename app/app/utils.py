@@ -1,27 +1,28 @@
 from __future__ import absolute_import, division, unicode_literals
 
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
 from functools import wraps
 
-import ujson
-import requests
 import regex
+import requests
+import ujson
 from django.conf import settings
-from django.utils.http import urlquote
-from django.views.decorators.cache import cache_page
-from django.core.urlresolvers import reverse, NoReverseMatch
-from django.utils.functional import SimpleLazyObject
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured
+from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
-from rest_framework.parsers import BaseParser
+from django.utils.functional import SimpleLazyObject
+from django.utils.http import urlquote
+from django.utils.six.moves.urllib.parse import urljoin
+from django.views.decorators.cache import cache_page
+from raven.contrib.django import DjangoClient
 from rest_framework.exceptions import ParseError
+from rest_framework.parsers import BaseParser
 from rest_framework.renderers import BaseRenderer
 from rest_framework.settings import api_settings
-from raven.contrib.django import DjangoClient
+
+from app import celery
+from requestprovider import get_request
+
 try:
     from django.utils.encoding import (  # noqa
         smart_text, force_text, smart_bytes, force_bytes
@@ -32,9 +33,6 @@ except ImportError:
         force_unicode as force_text,
         smart_bytes, force_bytes
     )
-
-from app import celery
-from requestprovider import get_request
 
 
 def u(value):

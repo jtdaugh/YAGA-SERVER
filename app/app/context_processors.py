@@ -1,8 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
 
-from django.utils.functional import SimpleLazyObject
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
+from django.utils.functional import SimpleLazyObject
 
 
 def environment(request):

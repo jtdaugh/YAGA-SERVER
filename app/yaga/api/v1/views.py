@@ -5,7 +5,6 @@ from django.db import transaction
 from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import status
 from rest_framework.generics import (
     CreateAPIView,
@@ -15,18 +14,19 @@ from rest_framework.generics import (
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
     UpdateAPIView,
-    get_object_or_404,
+    get_object_or_404
 )
 from rest_framework.permissions import IsAuthenticated
-# from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from ...conf import settings
+from ...models import Code, Group, Like, Member, Post
 from .permissions import (
     GroupMemeber,
     IsAnonymous,
     PostGroupMember,
     PostOwner,
-    TokenOwner,
+    TokenOwner
 )
 from .serializers import (
     CodeCreateSerializer,
@@ -42,8 +42,6 @@ from .serializers import (
     UserSerializer
 )
 from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
-from ...conf import settings
-from ...models import Code, Group, Like, Member, Post
 
 
 class UserRetrieveUpdateAPIView(

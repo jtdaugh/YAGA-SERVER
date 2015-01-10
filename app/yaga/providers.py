@@ -2,13 +2,15 @@ from __future__ import absolute_import, division, unicode_literals
 
 import json
 import logging
+
+from app.utils import create_requests_session
+
+from .conf import settings
+
 try:
     from urllib import urlencode
 except ImportError:
     from urllib.parse import urlencode
-
-from app.utils import create_requests_session
-from .conf import settings
 
 
 logger = logging.getLogger(__name__)
