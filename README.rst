@@ -10,11 +10,6 @@ Installation Mac OS X:
 
     brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql
 
-    # postgresql
-    ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
-    launchctl load ~/Library/LaunchAgents/homebrew.mxcl.postgresql.plist
-    # or postgres -D /usr/local/var/postgres
-
     sudo pip install virtualenv
 
     # bootstrap application
@@ -53,9 +48,6 @@ Deployment:
 ***********
 
 .. code-block:: bash
-
-    # activate python environment
-    source env/bin/activate
 
     # create new heroku application
     fab create

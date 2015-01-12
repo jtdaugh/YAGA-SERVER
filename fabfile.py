@@ -97,12 +97,22 @@ def status():
 
 @task
 def psql():
-    local('heroku pg:psql')
+    # local('heroku pg:psql')
+    config = local('heroku config', capture=True).splitlines()
+
+    for line in config:
+        if 'HEROKU_POSTGRESQL' in line:
+            DB_URL = line.split(' ')[1].strip()
+            break
+
+    local('pgcli {url}'.format(
+        url=DB_URL
+    ))
 
 
 @task
 def events():
-    local('heroku run "cd {app} celery -A app events"'.format(
+    local('heroku run "cd {app} && celery -A app events"'.format(
         app=APP_DIR
     ))
 
@@ -134,10 +144,10 @@ def resetdb():
 
     for line in config:
         if 'HEROKU_POSTGRESQL' in line:
-            DB_URL = line.split(':')[0].strip()
+            DB_NAME = line.split(':')[0].strip()
             break
 
-    local('heroku pg:promote {url}'.format(url=DB_URL))
+    local('heroku pg:promote {name}'.format(name=DB_NAME))
 
     local('heroku run "cd {app} && python manage.py migrate"'.format(
         app=APP_DIR

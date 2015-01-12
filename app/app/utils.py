@@ -26,13 +26,17 @@ from . import celery
 
 try:
     from django.utils.encoding import (  # noqa
-        smart_text, force_text, smart_bytes, force_bytes
+        smart_text,
+        force_text,
+        smart_bytes,
+        force_bytes
     )
 except ImportError:
     from django.utils.encoding import (  # noqa
         smart_unicode as smart_text,
         force_unicode as force_text,
-        smart_bytes, force_bytes
+        smart_bytes,
+        force_bytes
     )
 
 
@@ -208,13 +212,13 @@ class SentryCeleryClient(
 ):
     def get_user_info(self, user):
         if not user.is_authenticated():
-            return {'is_authenticated': False}
-
-        user_info = {
-            'id': smart_text(user.pk),
-            'is_authenticated': True,
-            'username': user.get_username()
-        }
+            user_info = {'is_authenticated': False}
+        else:
+            user_info = {
+                'id': smart_text(user.pk),
+                'is_authenticated': True,
+                'username': user.get_username()
+            }
 
         return user_info
 

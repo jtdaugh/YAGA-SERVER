@@ -27,7 +27,5 @@ class RequestProviderMiddleware(
 
         self.request = SimpleLazyObject(lazy_request)
 
-        return None
-
     def __call__(self, **kwargs):
         return self.request

@@ -44,12 +44,10 @@ class CodeBackend(
         elif response.exceeded():
             code_obj.delete()
 
-        return None
-
     def get_user(self, user_id):
         try:
             return self.model.objects.get(
                 pk=user_id
             )
         except self.model.DoesNotExist:
-            return None
+            pass
