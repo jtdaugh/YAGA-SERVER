@@ -2,12 +2,14 @@ from __future__ import absolute_import, division, unicode_literals
 
 from rest_framework.permissions import BasePermission
 
+from accounts.models import Token
+
 
 class TokenOwner(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.user
+        return isinstance(obj, Token) and request.user == obj.user
 
 
 class GroupMemeber(

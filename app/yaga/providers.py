@@ -5,7 +5,7 @@ import logging
 
 from django.utils.six.moves.urllib.parse import urlencode
 
-from app.utils import create_requests_session
+from app.utils import get_requests_session
 
 from .conf import settings
 
@@ -49,7 +49,7 @@ class NexmoProvider(
     SEND_VERIFY_ENDPOINT = VERIFY_ENDPOINT + FORMAT
     CHECK_VERIFY_ENDPOINT = VERIFY_ENDPOINT + 'check/' + FORMAT
 
-    session = create_requests_session()
+    session = get_requests_session()
 
     @property
     def api_key(self):
