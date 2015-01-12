@@ -149,9 +149,9 @@ def resetdb():
 
     local('heroku pg:promote {name}'.format(name=DB_NAME))
 
-    local('heroku run "cd {app} && python manage.py migrate"'.format(
-        app=APP_DIR
-    ))
+    # local('heroku run "cd {app} && python manage.py migrate"'.format(
+    #     app=APP_DIR
+    # ))
 
     start()
 
