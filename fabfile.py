@@ -13,9 +13,9 @@ from fabric.operations import prompt
 APP_DIR = 'app'
 DYNOS = {
     'web': 1,
-    'celery_broker': 0,
-    'celery_worker': 0,
-    'sqs': 0
+    # 'celery_broker': 0,
+    # 'celery_worker': 0,
+    # 'sqs': 0
 }
 # STOP_TIMEOUT = 30
 # START_TIMEOUT = 30
