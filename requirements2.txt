@@ -94,8 +94,6 @@ pep8==1.5.7
 pep8-naming==0.2.2
 pgcli==0.11.0
 phonenumbers==7.0.1
-pies==2.6.3
-pies2overrides==2.6.3
 pip-tools==0.3.5
 pipdeptree==0.4.2
 prompt-toolkit==0.25
