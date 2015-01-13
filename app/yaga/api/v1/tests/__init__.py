@@ -5,18 +5,20 @@ from django.contrib.auth import get_user_model
 from accounts.models import Token
 
 
-PHONE_NUMBER = '+380632237710'
-NAME = 'yaga_user'
+USER_PHONE_NUMBER = '+380632237710'
+USER_NAME = 'yaga_user'
+GROUP_MEMBERS = ['+380919575676', '+380675093001', '+380938542758']
+GROUP_NAME = 'yaga_group'
 
 
 class AuthMixin(
     object
 ):
-    def setUp(self):
+    def login(self):
         model = get_user_model()
-        user = model()
-        user.phone = PHONE_NUMBER
-        user.save()
+        user = model.objects.get_or_create(
+            phone=USER_PHONE_NUMBER
+        )
 
         token = Token()
         token.user = user
@@ -25,3 +27,6 @@ class AuthMixin(
         self.client.credentials(
             HTTP_AUTHORIZATION='Token ' + token.key
         )
+
+    def logout(self):
+        self.client.credentials()

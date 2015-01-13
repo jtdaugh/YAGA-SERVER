@@ -1,4 +1,9 @@
 [run]
 include =
-    application/*
+    accounts/*
+    app/*
+    content/*
+    frontend/*
+    requestprovide/*
+    yaga/*
 omit =

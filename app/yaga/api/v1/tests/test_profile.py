@@ -4,14 +4,16 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-
-from . import PHONE_NUMBER, NAME, AuthMixin
+from . import USER_NAME, USER_PHONE_NUMBER, AuthMixin
 
 
 class ProfileTestCase(
     AuthMixin,
     APITestCase
 ):
+    def setUp(self):  # noqa
+        self.login()
+
     def test_empty_profile(self):
         response = self.client.get(
             reverse('yaga:api:v1:user:profile')
@@ -19,6 +21,10 @@ class ProfileTestCase(
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+        self.assertIn(
+            'id',
+            response.data
         )
         self.assertIn(
             'phone',
@@ -34,7 +40,7 @@ class ProfileTestCase(
         )
         self.assertEqual(
             response.data['phone'],
-            PHONE_NUMBER
+            USER_PHONE_NUMBER
         )
         self.assertEqual(
             response.data['name'],
@@ -45,8 +51,12 @@ class ProfileTestCase(
         response = self.client.put(
             reverse('yaga:api:v1:user:profile'),
             data={
-                'name': NAME
+                'name': USER_NAME
             }
+        )
+        self.assertIn(
+            'id',
+            response.data
         )
         self.assertIn(
             'name',
@@ -54,5 +64,5 @@ class ProfileTestCase(
         )
         self.assertEqual(
             response.data['name'],
-            NAME
+            USER_NAME
         )

@@ -152,17 +152,17 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # cache configuration
     # -------------------------------------------------------
-    # CACHES = {
-    #     'default': {
-    #         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-    #         'LOCATION': os.path.abspath(os.path.join(PROJECT_ROOT, 'cache'))
-    #     }
-    # }
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.abspath(os.path.join(PROJECT_ROOT, 'cache'))
         }
     }
+    # CACHES = {
+    #     'default': {
+    #         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    #     }
+    # }
     # -------------------------------------------------------
     # sessions\message configuration
     # -------------------------------------------------------
@@ -402,6 +402,10 @@ class BaseConfiguration(
     # SOUTH_MIGRATION_MODULES = {
     # }
     # -------------------------------------------------------
+    # testing configuration
+    # -------------------------------------------------------
+    TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+    # -------------------------------------------------------
     # installed applications configuration
     # -------------------------------------------------------
     INSTALLED_APPS = [
@@ -445,6 +449,7 @@ class BaseConfiguration(
         'configurations',
         'rest_framework',
         'debug_toolbar',
+        'django_nose',
         'raven.contrib.django',
     ]
     # -------------------------------------------------------

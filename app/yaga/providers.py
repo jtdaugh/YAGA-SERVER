@@ -3,14 +3,11 @@ from __future__ import absolute_import, division, unicode_literals
 import json
 import logging
 
+from django.utils.six.moves.urllib.parse import urlencode
+
 from app.utils import get_requests_session
 
 from .conf import settings
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
 
 logger = logging.getLogger(__name__)
 

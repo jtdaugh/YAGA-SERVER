@@ -1,20 +1,25 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import json
 import datetime
+import json
 
 import responses
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
+from django.utils.six.moves import range
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from . import USER_PHONE_NUMBER
 from ....models import Code
-from . import PHONE_NUMBER
 
 
 class AuthTestCase(
     APITestCase
 ):
+    def tearDown(self):  # noqa
+        cache.clear()
+
     def test_non_authenticated(self):
         response = self.client.get(
             reverse('yaga:api:v1:user:profile')
@@ -28,7 +33,7 @@ class AuthTestCase(
         response = self.client.post(
             reverse('yaga:api:v1:auth:request'),
             {
-                'phone': PHONE_NUMBER[2:]
+                'phone': USER_PHONE_NUMBER[2:]
             }
         )
         self.assertEqual(
@@ -51,7 +56,7 @@ class AuthTestCase(
         response = self.client.post(
             reverse('yaga:api:v1:auth:request'),
             {
-                'phone': PHONE_NUMBER
+                'phone': USER_PHONE_NUMBER
             }
         )
         self.assertEqual(
@@ -69,7 +74,7 @@ class AuthTestCase(
         response = self.client.post(
             reverse('yaga:api:v1:auth:obtain'),
             {
-                'phone': PHONE_NUMBER
+                'phone': USER_PHONE_NUMBER
             }
         )
         self.assertEqual(
@@ -92,7 +97,7 @@ class AuthTestCase(
         response = self.client.post(
             reverse('yaga:api:v1:auth:obtain'),
             {
-                'phone': PHONE_NUMBER,
+                'phone': USER_PHONE_NUMBER,
                 'code': '0000'
             }
         )
@@ -115,4 +120,45 @@ class AuthTestCase(
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK
+        )
+
+        response = self.client.delete(
+            reverse('yaga:api:v1:auth:release')
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:user:profile')
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+    @responses.activate
+    def test_throttle(self):
+        valid_nexmo_response = {
+            'status': '0',
+            'request_id': 'nexmo_reques_id'
+        }
+        responses.add(
+            responses.GET,
+            Code.provider.SEND_VERIFY_ENDPOINT,
+            body=json.dumps(valid_nexmo_response), status=200,
+            content_type='application/json'
+        )
+
+        for step in range(20):
+            response = self.client.post(
+                reverse('yaga:api:v1:auth:request'),
+                {
+                    'phone': USER_PHONE_NUMBER
+                }
+            )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_429_TOO_MANY_REQUESTS
         )
