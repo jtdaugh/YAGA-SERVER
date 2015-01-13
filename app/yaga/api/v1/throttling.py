@@ -10,7 +10,7 @@ from app.utils import smart_text
 def set_scope(fn):
     @wraps(fn)
     def wrapper(cls, request, view):
-        setattr(view, cls.scope_attr, smart_text(cls.__class__))
+        setattr(view, cls.scope_attr, smart_text(cls.__class__.__name__))
 
         return fn(cls, request, view)
     return wrapper

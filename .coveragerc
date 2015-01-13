@@ -7,3 +7,4 @@ include =
     requestprovide/*
     yaga/*
 omit =
+    */migrations/*
