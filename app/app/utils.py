@@ -148,7 +148,7 @@ def reverse_host_lazy(pattern, args=None, kwargs=None):
     return SimpleLazyObject(_reverse_host_lazy)
 
 
-def __get_requests_session():
+def _get_requests_session():
     session = requests.Session()
 
     adapter = requests.adapters.HTTPAdapter(
@@ -161,19 +161,19 @@ def __get_requests_session():
     return session
 
 
-__requests_session = None
+_requests_session = None
 
 
 def get_requests_session(cached=True):
     if cached:
-        global __requests_session
+        global _requests_session
 
-        if __requests_session is None:
-            __requests_session = __get_requests_session()
+        if _requests_session is None:
+            _requests_session = _get_requests_session()
 
-        return __requests_session
+        return _requests_session
     else:
-        return __get_requests_session()
+        return _get_requests_session()
 
 
 def get_sentry_client():
