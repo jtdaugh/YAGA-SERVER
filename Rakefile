@@ -1,7 +1,7 @@
 APP_DIR = 'app'
 PROCESS_WORKERS = 2
 HTTP_TIMEOUT = 30
-USE_NEWRELIC = true
+USE_NEWRELIC = false
 NEWRELIC_CMD = 'newrelic-admin run-program '
 
 task default: [:env]
