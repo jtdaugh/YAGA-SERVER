@@ -29,8 +29,6 @@ except ImportError:
     from urllib.parse import urljoin
 
 
-
-
 try:
     from django.utils.encoding import (  # noqa
         smart_text,

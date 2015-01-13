@@ -152,10 +152,15 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # cache configuration
     # -------------------------------------------------------
+    # CACHES = {
+    #     'default': {
+    #         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+    #         'LOCATION': os.path.abspath(os.path.join(PROJECT_ROOT, 'cache'))
+    #     }
+    # }
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.abspath(os.path.join(PROJECT_ROOT, 'cache'))
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         }
     }
     # -------------------------------------------------------
@@ -598,7 +603,11 @@ class BaseConfiguration(
         'DEFAULT_THROTTLE_RATES': {
             'anon': '100/hour',
             'user': '500/hour',
-        }
+        },
+        'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+        'TEST_REQUEST_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer',
+        )
     }
     SWAGGER_SETTINGS = {
         'is_superuser': True

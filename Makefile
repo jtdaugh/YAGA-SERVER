@@ -8,7 +8,7 @@ CMD_RUNSERVER=$(CMD_MANAGE) runserver
 CMD_SHELL=$(CMD_MANAGE) shell_plus
 CMD_BOWER=$(CMD_MANAGE) bower_install -- --config.interactive=false
 CMD_MIGRATE=$(CMD_MANAGE) migrate
-CMD_TEST=$(CMD_MANAGE) test
+CMD_TEST=$(CMD_MANAGE) test -v 2
 CMD_FLAKE=flake8 app
 CMD_FROSTED=frosted -r app
 CMD_ISORT=isort --check-only -rc app --diff
