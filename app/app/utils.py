@@ -12,7 +12,6 @@ from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
 from django.utils.functional import SimpleLazyObject
 from django.utils.http import urlquote
-from django.utils.six.moves.urllib.parse import urljoin
 from django.views.decorators.cache import cache_page
 from raven.contrib.django import DjangoClient
 from rest_framework.exceptions import ParseError
@@ -23,6 +22,14 @@ from rest_framework.settings import api_settings
 from requestprovider import get_request
 
 from . import celery
+
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
+
+
 
 try:
     from django.utils.encoding import (  # noqa
