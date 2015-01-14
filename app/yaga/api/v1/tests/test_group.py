@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
+from itertools import imap
+
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -246,3 +248,106 @@ class GroupTestCase(
                 member['user']['phone'],
                 GROUP_MEMBERS + [USER_PHONE_NUMBER]
             )
+
+    def test_remove_group_member(self):
+        response = self.client.post(
+            reverse('yaga:api:v1:group:list-create'),
+            {
+                'name': GROUP_NAME
+            }
+        )
+        group_id = response.data['id']
+
+        response = self.client.put(
+            reverse('yaga:api:v1:group:members:add', kwargs={
+                'group_id': group_id
+            }),
+            {
+                'phones': GROUP_MEMBERS
+            }
+        )
+
+        for member in GROUP_MEMBERS:
+            response = self.client.put(
+                reverse('yaga:api:v1:group:members:remove', kwargs={
+                    'group_id': group_id
+                }),
+                {
+                    'phone': member
+                }
+            )
+            self.assertEqual(
+                response.status_code,
+                status.HTTP_200_OK
+            )
+            self.assertIsInstance(
+                response.data,
+                dict
+            )
+            self.assertTrue(
+                response.data
+            )
+            self.assertIn(
+                'id',
+                response.data
+            )
+            self.assertIn(
+                'members',
+                response.data
+            )
+            self.assertIsInstance(
+                response.data['members'],
+                list
+            )
+            self.assertTrue(
+                response.data['members']
+            )
+            self.assertNotIn(
+                member,
+                list(
+                    imap(
+                        lambda member: member['user']['phone'],
+                        response.data['members']
+                    )
+                )
+            )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:group:retrieve-update', kwargs={
+                'group_id': group_id
+            })
+        )
+        self.assertEqual(
+            len(response.data['members']),
+            1
+        )
+
+        response = self.client.put(
+            reverse('yaga:api:v1:group:members:remove', kwargs={
+                'group_id': group_id
+            }),
+            {
+                'phone': USER_PHONE_NUMBER
+            }
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:group:retrieve-update', kwargs={
+                'group_id': group_id
+            })
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:group:list-create')
+        )
+        self.assertIsInstance(
+            response.data,
+            list
+        )
+        self.assertFalse(
+            response.data
+        )

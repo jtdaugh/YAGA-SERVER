@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 from django.contrib.auth import get_user_model
-from django.db import transaction
 from django.db.models import Prefetch
-from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import status
 from rest_framework.generics import (
@@ -18,6 +16,8 @@ from rest_framework.generics import (
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from app.views import NonAtomicView
 
 from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
@@ -59,16 +59,13 @@ class UserRetrieveUpdateAPIView(
 
 
 class CodeCreateAPIView(
+    NonAtomicView,
     CreateAPIView
 ):
     model = Code
     serializer_class = CodeCreateSerializer
     throttle_classes = (CodeScopedRateThrottle,)
     permission_classes = (IsAnonymous,)
-
-    @method_decorator(transaction.non_atomic_requests)
-    def dispatch(self, *args, **kwargs):
-        return super(CodeCreateAPIView, self).dispatch(*args, **kwargs)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -133,15 +130,12 @@ class CodeRetrieveAPIView(
 
 
 class TokenCreateAPIView(
+    NonAtomicView,
     CreateAPIView
 ):
     serializer_class = TokenSerializer
     permission_classes = (IsAnonymous,)
     throttle_classes = (TokenScopedRateThrottle,)
-
-    @method_decorator(transaction.non_atomic_requests)
-    def dispatch(self, *args, **kwargs):
-        return super(TokenCreateAPIView, self).dispatch(*args, **kwargs)
 
     def get_object(self):
         obj = self.request.auth

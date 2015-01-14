@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
+from django.db import transaction
 from django.http import HttpResponseServerError
 from django.shortcuts import render
 from django.template import Context, loader
@@ -43,3 +44,19 @@ class CacheView(
     @method_decorator(cache_view)
     def dispatch(self, request, *args, **kwargs):
         return super(CacheView, self).dispatch(request, *args, **kwargs)
+
+
+class AtomicView(
+    object
+):
+    @method_decorator(transaction.atomic)
+    def dispatch(self, *args, **kwargs):
+        return super(AtomicView, self).dispatch(*args, **kwargs)
+
+
+class NonAtomicView(
+    object
+):
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, *args, **kwargs):
+        return super(NonAtomicView, self).dispatch(*args, **kwargs)

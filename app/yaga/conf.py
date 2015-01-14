@@ -17,6 +17,7 @@ class YagaAppConf(
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
     AWS_UPLOAD_LENGTH = 25 * 1024 * 1024
     SQS_QUEUE = 's3_yaga-dev_sqs'
+    ALLOWED_MIME = 'video/quicktime'
 
     class Meta:
         prefix = 'yaga'

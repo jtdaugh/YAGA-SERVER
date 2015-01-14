@@ -82,12 +82,7 @@ member_urlpatterns = patterns(
         r'^add/$',
         GroupManageMemberAddAPIView.as_view(),
         name='add'
-    ),
-    url(
-        r'^mute/$',
-        GroupManageMemberMuteAPIView.as_view(),
-        name='mute'
-    ),
+    )
 )
 
 
@@ -102,6 +97,11 @@ group_urlpatterns = patterns(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/$',
         GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
+    ),
+    url(
+        r'^(?P<group_id>[\-a-z0-9]{32,36})/mute/$',
+        GroupManageMemberMuteAPIView.as_view(),
+        name='mute'
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/members/',

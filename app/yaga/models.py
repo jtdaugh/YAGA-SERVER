@@ -211,7 +211,7 @@ class Post(
     )
 
     mime = models.CharField(
-        verbose_name=_('MIme'),
+        verbose_name=_('Mime'),
         max_length=255,
         db_index=True,
         blank=True,
@@ -269,7 +269,7 @@ class Post(
         secret_access_key = settings.AWS_SECRET_ACCESS_KEY
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        content_type = 'video/quicktime'
+        content_type = settings.YAGA_ALLOWED_MIME
 
         expires_in = timezone.now() + settings.YAGA_AWS_UPLOAD_EXPIRES
 

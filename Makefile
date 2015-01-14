@@ -2,8 +2,8 @@ APP_DIR=app
 ENV_DIR=env
 CMD_ENV=virtualenv
 CMD_PYTHON=python
-CMD_CELERY=cd $(APP_DIR) && celery -A app worker -c 1 -B
-CMD_MANAGE=cd $(APP_DIR) && $(CMD_PYTHON) manage.py
+CMD_CELERY=cd $(APP_DIR); celery -A app worker -c 1 -B
+CMD_MANAGE=cd $(APP_DIR); $(CMD_PYTHON) manage.py
 CMD_RUNSERVER=$(CMD_MANAGE) runserver
 CMD_SHELL=$(CMD_MANAGE) shell_plus
 CMD_BOWER=$(CMD_MANAGE) bower_install -- --config.interactive=false

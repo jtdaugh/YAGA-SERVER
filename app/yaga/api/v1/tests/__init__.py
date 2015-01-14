@@ -14,11 +14,21 @@ GROUP_NAME = 'yaga_group'
 class AuthMixin(
     object
 ):
-    def login(self):
+    def get_user(self, phone=None):
+        if phone is None:
+            phone = USER_PHONE_NUMBER
+
         model = get_user_model()
+
         user = model.objects.get_or_create(
-            phone=USER_PHONE_NUMBER
+            phone=phone
         )
+
+        return user
+
+    def login(self, user=None):
+        if user is None:
+            user = self.get_user()
 
         token = Token()
         token.user = user

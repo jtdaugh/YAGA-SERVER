@@ -16,9 +16,10 @@ class CodeCleanup(
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
-        Code.objects.filter(
+        for code in Code.objects.filter(
             expire_at__lte=timezone.now()
-        ).delete()
+        ):
+            code.delete()
 
 
 class GroupCleanup(
@@ -30,12 +31,18 @@ class GroupCleanup(
         for group in Group.objects.filter(
             members=None
         ):
+            keep_group = False
+
             for post in Post.objects.filter(
                 group=group
             ):
-                post.delete()
+                if post.ready:
+                    post.delete()
+                else:
+                    keep_group = True
 
-            group.delete()
+            if not keep_group:
+                group.delete()
 
 
 class PostCleanup(
@@ -44,7 +51,7 @@ class PostCleanup(
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
-        expired = timezone.now() - datetime.timedelta(days=1)
+        expired = timezone.now() - datetime.timedelta(hours=1)
 
         for post in Post.objects.filter(
             created_at__lte=expired,
@@ -69,7 +76,12 @@ class PostProcess(
         )
 
         post.attachment = key
+
         post.set_meta()
-        post.ready = True
-        post.ready_at = timezone.now()
-        post.save()
+
+        if post.mime != settings.YAGA_ALLOWED_MIME:
+            post.delete()
+        else:
+            post.ready = True
+            post.ready_at = timezone.now()
+            post.save()
