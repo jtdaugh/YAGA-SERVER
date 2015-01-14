@@ -21,7 +21,8 @@ from app.views import NonAtomicView
 from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
 from .permissions import (
-    GroupMemeber, IsAnonymous, PostGroupMember, PostOwner, TokenOwner, ReadyPost
+    GroupMemeber, IsAnonymous, PostGroupMember, PostOwner, ReadyPost,
+    TokenOwner
 )
 from .serializers import (
     CodeCreateSerializer, CodeRetrieveSerializer, GroupListSerializer,

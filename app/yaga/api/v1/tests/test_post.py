@@ -10,9 +10,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from . import (
-    GROUP_MEMBERS, GROUP_NAME, POST_NAME, AuthMixin
-)
+from . import GROUP_MEMBERS, GROUP_NAME, POST_NAME, AuthMixin
 from ....models import Post
 
 
