@@ -41,6 +41,13 @@ class PostOwner(
         return obj.user == request.user
 
 
+class ReadyPost(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        return obj.ready
+
+
 class IsAnonymous(
     BasePermission
 ):

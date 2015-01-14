@@ -13,6 +13,7 @@ USER_PHONE_NUMBER = '+380632237710'
 USER_NAME = 'yaga_user'
 GROUP_MEMBERS = ['+380919575676', '+380675093001', '+380938542758']
 GROUP_NAME = 'yaga_group'
+POST_NAME = 'yaga_post'
 
 
 class AuthMixin(

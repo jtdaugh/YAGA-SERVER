@@ -21,7 +21,7 @@ from app.views import NonAtomicView
 from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
 from .permissions import (
-    GroupMemeber, IsAnonymous, PostGroupMember, PostOwner, TokenOwner
+    GroupMemeber, IsAnonymous, PostGroupMember, PostOwner, TokenOwner, ReadyPost
 )
 from .serializers import (
     CodeCreateSerializer, CodeRetrieveSerializer, GroupListSerializer,
@@ -370,7 +370,7 @@ class PostRetrieveUpdateDestroyAPIView(
     RetrieveUpdateDestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostOwner)
+    permission_classes = (IsAuthenticated, PostOwner, ReadyPost)
 
     def get_queryset(self):
         return Post.objects.all()
@@ -391,19 +391,11 @@ class PostRetrieveUpdateDestroyAPIView(
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        if instance.ready:
-            self.perform_destroy(instance)
+        self.perform_destroy(instance)
 
-            return Response(
-                status=status.HTTP_204_NO_CONTENT
-            )
-        else:
-            return Response(
-                {
-                    'ready': [_('Can not remove not ready post.')]
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class LikeCreateDestroyAPIView(
@@ -411,7 +403,7 @@ class LikeCreateDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostGroupMember)
+    permission_classes = (IsAuthenticated, PostGroupMember, ReadyPost)
 
     def get_queryset(self):
         return Post.objects.all()

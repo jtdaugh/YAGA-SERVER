@@ -20,7 +20,7 @@ class GroupTestCase(
 
     def test_empty_groups(self):
         response = self.client.get(
-            reverse('yaga:api:v1:group:list-create')
+            reverse('yaga:api:v1:groups:list-create')
         )
         self.assertEqual(
             response.status_code,
@@ -38,7 +38,7 @@ class GroupTestCase(
         self.logout()
 
         response = self.client.get(
-            reverse('yaga:api:v1:group:list-create')
+            reverse('yaga:api:v1:groups:list-create')
         )
         self.assertEqual(
             response.status_code,
@@ -47,7 +47,7 @@ class GroupTestCase(
 
     def test_create_group(self):
         response = self.client.post(
-            reverse('yaga:api:v1:group:list-create'),
+            reverse('yaga:api:v1:groups:list-create'),
             {
                 'name': GROUP_NAME
             }
@@ -71,18 +71,10 @@ class GroupTestCase(
             response.data['name'],
             GROUP_NAME
         )
-        self.assertIn(
-            'members',
-            response.data
-        )
-        self.assertIn(
-            'id',
-            response.data
-        )
         group_id = response.data['id']
 
         response = self.client.get(
-            reverse('yaga:api:v1:group:retrieve-update', kwargs={
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
                 'group_id': group_id
             })
         )
@@ -163,7 +155,7 @@ class GroupTestCase(
 
     def test_add_group_member(self):
         response = self.client.post(
-            reverse('yaga:api:v1:group:list-create'),
+            reverse('yaga:api:v1:groups:list-create'),
             {
                 'name': GROUP_NAME
             }
@@ -171,7 +163,7 @@ class GroupTestCase(
         group_id = response.data['id']
 
         response = self.client.put(
-            reverse('yaga:api:v1:group:members:add', kwargs={
+            reverse('yaga:api:v1:groups:members:add', kwargs={
                 'group_id': group_id
             }),
             {
@@ -253,7 +245,7 @@ class GroupTestCase(
 
     def test_remove_group_member(self):
         response = self.client.post(
-            reverse('yaga:api:v1:group:list-create'),
+            reverse('yaga:api:v1:groups:list-create'),
             {
                 'name': GROUP_NAME
             }
@@ -261,7 +253,7 @@ class GroupTestCase(
         group_id = response.data['id']
 
         response = self.client.put(
-            reverse('yaga:api:v1:group:members:add', kwargs={
+            reverse('yaga:api:v1:groups:members:add', kwargs={
                 'group_id': group_id
             }),
             {
@@ -271,7 +263,7 @@ class GroupTestCase(
 
         for member in GROUP_MEMBERS:
             response = self.client.put(
-                reverse('yaga:api:v1:group:members:remove', kwargs={
+                reverse('yaga:api:v1:groups:members:remove', kwargs={
                     'group_id': group_id
                 }),
                 {
@@ -315,7 +307,7 @@ class GroupTestCase(
             )
 
         response = self.client.get(
-            reverse('yaga:api:v1:group:retrieve-update', kwargs={
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
                 'group_id': group_id
             })
         )
@@ -325,7 +317,7 @@ class GroupTestCase(
         )
 
         response = self.client.put(
-            reverse('yaga:api:v1:group:members:remove', kwargs={
+            reverse('yaga:api:v1:groups:members:remove', kwargs={
                 'group_id': group_id
             }),
             {
@@ -334,7 +326,7 @@ class GroupTestCase(
         )
 
         response = self.client.get(
-            reverse('yaga:api:v1:group:retrieve-update', kwargs={
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
                 'group_id': group_id
             })
         )
@@ -344,7 +336,7 @@ class GroupTestCase(
         )
 
         response = self.client.get(
-            reverse('yaga:api:v1:group:list-create')
+            reverse('yaga:api:v1:groups:list-create')
         )
         self.assertIsInstance(
             response.data,
@@ -352,4 +344,81 @@ class GroupTestCase(
         )
         self.assertFalse(
             response.data
+        )
+
+    def test_mute_group(self):
+        response = self.client.post(
+            reverse('yaga:api:v1:groups:list-create'),
+            {
+                'name': GROUP_NAME
+            }
+        )
+        group_id = response.data['id']
+
+        response = self.client.put(
+            reverse('yaga:api:v1:groups:mute', kwargs={
+                'group_id': group_id
+            }),
+            {
+                'mute': True
+            }
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
+                'group_id': group_id
+            })
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertTrue(
+            response.data['members'][0]['mute']
+        )
+
+        response = self.client.put(
+            reverse('yaga:api:v1:groups:mute', kwargs={
+                'group_id': group_id
+            }),
+            {
+                'mute': False
+            }
+        )
+        response = self.client.get(
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
+                'group_id': group_id
+            })
+        )
+        self.assertFalse(
+            response.data['members'][0]['mute']
+        )
+
+    def test_rename_group(self):
+        response = self.client.post(
+            reverse('yaga:api:v1:groups:list-create'),
+            {
+                'name': GROUP_NAME
+            }
+        )
+        group_id = response.data['id']
+
+        response = self.client.put(
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
+                'group_id': group_id
+            }),
+            {
+                'name': GROUP_NAME * 2
+            }
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:groups:retrieve-update', kwargs={
+                'group_id': group_id
+            })
+        )
+
+        self.assertEqual(
+            response.data['name'],
+            GROUP_NAME * 2
         )

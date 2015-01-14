@@ -54,7 +54,7 @@ post_urlpatterns = patterns(
     url(
         r'^$',
         PostCreateAPIView.as_view(),
-        name='add'
+        name='create'
     ),
     url(
         r'^(?P<post_id>[\-a-z0-9]{32,36})/like/$',
@@ -123,6 +123,6 @@ urlpatterns = patterns(
     ),
     url(
         r'^groups/',
-        include(group_urlpatterns, namespace='group')
+        include(group_urlpatterns, namespace='groups')
     ),
 )

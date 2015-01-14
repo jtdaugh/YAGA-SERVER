@@ -34,17 +34,13 @@ class ProfileTestCase(
             'phone',
             response.data
         )
-        self.assertIn(
-            'name',
-            response.data
-        )
-        self.assertIn(
-            'phone',
-            response.data
-        )
         self.assertEqual(
             response.data['phone'],
             USER_PHONE_NUMBER
+        )
+        self.assertIn(
+            'name',
+            response.data
         )
         self.assertEqual(
             response.data['name'],
