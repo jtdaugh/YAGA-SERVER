@@ -27,7 +27,7 @@ class Command(
             settings.AWS_SECRET_ACCESS_KEY
         )
 
-        queue = sqs.create_queue(settings.YAGA_SQS_QUEUE)
+        queue = sqs.create_queue(settings.YAGA_AWS_SQS_QUEUE)
 
         while True:
             try:

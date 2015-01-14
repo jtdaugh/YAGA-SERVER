@@ -19,9 +19,9 @@ class YagaAppConf(
     SMS_SECRET = '066e303e'
     SLOP_FACTOR = datetime.timedelta(seconds=5)
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
-    AWS_UPLOAD_LENGTH = 25 * 1024 * 1024
-    SQS_QUEUE = 's3_yaga-dev_sqs'
-    ALLOWED_MIME = 'video/quicktime'
+    AWS_UPLOAD_MAX_LENGTH = 25 * 1024 * 1024
+    AWS_SQS_QUEUE = 's3_yaga-dev_sqs'
+    AWS_ALLOWED_MIME = 'video/quicktime'
 
     class Meta:
         prefix = 'yaga'

@@ -83,9 +83,9 @@ class PostProcess(
 
         post.set_meta()
 
-        if post.mime != settings.YAGA_ALLOWED_MIME:
-            post.delete()
-        else:
+        if post.is_valid():
             post.ready = True
             post.ready_at = timezone.now()
             post.save()
+        else:
+            post.remove()

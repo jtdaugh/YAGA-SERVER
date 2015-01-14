@@ -265,15 +265,27 @@ class Post(
 
         self.checksum = self.attachment.file.key.etag.strip('"')
 
-    # def save(self, *args, **kwargs):
-    #     super(Post, self).save(*args, **kwargs)
+    def is_valid(self):
+        if not self.attachment:
+            return False
+
+        if self.mime != settings.YAGA_ALLOWED_AWS_MIME:
+            return False
+
+        if self.attachment.file.size > settings.YAGA_AWS_UPLOAD_MAX_LENGTH:
+            return False
+
+        if self.attachment.file.size == 0:
+            return False
+
+        return True
 
     def sign_s3(self):
         access_key = settings.AWS_ACCESS_KEY_ID
         secret_access_key = settings.AWS_SECRET_ACCESS_KEY
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        content_type = settings.YAGA_ALLOWED_MIME
+        content_type = settings.YAGA_AWS_ALLOWED_MIME
 
         expires_in = timezone.now() + settings.YAGA_AWS_UPLOAD_EXPIRES
 
@@ -303,8 +315,8 @@ class Post(
                 },
                 [
                     'content-length-range',
-                    0,
-                    settings.YAGA_AWS_UPLOAD_LENGTH
+                    1,
+                    settings.YAGA_AWS_UPLOAD_MAX_LENGTH
                 ],
             ]
         })
