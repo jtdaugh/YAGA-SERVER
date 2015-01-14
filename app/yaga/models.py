@@ -269,7 +269,7 @@ class Post(
         if not self.attachment:
             return False
 
-        if self.mime != settings.YAGA_ALLOWED_AWS_MIME:
+        if self.mime != settings.YAGA_AWS_ALLOWED_MIME:
             return False
 
         if self.attachment.file.size > settings.YAGA_AWS_UPLOAD_MAX_LENGTH:
