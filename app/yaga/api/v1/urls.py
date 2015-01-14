@@ -1,20 +1,17 @@
 from __future__ import absolute_import, division, unicode_literals
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 from django.conf.urls import include, patterns, url
 
 from .views import (
-    CodeCreateAPIView,
-    CodeRetrieveAPIView,
-    GroupListCreateAPIView,
-    GroupManageMemberAddAPIView,
-    GroupManageMemberMuteAPIView,
-    GroupManageMemberRemoveAPIView,
-    GroupRetrieveUpdateAPIView,
-    LikeCreateDestroyAPIView,
-    PostCreateAPIView,
-    PostRetrieveUpdateDestroyAPIView,
-    TokenCreateAPIView,
-    TokenDestroyAPIView,
+    CodeCreateAPIView, CodeRetrieveAPIView, GroupListCreateAPIView,
+    GroupManageMemberAddAPIView, GroupManageMemberMuteAPIView,
+    GroupManageMemberRemoveAPIView, GroupRetrieveUpdateAPIView,
+    LikeCreateDestroyAPIView, PostCreateAPIView,
+    PostRetrieveUpdateDestroyAPIView, TokenCreateAPIView, TokenDestroyAPIView,
     UserRetrieveUpdateAPIView
 )
 

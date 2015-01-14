@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
-
-from itertools import imap
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 from django.core.urlresolvers import reverse
 from rest_framework import status
@@ -305,7 +307,7 @@ class GroupTestCase(
             self.assertNotIn(
                 member,
                 list(
-                    imap(
+                    map(
                         lambda member: member['user']['phone'],
                         response.data['members']
                     )

@@ -1,6 +1,11 @@
 from __future__ import absolute_import, division, unicode_literals
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 from functools import wraps
+from urllib.parse import urljoin
 
 import regex
 import requests
@@ -12,7 +17,6 @@ from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
 from django.utils.functional import SimpleLazyObject
 from django.utils.http import urlquote
-from django.utils.six.moves.urllib.parse import urljoin
 from django.views.decorators.cache import cache_page
 from raven.contrib.django import DjangoClient
 from rest_framework.exceptions import ParseError
@@ -26,17 +30,13 @@ from . import celery
 
 try:
     from django.utils.encoding import (  # noqa
-        smart_text,
-        force_text,
-        smart_bytes,
-        force_bytes
+        smart_text, force_text,
+        smart_bytes, force_bytes
     )
 except ImportError:
     from django.utils.encoding import (  # noqa
-        smart_unicode as smart_text,
-        force_unicode as force_text,
-        smart_bytes,
-        force_bytes
+        smart_unicode as smart_text, force_unicode as force_text,
+        smart_bytes, force_bytes
     )
 
 

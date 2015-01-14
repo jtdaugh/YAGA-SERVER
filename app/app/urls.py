@@ -1,4 +1,8 @@
 from __future__ import absolute_import, division, unicode_literals
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 from django.conf import settings
 from django.conf.urls import include, patterns, url
@@ -11,9 +15,7 @@ from django.views.i18n import javascript_catalog
 
 from content.sitemaps import IndexSitemap
 from content.views import (
-    FaviconRedirectView,
-    IndexTemplateView,
-    RobotsTemplateView
+    FaviconRedirectView, IndexTemplateView, RobotsTemplateView
 )
 
 from .utils import cache_view

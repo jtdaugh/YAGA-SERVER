@@ -1,12 +1,14 @@
 from __future__ import absolute_import, division, unicode_literals
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 import string
 
 from django.conf import settings
 from django.contrib.auth.models import (
-    AbstractBaseUser,
-    BaseUserManager,
-    PermissionsMixin
+    AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse

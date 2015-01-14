@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 from __future__ import absolute_import, division, unicode_literals
+from future import standard_library
+from future.builtins import (  # noqa
+    ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
+    oct, open, pow, range, round, str, super, zip
+)
 
 import imp
 import locale
@@ -26,6 +31,7 @@ def set_environ():
 
 
 def setup():
+    standard_library.install_aliases()
     fix_locale()
     set_environ()
 
