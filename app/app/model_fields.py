@@ -43,7 +43,7 @@ class UUIDRepresentation(
         else:
             value = super(UUIDRepresentation, self).__str__()
 
-        return value
+        return smart_text(value)
 
     def __len__(self):
         return len(self.__str__())

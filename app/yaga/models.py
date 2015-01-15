@@ -76,7 +76,7 @@ class Code(
         verbose_name_plural = _('Codes')
 
     def __str__(self):
-        return self.request_id
+        return smart_text(self.request_id)
 
 
 @python_2_unicode_compatible
@@ -121,7 +121,7 @@ class Member(
         )
 
     def __str__(self):
-        return self.user.phone.as_e164
+        return smart_text(self.user.phone.as_e164)
 
 
 @python_2_unicode_compatible
@@ -224,6 +224,12 @@ class Post(
 
     ready = models.BooleanField(
         verbose_name=_('Ready'),
+        db_index=True,
+        default=False
+    )
+
+    notified = models.BooleanField(
+        verbose_name=_('Notified'),
         db_index=True,
         default=False
     )
@@ -381,6 +387,53 @@ class Like(
         verbose_name_plural = _('Likes')
         unique_together = (
             ('user', 'post'),
+        )
+
+    def __str__(self):
+        return smart_text(self.pk)
+
+
+@python_2_unicode_compatible
+class Device(
+    models.Model
+):
+    id = UUIDField(
+        auto=True,
+        primary_key=True,
+        version=4
+    )
+
+    IOS = 0
+    IOS_VALUE = 'IOS'
+    ANDROID = 1
+    ANDROID_VALUE = 'ADNDROID'
+    VENDOR_CHOICES = (
+        (IOS, IOS_VALUE),
+        (ANDROID, ANDROID_VALUE),
+    )
+    vendor = models.PositiveSmallIntegerField(
+        verbose_name=_('Vendor'),
+        choices=VENDOR_CHOICES,
+        db_index=True
+    )
+
+    token = models.CharField(
+        verbose_name=_('Request Id'),
+        max_length=255,
+        db_index=True
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        db_index=True
+    )
+
+    class Meta:
+        verbose_name = _('Device')
+        verbose_name_plural = _('Devices')
+        unique_together = (
+            ('vendor', 'token'),
         )
 
     def __str__(self):

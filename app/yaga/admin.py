@@ -6,7 +6,7 @@ from future.builtins import (  # noqa
 
 from django.contrib import admin
 
-from .models import Code, Group, Like, Member, Post
+from .models import Code, Device, Group, Like, Member, Post
 
 
 class CodeAdmin(
@@ -60,8 +60,17 @@ class LikeAdmin(
     ordering = ('-created_at',)
 
 
+class DeviceAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('user', 'token', 'vendor')
+
+    list_filter = ('vendor',)
+
+
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Code, CodeAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Like, LikeAdmin)
+admin.site.register(Device, DeviceAdmin)

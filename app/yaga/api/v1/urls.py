@@ -7,10 +7,10 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .views import (
-    CodeCreateAPIView, CodeRetrieveAPIView, GroupListCreateAPIView,
-    GroupManageMemberAddAPIView, GroupManageMemberMuteAPIView,
-    GroupManageMemberRemoveAPIView, GroupRetrieveUpdateAPIView,
-    LikeCreateDestroyAPIView, PostCreateAPIView,
+    CodeCreateAPIView, CodeRetrieveAPIView, DeviceCreateAPIView,
+    GroupListCreateAPIView, GroupManageMemberAddAPIView,
+    GroupManageMemberMuteAPIView, GroupManageMemberRemoveAPIView,
+    GroupRetrieveUpdateAPIView, LikeCreateDestroyAPIView, PostCreateAPIView,
     PostRetrieveUpdateDestroyAPIView, TokenCreateAPIView, TokenDestroyAPIView,
     UserRetrieveUpdateAPIView
 )
@@ -47,6 +47,11 @@ user_urlpatterns = patterns(
         UserRetrieveUpdateAPIView.as_view(),
         name='profile'
     ),
+    url(
+        r'^device/$',
+        DeviceCreateAPIView.as_view(),
+        name='device'
+    ),
 )
 
 post_urlpatterns = patterns(
@@ -68,7 +73,7 @@ post_urlpatterns = patterns(
     ),
 )
 
-member_urlpatterns = patterns(
+members_urlpatterns = patterns(
     '',
     url(
         r'^remove/$',
@@ -102,7 +107,7 @@ group_urlpatterns = patterns(
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/members/',
-        include(member_urlpatterns, namespace='members')
+        include(members_urlpatterns, namespace='members')
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/posts/',

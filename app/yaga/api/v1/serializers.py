@@ -4,28 +4,27 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import regex
 from django.contrib.auth import authenticate, get_user_model
 from django.utils.translation import ugettext_lazy as _
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (
-    IntegerField, ListField, ModelSerializer, Serializer
-)
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from accounts.models import Token
 
-from ...models import Code, Group, Member, Post
+from ...models import Code, Device, Group, Member, Post
 from .fields import CodeField, PhoneField, TimeStampField
 
 
 class SinceSerializer(
-    Serializer
+    serializers.Serializer
 ):
     since = TimeStampField()
 
 
 class UserSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     class Meta:
         model = get_user_model()
@@ -34,7 +33,7 @@ class UserSerializer(
 
 
 class TokenSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     phone = PhoneField()
     code = CodeField(min_length=4, max_length=4)
@@ -76,7 +75,7 @@ class TokenSerializer(
 
 
 class CodeRetrieveSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     phone = PhoneField()
 
@@ -113,10 +112,10 @@ class CodeCreateSerializer(
 
 
 class PostSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     user = UserSerializer(read_only=True)
-    likes = IntegerField(read_only=True)
+    likes = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Post
@@ -125,7 +124,7 @@ class PostSerializer(
 
 
 class MemberSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     user = UserSerializer(read_only=True)
 
@@ -135,7 +134,7 @@ class MemberSerializer(
 
 
 class GroupSerializer(
-    ModelSerializer
+    serializers.ModelSerializer
 ):
     members = MemberSerializer(many=True, read_only=True, source='member_set')
 
@@ -168,7 +167,7 @@ class GroupRetrieveSerializer(
 class GroupManageMemberAddSerializer(
     GroupSerializer
 ):
-    phones = ListField(
+    phones = serializers.ListField(
         child=PhoneField()
     )
 
@@ -187,3 +186,73 @@ class GroupManageMemberRemoveSerializer(
         GroupSerializer.Meta
     ):
         fields = ('phone', )
+
+
+class DeviceSerializer(
+    serializers.ModelSerializer
+):
+    user = UserSerializer(read_only=True)
+    vendor = serializers.CharField()
+
+    class Meta:
+        model = Device
+
+    def to_representation(self, instance):
+        ret = super(DeviceSerializer, self).to_representation(instance)
+
+        model_vendor = int(ret['vendor'])
+
+        for vendor, value in self.Meta.model.VENDOR_CHOICES:
+            if vendor == model_vendor:
+                ret['vendor'] = value
+                break
+
+        return ret
+
+    def get_validators(self):
+        validators = super(DeviceSerializer, self).get_validators()
+
+        for validator in validators:
+            if isinstance(validator, UniqueTogetherValidator):
+                validators.remove(validator)
+
+        return validators
+
+    def save(self, **kwargs):
+        instance = self.Meta.model.objects.filter(
+            token=self.validated_data['token'],
+            vendor=self.validated_data['vendor']
+        ).first()
+
+        if instance is not None:
+            self.instance = instance
+
+            if self.instance.user == kwargs['user']:
+                return self.instance
+
+        return super(DeviceSerializer, self).save(**kwargs)
+
+    def validate_vendor(self, value):
+        if value == self.Meta.model.IOS_VALUE:
+            return self.Meta.model.IOS
+
+        msg = _('Unsupported vendor.')
+        raise ValidationError(msg)
+
+    def validate_token(self, value):
+        if not regex.match(r'[a-z0-9]+', value):
+            msg = _('Invalid token.')
+            raise ValidationError(msg)
+
+        return value
+
+    def validate(self, attrs):
+        vendor = attrs['vendor']
+        token = attrs['token']
+
+        if vendor == Device.IOS:
+            if len(token) != 64:
+                msg = _('Invalid token.')
+                raise ValidationError(msg)
+
+        return attrs

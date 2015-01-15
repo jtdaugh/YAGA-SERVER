@@ -19,7 +19,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import reverse_host
+from app.utils import reverse_host, smart_text
 
 
 class UserManager(
@@ -144,7 +144,7 @@ class AbstractUser(
         verbose_name_plural = _('Users')
 
     def get_username(self):
-        return self.phone.as_e164
+        return smart_text(self.phone.as_e164)
 
     def get_full_name(self):
         return self.get_username()
@@ -222,4 +222,4 @@ class Token(
         return get_random_string(self.KEY_LENGTH, self.KEY_CHARS)
 
     def __str__(self):
-        return self.key
+        return smart_text(self.key)

@@ -143,3 +143,31 @@ class NexmoProvider(
             self.CHECK_VERIFY_ENDPOINT,
             params
         )
+
+
+class APNSProvider(
+    object
+):
+    def __init__(self):
+        from apnsclient import Session, APNs, Message
+
+        self.session = Session()
+        self.connection = self.session.get_connection(
+            settings.YAGA_APNS_MODE, cert_file=settings.YAGA_APNS_CERT
+        )
+        self.service = APNs(self.connection)
+
+        self.Message = Message
+
+    def push(self, receivers, **kwargs):
+        if not isinstance(receivers, (list, tuple)):
+            receivers = (receivers,)
+
+        message = self.Message(
+            receivers,
+            **kwargs
+        )
+
+        response = self.service.send(message)
+
+        return response

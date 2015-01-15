@@ -12,6 +12,9 @@ from app import celery
 
 from .conf import settings
 from .models import Code, Group, Post
+from .providers import APNSProvider
+
+apns_provider = APNSProvider()
 
 
 class CodeCleanup(
@@ -89,3 +92,11 @@ class PostProcess(
             post.save()
         else:
             post.remove()
+
+
+class APNSPush(
+    celery.Task
+):
+    def run(self, receivers, **kwargs):
+        if receivers:
+            apns_provider.push(receivers, **kwargs)

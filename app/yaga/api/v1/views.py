@@ -25,10 +25,11 @@ from .permissions import (
     TokenOwner
 )
 from .serializers import (
-    CodeCreateSerializer, CodeRetrieveSerializer, GroupListSerializer,
-    GroupManageMemberAddSerializer, GroupManageMemberRemoveSerializer,
-    GroupRetrieveSerializer, MemberSerializer, PostSerializer, SinceSerializer,
-    TokenSerializer, UserSerializer
+    CodeCreateSerializer, CodeRetrieveSerializer, DeviceSerializer,
+    GroupListSerializer, GroupManageMemberAddSerializer,
+    GroupManageMemberRemoveSerializer, GroupRetrieveSerializer,
+    MemberSerializer, PostSerializer, SinceSerializer, TokenSerializer,
+    UserSerializer
 )
 from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
 
@@ -460,3 +461,13 @@ class LikeCreateDestroyAPIView(
             obj.user = self.request.user
             obj.post = serializer.instance
             obj.save()
+
+
+class DeviceCreateAPIView(
+    CreateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = DeviceSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
