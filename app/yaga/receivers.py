@@ -30,36 +30,37 @@ class PostReceiver(
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        if instance.attachment:
-            if not instance.notified:
-                def push_notification():
-                    instance.notified = True
-                    instance.save()
+        if instance.attachment and instance.ready and not instance.notified:
+            def push_notification():
+                instance.notified = True
+                instance.save()
 
-                    members_tokens = Device.objects.filter(
-                        vendor=Device.IOS,
-                        user__in=instance.group.member_set.exclude(
-                            user=instance.user
-                        ).values_list('user', flat=True)
-                    ).values_list('token', flat=True)
+                members_tokens = Device.objects.filter(
+                    vendor=Device.IOS,
+                    user__in=instance.group.member_set.filter(
+                        mute=False
+                    ).exclude(
+                        user=instance.user,
+                    ).values_list('user', flat=True)
+                ).values_list('token', flat=True)
 
-                    APNSPush().delay(
-                        list(members_tokens),
-                        alert=_('New video at group %(group_id)s!') % {
-                            'group_id': instance.group.pk
-                        }
-                    )
+                APNSPush().delay(
+                    list(members_tokens),
+                    alert=_('New video at group %(group_id)s!') % {
+                        'group_id': instance.group.pk
+                    }
+                )
 
-                    user_tokens = Device.objects.filter(
-                        vendor=Device.IOS,
-                        user=instance.user
-                    ).values_list('token', flat=True)
+                user_tokens = Device.objects.filter(
+                    vendor=Device.IOS,
+                    user=instance.user,
+                ).values_list('token', flat=True)
 
-                    APNSPush().delay(
-                        list(user_tokens),
-                        alert=_('Your video %(post_id)s is ready!') % {
-                            'post_id': instance.pk
-                        }
-                    )
+                APNSPush().delay(
+                    list(user_tokens),
+                    alert=_('Your video %(post_id)s is ready!') % {
+                        'post_id': instance.pk
+                    }
+                )
 
-                connection.on_commit(push_notification)
+            connection.on_commit(push_notification)

@@ -418,7 +418,7 @@ class Device(
     )
 
     token = models.CharField(
-        verbose_name=_('Request Id'),
+        verbose_name=_('Token'),
         max_length=255,
         db_index=True
     )
