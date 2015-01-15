@@ -28,10 +28,12 @@ class YagaAppConf(
     AWS_SQS_QUEUE = 's3_yaga-dev_sqs'
 
     APNS_MODE = 'push_sandbox'
-    YAGA_APNS_CERT = os.path.join(
+    APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
         'apns/cert_file'
     )
+    APNS_POOL = True
+    APNS_POOL_TIMEOUT = datetime.timedelta(minutes=5)
 
     class Meta:
         prefix = 'yaga'

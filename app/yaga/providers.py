@@ -8,6 +8,9 @@ import json
 import logging
 from urllib.parse import urlencode
 
+from apnsclient import APNs, Message, Session
+from django.utils import timezone
+
 from app.utils import get_requests_session
 
 from .conf import settings
@@ -149,25 +152,57 @@ class APNSProvider(
     object
 ):
     def __init__(self):
-        from apnsclient import Session, APNs, Message
+        self.release_service()
 
-        self.session = Session()
-        self.connection = self.session.get_connection(
+    def load_service(self):
+        session = Session()
+
+        connection = session.get_connection(
             settings.YAGA_APNS_MODE, cert_file=settings.YAGA_APNS_CERT
         )
-        self.service = APNs(self.connection)
 
-        self.Message = Message
+        service = APNs(connection)
+
+        return service
+
+    def release_service(self):
+        if hasattr(self, 'service'):
+            del self.service
+
+        self.service = None
+        self.created_at = None
+
+    def setup_service(self):
+        self.service = self.load_service()
+        self.created_at = timezone.now()
+
+    def get_service(self):
+        if not settings.YAGA_APNS_POOL:
+            return self.load_service()
+
+        elif self.service is None:
+            self.setup_service()
+        elif (
+            timezone.now() - self.created_at
+            >
+            settings.YAGA_APNS_POOL_TIMEOUT
+        ):
+            self.release_service()
+            self.setup_service()
+
+        return self.service
 
     def push(self, receivers, **kwargs):
+        service = self.get_service()
+
         if not isinstance(receivers, (list, tuple)):
             receivers = (receivers,)
 
-        message = self.Message(
+        message = Message(
             receivers,
             **kwargs
         )
 
-        response = self.service.send(message)
+        response = service.send(message)
 
         return response
