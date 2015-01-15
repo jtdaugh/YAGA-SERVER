@@ -31,10 +31,9 @@ class PostReceiver(
         instance = kwargs['instance']
 
         if instance.attachment and instance.ready and not instance.notified:
-            def push_notification():
-                instance.notified = True
-                instance.save()
+            instance.notified = True
 
+            def push_notification():
                 members_tokens = Device.objects.filter(
                     vendor=Device.IOS,
                     user__in=instance.group.member_set.filter(
@@ -44,23 +43,29 @@ class PostReceiver(
                     ).values_list('user', flat=True)
                 ).values_list('token', flat=True)
 
-                APNSPush().delay(
-                    list(members_tokens),
-                    alert=_('New video at group %(group_id)s!') % {
-                        'group_id': instance.group.pk
-                    }
-                )
+                members_tokens = list(members_tokens)
+
+                if members_tokens:
+                    APNSPush().delay(
+                        members_tokens,
+                        alert=_('New video at group %(group_id)s!') % {
+                            'group_id': instance.group.pk
+                        }
+                    )
 
                 user_tokens = Device.objects.filter(
                     vendor=Device.IOS,
                     user=instance.user,
                 ).values_list('token', flat=True)
 
-                APNSPush().delay(
-                    list(user_tokens),
-                    alert=_('Your video %(post_id)s is ready!') % {
-                        'post_id': instance.pk
-                    }
-                )
+                user_tokens = list(user_tokens)
+
+                if user_tokens:
+                    APNSPush().delay(
+                        user_tokens,
+                        alert=_('Your video %(post_id)s is ready!') % {
+                            'post_id': instance.pk
+                        }
+                    )
 
             connection.on_commit(push_notification)
