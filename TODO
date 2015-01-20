@@ -1,6 +1,7 @@
 msg_cods
 disable PATCH
-test auth device
-test auth status
+yaga users
+test yaga users
+group likers
 test grop post likers
 apns tokens cleanup
