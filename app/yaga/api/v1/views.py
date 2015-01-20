@@ -212,7 +212,7 @@ class GroupRetrieveUpdateAPIView(
         serializer = SinceSerializer(data=self.request.QUERY_PARAMS.dict())
 
         if serializer.is_valid():
-            post_filter['ready_at__gte'] = (
+            post_filter['updated_at__gte'] = (
                 serializer.validated_data['since']
                 -
                 settings.YAGA_SLOP_FACTOR
@@ -233,7 +233,7 @@ class GroupRetrieveUpdateAPIView(
                     )
                 ).filter(
                     **post_filter
-                ).order_by('-ready_at'),
+                ).order_by('-updated_at'),
             )
         )
 

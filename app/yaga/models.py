@@ -246,6 +246,12 @@ class Post(
         db_index=True,
     )
 
+    updated_at = models.DateTimeField(
+        verbose_name=_('Updated At'),
+        auto_now=True,
+        db_index=True
+    )
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')

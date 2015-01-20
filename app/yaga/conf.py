@@ -33,7 +33,7 @@ class YagaAppConf(
         'apns/cert_file'
     )
     APNS_POOL = True
-    APNS_POOL_TIMEOUT = datetime.timedelta(minutes=5)
+    APNS_POOL_TIMEOUT = datetime.timedelta(minutes=1)
 
     class Meta:
         prefix = 'yaga'

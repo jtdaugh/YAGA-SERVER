@@ -119,8 +119,11 @@ class PostSerializer(
 
     class Meta:
         model = Post
-        fields = ('attachment', 'ready_at', 'user', 'id', 'likes', 'name')
-        read_only_fields = ('attachment', 'ready_at')
+        fields = (
+            'attachment', 'ready_at', 'updated_at',
+            'user', 'id', 'likes', 'name'
+        )
+        read_only_fields = ('attachment', 'ready_at',)
 
 
 class MemberSerializer(

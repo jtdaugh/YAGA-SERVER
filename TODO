@@ -1,12 +1,7 @@
 msg_cods
 disable PATCH
 grop post likers
-auth device
 test auth device
 test auth status
-test group member remove
-test group mute
-test group post
 test grop post likers
-test group post like
-test group post dislike
+apns tokens cleanup

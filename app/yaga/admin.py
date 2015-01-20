@@ -34,7 +34,7 @@ class PostAdmin(
 ):
     list_display = (
         'pk', 'name', 'user', 'likes', 'group', 'mime',
-        'ready', 'ready_at'
+        'ready', 'updated_at'
     )
 
     ordering = ('-ready_at',)
