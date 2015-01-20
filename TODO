@@ -1,6 +1,5 @@
 msg_cods
 disable PATCH
-grop post likers
 test auth device
 test auth status
 test grop post likers

@@ -45,6 +45,75 @@ class AuthTestCase(
         )
 
     @responses.activate
+    def test_auth_status(self):
+        valid_nexmo_response = {
+            'status': '0',
+            'request_id': 'nexmo_reques_id'
+        }
+        responses.add(
+            responses.GET,
+            Code.provider.SEND_VERIFY_ENDPOINT,
+            body=json.dumps(valid_nexmo_response), status=200,
+            content_type='application/json'
+        )
+        response = self.client.post(
+            reverse('yaga:api:v1:auth:request'),
+            {
+                'phone': USER_PHONE_NUMBER
+            }
+        )
+
+        response = self.client.post(
+            reverse('yaga:api:v1:auth:status'),
+            {
+                'phone': USER_PHONE_NUMBER
+            }
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertTrue(
+            response.data
+        )
+        self.assertIsInstance(
+            response.data,
+            dict
+        )
+        self.assertIn(
+            'expire_at',
+            response.data
+        )
+        self.assertIsInstance(
+            response.data['expire_at'], datetime.datetime
+        )
+
+        response = self.client.get(
+            reverse('yaga:api:v1:auth:status'),
+            {
+                'phone': USER_PHONE_NUMBER
+            }
+        )
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertTrue(
+            response.data
+        )
+        self.assertIsInstance(
+            response.data,
+            dict
+        )
+        self.assertIn(
+            'expire_at',
+            response.data
+        )
+        self.assertIsInstance(
+            response.data['expire_at'], datetime.datetime
+        )
+
+    @responses.activate
     def test_auth(self):
         valid_nexmo_response = {
             'status': '0',
