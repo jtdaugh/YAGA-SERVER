@@ -110,7 +110,7 @@ class CodeRetrieveAPIView(
 
         queryset = self.filter_queryset(self.get_queryset())
 
-        code = get_object_or_404(queryset, **serializer.data)
+        code = get_object_or_404(queryset, **serializer.validated_data)
 
         self.check_object_permissions(self.request, code)
 
@@ -254,12 +254,15 @@ class GroupManageMemberAPIView(
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        serializer = self.get_serializer(data=request.data)
+        # if not request.data.get('names'):
+        #     request.data['names'] = []
+
+        serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
         model = get_user_model()
 
-        self.perform_action(instance, model, serializer.data)
+        self.perform_action(instance, model, serializer.validated_data)
 
         serializer = GroupListSerializer(instance)
 
@@ -288,20 +291,22 @@ class GroupManageMemberAddAPIView(
                 obj.save()
 
     def perform_action(self, instance, model, data):
-        for name in data['names']:
-            user = model.objects.filter(
-                name=name
-            ).first()
+        if data.get('names'):
+            for name in data['names']:
+                user = model.objects.filter(
+                    name=name
+                ).first()
 
-            if user:
+                if user:
+                    self.perform_add(instance, user)
+
+        if data.get('phones'):
+            for phone in data['phones']:
+                user = model.objects.get_or_create(
+                    phone=phone
+                )
+
                 self.perform_add(instance, user)
-
-        for phone in data['phones']:
-            user = model.objects.get_or_create(
-                phone=phone
-            )
-
-            self.perform_add(instance, user)
 
 
 class GroupManageMemberRemoveAPIView(
