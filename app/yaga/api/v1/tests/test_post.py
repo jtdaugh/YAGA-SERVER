@@ -286,7 +286,7 @@ class GroupTestCase(
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_204_NO_CONTENT
+            status.HTTP_200_OK
         )
 
         response = self.client.delete(
@@ -297,7 +297,7 @@ class GroupTestCase(
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_404_NOT_FOUND
+            status.HTTP_403_FORBIDDEN
         )
 
     def test_like_post(self):

@@ -24,6 +24,17 @@ class MemberReceiver(
             instance.group.save()
 
 
+class LikeReceiver(
+    ModelReceiver
+):
+    @staticmethod
+    def pre_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if not instance.pk:
+            instance.post.save()
+
+
 class PostReceiver(
     ModelReceiver
 ):
