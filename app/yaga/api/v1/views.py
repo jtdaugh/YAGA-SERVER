@@ -274,23 +274,34 @@ class GroupManageMemberAddAPIView(
 ):
     serializer_class = GroupManageMemberAddSerializer
 
+    def perform_add(self, instance, user):
+        if user.is_active:
+            obj = instance.member_set.filter(
+                group=instance,
+                user=user
+            ).first()
+
+            if not obj:
+                obj = Member()
+                obj.group = instance
+                obj.user = user
+                obj.save()
+
     def perform_action(self, instance, model, data):
+        for name in data['names']:
+            user = model.objects.filter(
+                name=name
+            ).first()
+
+            if user:
+                self.perform_add(instance, user)
+
         for phone in data['phones']:
             user = model.objects.get_or_create(
                 phone=phone
             )
 
-            if user.is_active:
-                obj = instance.member_set.filter(
-                    group=instance,
-                    user=user
-                ).first()
-
-                if not obj:
-                    obj = Member()
-                    obj.group = instance
-                    obj.user = user
-                    obj.save()
+            self.perform_add(instance, user)
 
 
 class GroupManageMemberRemoveAPIView(

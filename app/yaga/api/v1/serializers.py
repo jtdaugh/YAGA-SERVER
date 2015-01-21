@@ -174,10 +174,14 @@ class GroupManageMemberAddSerializer(
         child=PhoneField()
     )
 
+    names = serializers.ListField(
+        child=serializers.CharField()
+    )
+
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('phones', )
+        fields = ('phones', 'names')
 
 
 class GroupManageMemberRemoveSerializer(
