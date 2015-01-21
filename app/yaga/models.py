@@ -151,6 +151,12 @@ class Group(
         auto_now_add=True
     )
 
+    updated_at = models.DateTimeField(
+        verbose_name=_('Updated At'),
+        auto_now=True,
+        db_index=True
+    )
+
     def members_count(self):
         return self.member_set.count()
     members_count.short_description = _('Members Count')
@@ -249,6 +255,12 @@ class Post(
     updated_at = models.DateTimeField(
         verbose_name=_('Updated At'),
         auto_now=True,
+        db_index=True
+    )
+
+    deleted = models.BooleanField(
+        verbose_name=_('Deleted'),
+        default=False,
         db_index=True
     )
 

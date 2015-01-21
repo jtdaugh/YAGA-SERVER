@@ -121,9 +121,9 @@ class PostSerializer(
         model = Post
         fields = (
             'attachment', 'ready_at', 'updated_at',
-            'user', 'id', 'likes', 'name'
+            'user', 'id', 'likes', 'name', 'deleted'
         )
-        read_only_fields = ('attachment', 'ready_at',)
+        read_only_fields = ('attachment', 'ready_at', 'deleted')
 
 
 class MemberSerializer(
@@ -151,7 +151,7 @@ class GroupListSerializer(
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('name', 'members', 'id')
+        fields = ('name', 'members', 'id', 'updated_at')
 
 
 class GroupRetrieveSerializer(
@@ -164,7 +164,7 @@ class GroupRetrieveSerializer(
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('name', 'members', 'posts', 'id')
+        fields = ('name', 'members', 'posts', 'id', 'updated_at')
 
 
 class GroupManageMemberAddSerializer(

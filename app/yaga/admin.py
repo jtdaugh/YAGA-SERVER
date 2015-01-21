@@ -34,12 +34,12 @@ class PostAdmin(
 ):
     list_display = (
         'pk', 'name', 'user', 'likes', 'group', 'mime',
-        'ready', 'updated_at'
+        'ready', 'deleted', 'updated_at'
     )
 
     ordering = ('-ready_at',)
 
-    list_filter = ('ready', 'mime')
+    list_filter = ('ready', 'mime', 'deleted')
 
     search_fields = ('attachment', 'name', 'pk')
 

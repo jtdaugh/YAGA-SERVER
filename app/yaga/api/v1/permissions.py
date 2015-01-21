@@ -41,11 +41,11 @@ class PostOwner(
         return obj.user == request.user
 
 
-class ReadyPost(
+class AvailablePost(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        return obj.ready
+        return (obj.ready and not obj.deleted)
 
 
 class IsAnonymous(

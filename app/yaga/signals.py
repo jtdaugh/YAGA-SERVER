@@ -6,8 +6,8 @@ from future.builtins import (  # noqa
 
 from app.signals import ModelSignal
 
-from .models import Post
-from .receivers import PostReceiver
+from .models import Member, Post
+from .receivers import MemberReceiver, PostReceiver
 
 
 class PostSignal(
@@ -15,3 +15,10 @@ class PostSignal(
 ):
     model = Post
     receiver = PostReceiver
+
+
+class MemberSignal(
+    ModelSignal
+):
+    model = Member
+    receiver = MemberReceiver

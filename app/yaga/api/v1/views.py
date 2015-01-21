@@ -21,7 +21,7 @@ from app.views import NonAtomicView
 from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
 from .permissions import (
-    GroupMemeber, IsAnonymous, PostGroupMember, PostOwner, ReadyPost,
+    AvailablePost, GroupMemeber, IsAnonymous, PostGroupMember, PostOwner,
     TokenOwner
 )
 from .serializers import (
@@ -179,6 +179,8 @@ class GroupListCreateAPIView(
             ),
         ).filter(
             members=self.request.user
+        ).order_by(
+            '-updated_at'
         )
 
     def create(self, request):
@@ -372,7 +374,7 @@ class PostRetrieveUpdateDestroyAPIView(
     RetrieveUpdateDestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostOwner, ReadyPost)
+    permission_classes = (IsAuthenticated, PostOwner, AvailablePost)
 
     def get_queryset(self):
         return Post.objects.all()
@@ -390,13 +392,24 @@ class PostRetrieveUpdateDestroyAPIView(
 
         return obj
 
+    def perform_destroy(self, instance):
+        instance.deleted = True
+        instance.save()
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 
         self.perform_destroy(instance)
 
+        serializer = self.get_serializer(instance)
+
+        serializer = dict(serializer.data)
+
+        serializer['attachment'] = None
+
         return Response(
-            status=status.HTTP_204_NO_CONTENT
+            serializer,
+            status=status.HTTP_200_OK
         )
 
 
@@ -405,7 +418,7 @@ class LikeCreateDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostGroupMember, ReadyPost)
+    permission_classes = (IsAuthenticated, PostGroupMember, AvailablePost)
 
     def get_queryset(self):
         return Post.objects.all()

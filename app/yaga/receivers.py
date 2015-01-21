@@ -4,13 +4,24 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.db import connection
+from django.db import connection, transaction
 from django.utils.translation import ugettext_lazy as _
 
 from app.receivers import ModelReceiver
 
 from .models import Device
 from .tasks import APNSPush
+
+
+class MemberReceiver(
+    ModelReceiver
+):
+    @staticmethod
+    def pre_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if not instance.pk:
+            instance.group.save()
 
 
 class PostReceiver(
@@ -27,8 +38,21 @@ class PostReceiver(
             connection.on_commit(delete_attachment)
 
     @staticmethod
+    def post_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if instance.deleted and instance.attachment:
+            def delete_attachment():
+                with transaction.atomic():
+                    instance.attachment.delete()
+
+            connection.on_commit(delete_attachment)
+
+    @staticmethod
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
+
+        instance.group.save()
 
         if instance.attachment and instance.ready and not instance.notified:
             instance.notified = True
