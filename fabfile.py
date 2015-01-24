@@ -153,7 +153,7 @@ def resetdb():
     #     app=APP_DIR
     # ))
 
-    start()
+    # start()
 
 
 @task
@@ -203,7 +203,8 @@ def create():
         bucket=AWS_STORAGE_BUCKET_NAME
     ))
     print('''
-<CORSConfiguration>
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
     <CORSRule>
         <AllowedOrigin>*</AllowedOrigin>
         <AllowedMethod>PUT</AllowedMethod>
@@ -213,6 +214,26 @@ def create():
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
+{
+  "Version": "2008-10-17",
+  "Id": "arn:aws:sqs:us-west-1:609367773239:yaga-dev/SQSDefaultPolicy",
+  "Statement": [
+    {
+      "Sid": "arn:aws:sqs:us-west-1:609367773239:yaga-dev",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "SQS:SendMessage",
+      "Resource": "arn:aws:sqs:us-west-1:609367773239:yaga-dev",
+      "Condition": {
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:*:*:yaga-dev"
+        }
+      }
+    }
+  ]
+}
 ''')
 
 

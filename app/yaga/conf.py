@@ -25,7 +25,7 @@ class YagaAppConf(
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
     AWS_UPLOAD_MAX_LENGTH = 25 * 1024 * 1024
     AWS_ALLOWED_MIME = 'video/quicktime'
-    AWS_SQS_QUEUE = 's3_yaga-dev_sqs'
+    AWS_SQS_QUEUE = 'yaga-dev'
 
     APNS_MODE = 'push_sandbox'
     APNS_CERT = os.path.join(

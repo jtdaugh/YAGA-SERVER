@@ -55,8 +55,15 @@ class IsAnonymous(
         return request.user and request.user.is_anonymous()
 
 
-class UserWithName(
+class FulfilledProfile(
     BasePermission
 ):
     def has_permission(self, request, view):
         return request.user.name is not None
+
+
+class EmptyProfile(
+    BasePermission
+):
+    def has_permission(self, request, view):
+        return request.user.name is None

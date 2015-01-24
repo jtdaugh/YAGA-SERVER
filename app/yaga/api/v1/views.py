@@ -7,37 +7,22 @@ from future.builtins import (  # noqa
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import status
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from app.views import NonAtomicView
 
+from . import permissions, serializers, throttling
 from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
-from .permissions import (
-    AvailablePost, GroupMemeber, IsAnonymous, PostGroupMember, PostOwner,
-    TokenOwner, UserWithName
-)
-from .serializers import (
-    CodeCreateSerializer, CodeRetrieveSerializer, DeviceSerializer,
-    GroupListSerializer, GroupManageMemberAddSerializer,
-    GroupManageMemberRemoveSerializer, GroupRetrieveSerializer,
-    MemberSerializer, PostSerializer, SinceSerializer, TokenSerializer,
-    UserSearchSerializer, UserSerializer
-)
-from .throttling import (
-    CodeScopedRateThrottle, TokenScopedRateThrottle,
-    UserSearchScopedRateThrottle
-)
 
 
 class UserRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView,
 ):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, permissions.EmptyProfile)
+    serializer_class = serializers.UserSerializer
 
     def get_object(self):
         obj = self.request.user
@@ -52,9 +37,9 @@ class CodeCreateAPIView(
     generics.CreateAPIView
 ):
     model = Code
-    serializer_class = CodeCreateSerializer
-    throttle_classes = (CodeScopedRateThrottle,)
-    permission_classes = (IsAnonymous,)
+    serializer_class = serializers.CodeCreateSerializer
+    throttle_classes = (throttling.CodeScopedRateThrottle,)
+    permission_classes = (permissions.IsAnonymous,)
 
     def create(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -89,8 +74,8 @@ class CodeCreateAPIView(
 class CodeRetrieveAPIView(
     generics.RetrieveAPIView
 ):
-    serializer_class = CodeRetrieveSerializer
-    permission_classes = (IsAnonymous,)
+    serializer_class = serializers.CodeRetrieveSerializer
+    permission_classes = (permissions.IsAnonymous,)
 
     def get_queryset(self):
         return Code.objects.all()
@@ -124,9 +109,9 @@ class TokenCreateAPIView(
     NonAtomicView,
     generics.CreateAPIView
 ):
-    serializer_class = TokenSerializer
-    permission_classes = (IsAnonymous,)
-    throttle_classes = (TokenScopedRateThrottle,)
+    serializer_class = serializers.TokenSerializer
+    permission_classes = (permissions.IsAnonymous,)
+    throttle_classes = (throttling.TokenScopedRateThrottle,)
 
     def get_object(self):
         obj = self.request.auth
@@ -151,7 +136,7 @@ class TokenCreateAPIView(
 class TokenDestroyAPIView(
     generics.DestroyAPIView
 ):
-    permission_classes = (IsAuthenticated, TokenOwner)
+    permission_classes = (IsAuthenticated, permissions.TokenOwner)
 
     def get_serializer_class(self):
         return None
@@ -167,8 +152,8 @@ class TokenDestroyAPIView(
 class GroupListCreateAPIView(
     generics.ListCreateAPIView
 ):
-    permission_classes = (IsAuthenticated, UserWithName)
-    serializer_class = GroupListSerializer
+    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    serializer_class = serializers.GroupListSerializer
 
     def get_queryset(self):
         return Group.objects.prefetch_related(
@@ -204,15 +189,19 @@ class GroupRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    serializer_class = GroupRetrieveSerializer
-    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
+    serializer_class = serializers.GroupRetrieveSerializer
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
 
     def get_queryset(self):
         post_filter = {
             'ready': True
         }
 
-        serializer = SinceSerializer(data=self.request.QUERY_PARAMS.dict())
+        serializer = serializers.SinceSerializer(
+            data=self.request.QUERY_PARAMS.dict()
+        )
 
         if serializer.is_valid():
             post_filter['updated_at__gte'] = (
@@ -247,7 +236,9 @@ class GroupManageMemberAPIView(
     generics.UpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
 
     def get_queryset(self):
         return Group.objects.all()
@@ -265,7 +256,7 @@ class GroupManageMemberAPIView(
 
         self.perform_action(instance, model, serializer.validated_data)
 
-        serializer = GroupListSerializer(instance)
+        serializer = serializers.GroupListSerializer(instance)
 
         return Response(
             dict(serializer.data),
@@ -276,7 +267,7 @@ class GroupManageMemberAPIView(
 class GroupManageMemberAddAPIView(
     GroupManageMemberAPIView
 ):
-    serializer_class = GroupManageMemberAddSerializer
+    serializer_class = serializers.GroupManageMemberAddSerializer
 
     def perform_add(self, instance, user):
         if user.is_active:
@@ -313,7 +304,7 @@ class GroupManageMemberAddAPIView(
 class GroupManageMemberRemoveAPIView(
     GroupManageMemberAPIView
 ):
-    serializer_class = GroupManageMemberRemoveSerializer
+    serializer_class = serializers.GroupManageMemberRemoveSerializer
 
     def perform_action(self, instance, model, data):
         user = model.objects.get_or_create(
@@ -332,7 +323,7 @@ class GroupManageMemberRemoveAPIView(
 class GroupManageMemberMuteAPIView(
     GroupManageMemberAPIView
 ):
-    serializer_class = MemberSerializer
+    serializer_class = serializers.MemberSerializer
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -345,7 +336,7 @@ class GroupManageMemberMuteAPIView(
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        serializer = GroupListSerializer(instance)
+        serializer = serializers.GroupListSerializer(instance)
 
         return Response(
             dict(serializer.data),
@@ -357,8 +348,10 @@ class PostCreateAPIView(
     generics.CreateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
+    serializer_class = serializers.PostSerializer
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
 
     def get_queryset(self):
         return Group.objects.all()
@@ -390,9 +383,10 @@ class PostCreateAPIView(
 class PostRetrieveUpdateDestroyAPIView(
     generics.RetrieveUpdateDestroyAPIView
 ):
-    serializer_class = PostSerializer
+    serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, PostOwner, AvailablePost, UserWithName
+        IsAuthenticated, permissions.PostOwner,
+        permissions.AvailablePost, permissions.FulfilledProfile
     )
 
     def get_queryset(self):
@@ -436,9 +430,10 @@ class LikeCreateDestroyAPIView(
     generics.CreateAPIView,
     generics.DestroyAPIView
 ):
-    serializer_class = PostSerializer
+    serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, PostGroupMember, AvailablePost, UserWithName
+        IsAuthenticated, permissions.PostGroupMember,
+        permissions.AvailablePost, permissions.FulfilledProfile
     )
 
     def get_queryset(self):
@@ -500,9 +495,10 @@ class LikeCreateDestroyAPIView(
 class LikeListAPIView(
     generics.ListAPIView,
 ):
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
     permission_classes = (
-        IsAuthenticated, PostGroupMember, AvailablePost, UserWithName
+        IsAuthenticated, permissions.PostGroupMember,
+        permissions.AvailablePost, permissions.FulfilledProfile
     )
 
     def get_object(self):
@@ -529,7 +525,7 @@ class DeviceCreateAPIView(
     generics.CreateAPIView
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = DeviceSerializer
+    serializer_class = serializers.DeviceSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -538,12 +534,12 @@ class DeviceCreateAPIView(
 class UserSearchListAPIView(
     generics.ListAPIView,
 ):
-    serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, UserWithName)
-    throttle_classes = (UserSearchScopedRateThrottle,)
+    serializer_class = serializers.UserSerializer
+    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    throttle_classes = (throttling.UserSearchScopedRateThrottle,)
 
     def get_queryset(self):
-        serializer = UserSearchSerializer(data=self.request.data)
+        serializer = serializers.UserSearchSerializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
 
         return get_user_model().objects.filter(
