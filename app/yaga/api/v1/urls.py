@@ -6,35 +6,29 @@ from future.builtins import (  # noqa
 
 from django.conf.urls import include, patterns, url
 
-from .views import (
-    CodeCreateAPIView, CodeRetrieveAPIView, DeviceCreateAPIView,
-    GroupListCreateAPIView, GroupManageMemberAddAPIView,
-    GroupManageMemberMuteAPIView, GroupManageMemberRemoveAPIView,
-    GroupRetrieveUpdateAPIView, LikeCreateDestroyAPIView, PostCreateAPIView,
-    PostRetrieveUpdateDestroyAPIView, TokenCreateAPIView, TokenDestroyAPIView,
-    UserRetrieveUpdateAPIView
-)
+from . import views
+
 
 auth_urlpatterns = patterns(
     '',
     url(
         r'^status/$',
-        CodeRetrieveAPIView.as_view(),
+        views.CodeRetrieveAPIView.as_view(),
         name='status'
     ),
     url(
         r'^request/$',
-        CodeCreateAPIView.as_view(),
+        views.CodeCreateAPIView.as_view(),
         name='request'
     ),
     url(
         r'^obtain/$',
-        TokenCreateAPIView.as_view(),
+        views.TokenCreateAPIView.as_view(),
         name='obtain'
     ),
     url(
         r'^release/$',
-        TokenDestroyAPIView.as_view(),
+        views.TokenDestroyAPIView.as_view(),
         name='release'
     ),
 )
@@ -44,12 +38,12 @@ user_urlpatterns = patterns(
     '',
     url(
         r'^profile/$',
-        UserRetrieveUpdateAPIView.as_view(),
+        views.UserRetrieveUpdateAPIView.as_view(),
         name='profile'
     ),
     url(
         r'^device/$',
-        DeviceCreateAPIView.as_view(),
+        views.DeviceCreateAPIView.as_view(),
         name='device'
     ),
 )
@@ -58,17 +52,22 @@ post_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        PostCreateAPIView.as_view(),
+        views.PostCreateAPIView.as_view(),
         name='create'
     ),
     url(
         r'^(?P<post_id>[\-a-z0-9]{32,36})/like/$',
-        LikeCreateDestroyAPIView.as_view(),
+        views.LikeCreateDestroyAPIView.as_view(),
         name='like'
     ),
     url(
+        r'^(?P<post_id>[\-a-z0-9]{32,36})/likers/$',
+        views.LikeListAPIView.as_view(),
+        name='like-list'
+    ),
+    url(
         r'^(?P<post_id>[\-a-z0-9]{32,36})/$',
-        PostRetrieveUpdateDestroyAPIView.as_view(),
+        views.PostRetrieveUpdateDestroyAPIView.as_view(),
         name='detail'
     ),
 )
@@ -77,12 +76,12 @@ members_urlpatterns = patterns(
     '',
     url(
         r'^remove/$',
-        GroupManageMemberRemoveAPIView.as_view(),
+        views.GroupManageMemberRemoveAPIView.as_view(),
         name='remove'
     ),
     url(
         r'^add/$',
-        GroupManageMemberAddAPIView.as_view(),
+        views.GroupManageMemberAddAPIView.as_view(),
         name='add'
     )
 )
@@ -92,17 +91,17 @@ group_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        GroupListCreateAPIView.as_view(),
+        views.GroupListCreateAPIView.as_view(),
         name='list-create'
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/$',
-        GroupRetrieveUpdateAPIView.as_view(),
+        views.GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/mute/$',
-        GroupManageMemberMuteAPIView.as_view(),
+        views.GroupManageMemberMuteAPIView.as_view(),
         name='mute'
     ),
     url(

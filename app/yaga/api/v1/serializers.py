@@ -117,12 +117,14 @@ class PostSerializer(
 ):
     user = UserSerializer(read_only=True)
     likes = serializers.IntegerField(read_only=True)
+    liked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Post
         fields = (
             'attachment', 'ready_at', 'updated_at',
-            'user', 'id', 'likes', 'name', 'deleted'
+            'user', 'id', 'likes', 'name', 'deleted',
+            'liked'
         )
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 

@@ -18,6 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
+from requestprovider import get_request
 
 from .conf import settings
 from .providers import NexmoProvider
@@ -278,6 +279,13 @@ class Post(
 
     def likes(self):
         return self.like_set.count()
+
+    def liked(self):
+        request = get_request()
+
+        return self.like_set.filter(
+            user=request.user
+        ).exists()
 
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
