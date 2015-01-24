@@ -119,7 +119,7 @@ class HerokuConfiguration(
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
-    S3_HOST = 'https://{bucket}.s3.amazonaws.com/'.format(
+    S3_HOST = 'https://{bucket}.s3-us-west-1.amazonaws.com/'.format(
         bucket=AWS_STORAGE_BUCKET_NAME
     )
     MEDIA_URL = '{host}media/'.format(

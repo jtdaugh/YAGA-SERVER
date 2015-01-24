@@ -355,7 +355,7 @@ class BaseConfiguration(
     AWS_SECRET_ACCESS_KEY = 'v0n4oxhLMhLEUbOE70a8RQ9HsLdVhJw+C3cOhBj0'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
-    S3_HOST = 'https://{bucket}.s3.amazonaws.com/'.format(
+    S3_HOST = 'https://{bucket}.s3-us-west-1.amazonaws.com/'.format(
         bucket=AWS_STORAGE_BUCKET_NAME
     )
     MEDIA_URL = '{host}media/'.format(
