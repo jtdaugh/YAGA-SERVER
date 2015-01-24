@@ -33,7 +33,7 @@ class UserRetrieveUpdateAPIView(
 
     def check_object_permissions(self, request, obj):
         if request.method != 'GET':
-            self.serializer_class.append(permissions.EmptyProfile)
+            self.permission_classes.append(permissions.EmptyProfile)
 
         return super(
             UserRetrieveUpdateAPIView, self
