@@ -351,8 +351,8 @@ class BaseConfiguration(
 
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
 
-    AWS_ACCESS_KEY_ID = 'AKIAJWXZI677ANQKOAIA'
-    AWS_SECRET_ACCESS_KEY = '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'
+    AWS_ACCESS_KEY_ID = 'AKIAJ3BOSZSPPD7EX7KA'
+    AWS_SECRET_ACCESS_KEY = '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'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
     S3_HOST = 'https://{bucket}.s3.amazonaws.com/'.format(
