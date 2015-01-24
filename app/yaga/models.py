@@ -460,6 +460,11 @@ class Device(
         db_index=True
     )
 
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
     class Meta:
         verbose_name = _('Device')
         verbose_name_plural = _('Devices')

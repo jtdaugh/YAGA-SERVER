@@ -28,11 +28,28 @@ class Migration(migrations.Migration):
             bases=(models.Model,),
         ),
         migrations.CreateModel(
+            name='Device',
+            fields=[
+                ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
+                ('vendor', models.PositiveSmallIntegerField(db_index=True, verbose_name='Vendor', choices=[(0, 'IOS'), (1, 'ADNDROID')])),
+                ('locale', models.CharField(max_length=2, verbose_name='Locale')),
+                ('token', models.CharField(max_length=255, verbose_name='Token', db_index=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
+                ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
+                'verbose_name': 'Device',
+                'verbose_name_plural': 'Devices',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
             name='Group',
             fields=[
                 ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
                 ('name', models.CharField(max_length=255, verbose_name='Name')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At', db_index=True)),
             ],
             options={
                 'verbose_name': 'Group',
@@ -74,10 +91,13 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, null=True, verbose_name='Name', blank=True)),
                 ('attachment', models.FileField(db_index=True, upload_to=yaga.models.post_upload_to, null=True, verbose_name='Attachment', blank=True)),
                 ('checksum', models.CharField(db_index=True, max_length=255, null=True, verbose_name='Checksum', blank=True)),
-                ('mime', models.CharField(db_index=True, max_length=255, null=True, verbose_name='MIme', blank=True)),
+                ('mime', models.CharField(db_index=True, max_length=255, null=True, verbose_name='Mime', blank=True)),
                 ('ready', models.BooleanField(default=False, db_index=True, verbose_name='Ready')),
+                ('notified', models.BooleanField(default=False, db_index=True, verbose_name='Notified')),
                 ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
                 ('ready_at', models.DateTimeField(db_index=True, null=True, verbose_name='Ready At', blank=True)),
+                ('updated_at', models.DateTimeField(auto_now=True, verbose_name='Updated At', db_index=True)),
+                ('deleted', models.BooleanField(default=False, db_index=True, verbose_name='Deleted')),
                 ('group', models.ForeignKey(verbose_name='Group', to='yaga.Group')),
                 ('user', models.ForeignKey(verbose_name='User', to=settings.AUTH_USER_MODEL)),
             ],
@@ -112,5 +132,9 @@ class Migration(migrations.Migration):
             name='members',
             field=models.ManyToManyField(to=settings.AUTH_USER_MODEL, verbose_name='Members', through='yaga.Member', db_index=True),
             preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='device',
+            unique_together=set([('vendor', 'token')]),
         ),
     ]
