@@ -9,7 +9,7 @@ import os
 from django.core.files.storage import get_storage_class
 from django.core.management.base import NoArgsCommand
 
-from ....conf import settings
+from ...conf import settings
 
 
 class Command(
