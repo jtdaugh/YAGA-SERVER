@@ -65,5 +65,5 @@ class FulfilledProfile(
 class EmptyProfile(
     BasePermission
 ):
-    def has_permission(self, request, view):
-        return request.user.name is None
+    def has_object_permission(self, request, view, obj):
+        return obj.name is None
