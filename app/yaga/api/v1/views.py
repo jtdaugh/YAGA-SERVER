@@ -25,7 +25,7 @@ from .serializers import (
     GroupListSerializer, GroupManageMemberAddSerializer,
     GroupManageMemberRemoveSerializer, GroupRetrieveSerializer,
     MemberSerializer, PostSerializer, SinceSerializer, TokenSerializer,
-    UserSerializer
+    UserSearchSerializer, UserSerializer
 )
 from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
 
@@ -92,15 +92,15 @@ class CodeRetrieveAPIView(
     def get_queryset(self):
         return Code.objects.all()
 
-    def get(self, request):
+    def get(self, request, *args, **kwargs):
         data = self.request.QUERY_PARAMS.dict()
-        return self.retrieve(request, data)
+        return self.retrieve(request, data, *args, **kwargs)
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         data = request.data
-        return self.retrieve(request, data)
+        return self.retrieve(request, data, *args, **kwargs)
 
-    def retrieve(self, request, data):
+    def retrieve(self, request, data, *args, **kwargs):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
@@ -530,3 +530,22 @@ class DeviceCreateAPIView(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class UserSearchListAPIView(
+    generics.ListAPIView,
+):
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated, UserWithName)
+
+    def get_queryset(self):
+        serializer = UserSearchSerializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+
+        return get_user_model().objects.filter(
+            verified=True,
+            phone__in=serializer.validated_data['phones']
+        )
+
+    def post(self, request, *args, **kwargs):
+        return self.get(request, *args, **kwargs)

@@ -276,3 +276,11 @@ class DeviceSerializer(
         attrs['locale'] = locale
 
         return attrs
+
+
+class UserSearchSerializer(
+    serializers.Serializer
+):
+    phones = serializers.ListField(
+        child=PhoneField()
+    )

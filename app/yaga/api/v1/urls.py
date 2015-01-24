@@ -46,6 +46,11 @@ user_urlpatterns = patterns(
         views.DeviceCreateAPIView.as_view(),
         name='device'
     ),
+    url(
+        r'^search/$',
+        views.UserSearchListAPIView.as_view(),
+        name='search'
+    ),
 )
 
 post_urlpatterns = patterns(
