@@ -10,7 +10,6 @@ from urllib.parse import urljoin
 import regex
 import requests
 import ujson
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import NoReverseMatch, reverse
@@ -27,6 +26,7 @@ from rest_framework.settings import api_settings
 from requestprovider import get_request
 
 from . import celery
+from .conf import settings
 
 try:
     from django.utils.encoding import (  # noqa
@@ -134,7 +134,10 @@ def reverse_host(pattern, args=None, kwargs=None):
             else:
                 schema = 'http://'
 
-            domain = '%s%s' % (schema, site.domain)
+            domain = '{schem}{domain}'.format(
+                schema=schema,
+                domain=site.domain
+            )
 
         url = urljoin(domain, url)
 
@@ -184,6 +187,12 @@ def get_sentry_client():
     return SimpleLazyObject(_get_sentry_cleint)
 
 
+class Bridge(
+    object
+):
+    pass
+
+
 class UJSONRenderer(
     BaseRenderer
 ):
@@ -219,7 +228,9 @@ class UJSONParser(
 
             return ujson.loads(data)
         except Exception as exc:
-            raise ParseError('JSON parse error - %s' % six.text_type(exc))
+            raise ParseError('JSON parse error - {exc}'.format(
+                exc=six.text_type(exc)
+            ))
 
 
 class SentryCeleryClient(

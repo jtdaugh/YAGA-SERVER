@@ -4,9 +4,10 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.conf import settings
 from django.utils import timezone
 from django.utils.functional import SimpleLazyObject
+
+from .conf import settings
 
 
 def environment(request):

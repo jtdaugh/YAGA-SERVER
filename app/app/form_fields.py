@@ -13,6 +13,8 @@ class PhoneNumberField(
 ):
     def to_python(self, value):
         if not value.startswith('+'):
-            value = '+' + value
+            value = '+{value}'.format(
+                value=value
+            )
 
         return super(PhoneNumberField, self).to_python(value)

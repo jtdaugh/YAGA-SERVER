@@ -456,6 +456,3 @@ class Device(
 
     def __str__(self):
         return smart_text(self.pk)
-
-
-from . import dispatch  # noqa # isort:skip

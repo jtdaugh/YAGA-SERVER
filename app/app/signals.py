@@ -12,25 +12,23 @@ class ModelSignal(
 ):
     model = None
     receiver = None
-    signals = ['pre_save', 'post_save', 'pre_delete', 'post_delete']
-
-    def __init__(self, *args, **kwargs):
-        if self.model is None:
-            raise NotImplemented('Model is not defined')
-
-        if self.receiver is None:
-            raise NotImplemented('Receiver is not defined')
+    signals = [
+        'pre_init', 'post_init',
+        'pre_save', 'post_save',
+        'pre_delete', 'post_delete'
+    ]
 
     @classmethod
     def connect(cls):
         instance = cls()
 
         for signal in instance.signals:
-            receiver = getattr(instance.receiver, signal)
+            receiver = getattr(instance.receiver, signal, None)
 
-            model_signal = getattr(signals, signal)
+            if receiver is not None:
+                model_signal = getattr(signals, signal)
 
-            model_signal.connect(receiver, sender=instance.model)
+                model_signal.connect(receiver, sender=instance.model)
 
 
 def register(obj):

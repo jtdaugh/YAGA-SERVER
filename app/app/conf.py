@@ -4,8 +4,4 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-
-class ModelReceiver(
-    object
-):
-    pass
+from django.conf import settings  # noqa

@@ -14,8 +14,12 @@ importer.install()
 
 from celery import Celery
 from celery.task import PeriodicTask
-from django.conf import settings
 from django.db import transaction
+
+from .conf import settings
+
+
+default_app_config = 'app.apps.AppAppConfig'
 
 
 celery = Celery(__name__)
@@ -50,5 +54,8 @@ celery.AtomicPeriodicTask = AtomicPeriodicTask
 celery.PeriodicTask = PeriodicTask
 
 
+def autodiscover_tasks():
+    return settings.INSTALLED_APPS
+
 celery.config_from_object('django.conf:settings')
-celery.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+celery.autodiscover_tasks(autodiscover_tasks)

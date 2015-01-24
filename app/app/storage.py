@@ -4,9 +4,10 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.conf import settings
 from django.core.files.storage import get_storage_class
 from storages.backends.s3boto import S3BotoStorage
+
+from .conf import settings
 
 
 class FixedS3BotoStorage(

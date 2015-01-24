@@ -119,10 +119,16 @@ class HerokuConfiguration(
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
-    S3_HOST = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    MEDIA_URL = '%smedia/' % S3_HOST
+    S3_HOST = 'https://{bucket}.s3.amazonaws.com/'.format(
+        bucket=AWS_STORAGE_BUCKET_NAME
+    )
+    MEDIA_URL = '{host}media/'.format(
+        host=S3_HOST
+    )
     STATICFILES_STORAGE = 'app.storage.CachedS3StaticStorage'
-    STATIC_URL = '%sstatic/' % S3_HOST
+    STATIC_URL = '{host}static/'.format(
+        host=S3_HOST
+    )
     COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
     COMPRESS_URL = STATIC_URL
 

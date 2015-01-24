@@ -3,3 +3,5 @@ from future.builtins import (  # noqa
     ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
     oct, open, pow, range, round, str, super, zip
 )
+
+default_app_config = 'accounts.apps.AccountsAppConfig'

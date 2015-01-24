@@ -4,8 +4,10 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from django.apps import AppConfig
+from django.utils.translation import ugettext_lazy as _
 
-class ModelReceiver(
-    object
-):
-    pass
+
+class ContentAppConfig(AppConfig):
+    name = 'content'
+    verbose_name = _('content')

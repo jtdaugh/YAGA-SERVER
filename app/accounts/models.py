@@ -6,7 +6,6 @@ from future.builtins import (  # noqa
 
 import string
 
-from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
@@ -20,6 +19,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import reverse_host, smart_text
+
+from .conf import settings
 
 
 class UserManager(
@@ -130,7 +131,8 @@ class AbstractUser(
 
     verified = models.BooleanField(
         verbose_name=_('Verified'),
-        default=False
+        default=False,
+        db_index=True
     )
 
     objects = UserManager()
@@ -186,7 +188,10 @@ class Token(
     models.Model
 ):
     KEY_LENGTH = 128
-    KEY_CHARS = string.ascii_letters + string.digits
+    KEY_CHARS = '{letters}{digits}'.format(
+        letters=string.ascii_letters,
+        digits=string.digits
+    )
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -8,7 +8,7 @@ Installation Mac OS X:
 
 .. code-block:: bash
 
-    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql
+    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql libmemcached
 
     sudo pip install virtualenv
 
@@ -27,9 +27,7 @@ Development:
     make celery
 
     # create superuser
-    source env/bin/activate
-    cd app
-    python manage.py createsuperuser
+    make superuser
 
 Visit `http://127.0.0.1:8000/ <http://127.0.0.1:8000/>`_
 

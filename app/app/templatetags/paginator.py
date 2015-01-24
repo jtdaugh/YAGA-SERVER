@@ -38,7 +38,9 @@ class Paginator(
 
         def render_link(page):
             get['page'] = page
-            return mark_safe('?' + iri_to_uri(get.urlencode(safe='/')))
+            return mark_safe('?{params}'.format(
+                params=iri_to_uri(get.urlencode(safe='/'))
+            ))
 
         if not get.get('page', None) is None:
             del get['page']
@@ -59,20 +61,29 @@ class Paginator(
             pages.append({
                 'class': 'disabled',
                 'get': render_link(page_obj.number),
-                'number': '%s %s' % (mark_safe('<<'), smart_text(_('First')))
+                'number': '{symbol} {label}'.format(
+                    symbol=mark_safe('<<'),
+                    label=smart_text(_('First'))
+                )
             })
         else:
             pages.append({
                 'class': '',
                 'get': render_link(1),
-                'number': '%s %s' % (mark_safe('<<'), smart_text(_('First')))
+                'number': '{symbol} {label}'.format(
+                    symbol=mark_safe('<<'),
+                    label=smart_text(_('First'))
+                )
             })
 
         if page_obj.has_previous():
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.previous_page_number()),
-                'number': '%s %s' % (mark_safe('<'), smart_text(_('Previous')))
+                'number': '{symbol} {label}'.format(
+                    symbol=mark_safe('<'),
+                    label=smart_text(_('Previous'))
+                )
             })
 
         for page in page_range:
@@ -93,20 +104,29 @@ class Paginator(
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.next_page_number()),
-                'number': '%s %s' % (smart_text(_('Next')), mark_safe('>'))
+                'number': '{symbol} {label}'.format(
+                    label=smart_text(_('Next')),
+                    symbol=mark_safe('>')
+                )
             })
 
         if page_obj.number == page_obj.paginator.num_pages:
             pages.append({
                 'class': 'disabled',
                 'get': render_link(page_obj.paginator.num_pages),
-                'number': '%s %s' % (smart_text(_('Last')), mark_safe('>>'))
+                'number': '{symbol} {label}'.format(
+                    label=smart_text(_('Last')),
+                    symbol=mark_safe('>>')
+                )
             })
         else:
             pages.append({
                 'class': '',
                 'get': render_link(page_obj.paginator.num_pages),
-                'number': '%s %s' % (smart_text(_('Last')), mark_safe('>>'))
+                'number': '{symbol} {label}'.format(
+                    label=smart_text(_('Last')),
+                    symbol=mark_safe('>>')
+                )
             })
 
         return {

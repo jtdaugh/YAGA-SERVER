@@ -44,10 +44,6 @@ class BaseConfiguration(
     # -------------------------------------------------------
     HTTPS = False
     # -------------------------------------------------------
-    # html minification configuration
-    # -------------------------------------------------------
-    MINIFY_ENABLED = False
-    # -------------------------------------------------------
     # django compressor configuration
     # -------------------------------------------------------
     COMPRESS_OFFLINE = False
@@ -57,10 +53,6 @@ class BaseConfiguration(
     # -------------------------------------------------------
     TEMPLATE_CACHE = False
     # -------------------------------------------------------
-    # db pool configuration
-    # -------------------------------------------------------
-    DB_POOL_PATCH = False
-    # -------------------------------------------------------
     # etag configuration
     # -------------------------------------------------------
     USE_ETAGS = False
@@ -69,6 +61,11 @@ class BaseConfiguration(
     # -------------------------------------------------------
     GZIP = False
     # -------------------------------------------------------
+    # global permissions configuration
+    # -------------------------------------------------------
+    GLOBAL_PERMISSIONS = [
+    ]
+    # -------------------------------------------------------
     # debug toolbar configuration
     # -------------------------------------------------------
     DEBUG_TOOLBAR = True
@@ -76,7 +73,6 @@ class BaseConfiguration(
         'SHOW_TOOLBAR_CALLBACK': 'app.utils.show_toolbar'
     }
     DEBUG_TOOLBAR_PANELS = [
-        # 'debug_toolbar.panels.versions.VersionsPanel',
         'debug_toolbar.panels.timer.TimerPanel',
         'debug_toolbar.panels.settings.SettingsPanel',
         'debug_toolbar.panels.headers.HeadersPanel',
@@ -88,6 +84,7 @@ class BaseConfiguration(
         'debug_toolbar.panels.signals.SignalsPanel',
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
+        'debug_toolbar.panels.versions.VersionsPanel',
     ]
     # -------------------------------------------------------
     # docs configuration
@@ -106,8 +103,6 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # app features configuration
     # -------------------------------------------------------
-    PAGINATE_BY_VIEWS = 10
-    PAGINATE_BY_ADMIN = 10
     # project root configuration
     # -------------------------------------------------------
     PROJECT_ROOT = os.path.abspath(os.path.join(
@@ -289,17 +284,22 @@ class BaseConfiguration(
     # django compressor configuration
     # -------------------------------------------------------
     COMPRESS_PRECOMPILERS = (
-        ('text/coffeescript', '%s --bare --compile --stdio' % os.path.join(
-            PROJECT_ROOT,
-            'node_modules',
-            '.bin',
-            'coffee'
+        ('text/coffeescript', '{coffee} --bare --compile --stdio'.format(
+            coffee=os.path.join(
+                PROJECT_ROOT,
+                'node_modules',
+                '.bin',
+                'coffee'
+            )
         )),
-        ('text/stylus', '%s < {infile} > {outfile}' % os.path.join(
-            PROJECT_ROOT,
-            'node_modules',
-            '.bin',
-            'stylus'
+        ('text/stylus', '{stylus} {cmd}'.format(
+            stylus=os.path.join(
+                PROJECT_ROOT,
+                'node_modules',
+                '.bin',
+                'stylus'
+            ),
+            cmd='< {infile} > {outfile}'
         ))
     )
     COMPRESS_CSS_FILTERS = [
@@ -309,11 +309,13 @@ class BaseConfiguration(
     COMPRESS_JS_FILTERS = [
         'compressor.filters.closure.ClosureCompilerFilter'
     ]
-    COMPRESS_YUI_BINARY = '%s -jar %s' % (
-        JAVA, yuicompressor.get_jar_filename()
+    COMPRESS_YUI_BINARY = '{java} -jar {jar}'.format(
+        java=JAVA,
+        jar=yuicompressor.get_jar_filename()
     )
-    COMPRESS_CLOSURE_COMPILER_BINARY = '%s -jar %s' % (
-        JAVA, closure.get_jar_filename()
+    COMPRESS_CLOSURE_COMPILER_BINARY = '{java} -jar {jar}'.format(
+        java=JAVA,
+        jar=closure.get_jar_filename()
     )
     COMPRESS_OUTPUT_DIR = 'compress'
     COMPRESS_PARSER = 'compressor.parser.LxmlParser'
@@ -337,11 +339,11 @@ class BaseConfiguration(
     # storages configuration
     # -------------------------------------------------------
     MEDIA_LOCATION = 'media'
-    # MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'media'))
-    # MEDIA_URL = '/%s/' % MEDIA_LOCATION
     STATIC_LOCATION = 'static'
     STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'static'))
-    STATIC_URL = '/%s/' % STATIC_LOCATION
+    STATIC_URL = '/{location}/'.format(
+        location=STATIC_LOCATION
+    )
     FAVICON_STATIC = 'frontend/img/favicon.ico'
     COMPRESS_ROOT = STATIC_ROOT
     COMPRESS_URL = STATIC_URL
@@ -352,8 +354,12 @@ class BaseConfiguration(
     AWS_SECRET_ACCESS_KEY = 'OdxAVZMH4Hg/dmTUWUNuzKPgktJwTo65VrtY3K4x'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
-    S3_HOST = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
-    MEDIA_URL = '%smedia/' % S3_HOST
+    S3_HOST = 'https://{bucket}.s3.amazonaws.com/'.format(
+        bucket=AWS_STORAGE_BUCKET_NAME
+    )
+    MEDIA_URL = '{host}media/'.format(
+        host=S3_HOST
+    )
 
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True
@@ -377,12 +383,13 @@ class BaseConfiguration(
     # middleware classes configuration
     # -------------------------------------------------------
     MIDDLEWARE_CLASSES = [
+        # bridge storage
+        'app.middleware.BridgeMiddleware',
         # request cookies
         'app.middleware.RequestCookiesMiddleware',
         # 'django.contrib.sites.middleware.CurrentSiteMiddleware',
         'app.middleware.CapabilityMiddleware',
         'django.middleware.http.ConditionalGetMiddleware',
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         # django mobile
         'django_mobile.middleware.MobileDetectionMiddleware',
@@ -452,9 +459,9 @@ class BaseConfiguration(
         'djangobower',
         'configurations',
         'rest_framework',
-        'debug_toolbar',
         'django_nose',
         'raven.contrib.django',
+        'guardian',
     ]
     # -------------------------------------------------------
     # template context processors configuration
@@ -480,7 +487,7 @@ class BaseConfiguration(
         'guardian.backends.ObjectPermissionBackend',
         'yaga.backends.CodeBackend',
     )
-    ANONYMOUS_USER_ID = -1
+    ANONYMOUS_USER_ID = 'b25d71af-3dd0-4955-9305-ed495e34727b'  # -1
     GUARDIAN_RAISE_403 = True
     # -------------------------------------------------------
     # logging configuration
@@ -566,8 +573,12 @@ class BaseConfiguration(
     # -------------------------------------------------------
     MESSAGE_PROTOCOL = 'pickle'
     CELERY_ALWAYS_EAGER = False
-    BROKER_URL = 'sqla+sqlite:///%s/broker.sqlite' % PROJECT_ROOT
-    CELERY_RESULT_BACKEND = 'db+sqlite:///%s/result.sqlite' % PROJECT_ROOT
+    BROKER_URL = 'sqla+sqlite:///{path}/broker.sqlite'.format(
+        path=PROJECT_ROOT
+    )
+    CELERY_RESULT_BACKEND = 'db+sqlite:///{path}/result.sqlite'.format(
+        path=PROJECT_ROOT
+    )
     CELERY_TASK_SERIALIZER = MESSAGE_PROTOCOL
     CELERYD_LOG_LEVEL = 'DEBUG'
     CELERY_SEND_TASK_ERROR_EMAILS = False
@@ -647,14 +658,6 @@ class Implementation(
         # -------------------------------------------------------
         # Python 2 capability features
         # -------------------------------------------------------
-        if not six.PY3:
-            self.INSTALLED_APPS.extend((
-                'template_timings_panel',
-                'django_pickling'
-            ))
-            self.DEBUG_TOOLBAR_PANELS.append(
-                'template_timings_panel.panels.TemplateTimings.TemplateTimings'
-            )
         # -------------------------------------------------------
         # debug context processor implementation
         # -------------------------------------------------------
@@ -672,6 +675,26 @@ class Implementation(
             self.INSTALLED_APPS.append(
                 'rest_framework_swagger'
             )
+        # -------------------------------------------------------
+        # debug toolbar implementation
+        # -------------------------------------------------------
+        if self.DEBUG_TOOLBAR:
+            if not six.PY3:
+                self.INSTALLED_APPS.extend((
+                    'template_timings_panel',
+                ))
+                self.DEBUG_TOOLBAR_PANELS.append(
+                    'template_timings_panel.panels.TemplateTimings.TemplateTimings'  # noqa
+                )
+
+            index = self.MIDDLEWARE_CLASSES.index(
+                'django.middleware.http.ConditionalGetMiddleware'
+            )
+            self.MIDDLEWARE_CLASSES.insert(
+                index + 1, 'debug_toolbar.middleware.DebugToolbarMiddleware'
+            )
+
+            self.INSTALLED_APPS.append('debug_toolbar')
         # -------------------------------------------------------
         # gzip implementation
         # -------------------------------------------------------

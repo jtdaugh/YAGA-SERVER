@@ -10,6 +10,8 @@ from django.contrib.sites.models import Site
 from django.http import HttpRequest, SimpleCookie
 from django.utils import six
 
+from .utils import Bridge
+
 
 def _set_cookie(
     self, key,
@@ -90,3 +92,10 @@ class CapabilityMiddleware(
 
         if not hasattr(request, 'site'):
             request.site = Site.objects.get_current()
+
+
+class BridgeMiddleware(
+    object
+):
+    def process_request(self, request):
+        request.bridge = Bridge()

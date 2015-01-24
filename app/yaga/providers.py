@@ -52,8 +52,14 @@ class NexmoProvider(
 ):
     FORMAT = 'json'
     VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
-    SEND_VERIFY_ENDPOINT = VERIFY_ENDPOINT + FORMAT
-    CHECK_VERIFY_ENDPOINT = VERIFY_ENDPOINT + 'check/' + FORMAT
+    SEND_VERIFY_ENDPOINT = '{verify_endpoint}{format}'.format(
+        verify_endpoint=VERIFY_ENDPOINT,
+        format=FORMAT
+    )
+    CHECK_VERIFY_ENDPOINT = '{verify_endpoint}check/{format}'.format(
+        verify_endpoint=VERIFY_ENDPOINT,
+        format=FORMAT
+    )
 
     session = get_requests_session()
 

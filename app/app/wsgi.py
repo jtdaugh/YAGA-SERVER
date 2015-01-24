@@ -5,11 +5,12 @@ from future.builtins import (  # noqa
 )
 
 from configurations.wsgi import get_wsgi_application
-from django.conf import settings
 from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.wsgi import SharedDataMiddleware
 
 from manage import setup
+
+from .conf import settings
 
 setup()
 

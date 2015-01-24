@@ -20,7 +20,9 @@ class PhoneField(
         data = super(PhoneField, self).to_internal_value(data)
 
         if not data.startswith('+'):
-            data = '+' + data
+            data = '+{data}'.format(
+                data=data
+            )
 
         phone_number = to_python(data)
 
