@@ -43,3 +43,9 @@ class TokenScopedRateThrottle(
     BaseScopedRateThrottle
 ):
     rate = '50/hour'
+
+
+class UserSearchScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '30/hour'

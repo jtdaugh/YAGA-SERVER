@@ -27,7 +27,10 @@ from .serializers import (
     MemberSerializer, PostSerializer, SinceSerializer, TokenSerializer,
     UserSearchSerializer, UserSerializer
 )
-from .throttling import CodeScopedRateThrottle, TokenScopedRateThrottle
+from .throttling import (
+    CodeScopedRateThrottle, TokenScopedRateThrottle,
+    UserSearchScopedRateThrottle
+)
 
 
 class UserRetrieveUpdateAPIView(
@@ -537,6 +540,7 @@ class UserSearchListAPIView(
 ):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated, UserWithName)
+    throttle_classes = (UserSearchScopedRateThrottle,)
 
     def get_queryset(self):
         serializer = UserSearchSerializer(data=self.request.data)
