@@ -21,7 +21,7 @@ from ...models import Code, Group, Like, Member, Post
 class UserRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView,
 ):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserSerializer
 
     def get_object(self):
