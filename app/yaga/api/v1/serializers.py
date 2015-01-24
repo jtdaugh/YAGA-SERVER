@@ -13,6 +13,7 @@ from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from accounts.models import Token
 
+from ...conf import settings
 from ...models import Code, Device, Group, Member, Post
 from .fields import CodeField, PhoneField, TimeStampField
 
@@ -234,7 +235,11 @@ class DeviceSerializer(
         if instance is not None:
             self.instance = instance
 
-            if self.instance.user == kwargs['user']:
+            if (
+                self.instance.user == kwargs['user']
+                and
+                self.instance.locale == self.validated_data['locale']
+            ):
                 return self.instance
 
         return super(DeviceSerializer, self).save(**kwargs)
@@ -256,10 +261,16 @@ class DeviceSerializer(
     def validate(self, attrs):
         vendor = attrs['vendor']
         token = attrs['token']
+        locale = attrs['locale']
 
         if vendor == Device.IOS:
             if len(token) != 64:
                 msg = _('Invalid token.')
                 raise ValidationError(msg)
+
+        if locale not in [code for code, title in settings.LANGUAGES]:
+            locale = settings.LANGUAGE_CODE
+
+        attrs['locale'] = locale
 
         return attrs

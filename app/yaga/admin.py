@@ -63,9 +63,9 @@ class LikeAdmin(
 class DeviceAdmin(
     admin.ModelAdmin
 ):
-    list_display = ('user', 'token', 'vendor')
+    list_display = ('user', 'token', 'vendor', 'locale')
 
-    list_filter = ('vendor',)
+    list_filter = ('vendor', 'locale')
 
 
 admin.site.register(Group, GroupAdmin)

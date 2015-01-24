@@ -22,7 +22,7 @@ from ...conf import settings
 from ...models import Code, Group, Like, Member, Post
 from .permissions import (
     AvailablePost, GroupMemeber, IsAnonymous, PostGroupMember, PostOwner,
-    TokenOwner
+    TokenOwner, UserWithName
 )
 from .serializers import (
     CodeCreateSerializer, CodeRetrieveSerializer, DeviceSerializer,
@@ -166,7 +166,7 @@ class TokenDestroyAPIView(
 class GroupListCreateAPIView(
     ListCreateAPIView
 ):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, UserWithName)
     serializer_class = GroupListSerializer
 
     def get_queryset(self):
@@ -204,7 +204,7 @@ class GroupRetrieveUpdateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = GroupRetrieveSerializer
-    permission_classes = (IsAuthenticated, GroupMemeber)
+    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
 
     def get_queryset(self):
         post_filter = {
@@ -246,7 +246,7 @@ class GroupManageMemberAPIView(
     UpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    permission_classes = (IsAuthenticated, GroupMemeber)
+    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
 
     def get_queryset(self):
         return Group.objects.all()
@@ -357,7 +357,7 @@ class PostCreateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, GroupMemeber)
+    permission_classes = (IsAuthenticated, GroupMemeber, UserWithName)
 
     def get_queryset(self):
         return Group.objects.all()
@@ -390,7 +390,9 @@ class PostRetrieveUpdateDestroyAPIView(
     RetrieveUpdateDestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostOwner, AvailablePost)
+    permission_classes = (
+        IsAuthenticated, PostOwner, AvailablePost, UserWithName
+    )
 
     def get_queryset(self):
         return Post.objects.all()
@@ -434,7 +436,9 @@ class LikeCreateDestroyAPIView(
     DestroyAPIView
 ):
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated, PostGroupMember, AvailablePost)
+    permission_classes = (
+        IsAuthenticated, PostGroupMember, AvailablePost, UserWithName
+    )
 
     def get_queryset(self):
         return Post.objects.all()

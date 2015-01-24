@@ -435,6 +435,11 @@ class Device(
         db_index=True
     )
 
+    locale = models.CharField(
+        verbose_name=_('Locale'),
+        max_length=2
+    )
+
     token = models.CharField(
         verbose_name=_('Token'),
         max_length=255,

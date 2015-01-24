@@ -53,3 +53,10 @@ class IsAnonymous(
 ):
     def has_permission(self, request, view):
         return request.user and request.user.is_anonymous()
+
+
+class UserWithName(
+    BasePermission
+):
+    def has_permission(self, request, view):
+        return request.user.name is not None

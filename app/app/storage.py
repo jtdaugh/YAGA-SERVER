@@ -16,7 +16,9 @@ class FixedS3BotoStorage(
     def url(self, name):
         url = super(FixedS3BotoStorage, self).url(name)
         if name.endswith('/') and not url.endswith('/'):
-            url += '/'
+            url = '{url}/'.format(
+                url=url
+            )
         return url
 
 

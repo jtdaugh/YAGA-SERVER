@@ -223,6 +223,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     LANGUAGES = (
         ('en', _('English')),
+        ('ru', _('Russian')),
     )
     LANGUAGE_CODE = 'en'
     TIME_ZONE = 'UTC'
