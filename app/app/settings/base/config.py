@@ -351,12 +351,14 @@ class BaseConfiguration(
 
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
 
+    AWS_REGION = 'us-west-1'
     AWS_ACCESS_KEY_ID = 'AKIAJ3BOSZSPPD7EX7KA'
     AWS_SECRET_ACCESS_KEY = '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'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
-    S3_HOST = 'https://{bucket}.s3-us-west-1.amazonaws.com/'.format(
-        bucket=AWS_STORAGE_BUCKET_NAME
+    S3_HOST = 'https://{bucket}.s3-{region}.amazonaws.com/'.format(
+        bucket=AWS_STORAGE_BUCKET_NAME,
+        region=AWS_REGION
     )
     MEDIA_URL = '{host}media/'.format(
         host=S3_HOST

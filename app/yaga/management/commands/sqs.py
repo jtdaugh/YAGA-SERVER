@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import json
 import logging
 
-import boto
+import boto.sqs
 from django.core.management.base import NoArgsCommand
 
 from ...conf import settings
@@ -22,9 +22,10 @@ class Command(
     help = 'SQS S3 events notifications.'
 
     def handle_noargs(self, **options):
-        sqs = boto.connect_sqs(
-            settings.AWS_ACCESS_KEY_ID,
-            settings.AWS_SECRET_ACCESS_KEY
+        sqs = boto.sqs.connect_to_region(
+            settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
         )
 
         queue = sqs.create_queue(settings.YAGA_AWS_SQS_QUEUE)
@@ -51,7 +52,6 @@ class Command(
                                     PostProcess().delay(
                                         key
                                     )
-
                         event.delete()
                     except Exception as e:
                         logger.exception(e)

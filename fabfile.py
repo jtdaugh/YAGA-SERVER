@@ -214,12 +214,12 @@ def create():
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
+
 {
   "Version": "2008-10-17",
   "Id": "arn:aws:sqs:us-west-1:609367773239:yaga-dev/SQSDefaultPolicy",
   "Statement": [
     {
-      "Sid": "arn:aws:sqs:us-west-1:609367773239:yaga-dev",
       "Effect": "Allow",
       "Principal": {
         "AWS": "*"
