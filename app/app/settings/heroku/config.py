@@ -136,6 +136,7 @@ class HerokuImplementation(
             location=self.STATIC_LOCATION,
             host=self.S3_HOST
         )
+        self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
