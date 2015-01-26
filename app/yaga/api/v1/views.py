@@ -21,8 +21,22 @@ from ...models import Code, Group, Like, Member, Post
 class UserRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView,
 ):
-    permission_classes = [IsAuthenticated]
     serializer_class = serializers.UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        permission_objects = super(
+            UserRetrieveUpdateAPIView, self
+        ).get_permissions()
+
+        print self.request.method
+
+        if self.request.method != 'GET':
+            permission_objects.append(permissions.EmptyProfile())
+
+        print permission_objects
+
+        return permission_objects
 
     def get_object(self):
         obj = self.request.user
@@ -32,9 +46,6 @@ class UserRetrieveUpdateAPIView(
         return obj
 
     def check_object_permissions(self, request, obj):
-        if request.method != 'GET':
-            self.permission_classes.append(permissions.EmptyProfile)
-
         return super(
             UserRetrieveUpdateAPIView, self
         ).check_object_permissions(request, obj)
