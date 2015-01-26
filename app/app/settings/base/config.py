@@ -339,15 +339,16 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # storages configuration
     # -------------------------------------------------------
+    FAVICON_STATIC = 'frontend/img/favicon.ico'
     MEDIA_LOCATION = 'media'
     STATIC_LOCATION = 'static'
-    STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'www', 'static'))
+
+    STATIC_ROOT = os.path.abspath(
+        os.path.join(PROJECT_ROOT, 'www', STATIC_LOCATION)
+    )
     STATIC_URL = '/{location}/'.format(
         location=STATIC_LOCATION
     )
-    FAVICON_STATIC = 'frontend/img/favicon.ico'
-    COMPRESS_ROOT = STATIC_ROOT
-    COMPRESS_URL = STATIC_URL
 
     DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
 
@@ -355,14 +356,6 @@ class BaseConfiguration(
     AWS_ACCESS_KEY_ID = 'AKIAJ3BOSZSPPD7EX7KA'
     AWS_SECRET_ACCESS_KEY = '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'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
-
-    S3_HOST = 'https://{bucket}.s3-{region}.amazonaws.com/'.format(
-        bucket=AWS_STORAGE_BUCKET_NAME,
-        region=AWS_REGION
-    )
-    MEDIA_URL = '{host}media/'.format(
-        host=S3_HOST
-    )
 
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True
@@ -658,6 +651,24 @@ class Implementation(
     object
 ):
     def implement(self):
+        # -------------------------------------------------------
+        # storages implementation
+        # -------------------------------------------------------
+        self.AWS_S3_CUSTOM_DOMAIN = '{bucket}.s3-{region}.amazonaws.com'.format(  # noqa
+            bucket=self.AWS_STORAGE_BUCKET_NAME,
+            region=self.AWS_REGION
+        )
+
+        self.S3_HOST = 'https://{domain}/'.format(
+            domain=self.AWS_S3_CUSTOM_DOMAIN
+        )
+
+        self.MEDIA_URL = '{host}{location}/'.format(
+            location=self.MEDIA_LOCATION,
+            host=self.S3_HOST
+        )
+
+        self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------
         # Python 2 capability features
         # -------------------------------------------------------

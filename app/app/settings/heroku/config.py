@@ -22,7 +22,7 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # https configuration
     # -------------------------------------------------------
-    HTTPS = True
+    HTTPS = False
     # -------------------------------------------------------
     # django compressor configuration
     # -------------------------------------------------------
@@ -119,20 +119,9 @@ class HerokuConfiguration(
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-    DEFAULT_FILE_STORAGE = 'app.storage.S3MediaStorage'
-    S3_HOST = 'https://{bucket}.s3-{region}.amazonaws.com/'.format(
-        bucket=AWS_STORAGE_BUCKET_NAME,
-        region=AWS_REGION
-    )
-    MEDIA_URL = '{host}media/'.format(
-        host=S3_HOST
-    )
+
     STATICFILES_STORAGE = 'app.storage.CachedS3StaticStorage'
-    STATIC_URL = '{host}static/'.format(
-        host=S3_HOST
-    )
     COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
-    COMPRESS_URL = STATIC_URL
 
 
 class HerokuImplementation(
@@ -140,6 +129,13 @@ class HerokuImplementation(
 ):
     def implement(self):
         super(HerokuImplementation, self).implement()
+        # -------------------------------------------------------
+        # storages implementation
+        # -------------------------------------------------------
+        self.STATIC_URL = '{host}{location}/'.format(
+            location=self.STATIC_LOCATION,
+            host=self.S3_HOST
+        )
         # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
