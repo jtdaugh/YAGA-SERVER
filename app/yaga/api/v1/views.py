@@ -254,9 +254,6 @@ class GroupManageMemberAPIView(
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        # if not request.data.get('names'):
-        #     request.data['names'] = []
-
         serializer = self.get_serializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
@@ -291,22 +288,20 @@ class GroupManageMemberAddAPIView(
                 obj.save()
 
     def perform_action(self, instance, model, data):
-        if data.get('names'):
-            for name in data['names']:
-                user = model.objects.filter(
-                    name=name
-                ).first()
+        for name in data['names']:
+            user = model.objects.filter(
+                name=name
+            ).first()
 
-                if user:
-                    self.perform_add(instance, user)
-
-        if data.get('phones'):
-            for phone in data['phones']:
-                user = model.objects.get_or_create(
-                    phone=phone
-                )
-
+            if user:
                 self.perform_add(instance, user)
+
+        for phone in data['phones']:
+            user = model.objects.get_or_create(
+                phone=phone
+            )
+
+            self.perform_add(instance, user)
 
 
 class GroupManageMemberRemoveAPIView(
@@ -388,18 +383,9 @@ class PostCreateAPIView(
         )
 
 
-class PostRetrieveUpdateDestroyAPIView(
-    generics.RetrieveUpdateDestroyAPIView
+class PostAPIView(
+    object
 ):
-    serializer_class = serializers.PostSerializer
-    permission_classes = (
-        IsAuthenticated, permissions.PostOwner,
-        permissions.AvailablePost, permissions.FulfilledProfile
-    )
-
-    def get_queryset(self):
-        return Post.objects.all()
-
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -412,6 +398,20 @@ class PostRetrieveUpdateDestroyAPIView(
         self.check_object_permissions(self.request, obj)
 
         return obj
+
+
+class PostRetrieveUpdateDestroyAPIView(
+    PostAPIView,
+    generics.RetrieveUpdateDestroyAPIView
+):
+    serializer_class = serializers.PostSerializer
+    permission_classes = (
+        IsAuthenticated, permissions.PostOwner,
+        permissions.AvailablePost, permissions.FulfilledProfile
+    )
+
+    def get_queryset(self):
+        return Post.objects.all()
 
     def perform_destroy(self, instance):
         instance.deleted = True
@@ -435,6 +435,7 @@ class PostRetrieveUpdateDestroyAPIView(
 
 
 class LikeCreateDestroyAPIView(
+    PostAPIView,
     generics.CreateAPIView,
     generics.DestroyAPIView
 ):
@@ -447,30 +448,17 @@ class LikeCreateDestroyAPIView(
     def get_queryset(self):
         return Post.objects.all()
 
-    def get_object(self):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        obj = generics.get_object_or_404(
-            queryset,
-            group__pk=self.kwargs['group_id'],
-            pk=self.kwargs['post_id'],
-        )
-
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
     def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
+        instance = self.get_object()
 
-        instance = self.get_object().like_set.filter(
+        obj = self.get_object().like_set.filter(
             user=request.user
         ).first()
 
-        if instance:
-            instance.delete()
+        if obj:
+            obj.delete()
 
-        serializer = self.get_serializer(obj)
+        serializer = self.get_serializer(instance)
 
         return Response(
             dict(serializer.data),
@@ -480,53 +468,20 @@ class LikeCreateDestroyAPIView(
     def create(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not instance.like_set.filter(
+            user=self.request.user
+        ).exists():
+            obj = Like()
+            obj.user = self.request.user
+            obj.post = instance
+            obj.save()
 
-        self.perform_create(serializer)
+        serializer = self.get_serializer(instance)
 
         return Response(
             dict(serializer.data),
             status=status.HTTP_200_OK
         )
-
-    def perform_create(self, serializer):
-        if not serializer.instance.like_set.filter(
-            user=self.request.user
-        ).exists():
-            obj = Like()
-            obj.user = self.request.user
-            obj.post = serializer.instance
-            obj.save()
-
-
-class LikeListAPIView(
-    generics.ListAPIView,
-):
-    serializer_class = serializers.UserSerializer
-    permission_classes = (
-        IsAuthenticated, permissions.PostGroupMember,
-        permissions.AvailablePost, permissions.FulfilledProfile
-    )
-
-    def get_object(self):
-        queryset = self.filter_queryset(self._get_queryset())
-
-        obj = generics.get_object_or_404(
-            queryset,
-            group__pk=self.kwargs['group_id'],
-            pk=self.kwargs['post_id'],
-        )
-
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    def _get_queryset(self):
-        return Post.objects.all()
-
-    def get_queryset(self):
-        return (obj.user for obj in self.get_object().like_set.all())
 
 
 class DeviceCreateAPIView(
