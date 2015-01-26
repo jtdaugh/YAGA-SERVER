@@ -29,12 +29,8 @@ class UserRetrieveUpdateAPIView(
             UserRetrieveUpdateAPIView, self
         ).get_permissions()
 
-        print self.request.method
-
         if self.request.method != 'GET':
             permission_objects.append(permissions.EmptyProfile())
-
-        print permission_objects
 
         return permission_objects
 
