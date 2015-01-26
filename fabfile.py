@@ -177,10 +177,14 @@ def create():
     local('heroku config:set DISABLE_COLLECTSTATIC=1')
     local('heroku config:add BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git')
 
+    AWS_REGION = ensure_prompt('AWS_REGION')
     AWS_ACCESS_KEY_ID = ensure_prompt('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = ensure_prompt('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = ensure_prompt('AWS_STORAGE_BUCKET_NAME')
 
+    local('heroku config:set AWS_REGION={value}'.format(
+        value=AWS_REGION
+    ))
     local('heroku config:set AWS_ACCESS_KEY_ID={value}'.format(
         value=AWS_ACCESS_KEY_ID
     ))
