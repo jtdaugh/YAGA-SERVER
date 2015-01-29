@@ -51,7 +51,6 @@ class CodeCreateAPIView(
     NonAtomicView,
     generics.CreateAPIView
 ):
-    model = Code
     serializer_class = serializers.CodeCreateSerializer
     throttle_classes = (throttling.CodeScopedRateThrottle,)
     permission_classes = (permissions.IsAnonymous,)

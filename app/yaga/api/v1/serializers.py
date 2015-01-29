@@ -18,6 +18,24 @@ from ...models import Code, Device, Group, Member, Post
 from .fields import CodeField, PhoneField, TimeStampField
 
 
+class NotStrictListField(
+    serializers.ListField
+):
+    def to_internal_value(self, data):
+        if isinstance(data, type('')) or not hasattr(data, '__iter__'):
+            self.fail('not_a_list', input_type=type(data).__name__)
+
+        res = []
+
+        for item in data:
+            try:
+                res.append(self.child.run_validation(item))
+            except ValidationError:
+                pass
+
+        return res
+
+
 class SinceSerializer(
     serializers.Serializer
 ):
@@ -171,7 +189,7 @@ class GroupRetrieveSerializer(
 class GroupManageMemberAddSerializer(
     GroupSerializer
 ):
-    phones = serializers.ListField(
+    phones = NotStrictListField(
         child=PhoneField()
     )
 
@@ -279,6 +297,6 @@ class DeviceSerializer(
 class UserSearchSerializer(
     serializers.Serializer
 ):
-    phones = serializers.ListField(
+    phones = NotStrictListField(
         child=PhoneField()
     )
