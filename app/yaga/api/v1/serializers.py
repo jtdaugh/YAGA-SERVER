@@ -18,7 +18,7 @@ from ...models import Code, Device, Group, Member, Post
 from .fields import CodeField, PhoneField, TimeStampField
 
 
-class NotStrictListField(
+class NonStrictListField(
     serializers.ListField
 ):
     def to_internal_value(self, data):
@@ -189,7 +189,7 @@ class GroupRetrieveSerializer(
 class GroupManageMemberAddSerializer(
     GroupSerializer
 ):
-    phones = NotStrictListField(
+    phones = NonStrictListField(
         child=PhoneField()
     )
 
@@ -297,6 +297,6 @@ class DeviceSerializer(
 class UserSearchSerializer(
     serializers.Serializer
 ):
-    phones = NotStrictListField(
+    phones = NonStrictListField(
         child=PhoneField()
     )
