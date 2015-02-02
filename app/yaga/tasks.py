@@ -89,6 +89,7 @@ class PostProcess(
         if post.is_valid():
             post.ready = True
             post.ready_at = timezone.now()
+            post.bridge.uploaded = True
             post.save()
         else:
             post.remove()

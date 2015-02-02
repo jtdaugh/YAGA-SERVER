@@ -5,12 +5,11 @@ from future.builtins import (  # noqa
 )
 
 from django.db import connection, transaction
-from django.utils.translation import ugettext_lazy as _
 
 from app.receivers import ModelReceiver
+from requestprovider import get_request
 
-from .models import Device
-from .tasks import APNSPush
+from . import utils
 
 
 class MemberReceiver(
@@ -23,6 +22,36 @@ class MemberReceiver(
         if not instance.pk:
             instance.group.save()
 
+            def push_notification():
+                utils.NewMemberIOSNotification(
+                    member=instance
+                )
+
+            connection.on_commit(push_notification)
+
+    @staticmethod
+    def pre_delete(sender, **kwargs):
+        instance = kwargs['instance']
+
+        try:
+            request = get_request()
+
+            if request.user != instance.user:
+                def push_notification():
+                    utils.DeleteMemberIOSNotification(
+                        member=instance,
+                        deleter=request.user
+                    )
+            else:
+                def push_notification():
+                    utils.GroupLeaveIOSNotification(
+                        member=instance
+                    )
+
+            connection.on_commit(push_notification)
+        except Exception:
+            pass
+
 
 class LikeReceiver(
     ModelReceiver
@@ -33,6 +62,14 @@ class LikeReceiver(
 
         if not instance.pk:
             instance.post.save()
+
+            if instance.post.user != instance.user:
+                def push_notification():
+                    utils.NewLikeIOSNotification(
+                        like=instance
+                    )
+
+                connection.on_commit(push_notification)
 
 
 class PostReceiver(
@@ -65,42 +102,10 @@ class PostReceiver(
 
         instance.group.save()
 
-        if instance.attachment and instance.ready and not instance.notified:
-            instance.notified = True
-
+        if hasattr(instance.bridge, 'uploaded'):
             def push_notification():
-                members_tokens = Device.objects.filter(
-                    vendor=Device.IOS,
-                    user__in=instance.group.member_set.filter(
-                        mute=False
-                    ).exclude(
-                        user=instance.user,
-                    ).values_list('user', flat=True)
-                ).values_list('token', flat=True)
-
-                members_tokens = list(members_tokens)
-
-                if members_tokens:
-                    APNSPush().delay(
-                        members_tokens,
-                        alert=_('New video at group %(group_id)s!') % {
-                            'group_id': instance.group.pk
-                        }
-                    )
-
-                user_tokens = Device.objects.filter(
-                    vendor=Device.IOS,
-                    user=instance.user,
-                ).values_list('token', flat=True)
-
-                user_tokens = list(user_tokens)
-
-                if user_tokens:
-                    APNSPush().delay(
-                        user_tokens,
-                        alert=_('Your video %(post_id)s is ready!') % {
-                            'post_id': instance.pk
-                        }
-                    )
+                utils.NewVideoIOSNotification(
+                    post=instance
+                )
 
             connection.on_commit(push_notification)

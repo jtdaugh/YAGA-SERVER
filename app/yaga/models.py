@@ -92,6 +92,15 @@ class Member(
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
+        related_name='user',
+        db_index=True
+    )
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Creator'),
+        related_name='creator',
+        null=True,
         db_index=True
     )
 
@@ -142,6 +151,7 @@ class Group(
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         through='Member',
+        through_fields=('group', 'user'),
         verbose_name=_('Members'),
         db_index=True
     )
@@ -230,12 +240,6 @@ class Post(
 
     ready = models.BooleanField(
         verbose_name=_('Ready'),
-        db_index=True,
-        default=False
-    )
-
-    notified = models.BooleanField(
-        verbose_name=_('Notified'),
         db_index=True,
         default=False
     )

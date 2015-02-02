@@ -29,8 +29,6 @@ install:
 	$(CMD_NPM)
 	test -d $(ENV_DIR) || $(CMD_ENV) $(ENV_DIR)
 	$(CMD_ACTIVATE_ENV); $(CMD_PIP)
-	cd $(APP_DIR); find . -type d -name "__pycache__" -exec rm -rf {} + > /dev/null 2>&1
-	$(CMD_ACTIVATE_ENV); $(CMD_CLEAN_PYC)
 	$(CMD_ACTIVATE_ENV); $(CMD_CLEAR_CACHE)
 	$(CMD_ACTIVATE_ENV); $($CMD_BOWER)
 	$(CMD_ACTIVATE_ENV); $(CMD_MIGRATE)
@@ -48,3 +46,13 @@ shell:
 
 superuser:
 	$(CMD_ACTIVATE_ENV); $(CMD_SUPERUSER)
+
+clean:
+	rm -rf app.sqlite
+	rm -rf broker.sqlite
+	rm -rf result.sqlite
+	rm -rf sessions/*
+	rm -rf cache/*
+	cd $(APP_DIR); rm -rf celerybeat-schedule
+	cd $(APP_DIR); find . -type d -name "__pycache__" -exec rm -rf {} + > /dev/null 2>&1
+	cd $(APP_DIR); find . -type f -name "*.pyc" -exec rm -rf {} + > /dev/null 2>&1

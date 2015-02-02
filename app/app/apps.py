@@ -11,7 +11,9 @@ from django.utils.translation import ugettext_lazy as _
 from .model_permissions import register_global_permission
 
 
-class AppAppConfig(AppConfig):
+class AppAppConfig(
+    AppConfig
+):
     name = 'app'
     verbose_name = _('App')
 

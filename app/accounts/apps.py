@@ -8,6 +8,8 @@ from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
 
-class AccountsAppConfig(AppConfig):
+class AccountsAppConfig(
+    AppConfig
+):
     name = 'accounts'
     verbose_name = _('Accounts')
