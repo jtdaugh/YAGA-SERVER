@@ -291,6 +291,7 @@ class GroupManageMemberAddAPIView(
                 obj = Member()
                 obj.group = instance
                 obj.user = user
+                obj.creator = self.request.user
                 obj.save()
 
     def perform_action(self, instance, model, data):
