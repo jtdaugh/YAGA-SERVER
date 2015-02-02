@@ -191,6 +191,7 @@ class GroupListCreateAPIView(
         obj = Member()
         obj.group = serializer.instance
         obj.user = request.user
+        obj.creator = request.user
         obj.save()
 
         return Response(
