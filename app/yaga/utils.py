@@ -167,14 +167,14 @@ class NewLikeIOSNotification(
     TARGET = True
 
     def get_emitter(self):
-        return self.like.user
+        return self.like.post.user
 
     def get_target_message(self):
         return _('{user} liked your video in {group}')
 
     def get_target_kwargs(self):
         return {
-            'user': self.like.post.user.get_username(),
+            'user': self.like.user.get_username(),
             'group': self.like.post.group.name,
         }
 
@@ -202,7 +202,7 @@ class DeleteMemberIOSNotification(
         }
 
     def get_target_message(self):
-        return _('{creator} has removed you from {group}')
+        return _('{deleter} has removed you from {group}')
 
     def get_target_kwargs(self):
         return self.get_broadcast_kwargs()
