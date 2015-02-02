@@ -3,3 +3,4 @@ disable PATCH
 captions null?
 fix tests
 apns tokens cleanup
+test celery exception
