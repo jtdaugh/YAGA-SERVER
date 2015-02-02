@@ -27,7 +27,7 @@ class YagaAppConf(
     AWS_ALLOWED_MIME = 'video/quicktime'
     AWS_SQS_QUEUE = 'yaga-dev'
 
-    APNS_MODE = 'push_sandbox'
+    APNS_MODE = 'push_production'
     APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
         'apns/cert_file'
