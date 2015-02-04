@@ -4,9 +4,9 @@ Fabric==1.10.1
 Markdown==2.5.2
 Pillow==2.7.0
 PyYAML==3.11
-Pygments==2.0.1
+Pygments==2.0.2
 SQLAlchemy==0.9.8
-Werkzeug==0.10
+Werkzeug==0.10.1
 amqp==1.4.6
 anyjson==0.3.3
 -e hg+http://bitbucket.org/dtbog/apns-client@875f12af6dd23e8c2c58be0849706b682d57ec41#egg=apns_client-dev
@@ -56,7 +56,7 @@ django-transaction-hooks==0.2
 djangorestframework==3.0.4
 docopt==0.6.2
 docutils==0.12
-drf-extensions==0.2.6
+drf-extensions==0.2.7
 drf-ujson==1.1
 ecdsa==0.11
 enum34==1.0.4
@@ -70,7 +70,7 @@ future==0.14.3
 futures==2.2.0
 geoip2==2.1.0
 gnureadline==6.3.3
-gunicorn==19.2.0
+gunicorn==19.2.1
 hiredis==0.1.5
 honcho==0.5.0
 httpie==0.9.0
