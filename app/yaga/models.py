@@ -92,14 +92,13 @@ class Member(
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
-        related_name='user',
         db_index=True
     )
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('Creator'),
-        related_name='creator',
+        related_name='member_creator',
         null=True,
         db_index=True
     )
@@ -146,6 +145,14 @@ class Group(
     name = models.CharField(
         verbose_name=_('Name'),
         max_length=255,
+    )
+
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Creator'),
+        related_name='group_creator',
+        null=True,
+        db_index=True
     )
 
     members = models.ManyToManyField(
