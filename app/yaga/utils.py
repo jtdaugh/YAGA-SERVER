@@ -7,7 +7,8 @@ from future.builtins import (  # noqa
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override
 
-from .models import Device
+from .conf import settings
+from .models import Device, Post
 from .tasks import APNSPush
 
 
@@ -24,35 +25,44 @@ class IOSNotification(
 
         self.push()
 
+    def rate_limited(self):
+        return False
+
     def get_broadcast_message(self):
-        return ''
+        raise NotImplementedError
 
     def get_broadcast_kwargs(self):
-        return {}
+        raise NotImplementedError
 
     def get_target_message(self):
-        return ''
+        raise NotImplementedError
 
     def get_target_kwargs(self):
-        return {}
+        raise NotImplementedError
 
     def get_group(self):
-        return self.group
+        raise NotImplementedError
+
+    def get_target(self):
+        raise NotImplementedError
 
     def get_emitter(self):
-        return self.user
+        raise NotImplementedError
+
+    def get_broadcast_exclude(self):
+        return {
+            'user': self.get_emitter()
+        }
 
     def get_broadcast_receivers(self):
         return self.get_group().member_set.filter(
             mute=False
+        ).exclude(
+            **self.get_broadcast_exclude()
         ).values_list('user', flat=True)
 
-        # .exclude(
-        #     user=self.get_emitter()
-        # )
-
     def get_target_receivers(self):
-        return [self.get_emitter()]
+        return [self.get_target()]
 
     def get_devices(self, users):
         devices = Device.objects.filter(
@@ -104,17 +114,38 @@ class IOSNotification(
                     )
 
     def push(self):
-        if self.TARGET:
-            self.push_target()
+        if not self.rate_limited():
+            if self.TARGET:
+                self.push_target()
 
-        if self.BROADCAST:
-            self.push_broadcast()
+            if self.BROADCAST:
+                self.push_broadcast()
 
 
 class NewVideoIOSNotification(
     IOSNotification
 ):
     BROADCAST = True
+
+    def rate_limited(self):
+        previous_post = Post.objects.filter(
+            user=self.get_emitter(),
+            group=self.get_group(),
+            ready=True
+        ).exclude(
+            pk=self.post.pk
+        ).order_by(
+            '-ready_at'
+        ).first()
+
+        if previous_post is not None:
+            return not (
+                self.post.ready_at - settings.YAGA_PUSH_POST_WINDOW
+                >
+                previous_post.ready_at
+            )
+        else:
+            return False
 
     def get_group(self):
         return self.post.group
@@ -142,7 +173,15 @@ class NewMemberIOSNotification(
         return self.member.group
 
     def get_emitter(self):
+        return self.member.creator
+
+    def get_target(self):
         return self.member.user
+
+    def get_broadcast_exclude(self):
+        return {
+            'user__in': [self.get_emitter(), self.get_target()]
+        }
 
     def get_broadcast_message(self):
         return _('{creator} added {member} to {group}')
@@ -166,7 +205,7 @@ class NewLikeIOSNotification(
 ):
     TARGET = True
 
-    def get_emitter(self):
+    def get_target(self):
         return self.like.post.user
 
     def get_target_message(self):
@@ -189,6 +228,9 @@ class DeleteMemberIOSNotification(
         return self.member.group
 
     def get_emitter(self):
+        return self.deleter
+
+    def get_target(self):
         return self.member.user
 
     def get_broadcast_message(self):

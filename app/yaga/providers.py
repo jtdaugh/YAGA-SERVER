@@ -160,6 +160,10 @@ class APNSProvider(
     def __init__(self):
         self.release_service()
 
+        from .models import Device
+
+        self.Device = Device
+
     def load_service(self):
         session = Session()
 
@@ -210,5 +214,13 @@ class APNSProvider(
         )
 
         response = service.send(message)
+
+        for token, (reason, explanation) in list(response.failed.items()):
+            self.Device.objects.filter(
+                token=token
+            ).delete()
+
+        if response.needs_retry():
+            response = service.send(message)
 
         return response

@@ -4,7 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from accounts.models import Token
 
@@ -34,11 +34,16 @@ class PostGroupMember(
         ).exists()
 
 
-class PostOwner(
+class PostOwnerOrGroupMember(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        return obj.user == request.user
+        if request.method not in SAFE_METHODS:
+            return obj.user == request.user
+        else:
+            return obj.group.member_set.filter(
+                user=request.user
+            ).exists()
 
 
 class AvailablePost(

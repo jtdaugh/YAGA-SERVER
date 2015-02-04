@@ -33,24 +33,24 @@ class MemberReceiver(
     def pre_delete(sender, **kwargs):
         instance = kwargs['instance']
 
-        try:
-            request = get_request()
+        if hasattr(instance.bridge, 'deleter'):
+            user = instance.bridge.deleter
+        else:
+            user = get_request().user
 
-            if request.user != instance.user:
-                def push_notification():
-                    utils.DeleteMemberIOSNotification(
-                        member=instance,
-                        deleter=request.user
-                    )
-            else:
-                def push_notification():
-                    utils.GroupLeaveIOSNotification(
-                        member=instance
-                    )
+        if user != instance.user:
+            def push_notification():
+                utils.DeleteMemberIOSNotification(
+                    member=instance,
+                    deleter=user
+                )
+        else:
+            def push_notification():
+                utils.GroupLeaveIOSNotification(
+                    member=instance
+                )
 
-            connection.on_commit(push_notification)
-        except Exception:
-            pass
+        connection.on_commit(push_notification)
 
 
 class LikeReceiver(

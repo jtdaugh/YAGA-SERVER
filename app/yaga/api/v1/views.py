@@ -330,6 +330,7 @@ class GroupManageMemberRemoveAPIView(
         ).first()
 
         if obj:
+            obj.bridge.deleter = self.request.user
             obj.delete()
 
 
@@ -416,7 +417,7 @@ class PostRetrieveUpdateDestroyAPIView(
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, permissions.PostOwner,
+        IsAuthenticated, permissions.PostOwnerOrGroupMember,
         permissions.AvailablePost, permissions.FulfilledProfile
     )
 
