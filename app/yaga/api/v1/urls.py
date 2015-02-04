@@ -69,6 +69,11 @@ post_urlpatterns = patterns(
         views.PostRetrieveUpdateDestroyAPIView.as_view(),
         name='detail'
     ),
+    url(
+        r'^(?P<post_id>[\-a-z0-9]{32,36})/likers/$',
+        views.LikeListAPIView.as_view(),
+        name='likers'
+    ),
 )
 
 members_urlpatterns = patterns(
