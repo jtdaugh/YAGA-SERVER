@@ -4,19 +4,19 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from manage import setup
+from manage import setup  # noqa
 
 setup()
 
-from configurations import importer
+from configurations import importer  # noqa
 
 importer.install()
 
-from celery import Celery
-from celery.task import PeriodicTask
-from django.db import transaction
+from celery import Celery  # noqa
+from celery.task import PeriodicTask  # noqa
+from django.db import transaction  # noqa
 
-from .conf import settings
+from .conf import settings  # noqa
 
 
 default_app_config = 'app.apps.AppAppConfig'
