@@ -6,7 +6,7 @@ from future.builtins import (  # noqa
 
 from django.contrib import admin
 
-from .models import Code, Device, Group, Like, Member, Post
+from .models import Code, Contact, Device, Group, Like, Member, Post
 
 
 class CodeAdmin(
@@ -68,8 +68,15 @@ class DeviceAdmin(
     list_filter = ('vendor', 'locale')
 
 
+class ContactAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('pk', 'user')
+
+
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Code, CodeAdmin)
+admin.site.register(Contact, ContactAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Member, MemberAdmin)
 admin.site.register(Like, LikeAdmin)

@@ -50,6 +50,11 @@ user_urlpatterns = patterns(
         views.UserSearchListAPIView.as_view(),
         name='search'
     ),
+    url(
+        r'^contacts/$',
+        views.ContactCreateAPIView.as_view(),
+        name='contacts'
+    )
 )
 
 post_urlpatterns = patterns(

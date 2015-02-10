@@ -15,7 +15,7 @@ from app.views import NonAtomicView
 
 from . import permissions, serializers, throttling
 from ...conf import settings
-from ...models import Code, Group, Like, Member, Post
+from ...models import Code, Contact, Group, Like, Member, Post
 
 
 class UserRetrieveUpdateAPIView(
@@ -555,3 +555,17 @@ class UserSearchListAPIView(
 
     def post(self, request, *args, **kwargs):
         return self.get(request, *args, **kwargs)
+
+
+class ContactCreateAPIView(
+    generics.CreateAPIView
+):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = serializers.ContactSerializer
+
+    def perform_create(self, serializer):
+        Contact.objects.filter(
+            user=self.request.user
+        ).delete()
+
+        serializer.save(user=self.request.user)

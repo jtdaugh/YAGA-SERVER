@@ -14,7 +14,7 @@ from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 from accounts.models import Token
 
 from ...conf import settings
-from ...models import Code, Device, Group, Member, Post
+from ...models import Code, Contact, Device, Group, Member, Post
 from .fields import CodeField, PhoneField, TimeStampField
 
 
@@ -30,6 +30,27 @@ class NonStrictListField(
         for item in data:
             try:
                 res.append(self.child.run_validation(item))
+            except ValidationError:
+                pass
+
+        return res
+
+
+class UniqueNonStrictListField(
+    serializers.ListField
+):
+    def to_internal_value(self, data):
+        if isinstance(data, type('')) or not hasattr(data, '__iter__'):
+            self.fail('not_a_list', input_type=type(data).__name__)
+
+        res = []
+
+        for item in data:
+            try:
+                item = self.child.run_validation(item)
+
+                if item not in res:
+                    res.append(item)
             except ValidationError:
                 pass
 
@@ -300,3 +321,15 @@ class UserSearchSerializer(
     phones = NonStrictListField(
         child=PhoneField()
     )
+
+
+class ContactSerializer(
+    serializers.ModelSerializer
+):
+    phones = UniqueNonStrictListField(
+        child=PhoneField(),
+    )
+
+    class Meta:
+        fields = ('phones',)
+        model = Contact

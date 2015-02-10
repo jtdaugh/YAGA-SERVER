@@ -15,6 +15,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from djorm_pgarray.fields import ArrayField
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
@@ -477,6 +478,41 @@ class Device(
         unique_together = (
             ('vendor', 'token'),
         )
+
+    def __str__(self):
+        return smart_text(self.pk)
+
+
+@python_2_unicode_compatible
+class Contact(
+    models.Model
+):
+    id = UUIDField(
+        auto=True,
+        primary_key=True,
+        version=4
+    )
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User'),
+        db_index=True
+    )
+
+    phones = ArrayField(
+        verbose_name=_('phone'),
+        dbtype='varchar(255)',
+        blank=True
+    )
+
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = _('Contact')
+        verbose_name_plural = _('Contacts')
 
     def __str__(self):
         return smart_text(self.pk)
