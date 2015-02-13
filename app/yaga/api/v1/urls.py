@@ -47,13 +47,8 @@ user_urlpatterns = patterns(
     ),
     url(
         r'^search/$',
-        views.UserSearchListAPIView.as_view(),
+        views.ContactListCreateAPIView.as_view(),
         name='search'
-    ),
-    url(
-        r'^contacts/$',
-        views.ContactCreateAPIView.as_view(),
-        name='contacts'
     )
 )
 

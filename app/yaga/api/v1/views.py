@@ -537,11 +537,11 @@ class DeviceCreateAPIView(
         serializer.save(user=self.request.user)
 
 
-class UserSearchListAPIView(
-    generics.ListAPIView,
+class ContactListCreateAPIView(
+    generics.ListCreateAPIView
 ):
     serializer_class = serializers.UserSerializer
-    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    permission_classes = (IsAuthenticated,)
     throttle_classes = (throttling.UserSearchScopedRateThrottle,)
 
     def get_queryset(self):
@@ -554,14 +554,14 @@ class UserSearchListAPIView(
         )
 
     def post(self, request, *args, **kwargs):
+        super(ContactListCreateAPIView, self).post(request, *args, **kwargs)
+
         return self.get(request, *args, **kwargs)
 
-
-class ContactCreateAPIView(
-    generics.CreateAPIView
-):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = serializers.ContactSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = serializers.ContactSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
 
     def perform_create(self, serializer):
         Contact.objects.filter(
