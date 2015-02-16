@@ -92,7 +92,7 @@ class PostProcess(
             post.bridge.uploaded = True
             post.save()
         else:
-            post.remove()
+            post.delete()
 
 
 class APNSPush(
