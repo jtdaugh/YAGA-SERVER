@@ -73,7 +73,7 @@ def build_key(group_id, video_id, is_input, format=None, extension=''):
 
 #PIPELINE_ID = get_pipeline()['Id']
 
-def start_job(group_id, video_id):
+def start_job(pipeline_id, presets, group_id, video_id):
     transcode = boto.elastictranscoder.connect_to_region('us-west-2')
 
     input_object = {
@@ -85,7 +85,7 @@ def start_job(group_id, video_id):
     }
 
     output_objects = []
-    for preset_data in PRESETS:
+    for preset_data in presets:
         format = preset_data[0]
         preset = preset_data[1]
         output_objects.append({
@@ -93,7 +93,7 @@ def start_job(group_id, video_id):
             'PresetId' : preset,
         })
 
-    job = transcode.create_job(PIPELINE_ID, input_name=input_object, outputs=output_objects)
+    job = transcode.create_job(pipeline_id, input_name=input_object, outputs=output_objects)
     if not job:
         logger.error('Failed to create job')
     return job
