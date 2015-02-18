@@ -115,6 +115,7 @@ def setup_s3():
             raise
 
     # Create output video bucket
+    output_bucket = None
     try:
         output_bucket = s3_conn.create_bucket(OUTPUT_BUCKET_NAME, location=Location.USWest2)
     except boto.exception.S3CreateError as e:
@@ -218,6 +219,7 @@ PRESET_AUDIO_BASE = {
     }
 
 def build_preset(name, max_width, max_height, description=None):
+    transcode = boto.elastictranscoder.connect_to_region('us-west-2')
     video = PRESET_VIDEO_BASE.copy()
     video['MaxWidth'] = str(max_width)
     video['MaxHeight'] = str(max_height)
