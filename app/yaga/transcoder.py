@@ -228,7 +228,7 @@ def build_preset(name, max_width, max_height, description=None):
 
 PRESETS = [('372x330', 372, 330, 'iPhone 6'),  # 750x1334 screen; 2px grid borders -> 373x331 round to even
     ('538x478', 538, 478, 'iPhone 6+'),  # 1080x1920; 2px grid borders
-    ('318x478', 538, 282, 'iPhone 5')  # 640x1136; 2px grid borders
+    ('318x282', 318, 282, 'iPhone 5')  # 640x1136; 2px grid borders
 ]
 
 def setup_presets():
