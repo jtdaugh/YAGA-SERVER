@@ -12,10 +12,7 @@ from app import celery
 
 from .conf import settings
 from .models import Code, Group, Post
-from .providers import APNSProvider
-
-
-apns_provider = APNSProvider()
+from .providers import apns_provider
 
 
 class CodeCleanup(

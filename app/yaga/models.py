@@ -14,15 +14,14 @@ import magic
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
-from django.utils.translation import ugettext_lazy as _
 from django.utils.functional import SimpleLazyObject
+from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import ArrayField
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
 
 from .conf import settings
-
 
 _provider = None
 

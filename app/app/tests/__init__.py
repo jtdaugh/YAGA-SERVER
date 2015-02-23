@@ -29,8 +29,6 @@ class BasePermissionContext(
             user = self.user
             permission = self.permission
 
-        print self.ensure_permission(permission)
-
         self.user.user_permissions.add(self.ensure_permission(permission))
         self.wipe_user_perm_cache(user)
 

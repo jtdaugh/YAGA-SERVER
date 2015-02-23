@@ -10,7 +10,8 @@ from urllib.parse import urlencode
 
 from apnsclient import APNs, Message, Session
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _, override
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import override
 
 from app.utils import get_requests_session
 
@@ -205,11 +206,7 @@ class APNSProvider(
         return self.service
 
     def scheduled_task(self, *args, **kwargs):
-        if not hasattr(self, '_scheduled_task'):
-            from .tasks import APNSPush
-            self._scheduled_task = APNSPush().delay
-
-        self._scheduled_task(*args, **kwargs)
+        APNSPush().delay(*args, **kwargs)
 
     def push(self, receivers, **kwargs):
         service = self.get_service()
@@ -317,7 +314,7 @@ class IOSNotification(
         if token_map:
             for locale, tokens in list(token_map.items()):
                 with override(locale):
-                    APNSPush().delay(
+                    apns_provider.scheduled_task(
                         tokens,
                         alert=self.get_broadcast_message().format(
                             **self.get_broadcast_kwargs()
@@ -332,7 +329,7 @@ class IOSNotification(
         if token_map:
             for locale, tokens in list(token_map.items()):
                 with override(locale):
-                    APNSPush().delay(
+                    apns_provider.scheduled_task(
                         tokens,
                         alert=self.get_target_message().format(
                             **self.get_target_kwargs()
@@ -497,4 +494,6 @@ class GroupLeaveIOSNotification(
         }
 
 
-from .tasks import APNSPush
+apns_provider = APNSProvider()
+
+from .tasks import APNSPush  # noqa # isort:skip
