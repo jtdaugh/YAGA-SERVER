@@ -15,13 +15,30 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from django.utils.functional import SimpleLazyObject
 from djorm_pgarray.fields import ArrayField
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
 
 from .conf import settings
-from .providers import NexmoProvider
+
+
+_provider = None
+
+
+def get_lazy_provider():
+    def _get_lazy_provider():
+        global _provider
+
+        if _provider is None:
+            from .providers import NexmoProvider
+
+            _provider = NexmoProvider()
+
+        return _provider
+
+    return SimpleLazyObject(_get_lazy_provider)
 
 
 def code_expire_at():
@@ -40,7 +57,7 @@ def post_upload_to(instance, filename=None):
 class Code(
     models.Model
 ):
-    provider = NexmoProvider()
+    provider = get_lazy_provider()
 
     request_id = models.CharField(
         verbose_name=_('Request Id'),

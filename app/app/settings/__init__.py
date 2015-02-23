@@ -6,13 +6,19 @@ from future.builtins import (  # noqa
 
 import os
 
+from django.utils.module_loading import import_by_path
 
 if os.environ.get('DYNO'):
-    from .heroku import config as settings
+    os.environ['ENV'] = 'heroku'
 elif os.environ.get('TRAVIS'):
-    from .travis import config as settings
+    os.environ['ENV'] = 'travis'
 else:
-    from .local import config as settings
+    os.environ['ENV'] = 'local'
 
+ENV = os.environ['ENV']
 
-Configuration = settings.Configuration
+Configuration = import_by_path(
+    'app.settings.{env}.config.Configuration'.format(
+        env=ENV,
+    )
+)

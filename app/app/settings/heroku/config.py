@@ -83,7 +83,7 @@ class HerokuConfiguration(
     # sessions\message configuration
     # -------------------------------------------------------
     SESSION_REDIS_ENV_URLS = ['REDISCLOUD_URL']
-    SESSION_ENGINE = 'redis_sessions_fork.session'
+    REAL_SESSION_ENGINE = 'redis_sessions_fork.session'
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------

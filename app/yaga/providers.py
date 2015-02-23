@@ -10,10 +10,12 @@ from urllib.parse import urlencode
 
 from apnsclient import APNs, Message, Session
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _, override
 
 from app.utils import get_requests_session
 
 from .conf import settings
+from .models import Device, Post
 
 logger = logging.getLogger(__name__)
 
@@ -202,6 +204,13 @@ class APNSProvider(
 
         return self.service
 
+    def scheduled_task(self, *args, **kwargs):
+        if not hasattr(self, '_scheduled_task'):
+            from .tasks import APNSPush
+            self._scheduled_task = APNSPush().delay
+
+        self._scheduled_task(*args, **kwargs)
+
     def push(self, receivers, **kwargs):
         service = self.get_service()
 
@@ -221,6 +230,271 @@ class APNSProvider(
             ).delete()
 
         if response.needs_retry():
-            response = service.send(message)
+            self.scheduled_task(
+                receivers,
+                **kwargs
+            )
 
         return response
+
+
+class IOSNotification(
+    object
+):
+    VENDOR = Device.IOS
+    BROADCAST = False
+    TARGET = False
+
+    def __init__(self, **kwargs):
+        for key, value in list(kwargs.items()):
+            setattr(self, key, value)
+
+        self.push()
+
+    def rate_limited(self):
+        return False
+
+    def get_broadcast_message(self):
+        raise NotImplementedError
+
+    def get_broadcast_kwargs(self):
+        raise NotImplementedError
+
+    def get_target_message(self):
+        raise NotImplementedError
+
+    def get_target_kwargs(self):
+        raise NotImplementedError
+
+    def get_group(self):
+        raise NotImplementedError
+
+    def get_target(self):
+        raise NotImplementedError
+
+    def get_emitter(self):
+        raise NotImplementedError
+
+    def get_broadcast_exclude(self):
+        return {
+            'user': self.get_emitter()
+        }
+
+    def get_broadcast_receivers(self):
+        return self.get_group().member_set.filter(
+            mute=False
+        ).exclude(
+            **self.get_broadcast_exclude()
+        ).values_list('user', flat=True)
+
+    def get_target_receivers(self):
+        return [self.get_target()]
+
+    def get_devices(self, users):
+        devices = Device.objects.filter(
+            vendor=self.VENDOR,
+            user__in=users
+        )
+
+        return devices
+
+    def get_token_map(self, devices):
+        token_map = {}
+
+        for device in devices:
+            if token_map.get(device.locale) is None:
+                token_map[device.locale] = []
+
+            token_map[device.locale].append(device.token)
+
+        return token_map
+
+    def push_broadcast(self):
+        devices = self.get_devices(self.get_broadcast_receivers())
+
+        token_map = self.get_token_map(devices)
+
+        if token_map:
+            for locale, tokens in list(token_map.items()):
+                with override(locale):
+                    APNSPush().delay(
+                        tokens,
+                        alert=self.get_broadcast_message().format(
+                            **self.get_broadcast_kwargs()
+                        )
+                    )
+
+    def push_target(self):
+        devices = self.get_devices(self.get_target_receivers())
+
+        token_map = self.get_token_map(devices)
+
+        if token_map:
+            for locale, tokens in list(token_map.items()):
+                with override(locale):
+                    APNSPush().delay(
+                        tokens,
+                        alert=self.get_target_message().format(
+                            **self.get_target_kwargs()
+                        )
+                    )
+
+    def push(self):
+        if not self.rate_limited():
+            if self.TARGET:
+                self.push_target()
+
+            if self.BROADCAST:
+                self.push_broadcast()
+
+
+class NewVideoIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+
+    def rate_limited(self):
+        previous_post = Post.objects.filter(
+            user=self.get_emitter(),
+            group=self.get_group(),
+            ready=True
+        ).exclude(
+            pk=self.post.pk
+        ).order_by(
+            '-ready_at'
+        ).first()
+
+        if previous_post is not None:
+            return not (
+                self.post.ready_at - settings.YAGA_PUSH_POST_WINDOW
+                >
+                previous_post.ready_at
+            )
+        else:
+            return False
+
+    def get_group(self):
+        return self.post.group
+
+    def get_emitter(self):
+        return self.post.user
+
+    def get_broadcast_message(self):
+        return _('{user} posted into {group}')
+
+    def get_broadcast_kwargs(self):
+        return {
+            'group': self.get_group().name,
+            'user': self.get_emitter()
+        }
+
+
+class NewMemberIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+    TARGET = True
+
+    def get_group(self):
+        return self.member.group
+
+    def get_emitter(self):
+        return self.member.creator
+
+    def get_target(self):
+        return self.member.user
+
+    def get_broadcast_exclude(self):
+        return {
+            'user__in': [self.get_emitter(), self.get_target()]
+        }
+
+    def get_broadcast_message(self):
+        return _('{creator} added {member} to {group}')
+
+    def get_broadcast_kwargs(self):
+        return {
+            'group': self.member.group.name,
+            'member': self.member.user.get_username(),
+            'creator': self.member.creator.get_username()
+        }
+
+    def get_target_message(self):
+        return _('{creator} has added you to {group}')
+
+    def get_target_kwargs(self):
+        return self.get_broadcast_kwargs()
+
+
+class NewLikeIOSNotification(
+    IOSNotification
+):
+    TARGET = True
+
+    def get_target(self):
+        return self.like.post.user
+
+    def get_target_message(self):
+        return _('{user} liked your video in {group}')
+
+    def get_target_kwargs(self):
+        return {
+            'user': self.like.user.get_username(),
+            'group': self.like.post.group.name,
+        }
+
+
+class DeleteMemberIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+    TARGET = True
+
+    def get_group(self):
+        return self.member.group
+
+    def get_emitter(self):
+        return self.deleter
+
+    def get_target(self):
+        return self.member.user
+
+    def get_broadcast_message(self):
+        return _('{deleter} removed {member} from {group}')
+
+    def get_broadcast_kwargs(self):
+        return {
+            'group': self.member.group.name,
+            'member': self.member.user.get_username(),
+            'deleter': self.deleter
+        }
+
+    def get_target_message(self):
+        return _('{deleter} has removed you from {group}')
+
+    def get_target_kwargs(self):
+        return self.get_broadcast_kwargs()
+
+
+class GroupLeaveIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+
+    def get_group(self):
+        return self.member.group
+
+    def get_emitter(self):
+        return self.member.user
+
+    def get_broadcast_message(self):
+        return _('{member} has left {group}')
+
+    def get_broadcast_kwargs(self):
+        return {
+            'group': self.member.group.name,
+            'member': self.member.user.get_username(),
+        }
+
+
+from .tasks import APNSPush

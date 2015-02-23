@@ -22,8 +22,17 @@ class InvalidTemplateObjectException(
 class InvalidTemplateObject(
     object
 ):
+    MUTED_PARAMS = (
+        'media',
+        'query.q',
+        'query.dir'
+    )
+
     def __mod__(self, missing):
-        raise InvalidTemplateObjectException(missing)
+        if str(missing) not in self.MUTED_PARAMS:
+            raise InvalidTemplateObjectException(missing)
+
+        return ''
 
     def __contains__(self, search):
         if search == '%s':
@@ -65,6 +74,11 @@ class BaseConfiguration(
     # -------------------------------------------------------
     GLOBAL_PERMISSIONS = [
     ]
+    # -------------------------------------------------------
+    # flanker configuration
+    # -------------------------------------------------------
+    USE_FLANKER = True
+    FLANKER_DRIVER_ENABLED = True
     # -------------------------------------------------------
     # debug toolbar configuration
     # -------------------------------------------------------
@@ -165,14 +179,16 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # sessions\message configuration
     # -------------------------------------------------------
-    # SESSION_ENGINE = 'django.contrib.sessions.backends.file'
-    # SESSION_FILE_PATH = os.path.abspath(
-    #      os.path.join(PROJECT_ROOT, 'sessions')
-    # )
+    REAL_SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+    SESSION_ENGINE = 'app.session'
+    SESSION_FILE_PATH = os.path.abspath(
+        os.path.join(PROJECT_ROOT, 'sessions')
+    )
     MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
-    SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+    # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'  # noqa
     # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
     # SESSION_SERIALIZER = 'redis_sessions_fork.serializers.UjsonSerializer'
+    SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
     SESSION_SAVE_EVERY_REQUEST = False
     # -------------------------------------------------------
     # cookies configuration
@@ -203,6 +219,7 @@ class BaseConfiguration(
     # email backend configuration
     # -------------------------------------------------------
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    # EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
     EMAIL_HOST = '127.0.0.1'
     EMAIL_HOST_USER = ''
     EMAIL_HOST_PASSWORD = ''
@@ -454,8 +471,10 @@ class BaseConfiguration(
         'crispy_forms',
         'djangobower',
         'configurations',
+        'django_flanker',
         'rest_framework',
         'django_nose',
+        'macros',
         'raven.contrib.django',
         'guardian',
     ]
@@ -567,7 +586,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # celery configuration
     # -------------------------------------------------------
-    MESSAGE_PROTOCOL = 'pickle'
+    MESSAGE_PROTOCOL = 'bson'  # 'pickle'
     CELERY_ALWAYS_EAGER = False
     BROKER_URL = 'sqla+sqlite:///{path}/broker.sqlite'.format(
         path=PROJECT_ROOT

@@ -92,7 +92,7 @@ class TravisConfiguration(
     SESSION_REDIS_DB = 3
     SESSION_REDIS_PASSWORD = None
     SESSION_REDIS_PREFIX = None
-    SESSION_ENGINE = 'redis_sessions_fork.session'
+    REAL_SESSION_ENGINE = 'redis_sessions_fork.session'
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------

@@ -11,6 +11,7 @@ import locale
 import os
 import sys
 
+from configurations import importer
 from django.utils import six
 
 
@@ -34,14 +35,16 @@ def setup():
     standard_library.install_aliases()
     fix_locale()
     set_environ()
+    importer.install()
 
 
 def main():
-    setup()
-
     from configurations.management import execute_from_command_line
 
     execute_from_command_line(sys.argv)
+
+
+setup()
 
 
 if __name__ == '__main__':

@@ -9,6 +9,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
 from .conf import settings
+from .utils import once
 
 _app_content_type = None
 
@@ -40,6 +41,7 @@ def register_permission(codename):
     return Permission
 
 
+@once
 def register_global_permission(sender, **kwargs):
     for permission in settings.GLOBAL_PERMISSIONS:
             register_permission(permission)

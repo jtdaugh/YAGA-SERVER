@@ -14,6 +14,7 @@ from .conf import settings
 from .models import Code, Group, Post
 from .providers import APNSProvider
 
+
 apns_provider = APNSProvider()
 
 

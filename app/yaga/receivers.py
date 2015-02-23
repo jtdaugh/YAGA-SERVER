@@ -9,7 +9,7 @@ from django.db import connection, transaction
 from app.receivers import ModelReceiver
 from requestprovider import get_request
 
-from . import utils
+from . import providers
 
 
 class MemberReceiver(
@@ -23,7 +23,7 @@ class MemberReceiver(
             instance.group.save()
 
             def push_notification():
-                utils.NewMemberIOSNotification(
+                providers.NewMemberIOSNotification(
                     member=instance
                 )
 
@@ -40,13 +40,13 @@ class MemberReceiver(
 
         if user != instance.user:
             def push_notification():
-                utils.DeleteMemberIOSNotification(
+                providers.DeleteMemberIOSNotification(
                     member=instance,
                     deleter=user
                 )
         else:
             def push_notification():
-                utils.GroupLeaveIOSNotification(
+                providers.GroupLeaveIOSNotification(
                     member=instance
                 )
 
@@ -65,7 +65,7 @@ class LikeReceiver(
 
             if instance.post.user != instance.user:
                 def push_notification():
-                    utils.NewLikeIOSNotification(
+                    providers.NewLikeIOSNotification(
                         like=instance
                     )
 
@@ -104,7 +104,7 @@ class PostReceiver(
 
         if hasattr(instance.bridge, 'uploaded'):
             def push_notification():
-                utils.NewVideoIOSNotification(
+                providers.NewVideoIOSNotification(
                     post=instance
                 )
 

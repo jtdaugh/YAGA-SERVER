@@ -12,6 +12,7 @@ import requests
 import ujson
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
+from django.core.management import call_command
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
 from django.utils.functional import SimpleLazyObject
@@ -76,6 +77,18 @@ def snless(content):
 
 def show_toolbar(request):
     return settings.DEBUG_TOOLBAR
+
+
+_once = []
+
+
+def once(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if fn.func_name not in _once:
+            fn(*args, **kwargs)
+            _once.append(fn.func_name)
+    return wrapper
 
 
 def user_cache_view(fn):
@@ -187,6 +200,11 @@ def get_sentry_client():
     return SimpleLazyObject(_get_sentry_cleint)
 
 
+@once
+def update_permissions(*args, **kwargs):
+    call_command('update_permissions')
+
+
 class Bridge(
     object
 ):
@@ -270,3 +288,21 @@ class SendRaw(
 
 
 sentry_client = get_sentry_client()
+
+
+class Choice(
+    object
+):
+    pass
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(self, *args, **kwargs):
+        if self not in self._instances:
+            self._instances[self] = super(
+                Singleton, self
+            ).__call__(*args, **kwargs)
+
+        return self._instances[self]

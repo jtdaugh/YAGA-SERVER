@@ -6,10 +6,12 @@ from future.builtins import (  # noqa
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import get_models
+from django.db.models.signals import post_migrate
 
+from .model_permissions import register_global_permission
 from .receivers import ModelReceiver
 from .signals import ModelSignal, register
-from .utils import Bridge
+from .utils import Bridge, update_permissions
 
 
 def receiver_factory():
@@ -53,3 +55,7 @@ for model in get_models():
     )
 
     register(bridge_storage[model]['signal'])
+
+
+post_migrate.connect(register_global_permission)
+post_migrate.connect(update_permissions)

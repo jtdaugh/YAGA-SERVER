@@ -13,8 +13,15 @@ from django.utils.encoding import python_2_unicode_compatible
 from phonenumber_field.modelfields import \
     PhoneNumberField as BasePhoneNumberField
 
+from .conf import settings
 from .form_fields import PhoneNumberField as FormPhoneNumberField
 from .utils import smart_text
+
+if settings.USE_FLANKER:
+    from django_flanker.models import EmailField as BaseEmailField
+else:
+    from django.db.models import EmailField as BaseEmailField
+
 
 try:
     # Django > 1.8
@@ -138,3 +145,9 @@ class PhoneNumberField(
         }
         defaults.update(kwargs)
         return super(PhoneNumberField, self).formfield(**defaults)
+
+
+class EmailField(
+    BaseEmailField
+):
+    pass
