@@ -34,6 +34,7 @@ django-celery==3.1.16
 -e git://github.com/DigiACTive/django-celery-email@f8d18a574a2cabb72cd568b39c82e570eae42f67#egg=django_celery_email-dev
 django-classy-tags==0.6.1
 django-clear-cache==0.3
+django-compat==1.0.1
 django-compressor==1.4
 django-configurations==0.8
 django-crispy-forms==1.4.0
@@ -43,9 +44,10 @@ django-extensions==1.5.0
 django-flanker==0.3.0
 django-guardian==1.2.5
 django-heroku-memcacheify==0.8
+django-hijack==1.0.5
 django-mailviews==0.6.3
-django-model-utils==2.2
 django-mobile==0.4.0
+django-model-utils==2.2
 django-multiurl==1.0.1
 django-nose==1.3
 django-pg-fts==0.1.1

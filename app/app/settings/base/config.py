@@ -475,6 +475,8 @@ class BaseConfiguration(
         'rest_framework',
         'django_nose',
         'macros',
+        'hijack',
+        'compat',
         'raven.contrib.django',
         'guardian',
     ]
@@ -494,6 +496,12 @@ class BaseConfiguration(
         # local
         'app.context_processors.environment',
     ]
+    # -------------------------------------------------------
+    # hijack backends configuration
+    # -------------------------------------------------------
+    SHOW_HIJACKUSER_IN_ADMIN = False
+    HIJACK_NOTIFY_ADMIN = False
+    HIJACK_LOGIN_REDIRECT_URL = '/'
     # -------------------------------------------------------
     # authentication backends configuration
     # -------------------------------------------------------

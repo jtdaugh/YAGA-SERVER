@@ -9,13 +9,14 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import ugettext_lazy as _
+from hijack.admin import HijackUserAdminMixin
 
 from .forms import UserChangeForm, UserCreationForm
 from .models import Token
 
 
 class UserAdmin(
-    BaseUserAdmin
+    BaseUserAdmin, HijackUserAdminMixin
 ):
     def get_urls(self):
         password_urlpatterns = patterns(
@@ -81,7 +82,8 @@ class UserAdmin(
     add_form = UserCreationForm
 
     list_display = (
-        'phone', 'name', 'verified', 'is_active', 'is_staff', 'is_superuser'
+        'phone', 'name', 'verified',
+        'is_active', 'is_staff', 'is_superuser', 'hijack_field'
     )
 
     list_filter = (
