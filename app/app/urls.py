@@ -7,16 +7,16 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.admin.sites import AlreadyRegistered
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import get_user_model
 from django.contrib.sitemaps.views import sitemap
 from django.db.models import get_models
 from django.shortcuts import get_object_or_404
 from django.views.i18n import javascript_catalog
-from hijack.urls import urlpatterns as hijack_urlpatterns
-from hijack.helpers import login_user as hijack_login_user
 from hijack import views as hijack_views
+from hijack.helpers import login_user as hijack_login_user
+from hijack.urls import urlpatterns as hijack_urlpatterns
 
 from content.sitemaps import IndexSitemap
 from content.views import (
