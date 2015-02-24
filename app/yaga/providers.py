@@ -28,24 +28,21 @@ class NexmoResponse(
         self.response = response
 
     def is_valid(self):
-        if self.response:
-            if self.response.get('status') == '0':
-                return True
+        if self.response and self.response.get('status') == '0':
+            return True
 
         return False
 
     def exceeded(self):
-        if self.response:
-            if self.response.get('status') == '17':
-                return True
+        if self.response and self.response.get('status') == '17':
+            return True
 
         return False
 
     @property
     def request_id(self):
-        if self.response:
-            if self.response.get('request_id'):
-                return self.response['request_id']
+        if self.response and self.response.get('request_id'):
+            return self.response['request_id']
 
         return False
 
@@ -163,10 +160,6 @@ class APNSProvider(
     def __init__(self):
         self.release_service()
 
-        from .models import Device
-
-        self.Device = Device
-
     def load_service(self):
         session = Session()
 
@@ -222,9 +215,12 @@ class APNSProvider(
         response = service.send(message)
 
         for token, (reason, explanation) in list(response.failed.items()):
-            self.Device.objects.filter(
+            Device.objects.filter(
                 token=token
             ).delete()
+
+            if token in receivers:
+                receivers.remove(token)
 
         if response.needs_retry():
             self.scheduled_task(
