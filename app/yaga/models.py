@@ -16,7 +16,7 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import SimpleLazyObject
 from django.utils.translation import ugettext_lazy as _
-from djorm_pgarray.fields import ArrayField
+from djorm_pgarray.fields import TextArrayField
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
@@ -31,9 +31,9 @@ def get_lazy_provider():
         global _provider
 
         if _provider is None:
-            from .providers import NexmoProvider
+            from .providers import code_provider
 
-            _provider = NexmoProvider()
+            _provider = code_provider
 
         return _provider
 
@@ -515,9 +515,8 @@ class Contact(
         db_index=True
     )
 
-    phones = ArrayField(
+    phones = TextArrayField(
         verbose_name=_('phone'),
-        dbtype='varchar(255)',
         blank=True
     )
 

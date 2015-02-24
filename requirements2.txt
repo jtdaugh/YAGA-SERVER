@@ -44,6 +44,7 @@ django-flanker==0.3.0
 django-guardian==1.2.5
 django-heroku-memcacheify==0.8
 django-mailviews==0.6.3
+django-model-utils==2.2
 django-mobile==0.4.0
 django-multiurl==1.0.1
 django-nose==1.3

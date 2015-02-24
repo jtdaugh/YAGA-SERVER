@@ -6,8 +6,9 @@ from future.builtins import (  # noqa
 
 from app.signals import register
 
-from .signals import LikeSignal, MemberSignal, PostSignal
+from .signals import LikeSignal, MemberSignal, PostSignal, UserSignal
 
 register(LikeSignal)
 register(MemberSignal)
 register(PostSignal)
+register(UserSignal)

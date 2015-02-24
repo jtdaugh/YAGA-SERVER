@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
+from model_utils import FieldTracker
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import reverse_host, smart_text
@@ -180,6 +181,8 @@ AbstractUser._meta.get_field('last_login').null = True
 class User(
     AbstractUser
 ):
+    tracker = FieldTracker()
+
     class Meta(
         AbstractUser.Meta
     ):

@@ -16,7 +16,7 @@ from django.utils.translation import override
 from app.utils import get_requests_session
 
 from .conf import settings
-from .models import Device, Post
+from .models import Contact, Device, Member, Post
 
 logger = logging.getLogger(__name__)
 
@@ -490,6 +490,70 @@ class GroupLeaveIOSNotification(
         }
 
 
+class NewUserIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+
+    def get_groups(self):
+        return (member.group for member in Member.objects.filter(
+            user=self.user
+        ))
+
+    def get_emitter(self):
+        return self.user
+
+    def push(self):
+        if self.BROADCAST:
+            self.push_broadcast_groups()
+
+    def push_broadcast_groups(self):
+        groups = self.get_groups()
+
+        self.get_broadcast_message = lambda: _('{member} joined {group}')
+
+        users = []
+
+        for group in groups:
+            users.extend(
+                [user for user in group.member_set.all().values_list(
+                    'user', flat=True
+                )]
+            )
+
+            self.get_broadcast_kwargs = lambda: {
+                'member': self.user.get_username(),
+                'group': group.name
+            }
+
+            self.get_group = lambda: group
+
+            self.push_broadcast()
+
+        self.push_broadcast_contacts(users)
+
+    def push_broadcast_contacts(self, users):
+        self.get_broadcast_receivers = lambda: [
+            user for user in Contact.objects.filter(
+                phones__contains=[self.user.phone.as_e164],
+            ).exclude(
+                user__in=list(set(users))
+            ).values_list(
+                'user', flat=True
+            )
+        ]
+
+        self.get_broadcast_message = lambda: _('{member} joined Yaga')
+
+        self.get_broadcast_kwargs = lambda: {
+            'member': self.user.get_username()
+        }
+
+        self.push_broadcast()
+
+
 apns_provider = APNSProvider()
+
+code_provider = NexmoProvider()
 
 from .tasks import APNSPush  # noqa # isort:skip

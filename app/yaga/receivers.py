@@ -109,3 +109,23 @@ class PostReceiver(
                 )
 
             connection.on_commit(push_notification)
+
+
+class UserReceiver(
+    ModelReceiver
+):
+    @staticmethod
+    def pre_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if (
+            instance.tracker.previous('name') is None
+            and
+            instance.name is not None
+        ):
+            def push_notification():
+                providers.NewUserIOSNotification(
+                    user=instance
+                )
+
+            connection.on_commit(push_notification)
