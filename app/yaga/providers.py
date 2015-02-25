@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 
 from apnsclient import APNs, Message, Session
 from django.utils import timezone
+from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override
 
@@ -493,6 +494,7 @@ class GroupLeaveIOSNotification(
 class NewUserIOSNotification(
     IOSNotification
 ):
+    @lru_cache()
     def get_groups(self):
         return [member.group for member in Member.objects.filter(
             user=self.user
