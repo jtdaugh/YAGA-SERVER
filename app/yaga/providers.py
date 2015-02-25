@@ -494,9 +494,9 @@ class NewUserIOSNotification(
     IOSNotification
 ):
     def get_groups(self):
-        return (member.group for member in Member.objects.filter(
+        return [member.group for member in Member.objects.filter(
             user=self.user
-        ))
+        )]
 
     def get_emitter(self):
         return self.user
@@ -522,20 +522,15 @@ class NewUserIOSNotification(
             self.push_broadcast()
 
     def push_broadcast_contacts(self):
-        groups = self.get_groups()
-
-        users = []
-
-        for group in groups:
-            users.extend(
-                [member.user for member in group.member_set.all()]
-            )
+        users = [member.user for member in Member.objects.filter(
+            group__in=self.get_groups()
+        ).distinct('user')]
 
         self.get_broadcast_receivers = lambda: [
             contact.user for contact in Contact.objects.filter(
                 phones__contains=[self.user.phone.as_e164],
             ).exclude(
-                user__in=list(set(users))
+                user__in=users
             )
         ]
 
