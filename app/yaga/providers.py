@@ -303,6 +303,11 @@ class IOSNotification(
 
         return token_map
 
+    def format_broadcast_alert(self):
+        return self.get_broadcast_message().format(
+            **self.get_broadcast_kwargs()
+        )
+
     def push_broadcast(self):
         devices = self.get_devices(self.get_broadcast_receivers())
 
@@ -313,10 +318,13 @@ class IOSNotification(
                 with override(locale):
                     apns_provider.scheduled_task(
                         tokens,
-                        alert=self.get_broadcast_message().format(
-                            **self.get_broadcast_kwargs()
-                        )
+                        alert=self.format_broadcast_alert()
                     )
+
+    def format_target_alert(self):
+        return self.get_target_message().format(
+            **self.get_target_kwargs()
+        )
 
     def push_target(self):
         devices = self.get_devices(self.get_target_receivers())
@@ -328,9 +336,7 @@ class IOSNotification(
                 with override(locale):
                     apns_provider.scheduled_task(
                         tokens,
-                        alert=self.get_target_message().format(
-                            **self.get_target_kwargs()
-                        )
+                        alert=self.format_target_alert()
                     )
 
     def push(self):
@@ -386,7 +392,7 @@ class NewVideoIOSNotification(
 class NewMemberIOSNotification(
     IOSNotification
 ):
-    BROADCAST = True
+    BROADCAST = False
     TARGET = True
 
     def get_group(self):
@@ -418,6 +424,55 @@ class NewMemberIOSNotification(
 
     def get_target_kwargs(self):
         return self.get_broadcast_kwargs()
+
+
+class NewMembersBatchIOSNotification(
+    NewMemberIOSNotification
+):
+    BROADCAST = True
+    TARGET = False
+
+    def get_group(self):
+        return self.group
+
+    def get_emitter(self):
+        return self.creator
+
+    def get_broadcast_exclude(self):
+        return {
+            'user__in': [self.get_emitter()]
+        }
+
+    def get_broadcast_kwargs(self):
+        return {
+            'group': self.group.name,
+            'targets': self.get_new_members(),
+            'creator': self.creator.get_username()
+        }
+
+    def get_new_members(self):
+        if len(self.group.bridge.new_members) == 1:
+            return self.group.bridge.new_members.pop().user.get_username()
+        elif (
+            settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
+            >=
+            len(self.group.bridge.new_members)
+        ):
+            member_list = self.group.bridge.new_members
+        else:
+            member_list = self.group.bridge.new_members[
+                :settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT - 1
+            ]
+
+        member_list = [member.user.get_username() for member in member_list]
+
+        return _('{list} and {last}').format(
+            list=', '.join(member_list[:-1]),
+            last=member_list[-1]
+        )
+
+    def get_broadcast_message(self):
+        return _('{creator} added {targets} to {group}')
 
 
 class NewLikeIOSNotification(

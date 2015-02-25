@@ -28,6 +28,7 @@ class YagaAppConf(
     AWS_SQS_QUEUE = 'yaga-dev'
 
     PUSH_POST_WINDOW = datetime.timedelta(minutes=5)
+    PUSH_NEW_MEMBERS_BATCH_LIMIT = 3
 
     APNS_MODE = 'push_production'
     APNS_CERT = os.path.join(

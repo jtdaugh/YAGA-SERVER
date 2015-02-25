@@ -23,6 +23,17 @@ class MemberReceiver(
             instance.group.save()
 
             if instance.user.name is not None:
+                if len(instance.group.bridge.new_members) == 0:
+                    def push_notification():
+                        providers.NewMembersBatchIOSNotification(
+                            group=instance.group,
+                            creator=instance.creator
+                        )
+
+                    connection.on_commit(push_notification)
+
+                instance.group.bridge.new_members.append(instance)
+
                 def push_notification():
                     providers.NewMemberIOSNotification(
                         member=instance
@@ -133,3 +144,13 @@ class UserReceiver(
                 )
 
             connection.on_commit(push_notification)
+
+
+class GroupReceiver(
+    ModelReceiver
+):
+    @staticmethod
+    def post_init(sender, **kwargs):
+        instance = kwargs['instance']
+
+        instance.bridge.new_members = []

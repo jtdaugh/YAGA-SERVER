@@ -8,8 +8,10 @@ from django.contrib.auth import get_user_model
 
 from app.signals import ModelSignal
 
-from .models import Like, Member, Post
-from .receivers import LikeReceiver, MemberReceiver, PostReceiver, UserReceiver
+from .models import Group, Like, Member, Post
+from .receivers import (
+    GroupReceiver, LikeReceiver, MemberReceiver, PostReceiver, UserReceiver
+)
 
 
 class PostSignal(
@@ -38,3 +40,10 @@ class UserSignal(
 ):
     model = get_user_model()
     receiver = UserReceiver
+
+
+class GroupSignal(
+    ModelSignal
+):
+    model = Group
+    receiver = GroupReceiver
