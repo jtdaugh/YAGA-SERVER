@@ -12,7 +12,7 @@ from apnsclient import APNs, Message, Session
 from django.utils import timezone
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import override
+from django.utils.translation import override, ungettext
 
 from app.utils import get_requests_session
 
@@ -459,17 +459,38 @@ class NewMembersBatchIOSNotification(
             len(self.group.bridge.new_members)
         ):
             member_list = self.group.bridge.new_members
+
+            member_list = [
+                member.user.get_username() for member in member_list
+            ]
+
+            return _('{list} and {last}').format(
+                list=', '.join(member_list[:-1]),
+                last=member_list[-1]
+            )
         else:
             member_list = self.group.bridge.new_members[
                 :settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT - 1
             ]
 
-        member_list = [member.user.get_username() for member in member_list]
+            member_list = [
+                member.user.get_username() for member in member_list
+            ]
 
-        return _('{list} and {last}').format(
-            list=', '.join(member_list[:-1]),
-            last=member_list[-1]
-        )
+            count = (
+                len(self.group.bridge.new_members)
+                -
+                settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
+            )
+
+            return ungettext(
+                '{list} and {count} other',
+                '{list} and {count} others',
+                count
+            ).format(
+                list=', '.join(member_list),
+                count=count
+            )
 
     def get_broadcast_message(self):
         return _('{creator} added {targets} to {group}')
