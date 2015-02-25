@@ -245,6 +245,9 @@ class IOSNotification(
 
         self.push()
 
+    def get_meta(self):
+        return {}
+
     def rate_limited(self):
         return False
 
@@ -311,7 +314,8 @@ class IOSNotification(
     def get_push_kwargs(self):
         return {
             'badge': settings.YAGA_PUSH_BADGE,
-            'sound': settings.YAGA_PUSH_SOUND
+            'sound': settings.YAGA_PUSH_SOUND,
+            'meta': self.get_meta()
         }
 
     def push_broadcast(self):
