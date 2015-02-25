@@ -22,35 +22,39 @@ class MemberReceiver(
         if not instance.pk:
             instance.group.save()
 
-            def push_notification():
-                providers.NewMemberIOSNotification(
-                    member=instance
-                )
+            if instance.user.name is not None:
+                def push_notification():
+                    providers.NewMemberIOSNotification(
+                        member=instance
+                    )
 
-            connection.on_commit(push_notification)
+                connection.on_commit(push_notification)
 
     @staticmethod
     def pre_delete(sender, **kwargs):
         instance = kwargs['instance']
+
+        instance.group.save()
 
         if hasattr(instance.bridge, 'deleter'):
             user = instance.bridge.deleter
         else:
             user = get_request().user
 
-        if user != instance.user:
-            def push_notification():
-                providers.DeleteMemberIOSNotification(
-                    member=instance,
-                    deleter=user
-                )
-        else:
-            def push_notification():
-                providers.GroupLeaveIOSNotification(
-                    member=instance
-                )
+        if instance.user.name is not None:
+            if user != instance.user:
+                def push_notification():
+                    providers.DeleteMemberIOSNotification(
+                        member=instance,
+                        deleter=user
+                    )
+            else:
+                def push_notification():
+                    providers.GroupLeaveIOSNotification(
+                        member=instance
+                    )
 
-        connection.on_commit(push_notification)
+            connection.on_commit(push_notification)
 
 
 class LikeReceiver(
