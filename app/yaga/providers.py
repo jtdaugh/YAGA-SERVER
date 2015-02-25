@@ -308,6 +308,12 @@ class IOSNotification(
             **self.get_broadcast_kwargs()
         )
 
+    def get_push_kwargs(self):
+        return {
+            'badge': settings.YAGA_PUSH_BADGE,
+            'sound': settings.YAGA_PUSH_SOUND
+        }
+
     def push_broadcast(self):
         devices = self.get_devices(self.get_broadcast_receivers())
 
@@ -316,9 +322,13 @@ class IOSNotification(
         if token_map:
             for locale, tokens in list(token_map.items()):
                 with override(locale):
+                    kwargs = {}
+                    kwargs['alert'] = self.format_broadcast_alert()
+                    kwargs.update(self.get_push_kwargs())
+
                     apns_provider.scheduled_task(
                         tokens,
-                        alert=self.format_broadcast_alert()
+                        **kwargs
                     )
 
     def format_target_alert(self):
@@ -334,9 +344,13 @@ class IOSNotification(
         if token_map:
             for locale, tokens in list(token_map.items()):
                 with override(locale):
+                    kwargs = {}
+                    kwargs['alert'] = self.format_target_alert()
+                    kwargs.update(self.get_push_kwargs())
+
                     apns_provider.scheduled_task(
                         tokens,
-                        alert=self.format_target_alert()
+                        **kwargs
                     )
 
     def push(self):
