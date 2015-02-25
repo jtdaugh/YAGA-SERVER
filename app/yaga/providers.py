@@ -274,11 +274,11 @@ class IOSNotification(
         }
 
     def get_broadcast_receivers(self):
-        return self.get_group().member_set.filter(
+        return [member.user for member in self.get_group().member_set.filter(
             mute=False
         ).exclude(
             **self.get_broadcast_exclude()
-        ).values_list('user', flat=True)
+        )]
 
     def get_target_receivers(self):
         return [self.get_target()]
@@ -493,8 +493,6 @@ class GroupLeaveIOSNotification(
 class NewUserIOSNotification(
     IOSNotification
 ):
-    BROADCAST = True
-
     def get_groups(self):
         return (member.group for member in Member.objects.filter(
             user=self.user
@@ -504,23 +502,16 @@ class NewUserIOSNotification(
         return self.user
 
     def push(self):
-        if self.BROADCAST:
-            self.push_broadcast_groups()
+        self.push_broadcast_groups()
+
+        self.push_broadcast_contacts()
 
     def push_broadcast_groups(self):
         groups = self.get_groups()
 
         self.get_broadcast_message = lambda: _('{member} joined {group}')
 
-        users = []
-
         for group in groups:
-            users.extend(
-                [user for user in group.member_set.all().values_list(
-                    'user', flat=True
-                )]
-            )
-
             self.get_broadcast_kwargs = lambda: {
                 'member': self.user.get_username(),
                 'group': group.name
@@ -530,16 +521,21 @@ class NewUserIOSNotification(
 
             self.push_broadcast()
 
-        self.push_broadcast_contacts(users)
+    def push_broadcast_contacts(self):
+        groups = self.get_groups()
 
-    def push_broadcast_contacts(self, users):
+        users = []
+
+        for group in groups:
+            users.extend(
+                [member.user for member in group.member_set.all()]
+            )
+
         self.get_broadcast_receivers = lambda: [
-            user for user in Contact.objects.filter(
+            contact.user for contact in Contact.objects.filter(
                 phones__contains=[self.user.phone.as_e164],
             ).exclude(
                 user__in=list(set(users))
-            ).values_list(
-                'user', flat=True
             )
         ]
 
