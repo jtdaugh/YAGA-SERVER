@@ -456,9 +456,14 @@ class NewMembersBatchIOSNotification(
     def get_emitter(self):
         return self.creator
 
+    def get_targets(self):
+        return [member.user for member in self.group.bridge.new_members]
+
     def get_broadcast_exclude(self):
         return {
-            'user__in': [self.get_emitter()]
+            'user__in': list(set([
+                self.get_emitter()
+            ] + self.get_targets()))
         }
 
     def get_broadcast_kwargs(self):
@@ -468,6 +473,11 @@ class NewMembersBatchIOSNotification(
             'creator': self.creator.get_username()
         }
 
+    def map_members(self, members):
+        return [
+            member.user.get_username() for member in members
+        ]
+
     def get_new_members(self):
         if len(self.group.bridge.new_members) == 1:
             return self.group.bridge.new_members.pop().user.get_username()
@@ -476,37 +486,31 @@ class NewMembersBatchIOSNotification(
             >=
             len(self.group.bridge.new_members)
         ):
-            member_list = self.group.bridge.new_members
-
-            member_list = [
-                member.user.get_username() for member in member_list
-            ]
+            users = self.map_members(self.group.bridge.new_members)
 
             return _('{list} and {last}').format(
-                list=', '.join(member_list[:-1]),
-                last=member_list[-1]
+                list=', '.join(users[:-1]),
+                last=users[-1]
             )
         else:
             member_list = self.group.bridge.new_members[
                 :settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT - 1
             ]
 
-            member_list = [
-                member.user.get_username() for member in member_list
-            ]
+            users = self.map_members(member_list)
 
             count = (
                 len(self.group.bridge.new_members)
                 -
                 settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
-            )
+            ) + 1
 
             return ungettext(
                 '{list} and {count} other',
                 '{list} and {count} others',
                 count
             ).format(
-                list=', '.join(member_list),
+                list=', '.join(users),
                 count=count
             )
 
