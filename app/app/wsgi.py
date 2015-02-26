@@ -8,12 +8,7 @@ from configurations.wsgi import get_wsgi_application
 from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.wsgi import SharedDataMiddleware
 
-from manage import setup
-
 from .conf import settings
-
-setup()
-
 
 application = get_wsgi_application()
 

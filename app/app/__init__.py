@@ -4,6 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from manage import setup  # noqa
+
 from .celery_app import celery  # noqa
 
 default_app_config = 'app.apps.AppAppConfig'

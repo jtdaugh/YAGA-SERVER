@@ -8,13 +8,9 @@ from celery import Celery
 from celery.task import PeriodicTask
 from django.db import transaction
 from kombu.serialization import register
-
-from manage import setup  # noqa
+from mongoengine.django.sessions import BSONSerializer
 
 from .conf import settings
-
-from mongoengine.django.sessions import BSONSerializer  # noqa # isort:skip
-
 
 celery = Celery(__name__)
 

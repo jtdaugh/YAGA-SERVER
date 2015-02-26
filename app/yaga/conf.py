@@ -29,7 +29,6 @@ class YagaAppConf(
 
     PUSH_POST_WINDOW = datetime.timedelta(minutes=5)
     PUSH_NEW_MEMBERS_BATCH_LIMIT = 3
-
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 
