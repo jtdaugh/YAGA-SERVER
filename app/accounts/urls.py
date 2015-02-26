@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 from django.conf.urls import patterns, url
 from django.utils.translation import ugettext_lazy as _
 
-from .views import SignInView, SignOutView
+from .views import ChangePasswordView, SignInView, SignOutView
 
 urlpatterns = patterns(
     '',
@@ -21,4 +21,9 @@ urlpatterns = patterns(
         SignOutView.as_view(),
         name='sign_out'
     ),
+    url(
+        _(r'^change_password/$'),
+        ChangePasswordView.as_view(),
+        name='change_password'
+    )
 )

@@ -11,5 +11,7 @@ from django.conf import settings  # noqa
 class AccountsAppConf(
     AppConf
 ):
+    MIN_PASSWORD_LEN = 6
+
     class Meta:
         prefix = 'accounts'

@@ -9,9 +9,12 @@ from crispy_forms.layout import Submit
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
-    AuthenticationForm, ReadOnlyPasswordHashField
+    AuthenticationForm, PasswordChangeForm, ReadOnlyPasswordHashField
 )
+from django.contrib.auth.signals import user_login_failed
 from django.utils.translation import ugettext_lazy as _
+
+from .conf import settings
 
 
 class UserCreationForm(
@@ -106,5 +109,58 @@ class SignInForm(
     def helper(self):
         helper = FormHelper()
         helper.add_input(Submit('submit', _('Sign in')))
+
+        return helper
+
+
+class SignUpForm(UserCreationForm):
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.add_input(Submit('submit', _('Sign up')))
+
+        return helper
+
+
+class ChangePasswordForm(
+    PasswordChangeForm
+):
+    error_messages = dict(PasswordChangeForm.error_messages, **{
+        'same_password': _('Please enter another password.'),
+        'short_password': _('Password must have at least %s characters.') % (
+            settings.ACCOUNTS_MIN_PASSWORD_LEN
+        )
+    })
+
+    def clean_new_password1(self):
+        password1 = self.cleaned_data.get('new_password1')
+
+        if self.user.check_password(password1):
+            raise forms.ValidationError(
+                self.error_messages['same_password'],
+                code='same_password'
+            )
+
+        if len(password1) < settings.ACCOUNTS_MIN_PASSWORD_LEN:
+            raise forms.ValidationError(
+                self.error_messages['short_password'],
+                code='short_password'
+            )
+
+        return password1
+
+    def clean_old_password(self):
+        try:
+            return super(ChangePasswordForm, self).clean_old_password()
+        except forms.ValidationError as e:
+            user_login_failed.send(None, credentials={
+                'username': self.user.get_username()
+            })
+            raise e
+
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.add_input(Submit('submit', _('Change password')))
 
         return helper
