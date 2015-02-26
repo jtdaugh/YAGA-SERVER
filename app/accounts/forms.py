@@ -13,6 +13,7 @@ from django.contrib.auth.forms import (
 )
 from django.contrib.auth.signals import user_login_failed
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext
 
 from .conf import settings
 
@@ -127,8 +128,12 @@ class ChangePasswordForm(
 ):
     error_messages = dict(PasswordChangeForm.error_messages, **{
         'same_password': _('Please enter another password.'),
-        'short_password': _('Password must have at least %s characters.') % (
+        'short_password': ungettext(
+            'Password must have at least {count} character.',
+            'Password must have at least {count} characters.',
             settings.ACCOUNTS_MIN_PASSWORD_LEN
+        ).format(
+            count=settings.ACCOUNTS_MIN_PASSWORD_LEN
         )
     })
 
