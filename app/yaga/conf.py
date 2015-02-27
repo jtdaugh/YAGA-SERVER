@@ -32,7 +32,7 @@ class YagaAppConf(
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 
-    APNS_MODE = 'push_production'
+    APNS_MODE = 'push_sandbox'  # production
     APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
         'apns/cert_file'

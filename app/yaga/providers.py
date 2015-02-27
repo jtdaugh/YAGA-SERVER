@@ -371,6 +371,12 @@ class NewVideoIOSNotification(
 ):
     BROADCAST = True
 
+    def get_meta(self):
+        return {
+            'event': 'post',
+            'group_id': str(self.post.group.pk)
+        }
+
     def rate_limited(self):
         previous_post = Post.objects.filter(
             user=self.get_emitter(),
@@ -413,6 +419,12 @@ class NewMemberIOSNotification(
     BROADCAST = False
     TARGET = True
 
+    def get_meta(self):
+        return {
+            'event': 'invite',
+            'group_id': str(self.member.group.pk)
+        }
+
     def get_group(self):
         return self.member.group
 
@@ -449,6 +461,12 @@ class NewMembersBatchIOSNotification(
 ):
     BROADCAST = True
     TARGET = False
+
+    def get_meta(self):
+        return {
+            'event': 'members',
+            'group_id': str(self.group.pk)
+        }
 
     def get_group(self):
         return self.group
@@ -523,6 +541,13 @@ class NewLikeIOSNotification(
 ):
     TARGET = True
 
+    def get_meta(self):
+        return {
+            'event': 'like',
+            'post_id': str(self.like.post.pk),
+            'group_id': str(self.like.post.group.pk),
+        }
+
     def get_target(self):
         return self.like.post.user
 
@@ -541,6 +566,13 @@ class DeleteMemberIOSNotification(
 ):
     BROADCAST = True
     TARGET = True
+
+    def get_meta(self):
+        return {
+            'event': 'kick',
+            'user_id': str(self.member.user.pk),
+            'group_id': str(self.member.group.pk),
+        }
 
     def get_group(self):
         return self.member.group
@@ -572,6 +604,13 @@ class GroupLeaveIOSNotification(
     IOSNotification
 ):
     BROADCAST = True
+
+    def get_meta(self):
+        return {
+            'event': 'leave',
+            'user_id': str(self.member.user.pk),
+            'group_id': str(self.member.group.pk),
+        }
 
     def get_group(self):
         return self.member.group
@@ -612,6 +651,12 @@ class NewUserIOSNotification(
         self.get_broadcast_message = lambda: _('{member} joined {group}')
 
         for group in groups:
+            self.get_meta = lambda: {
+                'event': 'join',
+                'user_id': str(self.user.pk),
+                'group_id': str(group.pk),
+            }
+
             self.get_broadcast_kwargs = lambda: {
                 'member': self.user.get_username(),
                 'group': group.name
@@ -633,6 +678,11 @@ class NewUserIOSNotification(
                 user__in=users
             )
         ]
+
+        self.get_meta = lambda: {
+            'event': 'registration',
+            'user_id': str(self.user.pk)
+        }
 
         self.get_broadcast_message = lambda: _('{member} joined Yaga')
 
