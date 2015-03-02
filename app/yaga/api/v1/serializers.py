@@ -173,12 +173,15 @@ class PostSerializer(
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 
     def validate(self, attrs):
-        name_x = attrs.get('name_x')
+        coordinates = ('name_x', 'name_y')
 
-        name_y = attrs.get('name_y')
+        coordinates_values = []
 
-        if not (name_x and name_y):
-            for attr in ('name_x', 'name_y'):
+        for attr in coordinates:
+            coordinates_values.append(attrs.get(attr))
+
+        if None in coordinates_values:
+            for attr in coordinates:
                 if attrs.get(attr):
                     attrs.pop(attr)
 
