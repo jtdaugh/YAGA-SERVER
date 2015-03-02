@@ -172,21 +172,6 @@ class PostSerializer(
         )
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 
-    def validate(self, attrs):
-        coordinates = ('name_x', 'name_y')
-
-        coordinates_values = []
-
-        for attr in coordinates:
-            coordinates_values.append(attrs.get(attr))
-
-        if None in coordinates_values:
-            for attr in coordinates:
-                if attrs.get(attr):
-                    attrs.pop(attr)
-
-        return attrs
-
 
 class MemberSerializer(
     serializers.ModelSerializer
