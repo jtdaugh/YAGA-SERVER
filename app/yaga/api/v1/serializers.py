@@ -156,14 +156,33 @@ class PostSerializer(
 ):
     user = UserSerializer(read_only=True)
     likers = UserSerializer(read_only=True, many=True)
+    name_x = serializers.IntegerField(
+        min_value=0, max_value=100, required=False
+    )
+    name_y = serializers.IntegerField(
+        min_value=0, max_value=100, required=False
+    )
 
     class Meta:
         model = Post
         fields = (
             'attachment', 'ready_at', 'updated_at',
-            'user', 'id', 'name', 'deleted', 'likers'
+            'user', 'id', 'name', 'deleted', 'likers',
+            'name_x', 'name_y'
         )
         read_only_fields = ('attachment', 'ready_at', 'deleted')
+
+    def validate(self, attrs):
+        name_x = attrs.get('name_x')
+
+        name_y = attrs.get('name_y')
+
+        if not (name_x and name_y):
+            for attr in ('name_x', 'name_y'):
+                if attrs.get(attr):
+                    attrs.pop(attr)
+
+        return attrs
 
 
 class MemberSerializer(

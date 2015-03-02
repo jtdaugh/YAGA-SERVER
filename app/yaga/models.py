@@ -226,6 +226,18 @@ class Post(
         null=True
     )
 
+    name_x = models.PositiveSmallIntegerField(
+        verbose_name=_('Name X'),
+        blank=True,
+        null=True
+    )
+
+    name_y = models.PositiveSmallIntegerField(
+        verbose_name=_('Name Y'),
+        blank=True,
+        null=True
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
