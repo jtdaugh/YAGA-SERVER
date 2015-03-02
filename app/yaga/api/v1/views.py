@@ -16,8 +16,10 @@ from app.views import NonAtomicView
 from . import permissions, serializers, throttling
 from ...conf import settings
 from ...models import Code, Contact, Group, Like, Member, Post
+from ...utils import patch_as_put
 
 
+@patch_as_put
 class UserRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView,
 ):
@@ -203,6 +205,7 @@ class GroupListCreateAPIView(
         )
 
 
+@patch_as_put
 class GroupRetrieveUpdateAPIView(
     generics.RetrieveUpdateAPIView
 ):
@@ -250,6 +253,7 @@ class GroupRetrieveUpdateAPIView(
         return queryset
 
 
+@patch_as_put
 class GroupManageMemberAPIView(
     generics.UpdateAPIView
 ):
@@ -414,6 +418,7 @@ class PostAPIView(
         return obj
 
 
+@patch_as_put
 class PostRetrieveUpdateDestroyAPIView(
     PostAPIView,
     generics.RetrieveUpdateDestroyAPIView
