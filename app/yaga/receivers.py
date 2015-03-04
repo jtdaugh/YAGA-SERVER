@@ -125,6 +125,17 @@ class PostReceiver(
 
             connection.on_commit(push_notification)
 
+        if instance.pk is not None:
+            if instance.tracker.previous('name') != instance.name:
+                if hasattr(instance.bridge, 'updater'):
+                    if instance.bridge.updater != instance.user:
+                        def push_notification():
+                            providers.NewCaptionIOSNotification(
+                                post=instance
+                            )
+
+                        connection.on_commit(push_notification)
+
 
 class UserReceiver(
     ModelReceiver

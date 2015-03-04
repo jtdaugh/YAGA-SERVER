@@ -436,6 +436,12 @@ class PostRetrieveUpdateDestroyAPIView(
         instance.deleted = True
         instance.save()
 
+    def get_object(self):
+        instance = super(PostRetrieveUpdateDestroyAPIView, self).get_object()
+        instance.bridge.updater = self.request.user
+
+        return instance
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
 

@@ -561,6 +561,31 @@ class NewLikeIOSNotification(
         }
 
 
+class NewCaptionIOSNotification(
+    IOSNotification
+):
+    TARGET = True
+
+    def get_meta(self):
+        return {
+            'event': 'caption',
+            'post_id': str(self.post.pk),
+            'group_id': str(self.post.group.pk),
+        }
+
+    def get_target(self):
+        return self.post.user
+
+    def get_target_message(self):
+        return _('{user} captioned your video in {group}')
+
+    def get_target_kwargs(self):
+        return {
+            'user': self.post.bridge.updater.get_username(),
+            'group': self.post.group.name,
+        }
+
+
 class DeleteMemberIOSNotification(
     IOSNotification
 ):

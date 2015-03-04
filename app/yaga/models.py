@@ -17,6 +17,7 @@ from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import SimpleLazyObject
 from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
+from model_utils import FieldTracker
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import smart_text
@@ -238,6 +239,24 @@ class Post(
         null=True
     )
 
+    rotation = models.PositiveSmallIntegerField(
+        verbose_name=_('Rotation'),
+        blank=True,
+        null=True
+    )
+
+    font = models.PositiveSmallIntegerField(
+        verbose_name=_('Font'),
+        blank=True,
+        null=True
+    )
+
+    scale = models.PositiveSmallIntegerField(
+        verbose_name=_('Scale'),
+        blank=True,
+        null=True
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
@@ -307,6 +326,8 @@ class Post(
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
+
+    tracker = FieldTracker()
 
     # def get_checksum(self, chunks):
     #     md5 = hashlib.md5()
