@@ -188,13 +188,17 @@ class PostSerializer(
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 
     def validate(self, attrs):
-        if (
+        if ((
+            self.instance is None
+            and
+            attrs.get('name') is None
+        ) or (
             self.instance is not None
             and
             self.instance.name is None
             and
             attrs.get('name') is None
-        ):
+        )):
             if (
                 len(set(self.Meta.caption_fields) & set(list(attrs.keys())))
                 !=
