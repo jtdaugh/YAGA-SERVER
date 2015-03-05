@@ -167,11 +167,11 @@ class PostSerializer(
     )
 
     rotation = serializers.IntegerField(
-        min_value=0, max_value=360, required=False
+        min_value=0, max_value=1440, required=False
     )
 
     font = serializers.IntegerField(
-        min_value=0, max_value=7, required=False
+        min_value=0, max_value=20, required=False
     )
 
     scale = serializers.IntegerField(
@@ -188,27 +188,34 @@ class PostSerializer(
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 
     def validate(self, attrs):
-        if self.instance.name is None and attrs.get('name') is None:
+        if (
+            self.instance is not None
+            and
+            self.instance.name is None
+            and
+            attrs.get('name') is None
+        ):
             if (
                 len(set(self.Meta.caption_fields) & set(list(attrs.keys())))
-                != 0
+                !=
+                0
             ):
                 msg = _('Can not set caption option without name.')
                 raise ValidationError(msg)
+        else:
+            coords = ('name_y', 'name_x')
 
-        coords = ('name_y', 'name_x')
+            def _bool(value):
+                value = attrs.get(value)
 
-        def _bool(value):
-            value = attrs.get(value)
+                if value == 0:
+                    return True
 
-            if value == 0:
-                return True
+                return bool(value)
 
-            return bool(value)
-
-        if _bool(coords[0]) ^ _bool(coords[1]):
-            msg = _('Options name_x and name_y must be set together.')
-            raise ValidationError(msg)
+            if _bool(coords[0]) ^ _bool(coords[1]):
+                msg = _('Options name_x and name_y must be set together.')
+                raise ValidationError(msg)
 
         return attrs
 
