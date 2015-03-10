@@ -15,7 +15,8 @@ from accounts.models import Token
 
 from ...conf import settings
 from ...models import Code, Contact, Device, Group, Member, Post
-from .fields import CodeField, PhoneField, TimeStampField
+from .validators import UniqueLowerUserName
+from .fields import CodeField, PhoneField, TimeStampField, UnicodeField
 
 
 class NonStrictListField(
@@ -66,6 +67,8 @@ class SinceSerializer(
 class UserSerializer(
     serializers.ModelSerializer
 ):
+    name = UnicodeField(required=False, validators=[UniqueLowerUserName()])
+
     class Meta:
         model = get_user_model()
         read_only_fields = ('phone',)
@@ -154,6 +157,8 @@ class CodeCreateSerializer(
 class PostSerializer(
     serializers.ModelSerializer
 ):
+    name = UnicodeField(required=False, allow_spaces=True)
+
     user = UserSerializer(read_only=True)
 
     likers = UserSerializer(read_only=True, many=True)
@@ -166,21 +171,13 @@ class PostSerializer(
         min_value=0, max_value=100, required=False
     )
 
-    rotation = serializers.IntegerField(
-        min_value=0, max_value=1440, required=False
-    )
-
     font = serializers.IntegerField(
         min_value=0, max_value=20, required=False
     )
 
-    scale = serializers.IntegerField(
-        min_value=0, max_value=10, required=False
-    )
-
     class Meta:
         model = Post
-        caption_fields = ('name_x', 'name_y', 'rotation', 'font', 'scale')
+        caption_fields = ('name_x', 'name_y', 'font')
         fields = (
             'attachment', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'deleted', 'likers'
@@ -238,6 +235,7 @@ class GroupSerializer(
     serializers.ModelSerializer
 ):
     members = MemberSerializer(many=True, read_only=True, source='member_set')
+    name = UnicodeField(required=False, allow_spaces=True)
 
     class Meta:
         model = Group
@@ -342,8 +340,8 @@ class DeviceSerializer(
         return super(DeviceSerializer, self).save(**kwargs)
 
     def validate_vendor(self, value):
-        if value == self.Meta.model.IOS_VALUE:
-            return self.Meta.model.IOS
+        if value == self.Meta.model.Vendor.IOS_VALUE:
+            return self.Meta.model.Vendor.IOS
 
         msg = _('Unsupported vendor.')
         raise ValidationError(msg)
@@ -360,7 +358,7 @@ class DeviceSerializer(
         token = attrs['token']
         locale = attrs['locale']
 
-        if vendor == Device.IOS:
+        if vendor == Device.Vendor.IOS:
             if len(token) != 64:
                 msg = _('Invalid token.')
                 raise ValidationError(msg)

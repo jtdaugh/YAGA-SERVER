@@ -105,10 +105,10 @@ class AbstractUser(
     name = models.CharField(
         verbose_name=_('Name'),
         max_length=255,
-        unique=True,
         null=True,
         blank=True
     )
+    # here is function lower unique index at migration
 
     is_staff = models.BooleanField(
         verbose_name=_('Staff status'), default=False,

@@ -16,7 +16,7 @@ task :deploy do
     sh 'python manage.py migrate'
     sh 'python manage.py bower_install -- --config.interactive=false'
     sh 'python manage.py collectstatic --noinput'
-    sh 'python manage.py clean_compress'
+    # sh 'python manage.py clean_compress'
     sh 'python manage.py compress'
   end
 end

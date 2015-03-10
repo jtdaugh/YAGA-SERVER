@@ -20,7 +20,7 @@ from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
 
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import smart_text
+from app.utils import Choice, smart_text
 
 from .conf import settings
 
@@ -74,7 +74,7 @@ class Code(
     expire_at = models.DateTimeField(
         verbose_name=_('Expire At'),
         default=code_expire_at,
-        db_index=True,
+        db_index=True
     )
 
     def check_code(self, code):
@@ -109,22 +109,18 @@ class Member(
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        db_index=True
+        verbose_name=_('User')
     )
 
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('Creator'),
-        related_name='member_creator',
-        null=True,
-        db_index=True
+        related_name='member_creator'
     )
 
     group = models.ForeignKey(
         'Group',
-        verbose_name=_('Group'),
-        db_index=True
+        verbose_name=_('Group')
     )
 
     mute = models.BooleanField(
@@ -168,17 +164,14 @@ class Group(
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('Creator'),
-        related_name='group_creator',
-        null=True,
-        db_index=True
+        related_name='group_creator'
     )
 
     members = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         through='Member',
         through_fields=('group', 'user'),
-        verbose_name=_('Members'),
-        db_index=True
+        verbose_name=_('Members')
     )
 
     created_at = models.DateTimeField(
@@ -239,39 +232,24 @@ class Post(
         null=True
     )
 
-    rotation = models.PositiveSmallIntegerField(
-        verbose_name=_('Rotation'),
-        blank=True,
-        null=True
-    )
-
     font = models.PositiveSmallIntegerField(
         verbose_name=_('Font'),
         blank=True,
         null=True
     )
 
-    scale = models.PositiveSmallIntegerField(
-        verbose_name=_('Scale'),
-        blank=True,
-        null=True
-    )
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        db_index=True
+        verbose_name=_('User')
     )
 
     group = models.ForeignKey(
         Group,
-        verbose_name=_('Group'),
-        db_index=True
+        verbose_name=_('Group')
     )
 
     attachment = models.FileField(
         verbose_name=_('Attachment'),
-        db_index=True,
         upload_to=post_upload_to,
         blank=True,
         null=True
@@ -280,7 +258,6 @@ class Post(
     checksum = models.CharField(
         verbose_name=_('Checksum'),
         max_length=255,
-        db_index=True,
         blank=True,
         null=True
     )
@@ -288,7 +265,6 @@ class Post(
     mime = models.CharField(
         verbose_name=_('Mime'),
         max_length=255,
-        db_index=True,
         blank=True,
         null=True
     )
@@ -449,19 +425,18 @@ class Like(
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        db_index=True
+        verbose_name=_('User')
     )
 
     post = models.ForeignKey(
         Post,
-        verbose_name=_('Post'),
-        db_index=True
+        verbose_name=_('Post')
     )
 
     created_at = models.DateTimeField(
         verbose_name=_('Created At'),
-        auto_now_add=True
+        auto_now_add=True,
+        db_index=True
     )
 
     class Meta:
@@ -485,13 +460,16 @@ class Device(
         version=4
     )
 
-    IOS = 0
-    IOS_VALUE = 'IOS'
-    ANDROID = 1
-    ANDROID_VALUE = 'ADNDROID'
+    class Vendor(
+        Choice
+    ):
+        IOS = 0
+        IOS_VALUE = 'IOS'
+        ANDROID = 1
+        ANDROID_VALUE = 'ANDROID'
     VENDOR_CHOICES = (
-        (IOS, IOS_VALUE),
-        (ANDROID, ANDROID_VALUE),
+        (Vendor.IOS, Vendor.IOS_VALUE),
+        (Vendor.ANDROID, Vendor.ANDROID_VALUE)
     )
     vendor = models.PositiveSmallIntegerField(
         verbose_name=_('Vendor'),
@@ -512,8 +490,7 @@ class Device(
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        db_index=True
+        verbose_name=_('User')
     )
 
     created_at = models.DateTimeField(
@@ -544,14 +521,14 @@ class Contact(
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User'),
-        db_index=True
+        verbose_name=_('User')
     )
 
     phones = TextArrayField(
         verbose_name=_('phone'),
         blank=True
     )
+    # here is GIN index at migration
 
     created_at = models.DateTimeField(
         verbose_name=_('Created At'),

@@ -23,7 +23,17 @@ class MemberReceiver(
             instance.group.save()
 
             if instance.user.name is not None:
-                if len(instance.group.bridge.new_members) == 0:
+                if instance.creator != instance.user:
+                    instance.group.bridge.new_members.append(instance)
+
+                    def push_notification():
+                        providers.NewMemberIOSNotification(
+                            member=instance
+                        )
+
+                    connection.on_commit(push_notification)
+
+                if len(instance.group.bridge.new_members) == 1:
                     def push_notification():
                         providers.NewMembersBatchIOSNotification(
                             group=instance.group,
@@ -31,15 +41,6 @@ class MemberReceiver(
                         )
 
                     connection.on_commit(push_notification)
-
-                instance.group.bridge.new_members.append(instance)
-
-                def push_notification():
-                    providers.NewMemberIOSNotification(
-                        member=instance
-                    )
-
-                connection.on_commit(push_notification)
 
     @staticmethod
     def pre_delete(sender, **kwargs):

@@ -306,7 +306,7 @@ class GroupManageMemberAddAPIView(
         if data.get('names'):
             for name in data['names']:
                 user = model.objects.filter(
-                    name=name
+                    name__iexact=name
                 ).first()
 
                 if user:
@@ -507,35 +507,6 @@ class LikeCreateDestroyAPIView(
             dict(serializer.data),
             status=status.HTTP_200_OK
         )
-
-
-class LikeListAPIView(
-    generics.ListAPIView,
-):
-    serializer_class = serializers.UserSerializer
-    permission_classes = (
-        IsAuthenticated, permissions.PostGroupMember,
-        permissions.AvailablePost, permissions.FulfilledProfile
-    )
-
-    def get_object(self):
-        queryset = self.filter_queryset(self._get_queryset())
-
-        obj = generics.get_object_or_404(
-            queryset,
-            group__pk=self.kwargs['group_id'],
-            pk=self.kwargs['post_id'],
-        )
-
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    def _get_queryset(self):
-        return Post.objects.all()
-
-    def get_queryset(self):
-        return self.get_object().likers()
 
 
 class DeviceCreateAPIView(

@@ -7,7 +7,6 @@ from future.builtins import (  # noqa
 import os
 
 import dj_database_url
-from memcacheify import memcacheify
 
 from ..base.config import BaseConfiguration, Implementation, Initialization
 
@@ -35,11 +34,11 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # etag configuration
     # -------------------------------------------------------
-    USE_ETAGS = True
+    USE_ETAGS = False
     # -------------------------------------------------------
     # gzip configuration
     # -------------------------------------------------------
-    GZIP = True
+    GZIP = False
     # -------------------------------------------------------
     # debug toolbar configuration
     # -------------------------------------------------------
@@ -60,7 +59,8 @@ class HerokuConfiguration(
     # hosts configuration
     # -------------------------------------------------------
     ALLOWED_HOSTS = [
-        '*'
+        'api.yagaprivate.com',
+        'www.yagaprivate.com'
     ]
     USE_X_FORWARDED_HOST = True
     BEHIND_PROXY = True
@@ -78,7 +78,17 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # cache configuration
     # -------------------------------------------------------
-    CACHES = memcacheify()
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'PICKLE_VERSION': 2,
+                'IGNORE_EXCEPTIONS': True,
+                'CONNECTION_POOL_CLASS': 'redis_sessions_fork.redis_server.connection_pool'  # noqa
+            }
+        }
+    }
     # -------------------------------------------------------
     # sessions\message configuration
     # -------------------------------------------------------
@@ -87,8 +97,8 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------
-    SESSION_COOKIE_DOMAIN = None
-    CSRF_COOKIE_DOMAIN = None
+    SESSION_COOKIE_DOMAIN = 'www.yagaprivate.com'
+    CSRF_COOKIE_DOMAIN = 'www.yagaprivate.com'
     # -------------------------------------------------------
     # email backend configuration
     # -------------------------------------------------------

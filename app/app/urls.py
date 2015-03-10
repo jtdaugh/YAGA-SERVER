@@ -48,7 +48,7 @@ hijack_login_with_id_urlpattern = url(
 )
 
 for urlpattern in hijack_urlpatterns:
-    if 'userId' in urlpattern._regex:
+    if 'user_id' in urlpattern._regex:
         login_with_id_pattern = urlpattern
         break
 

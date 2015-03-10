@@ -235,7 +235,7 @@ class APNSProvider(
 class IOSNotification(
     object
 ):
-    VENDOR = Device.IOS
+    VENDOR = Device.Vendor.IOS
     BROADCAST = False
     TARGET = False
 

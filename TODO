@@ -1,7 +1,2 @@
 msg_cods
-disable PATCH
-captions null?
 fix tests
-apns tokens cleanup
-remove likers endpoint
-fix all bridge

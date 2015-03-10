@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
                 ('id', app.model_fields.UUIDField(max_length=32, serialize=False, editable=False, primary_key=True, blank=True)),
                 ('phone', app.model_fields.PhoneNumberField(unique=True, max_length=255, verbose_name='Phone Number')),
-                ('name', models.CharField(max_length=255, unique=True, null=True, verbose_name='Name', blank=True)),
+                ('name', models.CharField(max_length=255, null=True, verbose_name='Name', blank=True)),
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='Staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='Active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date joined')),
@@ -38,6 +38,12 @@ class Migration(migrations.Migration):
             },
             bases=(models.Model,),
         ),
+        migrations.RunSQL('''
+            CREATE UNIQUE INDEX accounts_user_unique
+            ON accounts_user
+            USING btree
+            (lower(name::text))
+        '''),
         migrations.CreateModel(
             name='Token',
             fields=[
