@@ -6,10 +6,12 @@ from future.builtins import (  # noqa
 
 from django.contrib import admin
 
-from .models import Code, Contact, Device, Group, Like, Member, Post
+from .models import (
+    Code, Contact, Device, Group, Like, Member, MonkeyUser, Post
+)
 
 
-class CodeAdmin(
+class CodeModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('phone', 'request_id', 'expire_at')
@@ -19,7 +21,7 @@ class CodeAdmin(
     search_fields = ('phone', 'request_id',)
 
 
-class GroupAdmin(
+class GroupModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('pk', 'name', 'created_at', 'members_count', 'posts_count')
@@ -29,7 +31,7 @@ class GroupAdmin(
     search_fields = ('name', 'pk')
 
 
-class PostAdmin(
+class PostModelAdmin(
     admin.ModelAdmin
 ):
     list_display = (
@@ -44,7 +46,7 @@ class PostAdmin(
     search_fields = ('attachment', 'name', 'pk')
 
 
-class MemberAdmin(
+class MemberModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('user', 'group', 'mute', 'joined_at')
@@ -52,7 +54,7 @@ class MemberAdmin(
     ordering = ('-joined_at', 'mute')
 
 
-class LikeAdmin(
+class LikeModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('user', 'post',)
@@ -60,7 +62,7 @@ class LikeAdmin(
     ordering = ('-created_at',)
 
 
-class DeviceAdmin(
+class DeviceModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('user', 'token', 'vendor', 'locale')
@@ -68,16 +70,23 @@ class DeviceAdmin(
     list_filter = ('vendor', 'locale')
 
 
-class ContactAdmin(
+class ContactModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('pk', 'user')
 
 
-admin.site.register(Group, GroupAdmin)
-admin.site.register(Code, CodeAdmin)
-admin.site.register(Contact, ContactAdmin)
-admin.site.register(Post, PostAdmin)
-admin.site.register(Member, MemberAdmin)
-admin.site.register(Like, LikeAdmin)
-admin.site.register(Device, DeviceAdmin)
+class MonkeyUserModelAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('pk', 'user')
+
+
+admin.site.register(Group, GroupModelAdmin)
+admin.site.register(Code, CodeModelAdmin)
+admin.site.register(Contact, ContactModelAdmin)
+admin.site.register(Post, PostModelAdmin)
+admin.site.register(Member, MemberModelAdmin)
+admin.site.register(Like, LikeModelAdmin)
+admin.site.register(Device, DeviceModelAdmin)
+admin.site.register(MonkeyUser, MonkeyUserModelAdmin)

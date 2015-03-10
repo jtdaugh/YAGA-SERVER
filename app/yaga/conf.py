@@ -38,7 +38,9 @@ class YagaAppConf(
         'apns/cert_file'
     )
     APNS_POOL = True
-    APNS_POOL_TIMEOUT = datetime.timedelta(minutes=1)
+    APNS_POOL_TIMEOUT = datetime.timedelta(seconds=30)
+
+    MONKEY_LOGIN = True
 
     class Meta:
         prefix = 'yaga'

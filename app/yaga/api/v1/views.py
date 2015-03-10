@@ -4,6 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
 from django.utils.translation import ugettext_lazy as _
@@ -15,7 +17,7 @@ from app.views import NonAtomicView
 
 from . import permissions, serializers, throttling
 from ...conf import settings
-from ...models import Code, Contact, Group, Like, Member, Post
+from ...models import Code, Contact, Group, Like, Member, MonkeyUser, Post
 from ...utils import patch_as_put
 
 
@@ -61,6 +63,21 @@ class CodeCreateAPIView(
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid():
+            if settings.YAGA_MONKEY_LOGIN:
+                monkey = MonkeyUser.objects.filter(
+                    user__phone=serializer.validated_data['phone']
+                ).first()
+
+                if monkey is not None:
+                    return Response(
+                        {
+                            'expire_at': datetime.datetime(
+                                datetime.MAXYEAR, 12, 31
+                            )
+                        },
+                        status=status.HTTP_201_CREATED
+                    )
+
             code = Code()
             code.phone = serializer.validated_data['phone']
 

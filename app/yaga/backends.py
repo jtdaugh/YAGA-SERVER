@@ -6,7 +6,8 @@ from future.builtins import (  # noqa
 
 from django.contrib.auth import get_user_model
 
-from .models import Code
+from .conf import settings
+from .models import Code, MonkeyUser
 
 
 class CodeBackend(
@@ -21,6 +22,14 @@ class CodeBackend(
     def authenticate(self, phone=None, code=None):
         if None is (phone, code):
             return None
+
+        if settings.YAGA_MONKEY_LOGIN:
+            monkey = MonkeyUser.objects.filter(
+                user__phone=phone
+            ).first()
+
+            if monkey is not None:
+                return monkey.user
 
         code_obj = Code.objects.filter(
             phone=phone,

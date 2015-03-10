@@ -15,7 +15,7 @@ from .forms import UserChangeForm, UserCreationForm
 from .models import Token
 
 
-class UserAdmin(
+class UserModelAdmin(
     BaseUserAdmin, HijackUserAdminMixin
 ):
     def get_urls(self):
@@ -27,7 +27,7 @@ class UserAdmin(
             )
         )
 
-        base_urlpatterns = super(UserAdmin, self).get_urls()
+        base_urlpatterns = super(UserModelAdmin, self).get_urls()
 
         for urlpattern in base_urlpatterns:
             if '/password/' in urlpattern._regex:
@@ -97,7 +97,7 @@ class UserAdmin(
     filter_horizontal = ('groups', 'user_permissions')
 
 
-class TokenAdmin(
+class TokenModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('user', 'key', 'created_at')
@@ -107,5 +107,5 @@ class TokenAdmin(
     search_fields = ('key',)
 
 
-admin.site.register(get_user_model(), UserAdmin)
-admin.site.register(Token, TokenAdmin)
+admin.site.register(get_user_model(), UserModelAdmin)
+admin.site.register(Token, TokenModelAdmin)

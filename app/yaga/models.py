@@ -541,3 +541,26 @@ class Contact(
 
     def __str__(self):
         return smart_text(self.pk)
+
+
+@python_2_unicode_compatible
+class MonkeyUser(
+    models.Model
+):
+    id = UUIDField(
+        auto=True,
+        primary_key=True,
+        version=4
+    )
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('User')
+    )
+
+    class Meta:
+        verbose_name = _('Monkey User')
+        verbose_name_plural = _('Monkey Users')
+
+    def __str__(self):
+        return smart_text(self.pk)
