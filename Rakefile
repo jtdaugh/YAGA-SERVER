@@ -1,5 +1,5 @@
 APP_DIR = 'app'
-PROCESS_WORKERS = 1
+PROCESS_WORKERS = 5
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = false
 NEWRELIC_CMD = 'newrelic-admin run-program '

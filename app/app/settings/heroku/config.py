@@ -81,11 +81,10 @@ class HerokuConfiguration(
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': os.environ['REDISCLOUD_URL'],
             'OPTIONS': {
-                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
                 'PICKLE_VERSION': 2,
-                'IGNORE_EXCEPTIONS': True,
-                'CONNECTION_POOL_CLASS': 'redis_sessions_fork.redis_server.connection_pool'  # noqa
+                'IGNORE_EXCEPTIONS': True
             }
         }
     }
