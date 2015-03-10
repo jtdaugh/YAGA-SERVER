@@ -12,9 +12,9 @@ from fabric.operations import prompt
 
 APP_DIR = 'app'
 DYNOS = {
-    'web': 2,
+    'web': 1,
     'celery_broker': 1,
-    'celery_worker': 2,
+    'celery_worker': 1,
     'sqs': 1
 }
 # STOP_TIMEOUT = 30
