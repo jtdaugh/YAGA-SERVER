@@ -74,7 +74,7 @@ class UnicodeField(
             if ' ' in data:
                 raise ValidationError(_('Space is not supported.'))
 
-        allowed_chr = list(map(
+        allowed_chr = list(set(list(map(
             chr,
             list(range(0x0030, 0x0039 + 1)) +
             list(range(0x0041, 0x005A + 1)) +
@@ -101,7 +101,7 @@ class UnicodeField(
             list(range(0x1F550, 0x1F579 + 1)) +
             list(range(0x1F57B, 0x1F5A3 + 1)) +
             list(range(0x1F5A5, 0x1F5FF + 1))
-        ))
+        ))))
 
         allowed_non_leading_chr = list(map(
             chr,
@@ -113,7 +113,7 @@ class UnicodeField(
         if data[0] in allowed_non_leading_chr:
             raise ValidationError(_('Wrong leading character.'))
 
-        for symbol in ''.join(list(filter(lambda char: char != ' ', data))):
+        for symbol in data.replace(' ', ''):
             if symbol not in allowed_chr:
                 raise ValidationError(_('Unsupported character.'))
 
