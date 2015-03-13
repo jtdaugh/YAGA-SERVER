@@ -26,4 +26,7 @@ class SessionStore(
     def decode(self, session_data):
         serialized = base64.b64decode(force_bytes(session_data))
 
-        return self.serializer().loads(serialized)
+        try:
+            return self.serializer().loads(serialized)
+        except Exception:
+            return {}
