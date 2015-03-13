@@ -68,6 +68,16 @@
                                     {% trans 'Index' %}
                                 </a>
                             </li>
+                            {% if request.user.is_authenticated %}
+                                {% if perms.app.view_stats %}
+                                    <li>
+                                        <a href="{% url 'yaga:basic_stats' %}">
+                                            <i class="fa fa-bar-chart"></i>
+                                            {% trans 'Basic stats' %}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
                         </ul>
                     {% endactiveurl %}
                 {% endblock %}

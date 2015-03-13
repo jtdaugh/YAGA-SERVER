@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
+from .views import BasicStatsTemplateView
 
 api_urlpatterns = patterns(
     '',
@@ -21,5 +22,10 @@ urlpatterns = patterns(
     url(
         r'^api/',
         include(api_urlpatterns, namespace='api')
-    )
+    ),
+    url(
+        r'^stats/basic/',
+        BasicStatsTemplateView.as_view(),
+        name='basic_stats'
+    ),
 )

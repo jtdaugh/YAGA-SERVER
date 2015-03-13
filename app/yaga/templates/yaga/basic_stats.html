@@ -1,0 +1,85 @@
+{% extends 'content.html' %}
+
+{% load i18n %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {% trans 'Stats' %}
+    |
+    {% trans 'Basic' %}
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li>
+            <a href="{% url 'index' %}">
+                {% trans 'Index' %}
+            </a>
+        </li>
+        <li class="active">
+            {% trans 'Basic Stats' %}
+        </li>
+    </ol>
+{% endblock %}
+
+{% block content %}
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>
+                </th>
+                <th>
+                    {% trans 'Total' %}
+                </th>
+                <th>
+                    {% trans 'Today' %}
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    {% trans 'Users' %}
+                </th>
+                <th>
+                    {{ stats.total.users }}
+                </th>
+                <th>
+                    {{ stats.today.users }}
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    {% trans 'Groups' %}
+                </th>
+                <th>
+                    {{ stats.total.groups }}
+                </th>
+                <th>
+                    {{ stats.today.groups }}
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    {% trans 'Posts' %}
+                </th>
+                <th>
+                    {{ stats.total.posts }}
+                </th>
+                <th>
+                    {{ stats.today.posts }}
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    {% trans 'Likes' %}
+                </th>
+                <th>
+                    {{ stats.total.likes }}
+                </th>
+                <th>
+                    {{ stats.today.likes }}
+                </th>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

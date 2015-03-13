@@ -28,9 +28,9 @@ def get_app_content_type():
 
 
 def register_permission(codename):
-    name = 'can_{codename}'.format(
+    name = 'Can {codename}'.format(
         codename=codename.replace('_', ' ')
-    ).capitalize()
+    )
 
     permission, created = Permission.objects.get_or_create(
         content_type=get_app_content_type(),

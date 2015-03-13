@@ -1,5 +1,21 @@
 {% extends 'content.html' %}
 
+{% load i18n %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {% trans 'Index' %}
+{% endblock %}
+
+{% block breadcrumb %}
+    <ol class="breadcrumb">
+        <li class="active">
+            {% trans 'Index' %}
+        </li>
+    </ol>
+{% endblock %}
+
 {% block content %}
-    index
+    {% trans 'Index' %}
 {% endblock %}

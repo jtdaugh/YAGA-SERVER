@@ -73,6 +73,7 @@ class BaseConfiguration(
     # global permissions configuration
     # -------------------------------------------------------
     GLOBAL_PERMISSIONS = [
+        'view_stats'
     ]
     # -------------------------------------------------------
     # flanker configuration
