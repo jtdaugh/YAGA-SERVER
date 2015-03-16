@@ -7,11 +7,13 @@ from future.builtins import (  # noqa
 import os
 
 import closure
-import psycopg2.extensions
 import yuicompressor
 from configurations import Configuration
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
+
+
+# import psycopg2.extensions
 
 
 class InvalidTemplateObjectException(
@@ -158,9 +160,9 @@ class BaseConfiguration(
             'ATOMIC_REQUESTS': True,
             'CONN_MAX_AGE': 30,
             'AUTOCOMMIT': True,
-            'OPTIONS': {
-                'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
-            }
+            # 'OPTIONS': {
+            #     'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
+            # }
         }
     }
     # -------------------------------------------------------

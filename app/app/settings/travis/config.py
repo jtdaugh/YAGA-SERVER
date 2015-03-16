@@ -5,9 +5,11 @@ from future.builtins import (  # noqa
 )
 
 import dj_database_url
-import psycopg2.extensions
 
 from ..base.config import BaseConfiguration, Implementation, Initialization
+
+
+# import psycopg2.extensions
 
 
 class TravisConfiguration(
@@ -74,9 +76,9 @@ class TravisConfiguration(
         'ATOMIC_REQUESTS': True,
         'CONN_MAX_AGE': 30,
         'AUTOCOMMIT': True,
-        'OPTIONS': {
-            'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
-        }
+        # 'OPTIONS': {
+        #     'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
+        # }
     })
     # -------------------------------------------------------
     # cache configuration
