@@ -11,6 +11,7 @@ import yuicompressor
 from configurations import Configuration
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
+import psycopg2.extensions
 
 
 class InvalidTemplateObjectException(
@@ -154,13 +155,12 @@ class BaseConfiguration(
         'default': {
             'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
             'NAME': 'app',
-            # 'ENGINE': 'transaction_hooks.backends.sqlite3',
-            # 'NAME': os.path.abspath(
-            #     os.path.join(PROJECT_ROOT, 'app.sqlite')
-            # ),
             'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 30,
             'AUTOCOMMIT': True,
-            'CONN_MAX_AGE': None
+            'OPTIONS': {
+                'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
+            }
         }
     }
     # -------------------------------------------------------
@@ -611,7 +611,7 @@ class BaseConfiguration(
     CELERY_ENABLE_UTC = True
     CELERY_TASK_RESULT_EXPIRES = 60 * 60
     CELERY_SEND_TASK_SENT_EVENT = True
-    CELERY_MESSAGE_COMPRESSION = 'bzip2'
+    CELERY_MESSAGE_COMPRESSION = 'zlib'
     CELERY_RESULT_SERIALIZER = MESSAGE_PROTOCOL
     CELERY_ACCEPT_CONTENT = (MESSAGE_PROTOCOL,)
     CELERY_IGNORE_RESULT = False

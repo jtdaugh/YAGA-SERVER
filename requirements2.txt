@@ -129,7 +129,7 @@ PyYAML==3.11
 raven==5.2.0
 redis==2.10.3
 regex==2014.12.24
-requests==2.5.3
+requests==2.6.0
 responses==0.3.0
 rest-condition==1.0.1
 six==1.5.2

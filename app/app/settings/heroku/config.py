@@ -72,8 +72,11 @@ class HerokuConfiguration(
     DATABASES['default'].update({
         'ENGINE': 'transaction_hooks.backends.postgresql_psycopg2',
         'ATOMIC_REQUESTS': True,
+        'CONN_MAX_AGE': 30,
         'AUTOCOMMIT': True,
-        'CONN_MAX_AGE': 30
+        'OPTIONS': {
+            'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_REPEATABLE_READ  # noqa
+        }
     })
     # -------------------------------------------------------
     # cache configuration
