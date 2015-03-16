@@ -7,11 +7,11 @@ from future.builtins import (  # noqa
 import os
 
 import closure
+import psycopg2.extensions
 import yuicompressor
 from configurations import Configuration
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-import psycopg2.extensions
 
 
 class InvalidTemplateObjectException(

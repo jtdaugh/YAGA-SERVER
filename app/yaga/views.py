@@ -6,12 +6,12 @@ from future.builtins import (  # noqa
 
 import datetime
 
-from django.views.generic import TemplateView
+from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from braces.views import LoginRequiredMixin, PermissionRequiredMixin
+from django.views.generic import TemplateView
 
-from .models import Group, Post, Like
+from .models import Group, Like, Post
 
 
 class BasicStatsTemplateView(

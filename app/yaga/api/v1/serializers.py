@@ -15,8 +15,8 @@ from accounts.models import Token
 
 from ...conf import settings
 from ...models import Code, Contact, Device, Group, Member, Post
-from .validators import UniqueLowerUserName
 from .fields import CodeField, PhoneField, TimeStampField, UnicodeField
+from .validators import UniqueLowerUserName
 
 
 class NonStrictListField(

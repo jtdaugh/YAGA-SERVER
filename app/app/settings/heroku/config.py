@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 import os
 
 import dj_database_url
+import psycopg2.extensions
 
 from ..base.config import BaseConfiguration, Implementation, Initialization
 
