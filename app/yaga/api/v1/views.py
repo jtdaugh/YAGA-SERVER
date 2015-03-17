@@ -405,6 +405,7 @@ class PostCreateAPIView(
         obj.group = group
         if serializer.validated_data.get('name'):
             obj.name = serializer.validated_data['name']
+            obj.namer = request.user
         obj.save()
 
         serializer = self.get_serializer(obj)

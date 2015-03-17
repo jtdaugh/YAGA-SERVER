@@ -220,6 +220,14 @@ class Post(
         null=True
     )
 
+    namer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Namer'),
+        related_name='post_namer',
+        null=True,
+        blank=True
+    )
+
     name_x = models.PositiveSmallIntegerField(
         verbose_name=_('Name X'),
         blank=True,

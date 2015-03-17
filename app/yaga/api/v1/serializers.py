@@ -161,6 +161,8 @@ class PostSerializer(
 
     user = UserSerializer(read_only=True)
 
+    namer = UserSerializer(read_only=True)
+
     likers = UserSerializer(read_only=True, many=True)
 
     name_x = serializers.IntegerField(
@@ -180,7 +182,7 @@ class PostSerializer(
         caption_fields = ('name_x', 'name_y', 'font')
         fields = (
             'attachment', 'ready_at', 'updated_at',
-            'user', 'id', 'name', 'deleted', 'likers'
+            'user', 'id', 'name', 'deleted', 'likers', 'namer'
         ) + caption_fields
         read_only_fields = ('attachment', 'ready_at', 'deleted')
 
@@ -217,6 +219,15 @@ class PostSerializer(
             if _bool(coords[0]) ^ _bool(coords[1]):
                 msg = _('Options name_x and name_y must be set together.')
                 raise ValidationError(msg)
+
+        if (
+            self.instance
+            and
+            attrs.get('name')
+            and
+            self.instance.tracker.previous('name') != attrs['name']
+        ):
+            self.instance.namer = self.instance.bridge.updater
 
         return attrs
 

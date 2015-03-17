@@ -581,7 +581,7 @@ class NewCaptionIOSNotification(
 
     def get_target_kwargs(self):
         return {
-            'user': self.post.bridge.updater.get_username(),
+            'user': self.post.namer.get_username(),
             'group': self.post.group.name,
         }
 
