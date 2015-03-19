@@ -45,11 +45,25 @@ def code_expire_at():
     return timezone.now() + settings.YAGA_SMS_EXPIRATION
 
 
-def post_upload_to(instance, filename=None):
+def post_upload_to(instance, filename=None, prefix=None):
     return os.path.join(
-        'posts',
+        prefix,
         str(instance.group.pk),
         str(instance.pk)
+    )
+
+
+def post_attachment_upload_to(instance, filename=None):
+    return post_upload_to(
+        instance, filename=filename,
+        prefix=settings.YAGA_ATTACHMENT_PREFIX
+    )
+
+
+def post_attachment_preview_upload_to(instance, filename=None):
+    return post_upload_to(
+        instance, filename=filename,
+        prefix=settings.YAGA_ATTACHMENT_PREVIEW_PREFIX
     )
 
 
@@ -258,20 +272,20 @@ class Post(
 
     attachment = models.FileField(
         verbose_name=_('Attachment'),
-        upload_to=post_upload_to,
+        upload_to=post_attachment_upload_to,
+        blank=True,
+        null=True
+    )
+
+    attachment_preview = models.FileField(
+        verbose_name=_('Attachment Preview'),
+        upload_to=post_attachment_preview_upload_to,
         blank=True,
         null=True
     )
 
     checksum = models.CharField(
         verbose_name=_('Checksum'),
-        max_length=255,
-        blank=True,
-        null=True
-    )
-
-    mime = models.CharField(
-        verbose_name=_('Mime'),
         max_length=255,
         blank=True,
         null=True
@@ -330,34 +344,43 @@ class Post(
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
 
-    def set_meta(self):
-        stream = self.attachment.file.key.read(1024)
+    def is_valid_file_obj(self, field):
+        file_obj = getattr(self, field)
 
-        self.mime = self.get_mime(stream)
-
-        self.checksum = self.attachment.file.key.etag.strip('"')
-
-    def is_valid(self):
-        if not self.attachment:
+        if not file_obj:
             return False
 
-        if self.mime != settings.YAGA_AWS_ALLOWED_MIME:
+        stream = file_obj.file.key.read(1024)
+
+        mime = self.get_mime(stream)
+
+        if mime != settings.YAGA_AWS_ALLOWED_MIME[field]:
             return False
 
-        if self.attachment.file.size > settings.YAGA_AWS_UPLOAD_MAX_LENGTH:
+        if (
+            file_obj.file.size
+            >
+            settings.YAGA_AWS_UPLOAD_MAX_LENGTH
+        ):
             return False
 
-        if self.attachment.file.size == 0:
+        if file_obj.file.size == 0:
             return False
 
         return True
 
-    def sign_s3(self):
+    def is_valid_attachment(self):
+        return self.is_valid_file_obj('attachment')
+
+    def is_valid_attachment_preview(self):
+        return self.is_valid_file_obj('attachment_preview')
+
+    def sign_s3(self, mime, path_fn):
         access_key = settings.AWS_ACCESS_KEY_ID
         secret_access_key = settings.AWS_SECRET_ACCESS_KEY
         bucket = settings.AWS_STORAGE_BUCKET_NAME
 
-        content_type = settings.YAGA_AWS_ALLOWED_MIME
+        content_type = mime
 
         expires_in = timezone.now() + settings.YAGA_AWS_UPLOAD_EXPIRES
 
@@ -367,7 +390,7 @@ class Post(
 
         key = os.path.join(
             settings.MEDIA_LOCATION,
-            post_upload_to(self)
+            path_fn(self)
         )
 
         policy_object = json.dumps({

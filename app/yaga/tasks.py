@@ -65,10 +65,20 @@ class PostCleanup(
             post.delete()
 
 
-class PostProcess(
-    celery.AtomicTask
+class UploadProcess(
+    celery.Task
 ):
     def run(self, key):
+        if settings.YAGA_ATTACHMENT_PREVIEW_PREFIX in key:
+            PostAttachmentPreviewProcess().delay(key)
+        elif settings.YAGA_ATTACHMENT_PREFIX in key:
+            PostAttachmentProcess().delay(key)
+
+
+class PostAttachmentProcess(
+    celery.AtomicTask
+):
+    def setup_post(self, key):
         key = key.replace(settings.MEDIA_LOCATION, '')
 
         key = key.strip('/')
@@ -80,17 +90,36 @@ class PostProcess(
             pk=post_pk
         )
 
-        post.attachment = key
+        self.post = post
+        self.key = key
 
-        post.set_meta()
+    def run(self, key):
+        self.setup_post(key)
 
-        if post.is_valid():
-            post.ready = True
-            post.ready_at = timezone.now()
-            post.bridge.uploaded = True
-            post.save()
+        self.post.attachment = self.key
+
+        if self.post.is_valid_attachment():
+            self.post.checksum = self.attachment.file.key.etag.strip('"')
+            self.post.ready = True
+            self.post.ready_at = timezone.now()
+            self.post.bridge.uploaded = True
+            self.post.save()
         else:
-            post.delete()
+            self.post.delete()
+
+
+class PostAttachmentPreviewProcess(
+    PostAttachmentProcess
+):
+    def run(self, key):
+        self.setup_post(key)
+
+        self.post.attachment_preview = self.key
+
+        if self.post.is_valid_attachment_preview():
+            self.post.save()
+        else:
+            self.post.attachment_preview.delete()
 
 
 class APNSPush(

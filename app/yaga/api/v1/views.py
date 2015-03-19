@@ -17,7 +17,10 @@ from app.views import NonAtomicView
 
 from . import permissions, serializers, throttling
 from ...conf import settings
-from ...models import Code, Contact, Group, Like, Member, MonkeyUser, Post
+from ...models import (
+    Code, Contact, Group, Like, Member, MonkeyUser, Post,
+    post_attachment_preview_upload_to, post_attachment_upload_to
+)
 from ...utils import patch_as_put
 
 
@@ -411,7 +414,16 @@ class PostCreateAPIView(
         serializer = self.get_serializer(obj)
         response = dict(serializer.data)
 
-        response['meta'] = obj.sign_s3()
+        response['meta'] = {
+            'attachment': obj.sign_s3(
+                settings.YAGA_AWS_ALLOWED_MIME['attachment'],
+                post_attachment_upload_to
+            ),
+            'attachment_preview': obj.sign_s3(
+                settings.YAGA_AWS_ALLOWED_MIME['attachment_preview'],
+                post_attachment_preview_upload_to
+            )
+        }
 
         return Response(
             response,

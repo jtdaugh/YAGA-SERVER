@@ -24,7 +24,13 @@ class YagaAppConf(
 
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
     AWS_UPLOAD_MAX_LENGTH = 25 * 1024 * 1024
-    AWS_ALLOWED_MIME = 'video/mp4'
+    AWS_ALLOWED_MIME = {
+        'attachment': 'video/mp4',
+        'attachment_preview': 'image/gif'
+    }
+    ATTACHMENT_PREVIEW_PREFIX = 'posts_preview'
+    ATTACHMENT_PREFIX = 'posts'
+
     AWS_SQS_QUEUE = 'yaga-prod'
 
     PUSH_POST_WINDOW = datetime.timedelta(minutes=5)

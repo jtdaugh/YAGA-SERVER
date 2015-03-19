@@ -35,13 +35,13 @@ class PostModelAdmin(
     admin.ModelAdmin
 ):
     list_display = (
-        'pk', 'name', 'user', 'likes', 'group', 'mime',
+        'pk', 'name', 'user', 'likes', 'group',
         'ready', 'deleted', 'updated_at'
     )
 
     ordering = ('-ready_at',)
 
-    list_filter = ('ready', 'mime', 'deleted')
+    list_filter = ('ready', 'deleted')
 
     search_fields = ('attachment', 'name', 'pk')
 
