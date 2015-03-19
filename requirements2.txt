@@ -9,7 +9,7 @@ celery==3.1.17
 cffi==0.8.6
 chardet==2.3.0
 click==3.3
-closure==20140110
+closure==20150315
 Collectfast==0.2.1
 coverage==3.7.1
 cryptography==0.7.1
@@ -128,11 +128,11 @@ pytz==2014.10
 PyYAML==3.11
 raven==5.2.0
 redis==2.10.3
-regex==2014.12.24
+regex==2015.3.18
 requests==2.6.0
 responses==0.3.0
 rest-condition==1.0.1
-six==1.5.2
+six==1.9.0
 SQLAlchemy==0.9.9
 sqlparse==0.1.14
 tox==1.9.0
