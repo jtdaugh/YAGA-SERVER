@@ -118,6 +118,13 @@ class PostReceiver(
 
             connection.on_commit(delete_attachment)
 
+        if instance.deleted and instance.attachment_preview:
+            def delete_attachment_preview():
+                with transaction.atomic():
+                    instance.attachment_preview.delete()
+
+            connection.on_commit(delete_attachment_preview)
+
     @staticmethod
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
