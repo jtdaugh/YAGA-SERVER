@@ -63,7 +63,9 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     ALLOWED_HOSTS = [
         'api.yagaprivate.com',
-        'www.yagaprivate.com'
+        'yaga-prod.herokuapp.com',
+        'www.yagaprivate.com',
+        'yaga-dev.herokuapp.com'
     ]
     USE_X_FORWARDED_HOST = True
     BEHIND_PROXY = True
@@ -102,8 +104,8 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------
-    SESSION_COOKIE_DOMAIN = 'www.yagaprivate.com'
-    CSRF_COOKIE_DOMAIN = 'www.yagaprivate.com'
+    SESSION_COOKIE_DOMAIN = os.environ['DOMAIN']
+    CSRF_COOKIE_DOMAIN = os.environ['DOMAIN']
     # -------------------------------------------------------
     # email backend configuration
     # -------------------------------------------------------
