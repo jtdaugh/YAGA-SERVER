@@ -375,7 +375,7 @@ class BaseConfiguration(
     AWS_REGION = 'us-west-2'
     AWS_ACCESS_KEY_ID = 'AKIAJ3BOSZSPPD7EX7KA'
     AWS_SECRET_ACCESS_KEY = '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'
-    AWS_STORAGE_BUCKET_NAME = 'yaga-prod'
+    AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True

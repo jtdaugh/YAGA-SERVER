@@ -31,18 +31,26 @@ class YagaAppConf(
     ATTACHMENT_PREVIEW_PREFIX = 'posts_preview'
     ATTACHMENT_PREFIX = 'posts'
 
-    AWS_SQS_QUEUE = 'yaga-prod'
+    AWS_SQS_QUEUE = os.environ.get('AWS_SQS_QUEUE', 'yaga-dev')
 
     PUSH_POST_WINDOW = datetime.timedelta(minutes=5)
     PUSH_NEW_MEMBERS_BATCH_LIMIT = 3
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 
-    APNS_MODE = 'push_production'  # sandox
+    APNS_MODE = os.environ.get('APNS_MODE', 'sandox')
+
     APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
-        'apns/cert_file'
+        'apns/{mode}'.format(
+            mode=APNS_MODE
+        )
     )
+
+    APNS_MODE = 'push_{mode}'.format(
+        mode=APNS_MODE
+    )
+
     APNS_POOL = True
     APNS_POOL_TIMEOUT = datetime.timedelta(seconds=30)
 
