@@ -99,7 +99,7 @@ class PostAttachmentProcess(
         self.post.attachment = self.key
 
         if self.post.is_valid_attachment():
-            self.post.checksum = self.attachment.file.key.etag.strip('"')
+            self.post.checksum = self.post.attachment.file.key.etag.strip('"')
             self.post.ready = True
             self.post.ready_at = timezone.now()
             self.post.bridge.uploaded = True
