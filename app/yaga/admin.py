@@ -28,7 +28,7 @@ class GroupModelAdmin(
 
     ordering = ('-created_at',)
 
-    search_fields = ('name', 'pk')
+    search_fields = ('name', 'id')
 
 
 class PostModelAdmin(
@@ -43,7 +43,7 @@ class PostModelAdmin(
 
     list_filter = ('ready', 'deleted')
 
-    search_fields = ('attachment', 'name', 'pk')
+    search_fields = ('attachment', 'name', 'id')
 
 
 class MemberModelAdmin(
@@ -68,6 +68,8 @@ class DeviceModelAdmin(
     list_display = ('user', 'token', 'vendor', 'locale')
 
     list_filter = ('vendor', 'locale')
+
+    search_fields = ('token',)
 
 
 class ContactModelAdmin(
