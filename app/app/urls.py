@@ -74,6 +74,7 @@ if settings.MODELS_AUTO_REGISTRATION:
             pass
 
 
+handler400 = 'app.views.handler400'
 handler403 = 'app.views.handler403'
 handler404 = 'app.views.handler404'
 handler500 = 'app.views.handler500'
@@ -99,18 +100,6 @@ if settings.DEBUG:
     # media
     urlpatterns += static(
         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
-    )
-
-
-if settings.DEBUG_TOOLBAR:
-    import debug_toolbar
-
-    urlpatterns += patterns(
-        '',
-        url(
-            r'^__debug__/',
-            include(debug_toolbar.urls)
-        ),
     )
 
 

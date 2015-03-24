@@ -19,6 +19,11 @@ def csrf(request, reason=''):
     return render(request, 'csrf.html', {'error': error}, status=400)
 
 
+def handler400(request):
+    error = _('400')
+    return render(request, '400.html', {'error': error}, status=400)
+
+
 def handler403(request):
     error = _('403')
     return render(request, '403.html', {'error': error}, status=403)

@@ -11,7 +11,7 @@ from django.db.models.signals import post_migrate
 from .model_permissions import register_global_permission
 from .receivers import ModelReceiver
 from .signals import ModelSignal, register
-from .utils import Bridge, update_permissions
+from .utils import Bridge  # , update_permissions
 
 
 def receiver_factory():
@@ -58,4 +58,4 @@ for model in get_models():
 
 
 post_migrate.connect(register_global_permission)
-post_migrate.connect(update_permissions)
+# post_migrate.connect(update_permissions)

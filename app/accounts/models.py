@@ -145,6 +145,9 @@ class AbstractUser(
         abstract = True
         verbose_name = _('User')
         verbose_name_plural = _('Users')
+        permissions = (
+            ('view_user', 'Can view User'),
+        )
 
     def get_username(self):
         if self.name:

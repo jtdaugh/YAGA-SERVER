@@ -7,7 +7,9 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
-from .views import BasicStatsTemplateView
+from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
+from .views.user.views import UserBaseRedirectView, UserListView
+from .views.post.views import PostBaseRedirectView, PostListView
 
 api_urlpatterns = patterns(
     '',
@@ -17,15 +19,69 @@ api_urlpatterns = patterns(
     ),
 )
 
+stats_urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        StatsBaseRedirectView.as_view(),
+        name='base'
+    ),
+    url(
+        r'^basic/$',
+        BasicStatsTemplateView.as_view(),
+        name='basic'
+    )
+)
+
+user_urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        UserBaseRedirectView.as_view(),
+        name='base'
+    ),
+    url(
+        r'^list/$',
+        UserListView.as_view(),
+        name='list'
+    ),
+)
+
+post_urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        PostBaseRedirectView.as_view(),
+        name='base'
+    ),
+    url(
+        r'^list/$',
+        PostListView.as_view(),
+        name='list'
+    ),
+)
+
 urlpatterns = patterns(
     '',
+    url(
+        r'^$',
+        StatsBaseRedirectView.as_view(),
+        name='stats_base_redirec'
+    ),
     url(
         r'^api/',
         include(api_urlpatterns, namespace='api')
     ),
     url(
-        r'^stats/basic/',
-        BasicStatsTemplateView.as_view(),
-        name='basic_stats'
+        r'^stats/',
+        include(stats_urlpatterns, namespace='stats')
     ),
+    url(
+        r'^user/',
+        include(user_urlpatterns, namespace='user')
+    ),
+    url(
+        r'^post/',
+        include(post_urlpatterns, namespace='post')
+    )
 )

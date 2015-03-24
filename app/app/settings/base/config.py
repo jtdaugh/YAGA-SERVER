@@ -276,10 +276,10 @@ class BaseConfiguration(
         'modernizr#2.8.3',
         'respond#1.4.2',
         'jquery#2.1.3',
-        'bootstrap#3.3.1',
-        'font-awesome#4.2.0',
-        'handlebars#2.0.0',
-        'underscore#1.7.0',
+        'bootstrap#3.3.4',
+        'font-awesome#4.3.0',
+        'handlebars#3.0.0',
+        'underscore#1.8.2',
         'json3#3.3.2',
     )
     # -------------------------------------------------------

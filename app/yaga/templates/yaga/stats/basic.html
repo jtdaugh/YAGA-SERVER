@@ -5,22 +5,21 @@
 {% block title %}
     {{ block.super }}
     |
-    {% trans 'Stats' %}
-    |
-    {% trans 'Basic' %}
+    {% trans 'Basic Stats' %}
 {% endblock %}
 
-{% block breadcrumb %}
-    <ol class="breadcrumb">
-        <li>
-            <a href="{% url 'index' %}">
-                {% trans 'Index' %}
-            </a>
-        </li>
-        <li class="active">
-            {% trans 'Basic Stats' %}
-        </li>
-    </ol>
+{% block breadcrumbs_list %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'yaga:stats:base' %}">
+            {% trans 'Stats' %}
+        </a>
+    </li>
+{% endblock %}
+
+
+{% block breadcrumbs_active %}
+    {% trans 'Basic Stats' %}
 {% endblock %}
 
 {% block content %}

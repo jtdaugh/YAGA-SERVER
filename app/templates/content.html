@@ -1,11 +1,29 @@
 {% extends 'base.html' %}
 
-{% block layout %}
+{% load i18n %}
+
+{% load activeurl %}
+
+{% block container %}
     <div class="row">
-        <div class="col-md-12">
-            {% block breadcrumb %}
-            {% endblock %}
-        </div>
+        {% block breadcrumbs %}
+            <div class="col-md-12">
+                <ol class="breadcrumb">
+                    {% block breadcrumbs_list %}
+                        <li>
+                            <a href="{% url 'index' %}">
+                                {% trans 'Index' %}
+                            </a>
+                        </li>
+                    {% endblock %}
+                    <li class="active">
+                        {% block breadcrumbs_active %}
+                        {% endblock %}
+                    </li>
+                </ol>
+            </div>
+        {% endblock %}
+
         <div class="col-md-12">
             {% block content %}
             {% endblock %}

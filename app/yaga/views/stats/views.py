@@ -8,10 +8,23 @@ import datetime
 
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth import get_user_model
+from django.core.urlresolvers import reverse_lazy
 from django.utils import timezone
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 
-from .models import Group, Like, Post
+from ...models import Group, Like, Post
+
+
+class StatsBaseRedirectView(
+    LoginRequiredMixin,
+    RedirectView
+):
+    permanent = False
+    query_string = True
+
+    def get_redirect_url(self):
+        return reverse_lazy('yaga:stats:basic')
 
 
 class BasicStatsTemplateView(
@@ -19,7 +32,7 @@ class BasicStatsTemplateView(
     PermissionRequiredMixin,
     TemplateView
 ):
-    template_name = 'yaga/basic_stats.html'
+    template_name = 'yaga/stats/basic.html'
     raise_exception = True
     permission_required = 'app.view_stats'
 

@@ -8,7 +8,9 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import os
+from cStringIO import StringIO
 
 import magic
 from django.db import models
@@ -18,11 +20,14 @@ from django.utils.functional import SimpleLazyObject
 from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
+from PIL import Image
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import Choice, smart_text
 
 from .conf import settings
+
+logger = logging.getLogger(__name__)
 
 _provider = None
 
@@ -212,6 +217,9 @@ class Group(
     class Meta:
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
+        permissions = (
+            ('view_group', 'Can view Group'),
+        )
 
     def __str__(self):
         return smart_text(self.pk)
@@ -324,6 +332,9 @@ class Post(
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
+        permissions = (
+            ('view_post', 'Can view Post'),
+        )
 
     tracker = FieldTracker()
 
@@ -350,7 +361,8 @@ class Post(
         if not file_obj:
             return False
 
-        stream = file_obj.file.key.read(1024)
+        file_obj.file.seek(0)
+        stream = file_obj.file.read()
 
         mime = self.get_mime(stream)
 
@@ -373,7 +385,23 @@ class Post(
         return self.is_valid_file_obj('attachment')
 
     def is_valid_attachment_preview(self):
-        return self.is_valid_file_obj('attachment_preview')
+        if self.is_valid_file_obj('attachment_preview'):
+            try:
+                self.attachment_preview.file.seek(0)
+                stream = self.attachment_preview.file.read()
+
+                image = Image.open(StringIO(stream))
+
+                if image.size != settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
+                    return False
+            except Exception as e:
+                logger.exception(e)
+
+                return False
+
+            return True
+        else:
+            return False
 
     def sign_s3(self, mime, path_fn):
         access_key = settings.AWS_ACCESS_KEY_ID

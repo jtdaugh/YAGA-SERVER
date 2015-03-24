@@ -10,6 +10,8 @@ from urllib.parse import urljoin
 import regex
 import requests
 import ujson
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management import call_command
@@ -17,6 +19,7 @@ from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
 from django.utils.functional import SimpleLazyObject
 from django.utils.http import urlquote
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import cache_page
 from raven.contrib.django import DjangoClient
 from rest_framework.exceptions import ParseError
@@ -117,6 +120,25 @@ def cache_view(fn):
             _fn = fn
 
         return _fn(*args, **kwargs)
+    return wrapper
+
+
+def crispy_filter_helper(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        res = fn(*args, **kwargs)
+
+        def helper():
+            helper = FormHelper()
+            helper.form_id = 'filter-form'
+            helper.form_class = 'form-inline'
+            helper.form_method = 'get'
+            helper.add_input(Submit('submit', _('Filter')))
+            return helper
+
+        res.context_data['filter'].form.helper = helper()
+
+        return res
     return wrapper
 
 
