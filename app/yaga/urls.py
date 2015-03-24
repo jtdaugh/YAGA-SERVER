@@ -7,10 +7,10 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
+from .views.group.views import GroupBaseRedirectView, GroupListView
+from .views.post.views import PostBaseRedirectView, PostListView
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
 from .views.user.views import UserBaseRedirectView, UserListView
-from .views.post.views import PostBaseRedirectView, PostListView
-from .views.group.views import GroupBaseRedirectView, GroupListView
 
 api_urlpatterns = patterns(
     '',
