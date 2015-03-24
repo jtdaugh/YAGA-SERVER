@@ -10,8 +10,9 @@ from django.shortcuts import render
 from django.template import Context, loader
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
+from django_filters.views import FilterView
 
-from .utils import cache_view, user_cache_view
+from .utils import cache_view, crispy_filter_helper, user_cache_view
 
 
 def csrf(request, reason=''):
@@ -69,3 +70,13 @@ class NonAtomicView(
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):
         return super(NonAtomicView, self).dispatch(*args, **kwargs)
+
+
+class CrispyFilterView(
+    FilterView
+):
+    @crispy_filter_helper
+    def get(self, request, *args, **kwargs):
+        return super(CrispyFilterView, self).get(
+            request, *args, **kwargs
+        )

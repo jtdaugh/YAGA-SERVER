@@ -60,6 +60,9 @@
                     {% trans 'Name' %}
                 </th>
                 <th>
+                    {% trans 'Posts' %}
+                </th>
+                <th>
                     {% trans 'Verified' %}
                 </th>
                 <th>
@@ -82,6 +85,9 @@
                                 {% trans 'Empty' %}
                             </span>
                         {% endif %}
+                    </td>
+                    <td>
+                        {{ user.post_set.count}}
                     </td>
                     <td>
                         {% if user.verified %}

@@ -8,9 +8,8 @@ from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.base import RedirectView
-from django_filters.views import FilterView
 
-from app.utils import crispy_filter_helper
+from app.views import CrispyFilterView
 
 from ...models import Post
 from .filters import PostFilterSet
@@ -30,21 +29,15 @@ class PostBaseRedirectView(
 class PostListView(
     LoginRequiredMixin,
     PermissionRequiredMixin,
-    FilterView,
+    CrispyFilterView,
     ListView
 ):
-    paginate_by = 50
+    paginate_by = 10
     template_name = 'yaga/post/list.html'
     raise_exception = True
     permission_required = 'posts.view_post'
     context_object_name = 'posts'
     filterset_class = PostFilterSet
-
-    @crispy_filter_helper
-    def get(self, request, *args, **kwargs):
-        return super(PostListView, self).get(
-            request, *args, **kwargs
-        )
 
     def get_queryset(self):
         return Post.objects.all()

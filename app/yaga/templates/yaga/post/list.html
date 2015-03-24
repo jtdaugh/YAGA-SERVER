@@ -23,6 +23,13 @@
     {% endcompress %}
 {% endblock %}
 
+{% block extra_js %}
+    {{ block.super }}
+    {% compress js %}
+        <script type="text/coffeescript" src="{% static 'yaga/coffee/preview.coffee' %}"></script>
+    {% endcompress %}
+{% endblock %}
+
 {% block breadcrumbs_list %}
     {{ block.super }}
     <li>
@@ -54,10 +61,19 @@
                     {% trans 'Id' %}
                 </th>
                 <th>
+                    {% trans 'User' %}
+                </th>
+                <th>
+                    {% trans 'Group' %}
+                </th>
+                <th>
                     {% trans 'Name' %}
                 </th>
                 <th>
                     {% trans 'Ready' %}
+                </th>
+                <th>
+                    {% trans 'Likes' %}
                 </th>
                 <th>
                     {% trans 'Preview' %}
@@ -67,6 +83,12 @@
                 <tr>
                     <td>
                         {{ post.pk }}
+                    </td>
+                    <td>
+                        {{ post.user.pk }}
+                    </td>
+                    <td>
+                        {{ post.group.pk }}
                     </td>
                     <td>
                         {% if post.name %}
@@ -89,8 +111,13 @@
                         {% endif %}
                     </td>
                     <td>
+                        {{ post.likes }}
+                    </td>
+                    <td>
                         {% if post.attachment_preview %}
-                            <img src="{{ post.attachment_preview.url }}">
+                            <button class="btn btn-default" rel="popover" data-title="{{ post.name }}" data-url="{{ post.attachment_preview.url }}">
+                                {% trans 'Preview' %}
+                            </button>
                         {% else %}
                             <span class="label label-danger">
                                 {% trans 'No' %}
