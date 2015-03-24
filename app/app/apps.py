@@ -5,10 +5,7 @@ from future.builtins import (  # noqa
 )
 
 from django.apps import AppConfig
-from django.db.models.signals import post_migrate
 from django.utils.translation import ugettext_lazy as _
-
-from .model_permissions import register_global_permission
 
 
 class AppAppConfig(
@@ -19,5 +16,3 @@ class AppAppConfig(
 
     def ready(self):
         from . import dispatch  # noqa # isort:skip
-
-        post_migrate.connect(register_global_permission, sender=self)
