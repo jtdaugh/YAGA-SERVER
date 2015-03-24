@@ -463,8 +463,7 @@ class PostRetrieveUpdateDestroyAPIView(
         return Post.objects.all()
 
     def perform_destroy(self, instance):
-        instance.deleted = True
-        instance.save()
+        instance.mark_deleted()
 
     def get_object(self):
         instance = super(PostRetrieveUpdateDestroyAPIView, self).get_object()

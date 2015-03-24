@@ -346,6 +346,10 @@ class Post(
 
     #     return md5.hexdigest()
 
+    def mark_deleted(self):
+        self.deleted = True
+        self.save()
+
     def likes(self):
         return self.like_set.all().count()
 
