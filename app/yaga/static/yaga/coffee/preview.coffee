@@ -11,6 +11,7 @@
       content: ->
         '<img class="img-responsive img-thumbnail" src="' + $(this).attr('data-url') + '" />'
     ).click (e) ->
+      $('button[rel="popover"]').popover 'hide'
       $(this).popover 'toggle'
       e.stopPropagation()
 
