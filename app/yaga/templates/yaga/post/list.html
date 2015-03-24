@@ -115,7 +115,7 @@
                     </td>
                     <td>
                         {% if post.attachment_preview %}
-                            <button class="btn btn-default" rel="popover" data-title="{{ post.name }}" data-url="{{ post.attachment_preview.url }}">
+                            <button class="btn btn-default" rel="popover" data-title="{{ post.pk }}" data-url="{{ post.attachment_preview.url }}">
                                 {% trans 'Preview' %}
                             </button>
                         {% else %}

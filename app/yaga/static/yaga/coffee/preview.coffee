@@ -9,16 +9,28 @@
       placement: 'left'
       title: $(this).attr('data-title')
       content: ->
-        '<img class="img-responsive img-thumbnail" src="' + $(this).attr('data-url') + '" />'
+        return '<img class="img-responsive img-thumbnail" src="' + $(this).attr('data-url') + '" />'
     ).click (e) ->
-      $('button[rel="popover"]').popover 'hide'
+      self = this
+      $('button[rel="popover"]').each ->
+        if self != this
+          $(this).popover 'hide'
+
+          return
+
       $(this).popover 'toggle'
       e.stopPropagation()
 
       return
 
-    $('html').click (e) ->
-      $('button[rel="popover"]').popover 'hide'
+    $(document).on 'click', (e) ->
+      if !$(e.target).closest('.popover').length
+        $('.popover').each ->
+          $(@previousSibling).popover 'hide'
+
+          return
+
+      return
 
       return
 
