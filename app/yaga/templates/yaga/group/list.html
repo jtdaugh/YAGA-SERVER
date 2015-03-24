@@ -1,0 +1,75 @@
+{% extends 'content.html' %}
+
+{% load i18n %}
+{% load static %}
+
+{% load compress %}
+{% load crispy_forms_tags %}
+
+{% load paginator %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {% trans 'Group' %}
+    |
+    {% trans 'List' %}
+{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    {% compress css %}
+         <link rel="stylesheet" type="text/stylus" href="{% static 'yaga/stylus/filter.styl' %}">
+    {% endcompress %}
+{% endblock %}
+
+{% block breadcrumbs_list %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'yaga:group:base' %}">
+            {% trans 'Group' %}
+        </a>
+    </li>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+    {% trans 'List' %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12 text-center">
+            {% crispy filter.form %}
+        </div>
+    </div>
+
+    <hr>
+
+    {% paginator page_obj %}
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <tr>
+                <th>
+                    {% trans 'Id' %}
+                </th>
+                <th>
+                    {% trans 'Name' %}
+                </th>
+            </tr>
+            {% for group in groups %}
+                <tr>
+                    <td>
+                        {{ group.pk }}
+                    </td>
+                    <td>
+                        {{ group.name }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {% paginator page_obj %}
+{% endblock %}
+

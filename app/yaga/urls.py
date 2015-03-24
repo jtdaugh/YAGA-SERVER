@@ -10,6 +10,7 @@ from .api.v1.urls import urlpatterns as api_urlpatterns_v1
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
 from .views.user.views import UserBaseRedirectView, UserListView
 from .views.post.views import PostBaseRedirectView, PostListView
+from .views.group.views import GroupBaseRedirectView, GroupListView
 
 api_urlpatterns = patterns(
     '',
@@ -61,6 +62,20 @@ post_urlpatterns = patterns(
     ),
 )
 
+group_urlpatterns = patterns(
+    '',
+    url(
+        r'^$',
+        GroupBaseRedirectView.as_view(),
+        name='base'
+    ),
+    url(
+        r'^list/$',
+        GroupListView.as_view(),
+        name='list'
+    ),
+)
+
 urlpatterns = patterns(
     '',
     url(
@@ -83,5 +98,9 @@ urlpatterns = patterns(
     url(
         r'^post/',
         include(post_urlpatterns, namespace='post')
+    ),
+    url(
+        r'^group/',
+        include(group_urlpatterns, namespace='group')
     )
 )

@@ -163,7 +163,10 @@ urlpatterns += patterns(
         # include(site.urls)
     ),
     # hijack
-    url(r'^hijack/', include(hijack_urlpatterns)),
+    url(
+        r'^hijack/',
+        include(hijack_urlpatterns)
+    ),
     # index
     url(
         r'^$',

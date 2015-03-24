@@ -11,11 +11,11 @@ from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
-from ...models import Post
-from .filters import PostFilterSet
+from ...models import Group
+from .filters import GroupFilterSet
 
 
-class PostBaseRedirectView(
+class GroupBaseRedirectView(
     LoginRequiredMixin,
     RedirectView
 ):
@@ -23,21 +23,21 @@ class PostBaseRedirectView(
     query_string = True
 
     def get_redirect_url(self):
-        return reverse_lazy('yaga:post:list')
+        return reverse_lazy('yaga:group:list')
 
 
-class PostListView(
+class GroupListView(
     LoginRequiredMixin,
     PermissionRequiredMixin,
     CrispyFilterView,
     ListView
 ):
     paginate_by = 25
-    template_name = 'yaga/post/list.html'
+    template_name = 'yaga/group/list.html'
     raise_exception = True
-    permission_required = 'posts.view_post'
-    context_object_name = 'posts'
-    filterset_class = PostFilterSet
+    permission_required = 'posts.view_group'
+    context_object_name = 'groups'
+    filterset_class = GroupFilterSet
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Group.objects.all()

@@ -40,6 +40,13 @@
                         </a>
                     </li>
                 {% endif %}
+                {% if perms.yaga.view_group %}
+                    <li>
+                        <a href="{% url 'yaga:group:list' %}">
+                            {% trans 'Group List' %}
+                        </a>
+                    </li>
+                {% endif %}
             </ul>
         </li>
     {% endif %}

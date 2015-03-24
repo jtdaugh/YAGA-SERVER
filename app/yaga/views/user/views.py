@@ -32,7 +32,7 @@ class UserListView(
     CrispyFilterView,
     ListView
 ):
-    paginate_by = 50
+    paginate_by = 25
     template_name = 'yaga/user/list.html'
     raise_exception = True
     permission_required = 'accounts.view_user'
