@@ -13,7 +13,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.views import NonAtomicView
+from app.views import NonAtomicView, PatchAsPutMixin
 
 from . import permissions, serializers, throttling
 from ...conf import settings
@@ -21,11 +21,10 @@ from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post,
     post_attachment_preview_upload_to, post_attachment_upload_to
 )
-from ...utils import patch_as_put
 
 
-@patch_as_put
 class UserRetrieveUpdateAPIView(
+    PatchAsPutMixin,
     generics.RetrieveUpdateAPIView,
 ):
     serializer_class = serializers.UserSerializer
@@ -225,8 +224,8 @@ class GroupListCreateAPIView(
         )
 
 
-@patch_as_put
 class GroupRetrieveUpdateAPIView(
+    PatchAsPutMixin,
     generics.RetrieveUpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
@@ -273,8 +272,8 @@ class GroupRetrieveUpdateAPIView(
         return queryset
 
 
-@patch_as_put
 class GroupManageMemberAPIView(
+    PatchAsPutMixin,
     generics.UpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
@@ -448,9 +447,9 @@ class PostAPIView(
         return obj
 
 
-@patch_as_put
 class PostRetrieveUpdateDestroyAPIView(
     PostAPIView,
+    PatchAsPutMixin,
     generics.RetrieveUpdateDestroyAPIView
 ):
     serializer_class = serializers.PostSerializer

@@ -80,3 +80,12 @@ class CrispyFilterView(
         return super(CrispyFilterView, self).get(
             request, *args, **kwargs
         )
+
+
+class PatchAsPutMixin(
+    object
+):
+    def patch(self, request, *args, **kwargs):
+        return super(PatchAsPutMixin, self).put(
+            request, *args, **kwargs
+        )
