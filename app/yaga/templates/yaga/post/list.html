@@ -73,6 +73,9 @@
                     {% trans 'Ready' %}
                 </th>
                 <th>
+                    {% trans 'Deleted' %}
+                </th>
+                <th>
                     {% trans 'Likes' %}
                 </th>
                 <th>
@@ -106,6 +109,17 @@
                             </span>
                         {% else %}
                             <span class="label label-warning">
+                                {% trans 'No' %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if post.deleted %}
+                            <span class="label label-danger">
+                                {% trans 'Yes' %}
+                            </span>
+                        {% else %}
+                            <span class="label label-success">
                                 {% trans 'No' %}
                             </span>
                         {% endif %}

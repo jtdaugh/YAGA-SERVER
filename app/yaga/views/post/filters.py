@@ -23,4 +23,4 @@ class PostFilterSet(
 
     class Meta:
         model = Post
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'ready', 'deleted']
