@@ -71,21 +71,6 @@ post_urlpatterns = patterns(
     )
 )
 
-members_urlpatterns = patterns(
-    '',
-    url(
-        r'^remove/$',
-        views.GroupManageMemberRemoveAPIView.as_view(),
-        name='remove'
-    ),
-    url(
-        r'^add/$',
-        views.GroupManageMemberAddAPIView.as_view(),
-        name='add'
-    )
-)
-
-
 group_urlpatterns = patterns(
     '',
     url(
@@ -100,12 +85,13 @@ group_urlpatterns = patterns(
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/mute/$',
-        views.GroupManageMemberMuteAPIView.as_view(),
+        views.GroupMemberMuteAPIView.as_view(),
         name='mute'
     ),
     url(
-        r'^(?P<group_id>[\-a-z0-9]{32,36})/members/',
-        include(members_urlpatterns, namespace='members')
+        r'^(?P<group_id>[\-a-z0-9]{32,36})/members/$',
+        views.GroupMemberUpdateDestroyAPIView.as_view(),
+        name='members'
     ),
     url(
         r'^(?P<group_id>[\-a-z0-9]{32,36})/posts/',

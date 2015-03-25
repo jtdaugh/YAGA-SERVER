@@ -272,14 +272,17 @@ class GroupRetrieveUpdateAPIView(
         return queryset
 
 
-class GroupManageMemberAPIView(
+class GroupMemberUpdateDestroyAPIView(
     PatchAsPutMixin,
-    generics.UpdateAPIView
+    generics.UpdateAPIView,
+    generics.DestroyAPIView
 ):
     lookup_url_kwarg = 'group_id'
     permission_classes = (
         IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
     )
+
+    serializer_class = serializers.GroupListSerializer
 
     def get_queryset(self):
         return Group.objects.all()
@@ -287,12 +290,12 @@ class GroupManageMemberAPIView(
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
 
-        serializer = self.get_serializer(data=request.data, partial=True)
+        serializer = serializers.GroupManageMemberAddSerializer(
+            data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
-        model = get_user_model()
-
-        self.perform_action(instance, model, serializer.validated_data)
+        self.perform_update(instance, serializer.validated_data)
 
         serializer = serializers.GroupListSerializer(instance)
 
@@ -301,53 +304,65 @@ class GroupManageMemberAPIView(
             status=status.HTTP_200_OK
         )
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
 
-class GroupManageMemberAddAPIView(
-    GroupManageMemberAPIView
-):
-    serializer_class = serializers.GroupManageMemberAddSerializer
+        serializer = serializers.GroupManageMemberRemoveSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
 
-    def perform_add(self, instance, user):
-        if user.is_active:
-            obj = instance.member_set.filter(
-                group=instance,
-                user=user
-            ).first()
+        self.perform_destroy(instance, serializer.validated_data)
 
-            if not obj:
-                obj = Member()
-                obj.group = instance
-                obj.user = user
-                obj.creator = self.request.user
-                obj.save()
+        serializer = serializers.GroupListSerializer(instance)
 
-    def perform_action(self, instance, model, data):
-        if data.get('names'):
-            for name in data['names']:
-                user = model.objects.filter(
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+    def perform_update(self, instance, validated_data):
+        users = []
+
+        if validated_data.get('names'):
+            for name in validated_data['names']:
+                user = get_user_model().objects.filter(
                     name__iexact=name
                 ).first()
 
                 if user:
-                    self.perform_add(instance, user)
+                    users.append(user)
 
-        if data.get('phones'):
-            for phone in data['phones']:
-                user = model.objects.get_or_create(
+        if validated_data.get('phones'):
+            for phone in validated_data['phones']:
+                user = get_user_model().objects.get_or_create(
                     phone=phone
                 )
 
-                self.perform_add(instance, user)
+                users.append(user)
 
+        users = list(set(users))
 
-class GroupManageMemberRemoveAPIView(
-    GroupManageMemberAPIView
-):
-    serializer_class = serializers.GroupManageMemberRemoveSerializer
+        if self.request.user in users:
+            users.remove(self.request.user)
 
-    def perform_action(self, instance, model, data):
-        user = model.objects.get_or_create(
-            phone=data['phone']
+        for user in users:
+            if user.is_active:
+                obj = instance.member_set.filter(
+                    group=instance,
+                    user=user
+                ).first()
+
+                if not obj:
+                    obj = Member()
+                    obj.group = instance
+                    obj.user = user
+                    obj.creator = self.request.user
+                    obj.save()
+
+    def perform_destroy(self, instance, validated_data):
+        user = get_user_model().objects.get_or_create(
+            phone=validated_data['phone']
         )
 
         obj = instance.member_set.filter(
@@ -360,10 +375,19 @@ class GroupManageMemberRemoveAPIView(
             obj.delete()
 
 
-class GroupManageMemberMuteAPIView(
-    GroupManageMemberAPIView
+class GroupMemberMuteAPIView(
+    PatchAsPutMixin,
+    generics.UpdateAPIView,
 ):
+    lookup_url_kwarg = 'group_id'
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
+
     serializer_class = serializers.MemberSerializer
+
+    def get_queryset(self):
+        return Group.objects.all()
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
