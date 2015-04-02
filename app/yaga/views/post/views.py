@@ -40,4 +40,4 @@ class PostListView(
     filterset_class = PostFilterSet
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Post.objects.all().order_by('-created_at')

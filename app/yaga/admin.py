@@ -36,10 +36,10 @@ class PostModelAdmin(
 ):
     list_display = (
         'pk', 'name', 'user', 'likes', 'group',
-        'ready', 'deleted', 'updated_at'
+        'ready', 'deleted', 'created_at'
     )
 
-    ordering = ('-ready_at',)
+    ordering = ('-created_at',)
 
     list_filter = ('ready', 'deleted')
 
