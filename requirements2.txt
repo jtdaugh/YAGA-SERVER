@@ -54,6 +54,7 @@ django-redis==3.8.3
 django-redis-sessions-fork==0.6.2
 django-rest-swagger==0.2.9
 django-reversion==1.8.5
+django-save-the-change==1.1.0
 django-secure==1.0.1
 django-storages==1.1.8
 django-templates-macros==0.1
@@ -109,7 +110,7 @@ pgcli==0.16.2
 phonenumbers==7.0.4
 pies==2.6.3
 pies2overrides==2.6.3
-Pillow==2.7.0
+Pillow==2.8.1
 pip-tools==0.3.5
 pipdeptree==0.4.2
 prompt-toolkit==0.26

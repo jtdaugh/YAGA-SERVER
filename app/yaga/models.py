@@ -21,6 +21,7 @@ from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
 from PIL import Image
+from save_the_change.mixins import SaveTheChange
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import Choice, smart_text
@@ -227,6 +228,7 @@ class Group(
 
 @python_2_unicode_compatible
 class Post(
+    SaveTheChange,
     models.Model
 ):
     id = UUIDField(
