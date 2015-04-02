@@ -14,7 +14,7 @@ APP_DIR = 'app'
 DYNOS = {
     'web': 1,
     'celery_broker': 1,
-    'celery_worker': 1,
+    'celery_worker': 0,
     'sqs': 1
 }
 # STOP_TIMEOUT = 30

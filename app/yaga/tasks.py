@@ -85,7 +85,7 @@ class PostAttachmentProcess(
 
         folder, group_pk, post_pk = key.split('/')
 
-        post = Post.objects.get(
+        post = Post.objects.select_for_update().get(
             group__pk=group_pk,
             pk=post_pk
         )

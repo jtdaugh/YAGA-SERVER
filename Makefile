@@ -3,10 +3,11 @@ APP_DIR=app
 ENV_DIR=env
 CMD_ENV=virtualenv
 CMD_PYTHON=python
-CMD_CELERY=cd $(APP_DIR); celery -A app worker -c 2 -B
+CMD_CELERY=cd $(APP_DIR); celery -A app worker -c 1 -B
 CMD_MANAGE=cd $(APP_DIR); $(CMD_PYTHON) manage.py
-CMD_RUNSERVER=$(CMD_MANAGE) runserver
+CMD_RUNSERVER=$(CMD_MANAGE) runserver 0.0.0.0:8000
 CMD_SUPERUSER=$(CMD_MANAGE) createsuperuser
+CMD_SQS=$(CMD_MANAGE) sqs
 CMD_CHECK=$(CMD_MANAGE) check
 CMD_FIXTURES=$(CMD_MANAGE) loaddata ../fixtures/*.json
 CMD_SHELL=$(CMD_MANAGE) shell_plus
@@ -24,6 +25,9 @@ runserver:
 
 celery:
 	$(CMD_ACTIVATE_ENV); $(CMD_CELERY)
+
+sqs:
+	$(CMD_ACTIVATE_ENV); $(CMD_SQS)
 
 install:
 	test -d $(ENV_DIR) || $(CMD_ENV) $(ENV_DIR)

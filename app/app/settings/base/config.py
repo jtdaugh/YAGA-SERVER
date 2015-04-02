@@ -580,7 +580,7 @@ class BaseConfiguration(
             'django': ERROR_LOGGER,
             # 'django.request': DEBUG_LOGGER,
             # 'django.security': DEBUG_LOGGER,
-            # 'django.db.backends': DEBUG_LOGGER,
+            'django.db.backends': DEBUG_LOGGER,
 
             'boto': ERROR_LOGGER,
 
