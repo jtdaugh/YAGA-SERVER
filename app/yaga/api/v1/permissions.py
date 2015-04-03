@@ -38,7 +38,7 @@ class PostOwnerOrGroupMember(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        if request.method not in SAFE_METHODS + ['PATCH', 'PUT']:
+        if request.method not in SAFE_METHODS + ('PATCH', 'PUT'):
             return obj.user == request.user
         else:
             return obj.group.member_set.filter(
