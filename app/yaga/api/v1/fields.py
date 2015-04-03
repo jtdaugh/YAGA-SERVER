@@ -78,7 +78,8 @@ class UnicodeField(
             chr,
             list(range(0x0030, 0x0039 + 1)) +
             list(range(0x0041, 0x005A + 1)) +
-            list(range(0x0061, 0x0079 + 1)) +
+            # list(range(0x0061, 0x0079 + 1)) +
+            list(range(0x0061, 0x007A + 1)) +
             list(range(0x00C0, 0x00D6 + 1)) +
             list(range(0x00D8, 0x00F6 + 1)) +
             list(range(0x00F8, 0x00FF + 1)) +
