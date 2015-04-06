@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import django_filters
 from django.db import models
 
-from app.filters import icontains
+from app.filters import UUIDFilter, icontains
 from app.model_fields import UUIDField
 
 from ...models import Post
@@ -18,9 +18,15 @@ class PostFilterSet(
 ):
     filter_overrides = {
         UUIDField: icontains,
-        models.CharField: icontains
+        models.CharField: icontains,
+        models.ForeignKey: {
+            'filter_class': UUIDFilter,
+            'extra': lambda f: {
+                'lookup_type': 'exact',
+            }
+        }
     }
 
     class Meta:
         model = Post
-        fields = ['id', 'name', 'ready', 'deleted']
+        fields = ['id', 'user', 'group', 'name', 'ready', 'deleted']
