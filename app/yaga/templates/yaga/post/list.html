@@ -70,6 +70,9 @@
                     {% trans 'Name' %}
                 </th>
                 <th>
+                    {% trans 'Created At' %}
+                </th>
+                <th>
                     {% trans 'Ready' %}
                 </th>
                 <th>
@@ -101,6 +104,9 @@
                                 {% trans 'Empty' %}
                             </span>
                         {% endif %}
+                    </td>
+                    <td>
+                        {{ post.created_at }}
                     </td>
                     <td>
                         {% if post.ready %}
