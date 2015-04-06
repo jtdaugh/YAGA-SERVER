@@ -75,6 +75,8 @@ class CodeCreateAPIView(
                         {
                             'expire_at': datetime.datetime(
                                 datetime.MAXYEAR, 12, 31
+                            ).strftime(
+                                settings.REST_FRAMEWORK['DATETIME_FORMAT']
                             )
                         },
                         status=status.HTTP_201_CREATED
@@ -88,7 +90,9 @@ class CodeCreateAPIView(
 
                 return Response(
                     {
-                        'expire_at': code.expire_at
+                        'expire_at': code.expire_at.strftime(
+                            settings.REST_FRAMEWORK['DATETIME_FORMAT']
+                        )
                     },
                     status=status.HTTP_201_CREATED
                 )
