@@ -63,9 +63,11 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     ALLOWED_HOSTS = [
         'api.yagaprivate.com',
-        'yaga-prod.herokuapp.com',
         'www.yagaprivate.com',
-        'yaga-dev.herokuapp.com'
+        'www-dev.yagaprivate.com',
+        'api-dev.yagaprivate.com',
+        'yaga-dev.herokuapp.com',
+        'yaga-prod.herokuapp.com'
     ]
     USE_X_FORWARDED_HOST = True
     BEHIND_PROXY = True
