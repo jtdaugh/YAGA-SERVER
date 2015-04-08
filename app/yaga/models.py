@@ -500,10 +500,11 @@ class Post(
 
     def save(self, *args, **kwargs):
         if kwargs.get('update_fields', None) is None:
-            is_dirty = list(self.tracker.changed().keys())
+            if self.pk:
+                is_dirty = list(self.tracker.changed().keys())
 
-            if is_dirty:
-                kwargs['update_fields'] = is_dirty
+                if is_dirty:
+                    kwargs['update_fields'] = is_dirty
 
         return super(Post, self).save(*args, **kwargs)
 
