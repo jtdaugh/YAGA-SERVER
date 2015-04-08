@@ -374,6 +374,10 @@ class Post(
         mime = self.get_mime(stream)
 
         if mime != settings.YAGA_AWS_ALLOWED_MIME[field]:
+            logger.error('{file_name} unexpected mime {mime}'.format(
+                file_name=file_obj.name,
+                mime=mime
+            ))
             return False
 
         if (
@@ -381,9 +385,15 @@ class Post(
             >
             settings.YAGA_AWS_UPLOAD_MAX_LENGTH
         ):
+            logger.error('{file_name} exceeded capacity'.format(
+                file_name=file_obj.name
+            ))
             return False
 
         if file_obj.file.size == 0:
+            logger.error('{file_name} size is 0'.format(
+                file_name=file_obj.name
+            ))
             return False
 
         return True
@@ -399,7 +409,20 @@ class Post(
 
                 image = Image.open(StringIO(stream))
 
-                if image.size != settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
+                image_size = image.size
+
+                image_size = {
+                    'x': image_size[0],
+                    'y': image_size[1]
+                }
+
+                if image_size != settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
+                    logger.error('{group}/{post} GIF is {x}*{y}'.format(
+                        group=self.group.pk,
+                        post=self.pk,
+                        x=image.size['x'],
+                        y=image.size['y']
+                    ))
                     return False
             except Exception as e:
                 logger.exception(e)
