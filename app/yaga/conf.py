@@ -31,6 +31,7 @@ class YagaAppConf(
     ATTACHMENT_PREVIEW_PREFIX = 'posts_preview'
     ATTACHMENT_PREFIX = 'posts'
     ATTACHMENT_PREVIEW_SIZE = (240, 240)
+    ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
     AWS_SQS_QUEUE = os.environ.get('AWS_SQS_QUEUE', 'yaga-dev')
 

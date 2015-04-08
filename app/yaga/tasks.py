@@ -56,11 +56,11 @@ class PostCleanup(
     run_every = datetime.timedelta(minutes=1)
 
     def run(self, *args, **kwargs):
-        expired = timezone.now() - datetime.timedelta(hours=1)
+        expired = timezone.now() - settings.YAGA_ATTACHMENT_READY_EXPIRES
 
         for post in Post.objects.filter(
             created_at__lte=expired,
-            ready_at=None
+            ready=False
         ):
             post.delete()
 
