@@ -417,9 +417,8 @@ class Post(
                 }
 
                 if image_size != settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
-                    logger.error('{group}/{post} GIF is {x}*{y}'.format(
-                        group=self.group.pk,
-                        post=self.pk,
+                    logger.error('{file_name} GIF is {x}*{y}'.format(
+                        file_name=self.attachment_preview.name,
                         x=image_size['x'],
                         y=image_size['y']
                     ))
