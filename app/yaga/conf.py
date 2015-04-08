@@ -33,6 +33,8 @@ class YagaAppConf(
     ATTACHMENT_PREVIEW_SIZE = (240, 240)
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
+    CLEANUP_RUN_EVERY = datetime.timedelta(minutes=1)
+
     AWS_SQS_QUEUE = os.environ.get('AWS_SQS_QUEUE', 'yaga-dev')
 
     PUSH_POST_WINDOW = datetime.timedelta(minutes=5)

@@ -6,6 +6,8 @@ from future.builtins import (  # noqa
 
 import datetime
 
+from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from app import celery
@@ -18,7 +20,7 @@ from .providers import apns_provider
 class CodeCleanup(
     celery.AtomicPeriodicTask
 ):
-    run_every = datetime.timedelta(minutes=1)
+    run_every = settings.YAGA_CLEANUP_RUN_EVERY
 
     def run(self, *args, **kwargs):
         for code in Code.objects.filter(
@@ -30,7 +32,7 @@ class CodeCleanup(
 class GroupCleanup(
     celery.AtomicPeriodicTask
 ):
-    run_every = datetime.timedelta(minutes=1)
+    run_every = settings.YAGA_CLEANUP_RUN_EVERY
 
     def run(self, *args, **kwargs):
         for group in Group.objects.filter(
@@ -43,7 +45,7 @@ class GroupCleanup(
             ):
                 if post.ready:
                     post.delete()
-                else:
+                else:  # waiting for pending posts
                     keep_group = True
 
             if not keep_group:
@@ -53,7 +55,7 @@ class GroupCleanup(
 class PostCleanup(
     celery.AtomicPeriodicTask
 ):
-    run_every = datetime.timedelta(minutes=1)
+    run_every = settings.YAGA_CLEANUP_RUN_EVERY
 
     def run(self, *args, **kwargs):
         expired = timezone.now() - settings.YAGA_ATTACHMENT_READY_EXPIRES
@@ -63,6 +65,28 @@ class PostCleanup(
             ready=False
         ):
             post.delete()
+
+
+class DeletedPostCleanup(
+    celery.PeriodicTask
+):
+    run_every = settings.YAGA_CLEANUP_RUN_EVERY
+
+    def run(self, *args, **kwargs):
+        for post in Post.objects.filter(
+            deleted=True
+        ).filter(
+            Q(attachment__isnull=False)
+            |
+            Q(attachment_preview__isnull=False)
+        ):
+            if post.attachment is not None:
+                with transaction.atomic():
+                    post.attachment.delete(save=True)
+
+            if post.attachment_preview is not None:
+                with transaction.atomic():
+                    post.attachment_preview.delete(save=True)
 
 
 class UploadProcess(
