@@ -4,8 +4,6 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-import datetime
-
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -127,7 +125,12 @@ class PostAttachmentProcess(
             self.post.ready = True
             self.post.ready_at = timezone.now()
             self.post.bridge.uploaded = True
-            self.post.save()
+            self.post.save(update_fields=[
+                'checksum',
+                'ready',
+                'ready_at',
+                'attachment'
+            ])
         else:
             self.post.delete()
 
@@ -141,7 +144,9 @@ class PostAttachmentPreviewProcess(
         self.post.attachment_preview = self.key
 
         if self.post.is_valid_attachment_preview():
-            self.post.save()
+            self.post.save(update_fields=[
+                'attachment_preview'
+            ])
         else:
             self.post.attachment_preview.delete()
 

@@ -498,15 +498,23 @@ class Post(
             }
         }
 
-    def save(self, *args, **kwargs):
-        if kwargs.get('update_fields', None) is None:
-            if self.pk:
-                is_dirty = list(self.tracker.changed().keys())
+        def save(self, *args, **kwargs):
+            if kwargs.get('update_fields'):
+                if 'updated_at' not in kwargs['update_fields']:
+                    kwargs['update_fields'] = list(kwargs['update_fields'])
+                    kwargs['update_fields'].append('updated_at')
 
-                if is_dirty:
-                    kwargs['update_fields'] = is_dirty
+            return super(Post, self).save(*args, **kwargs)
 
-        return super(Post, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if kwargs.get('update_fields', None) is None:
+    #         if self.pk:
+    #             is_dirty = list(self.tracker.changed().keys())
+
+    #             if is_dirty:
+    #                 kwargs['update_fields'] = is_dirty
+
+    #     return super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
         return smart_text(self.pk)
