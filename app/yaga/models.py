@@ -420,8 +420,8 @@ class Post(
                     logger.error('{group}/{post} GIF is {x}*{y}'.format(
                         group=self.group.pk,
                         post=self.pk,
-                        x=image.size['x'],
-                        y=image.size['y']
+                        x=image_size['x'],
+                        y=image_size['y']
                     ))
                     return False
             except Exception as e:
