@@ -575,7 +575,7 @@ class BaseConfiguration(
             # 'configurations.importer': DEBUG_LOGGER,
             'configurations': DEBUG_LOGGER,
 
-            'multiprocessing': DEBUG_LOGGER,
+            # 'multiprocessing': DEBUG_LOGGER,
 
             'django': ERROR_LOGGER,
             # 'django.request': DEBUG_LOGGER,

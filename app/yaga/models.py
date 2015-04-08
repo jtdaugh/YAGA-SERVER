@@ -21,7 +21,6 @@ from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
 from PIL import Image
-from save_the_change.mixins import SaveTheChange
 
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import Choice, smart_text
@@ -215,6 +214,9 @@ class Group(
         ).count()
     posts_count.short_description = _('Posts Count')
 
+    def mark_updated(self):
+        self.save(update_fields=['updated_at'])
+
     class Meta:
         verbose_name = _('Group')
         verbose_name_plural = _('Groups')
@@ -228,7 +230,6 @@ class Group(
 
 @python_2_unicode_compatible
 class Post(
-    SaveTheChange,
     models.Model
 ):
     id = UUIDField(
@@ -352,11 +353,11 @@ class Post(
         self.deleted = True
         self.save()
 
+    def mark_updated(self):
+        self.save(update_fields=['updated_at'])
+
     def likes(self):
         return self.like_set.all().count()
-
-    def likers(self):
-        return (like.user for like in self.like_set.all())
 
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
@@ -473,6 +474,15 @@ class Post(
                 'Content-Type': content_type
             }
         }
+
+    def save(self, *args, **kwargs):
+        if kwargs.get('update_fields', None) is None:
+            is_dirty = list(self.tracker.changed().keys())
+
+            if is_dirty:
+                kwargs['update_fields'] = is_dirty
+
+        return super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
         return smart_text(self.pk)

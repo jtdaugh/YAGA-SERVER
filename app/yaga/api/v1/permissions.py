@@ -26,31 +26,33 @@ class GroupMemeber(
 
 
 class PostGroupMember(
-    BasePermission
+    GroupMemeber
 ):
     def has_object_permission(self, request, view, obj):
-        return obj.group.member_set.filter(
-            user=request.user
-        ).exists()
+        return super(PostGroupMember, self).has_object_permission(
+            request, view, obj.group
+        )
 
 
-class PostOwnerOrGroupMember(
-    BasePermission
+class PostOwnerOrPostGroupMember(
+    PostGroupMember
 ):
     def has_object_permission(self, request, view, obj):
         if request.method not in SAFE_METHODS + ('PATCH', 'PUT'):
             return obj.user == request.user
         else:
-            return obj.group.member_set.filter(
-                user=request.user
-            ).exists()
+            return super(
+                PostOwnerOrPostGroupMember, self
+            ).has_object_permission(
+                request, view, obj
+            )
 
 
 class AvailablePost(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        return (obj.ready and not obj.deleted)
+        return obj.ready and not obj.deleted
 
 
 class IsAnonymous(

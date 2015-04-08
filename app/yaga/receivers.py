@@ -20,7 +20,7 @@ class MemberReceiver(
         instance = kwargs['instance']
 
         if not instance.pk:
-            instance.group.save()
+            instance.group.mark_updated()
 
             if instance.user.name is not None:
                 if instance.creator != instance.user:
@@ -46,7 +46,7 @@ class MemberReceiver(
     def pre_delete(sender, **kwargs):
         instance = kwargs['instance']
 
-        instance.group.save()
+        instance.group.mark_updated()
 
         if hasattr(instance.bridge, 'deleter'):
             user = instance.bridge.deleter
@@ -76,16 +76,21 @@ class LikeReceiver(
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        if not instance.pk:
-            instance.post.save()
+        instance.post.mark_updated()
 
-            if instance.post.user != instance.user:
-                def push_notification():
-                    providers.NewLikeIOSNotification(
-                        like=instance
-                    )
+        if instance.post.user != instance.user:
+            def push_notification():
+                providers.NewLikeIOSNotification(
+                    like=instance
+                )
 
-                connection.on_commit(push_notification)
+            connection.on_commit(push_notification)
+
+    @staticmethod
+    def pre_delete(sender, **kwargs):
+        instance = kwargs['instance']
+
+        instance.post.mark_updated()
 
 
 class PostReceiver(
@@ -111,25 +116,26 @@ class PostReceiver(
     def post_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        if instance.deleted and instance.attachment:
-            def delete_attachment():
-                with transaction.atomic():
-                    instance.attachment.delete()
+        if instance.deleted:
+            if instance.attachment:
+                def delete_attachment():
+                    with transaction.atomic():
+                        instance.attachment.delete(save=True)
 
-            connection.on_commit(delete_attachment)
+                connection.on_commit(delete_attachment)
 
-        if instance.deleted and instance.attachment_preview:
-            def delete_attachment_preview():
-                with transaction.atomic():
-                    instance.attachment_preview.delete()
+            if instance.attachment_preview:
+                def delete_attachment_preview():
+                    with transaction.atomic():
+                        instance.attachment_preview.delete(save=True)
 
-            connection.on_commit(delete_attachment_preview)
+                connection.on_commit(delete_attachment_preview)
 
     @staticmethod
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        instance.group.save()
+        instance.group.mark_updated()
 
         if hasattr(instance.bridge, 'uploaded'):
             def push_notification():

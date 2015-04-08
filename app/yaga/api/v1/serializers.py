@@ -154,6 +154,13 @@ class CodeCreateSerializer(
         return attrs
 
 
+class LikerSerializer(
+    UserSerializer
+):
+    def to_representation(self, obj):
+        return super(LikerSerializer, self).to_representation(obj.user)
+
+
 class PostSerializer(
     serializers.ModelSerializer
 ):
@@ -163,7 +170,7 @@ class PostSerializer(
 
     namer = UserSerializer(read_only=True)
 
-    likers = UserSerializer(read_only=True, many=True)
+    likers = LikerSerializer(read_only=True, many=True, source='like_set')
 
     name_x = serializers.IntegerField(
         min_value=0, max_value=100, required=False

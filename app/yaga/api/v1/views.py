@@ -140,7 +140,9 @@ class CodeRetrieveAPIView(
         self.check_object_permissions(self.request, code)
 
         return Response({
-            'expire_at': code.expire_at
+            'expire_at': code.expire_at.strftime(
+                settings.REST_FRAMEWORK['DATETIME_FORMAT']
+            )
         })
 
 
@@ -198,9 +200,7 @@ class GroupListCreateAPIView(
         return Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.prefetch_related(
-                    'user',
-                )
+                queryset=Member.objects.prefetch_related('user')
             ),
         ).filter(
             members=self.request.user
@@ -257,22 +257,22 @@ class GroupRetrieveUpdateAPIView(
         queryset = Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.prefetch_related(
-                    'user',
-                )
+                queryset=Member.objects.prefetch_related('user')
             ),
             Prefetch(
                 'post_set',
                 queryset=Post.objects.prefetch_related(
+                    'user',
+                    'namer',
                     Prefetch(
-                        'user',
+                        'like_set',
+                        queryset=Like.objects.prefetch_related('user')
                     )
                 ).filter(
                     **post_filter
                 ).order_by('-updated_at'),
             )
         )
-
         return queryset
 
 
@@ -482,12 +482,19 @@ class PostRetrieveUpdateDestroyAPIView(
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, permissions.PostOwnerOrGroupMember,
+        IsAuthenticated, permissions.PostOwnerOrPostGroupMember,
         permissions.AvailablePost, permissions.FulfilledProfile
     )
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Post.objects.prefetch_related(
+            'user',
+            'namer',
+            Prefetch(
+                'like_set',
+                queryset=Like.objects.prefetch_related('user')
+            )
+        )
 
     def perform_destroy(self, instance):
         instance.mark_deleted()
@@ -505,12 +512,10 @@ class PostRetrieveUpdateDestroyAPIView(
 
         serializer = self.get_serializer(instance)
 
-        serializer = dict(serializer.data)
-
-        serializer['attachment'] = None
+        response = dict(serializer.data)
 
         return Response(
-            serializer,
+            response,
             status=status.HTTP_200_OK
         )
 
