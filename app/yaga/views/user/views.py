@@ -40,4 +40,4 @@ class UserListView(
     filterset_class = UserFilterSet
 
     def get_queryset(self):
-        return get_user_model().objects.all()
+        return get_user_model().objects.all().order_by('-date_joined')

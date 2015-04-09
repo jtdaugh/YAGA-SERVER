@@ -136,6 +136,12 @@ class AbstractUser(
         db_index=True
     )
 
+    verified_at = models.DateTimeField(
+        verbose_name=_('Verified At'),
+        default=None,
+        null=True, blank=True
+    )
+
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'

@@ -60,6 +60,12 @@
                     {% trans 'Name' %}
                 </th>
                 <th>
+                    {% trans 'Date Joined' %}
+                </th>
+                <th>
+                    {% trans 'Verified At' %}
+                </th>
+                <th>
                     {% trans 'Posts' %}
                 </th>
                 <th>
@@ -83,6 +89,18 @@
                         {% else %}
                             <span class="label label-danger">
                                 {% trans 'Empty' %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ user.date_joined }}
+                    </td>
+                    <td>
+                        {% if user.verified_at %}
+                            {{ user.verified_at }}
+                        {% else %}
+                            <span class="label label-warning">
+                                {% trans 'Not yet' %}
                             </span>
                         {% endif %}
                     </td>

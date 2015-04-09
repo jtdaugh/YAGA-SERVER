@@ -5,6 +5,7 @@ from future.builtins import (  # noqa
 )
 
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 from .conf import settings
 from .models import Code, MonkeyUser
@@ -48,6 +49,7 @@ class CodeBackend(
             )
 
             if not user.verified:
+                user.verified_at = timezone.now()
                 user.verified = True
                 user.save()
 
