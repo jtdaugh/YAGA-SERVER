@@ -9,32 +9,31 @@ import logging
 from urllib.parse import urljoin
 
 from . import celery
-from .utils import get_requests_session
 from .conf import settings
-
+from .utils import get_requests_session
 
 logger = logging.getLogger(__name__)
 
 
-class SelfHeartBeat(
-    celery.PeriodicTask
-):
-    run_every = datetime.timedelta(minutes=5)
+if not settings.DEBUG:
+    class SelfHeartBeat(
+        celery.PeriodicTask
+    ):
+        run_every = datetime.timedelta(minutes=5)
 
-    def run(self, *args, **kwargs):
-        if not settings.DEBUG:
-            session = get_requests_session()
+        def run(self, *args, **kwargs):
+                session = get_requests_session()
 
-            host = settings.SESSION_COOKIE_DOMAIN
+                host = settings.SESSION_COOKIE_DOMAIN
 
-            if settings.HTTPS:
-                schema = 'https://'
-            else:
-                schema = 'http://'
+                if settings.HTTPS:
+                    schema = 'https://'
+                else:
+                    schema = 'http://'
 
-            url = urljoin(schema, host)
+                url = urljoin(schema, host)
 
-            try:
-                session.get(url)
-            except Exception as e:
-                logging.exception(e)
+                try:
+                    session.get(url)
+                except Exception as e:
+                    logging.exception(e)
