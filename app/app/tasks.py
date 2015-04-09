@@ -6,11 +6,10 @@ from future.builtins import (  # noqa
 
 import datetime
 import logging
-from urllib.parse import urljoin
 
 from . import celery
 from .conf import settings
-from .utils import get_requests_session
+from .utils import get_requests_session, reverse_host
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +23,7 @@ if not settings.DEBUG:
         def run(self, *args, **kwargs):
                 session = get_requests_session()
 
-                host = settings.SESSION_COOKIE_DOMAIN
-
-                if settings.HTTPS:
-                    schema = 'https://'
-                else:
-                    schema = 'http://'
-
-                url = urljoin(schema, host)
+                url = reverse_host('index')
 
                 try:
                     session.get(url)

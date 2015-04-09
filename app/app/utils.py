@@ -169,7 +169,7 @@ def reverse_host(pattern, args=None, kwargs=None):
             else:
                 schema = 'http://'
 
-            domain = '{schem}{domain}'.format(
+            domain = '{schema}{domain}'.format(
                 schema=schema,
                 domain=site.domain
             )
