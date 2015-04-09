@@ -40,4 +40,4 @@ class GroupListView(
     filterset_class = GroupFilterSet
 
     def get_queryset(self):
-        return Group.objects.all()
+        return Group.objects.all().order_by('-created_at')

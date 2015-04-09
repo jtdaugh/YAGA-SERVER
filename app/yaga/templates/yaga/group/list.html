@@ -56,6 +56,9 @@
                 <th>
                     {% trans 'Name' %}
                 </th>
+                <th>
+                    {% trans 'Created At' %}
+                </th>
             </tr>
             {% for group in groups %}
                 <tr>
@@ -64,6 +67,9 @@
                     </td>
                     <td>
                         {{ group.name }}
+                    </td>
+                    <td>
+                        {{ group.created_at }}
                     </td>
                 </tr>
             {% endfor %}
