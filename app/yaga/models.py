@@ -285,14 +285,16 @@ class Post(
         verbose_name=_('Attachment'),
         upload_to=post_attachment_upload_to,
         blank=True,
-        null=True
+        null=False,
+        default=''
     )
 
     attachment_preview = models.FileField(
         verbose_name=_('Attachment Preview'),
         upload_to=post_attachment_preview_upload_to,
         blank=True,
-        null=True
+        null=False,
+        default=''
     )
 
     checksum = models.CharField(

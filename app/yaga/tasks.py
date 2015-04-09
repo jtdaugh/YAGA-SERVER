@@ -73,18 +73,16 @@ class DeletedPostCleanup(
         for post in Post.objects.filter(
             deleted=True
         ).exclude(
-            attachment=''
-        ):
-            with transaction.atomic():
-                post.attachment.delete(save=True)
-
-        for post in Post.objects.filter(
-            deleted=True
-        ).exclude(
+            attachment='',
             attachment_preview=''
         ):
-            with transaction.atomic():
-                post.attachment_preview.delete(save=True)
+            if post.attachment:
+                with transaction.atomic():
+                    post.attachment.delete(save=True)
+
+            if post.attachment_preview:
+                with transaction.atomic():
+                    post.attachment_preview.delete(save=True)
 
 
 class UploadProcess(
