@@ -556,8 +556,8 @@ class BaseConfiguration(
             }
         },
         'loggers': {
-            'amqp': DEBUG_LOGGER,
-            'kombu': DEBUG_LOGGER,
+            # 'amqp': DEBUG_LOGGER,
+            # 'kombu': DEBUG_LOGGER,
             # 'kombu.common': DEBUG_LOGGER,
             # 'kombu.connection': DEBUG_LOGGER,
             'celery': DEBUG_LOGGER,
@@ -580,13 +580,14 @@ class BaseConfiguration(
             'django': ERROR_LOGGER,
             # 'django.request': DEBUG_LOGGER,
             # 'django.security': DEBUG_LOGGER,
-            'django.db.backends': DEBUG_LOGGER,
+            # 'django.db.backends': DEBUG_LOGGER,
 
             'boto': ERROR_LOGGER,
 
             'requests': DEBUG_LOGGER,
 
-            'yaga': DEBUG_LOGGER
+            'yaga': DEBUG_LOGGER,
+            'app': DEBUG_LOGGER
         },
         'root': DEBUG_LOGGER,
     }
