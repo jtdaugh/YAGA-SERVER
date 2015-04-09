@@ -5,7 +5,6 @@ from future.builtins import (  # noqa
 )
 
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 
 from app import celery
@@ -73,18 +72,19 @@ class DeletedPostCleanup(
     def run(self, *args, **kwargs):
         for post in Post.objects.filter(
             deleted=True
-        ).filter(
-            Q(attachment__isnull=False)
-            |
-            Q(attachment_preview__isnull=False)
+        ).exclude(
+            attachment=''
         ):
-            if post.attachment is not None:
-                with transaction.atomic():
-                    post.attachment.delete(save=True)
+            with transaction.atomic():
+                post.attachment.delete(save=True)
 
-            if post.attachment_preview is not None:
-                with transaction.atomic():
-                    post.attachment_preview.delete(save=True)
+        for post in Post.objects.filter(
+            deleted=True
+        ).exclude(
+            attachment_preview=''
+        ):
+            with transaction.atomic():
+                post.attachment_preview.delete(save=True)
 
 
 class UploadProcess(
