@@ -45,8 +45,12 @@ class UserModelAdmin(
             'fields': (
                 'phone',
                 'name',
-                'password',
-                'verified'
+                'password'
+            )
+        }),
+        (_('Optional'), {
+            'fields': (
+                'verified',
             )
         }),
         (_('Permissions'), {
@@ -60,6 +64,7 @@ class UserModelAdmin(
         }),
         (_('Important dates'), {
             'fields': (
+                'verified_at',
                 'last_login',
                 'date_joined'
             )
@@ -72,8 +77,7 @@ class UserModelAdmin(
                 'phone',
                 'name',
                 'password1',
-                'password2',
-                'verified'
+                'password2'
             )
         }),
     )
