@@ -514,6 +514,10 @@ class PostRetrieveUpdateDestroyAPIView(
 
         response = dict(serializer.data)
 
+        # files actually deleted by signals, just representation hack
+        response['attachment'] = None
+        response['attachment_preview'] = None
+
         return Response(
             response,
             status=status.HTTP_200_OK
