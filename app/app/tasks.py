@@ -21,11 +21,11 @@ if not settings.DEBUG:
         run_every = datetime.timedelta(minutes=5)
 
         def run(self, *args, **kwargs):
-                session = get_requests_session()
+            session = get_requests_session()
 
-                url = reverse_host('index')
+            url = reverse_host('index')
 
-                try:
-                    session.get(url)
-                except Exception as e:
-                    logging.exception(e)
+            try:
+                session.get(url)
+            except Exception as e:
+                logging.exception(e)
