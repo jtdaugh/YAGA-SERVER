@@ -4,6 +4,9 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import logging
+
+from django.core.files.storage import default_storage
 from django.db import transaction
 from django.utils import timezone
 
@@ -12,6 +15,8 @@ from app import celery
 from .conf import settings
 from .models import Code, Group, Post
 from .providers import apns_provider
+
+logger = logging.getLogger(__name__)
 
 
 class CodeCleanup(
@@ -98,55 +103,63 @@ class UploadProcess(
 class PostAttachmentProcess(
     celery.AtomicTask
 ):
-    def setup_post(self, key):
-        key = key.replace(settings.MEDIA_LOCATION, '')
-
-        key = key.strip('/')
-
-        folder, group_pk, post_pk = key.split('/')
-
-        post = Post.objects.get(
-            group__pk=group_pk,
-            pk=post_pk
-        )
-
-        self.post = post
-        self.key = key
+    file_obj = 'attachment'
 
     def run(self, key):
-        self.setup_post(key)
+        path = key.replace(settings.MEDIA_LOCATION, '')
 
-        self.post.attachment = self.key
+        path = path.strip('/')
 
-        if self.post.is_valid_attachment():
-            self.post.checksum = self.post.attachment.file.key.etag.strip('"')
-            self.post.ready = True
-            self.post.ready_at = timezone.now()
-            self.post.bridge.uploaded = True
-            self.post.save(update_fields=[
+        folder, group_pk, post_pk = path.split('/')
+
+        try:
+            post = Post.objects.select_for_update.get(
+                group__pk=group_pk,
+                pk=post_pk
+            )
+        except Post.DoesNotExist:
+            default_storage.delete(key)
+            logging.warning('No model instance found for {key}'.format(
+                key=key
+            ))
+        else:
+            if getattr(post, self.file_obj):
+                post.delete()
+                logging.warning('Attempt to override {file_obj}'.format(
+                    file_obj=self.file_obj
+                ))
+            else:
+                setattr(post, self.file_obj, path)
+                self.process(post)
+
+    def process(self, post):
+        if post.is_valid_attachment():
+            post.checksum = post.attachment.file.key.etag.strip('"')
+            post.ready = True
+            post.ready_at = timezone.now()
+            post.bridge.uploaded = True
+            post.save(update_fields=[
                 'checksum',
                 'ready',
                 'ready_at',
                 'attachment'
             ])
         else:
-            self.post.delete()
+            post.delete()
 
 
 class PostAttachmentPreviewProcess(
     PostAttachmentProcess
 ):
-    def run(self, key):
-        self.setup_post(key)
+    file_obj = 'attachment_preview'
 
-        self.post.attachment_preview = self.key
-
-        if self.post.is_valid_attachment_preview():
-            self.post.save(update_fields=[
+    def process(self, post):
+        if post.is_valid_attachment_preview():
+            post.save(update_fields=[
                 'attachment_preview'
             ])
         else:
-            self.post.attachment_preview.delete()
+            post.attachment_preview.delete()
 
 
 class APNSPush(
