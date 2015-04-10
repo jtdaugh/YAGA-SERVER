@@ -181,6 +181,7 @@ def create():
     AWS_ACCESS_KEY_ID = ensure_prompt('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = ensure_prompt('AWS_SECRET_ACCESS_KEY')
     AWS_STORAGE_BUCKET_NAME = ensure_prompt('AWS_STORAGE_BUCKET_NAME')
+    AWS_SQS_QUEUE = ensure_prompt('AWS_SQS_QUEUE')
 
     local('heroku config:set AWS_REGION={value}'.format(
         value=AWS_REGION
@@ -194,11 +195,26 @@ def create():
     local('heroku config:set AWS_STORAGE_BUCKET_NAME={value}'.format(
         value=AWS_STORAGE_BUCKET_NAME
     ))
+    local('heroku config:set AWS_SQS_QUEUE={value}'.format(
+        value=AWS_SQS_QUEUE
+    ))
+
+    APNS_MODE = ensure_prompt('APNS_MODE')
+
+    local('heroku config:set APNS_MODE={value}'.format(
+        value=APNS_MODE
+    ))
 
     SECRET_KEY = ensure_prompt('SECRET_KEY')
 
     local('heroku config:set SECRET_KEY={value}'.format(
         value=SECRET_KEY
+    ))
+
+    DOMAIN = ensure_prompt('DOMAIN (http domain for dashboard)')
+
+    local('heroku config:set DOMAIN={value}'.format(
+        value=DOMAIN
     ))
 
     release(initial=True)
