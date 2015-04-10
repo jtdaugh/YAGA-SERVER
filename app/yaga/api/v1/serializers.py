@@ -75,6 +75,18 @@ class UserSerializer(
         fields = ('phone', 'name', 'id')
 
 
+class AuthStatusResponseSerializer(
+    serializers.Serializer
+):
+    expire_at = serializers.DateTimeField()
+
+
+class TokenResponseSerializer(
+    serializers.Serializer
+):
+    token = serializers.CharField()
+
+
 class TokenSerializer(
     serializers.ModelSerializer
 ):

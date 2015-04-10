@@ -62,7 +62,9 @@ class CodeCreateAPIView(
     permission_classes = (permissions.IsAnonymous,)
 
     def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data
+        )
 
         if serializer.is_valid():
             if settings.YAGA_MONKEY_LOGIN:
@@ -71,14 +73,18 @@ class CodeCreateAPIView(
                 ).first()
 
                 if monkey is not None:
-                    return Response(
-                        {
+                    serializer = serializers.AuthStatusResponseSerializer(
+                        data={
                             'expire_at': datetime.datetime(
                                 datetime.MAXYEAR, 12, 31
-                            ).strftime(
-                                settings.REST_FRAMEWORK['DATETIME_FORMAT']
                             )
-                        },
+                        }
+                    )
+
+                    serializer.is_valid(raise_exception=True)
+
+                    return Response(
+                        dict(serializer.data),
                         status=status.HTTP_201_CREATED
                     )
 
@@ -88,12 +94,16 @@ class CodeCreateAPIView(
             if code.verify_phone():
                 code.save()
 
+                serializer = serializers.AuthStatusResponseSerializer(
+                    data={
+                        'expire_at': code.expire_at
+                    }
+                )
+
+                serializer.is_valid(raise_exception=True)
+
                 return Response(
-                    {
-                        'expire_at': code.expire_at.strftime(
-                            settings.REST_FRAMEWORK['DATETIME_FORMAT']
-                        )
-                    },
+                    dict(serializer.data),
                     status=status.HTTP_201_CREATED
                 )
             else:
@@ -128,7 +138,9 @@ class CodeRetrieveAPIView(
         return self.retrieve(request, data, *args, **kwargs)
 
     def retrieve(self, request, data, *args, **kwargs):
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(
+            data=data
+        )
         serializer.is_valid(raise_exception=True)
 
         queryset = self.filter_queryset(self.get_queryset())
@@ -139,11 +151,17 @@ class CodeRetrieveAPIView(
 
         self.check_object_permissions(self.request, code)
 
-        return Response({
-            'expire_at': code.expire_at.strftime(
-                settings.REST_FRAMEWORK['DATETIME_FORMAT']
-            )
-        })
+        serializer = serializers.AuthStatusResponseSerializer(
+            data={
+                'expire_at': code.expire_at
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            dict(serializer.data)
+        )
 
 
 class TokenCreateAPIView(
@@ -162,14 +180,22 @@ class TokenCreateAPIView(
         return obj
 
     def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return Response(
-            {
+        serializer = serializers.TokenResponseSerializer(
+            data={
                 'token': serializer.instance.key
-            },
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            dict(serializer.data),
             status=status.HTTP_201_CREATED,
         )
 
@@ -212,7 +238,9 @@ class GroupListCreateAPIView(
         serializer.save(creator=self.request.user)
 
     def create(self, request):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
@@ -400,7 +428,10 @@ class GroupMemberMuteAPIView(
             user=self.request.user
         )
 
-        serializer = self.get_serializer(obj, data=request.data)
+        serializer = self.get_serializer(
+            obj,
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -425,7 +456,9 @@ class PostCreateAPIView(
         return Group.objects.all()
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
 
         group = self.get_object()
@@ -592,7 +625,9 @@ class ContactListCreateAPIView(
     throttle_classes = (throttling.UserSearchScopedRateThrottle,)
 
     def get_queryset(self):
-        serializer = serializers.UserSearchSerializer(data=self.request.data)
+        serializer = serializers.UserSearchSerializer(
+            data=self.request.data
+        )
         serializer.is_valid(raise_exception=True)
 
         return get_user_model().objects.filter(
@@ -606,7 +641,9 @@ class ContactListCreateAPIView(
         return self.get(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        serializer = serializers.ContactSerializer(data=request.data)
+        serializer = serializers.ContactSerializer(
+            data=request.data
+        )
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 

@@ -2,10 +2,8 @@ msg_cods
 fix tests
 cloudfalre IP
 
-disable hardcoded dictionary responses
 fix likes_lookup twice
 nexmo updates
-celery attachment delete
 no caption push if not member
 all push logick to celery
 
@@ -17,11 +15,6 @@ update bower
 update ruby
 fix travis
 caniuse3???
-
-
-post delete search periodictask
-
-post && attachmnet synctask
 
 celery ack later - celery retry
 
