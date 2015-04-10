@@ -3,7 +3,7 @@ anyjson==0.3.3
 -e hg+http://bitbucket.org/dtbog/apns-client@875f12af6dd23e8c2c58be0849706b682d57ec41#egg=apns_client-dev
 bcrypt==1.1.1
 billiard==3.3.0.19
-boto==2.37.0
+boto==2.38.0
 cchardet==0.3.5
 celery==3.1.17
 cffi==0.8.6
@@ -103,7 +103,7 @@ mock==1.0.1
 mongoengine==0.9.0
 natsort==3.5.1
 nltk==3.0.2
-nose==1.3.4
+nose==1.3.6
 paramiko==1.15.2
 pep8==1.5.7
 pep8-naming==0.2.2
