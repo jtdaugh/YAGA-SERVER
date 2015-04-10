@@ -22,7 +22,7 @@ class YagaAppConf(
 
     SLOP_FACTOR = datetime.timedelta(seconds=5)
 
-    AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=5)
+    AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=10)
     AWS_UPLOAD_MAX_LENGTH = 25 * 1024 * 1024
     AWS_ALLOWED_MIME = {
         'attachment': 'video/mp4',
