@@ -107,7 +107,7 @@ class UnicodeField(
 
         allowed_non_leading_chr = list(map(
             chr,
-            [0x0021, 0x002A, 0x002B, 0x002D, 0x002E, 0x0040]
+            [0x0021, 0x002A, 0x002B, 0x002D, 0x005F, 0x002E, 0x0040]
         ))
 
         allowed_chr += allowed_non_leading_chr
