@@ -119,13 +119,13 @@ class PostAttachmentProcess(
             )
         except Post.DoesNotExist:
             default_storage.delete(key)
-            logger.warning('No model instance found for {key}'.format(
+            logger.error('No model instance found for {key}'.format(
                 key=key
             ))
         else:
             if getattr(post, self.file_obj):
                 post.delete()
-                logger.warning('Attempt to override {file_obj}'.format(
+                logger.error('Attempt to override {file_obj}'.format(
                     file_obj=self.file_obj
                 ))
             else:
@@ -142,7 +142,7 @@ class PostAttachmentProcess(
             ).exists():
                 post.delete()
 
-                logger.warning('Dropped duplicate {file_obj}'.format(
+                logger.error('Dropped duplicate {file_obj}'.format(
                     file_obj=post.attachment
                 ))
             else:
