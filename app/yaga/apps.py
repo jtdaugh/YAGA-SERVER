@@ -8,7 +8,9 @@ from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
 
-class YagaAppConfig(AppConfig):
+class YagaAppConfig(
+    AppConfig
+):
     name = 'yaga'
     verbose_name = _('Yaga')
 
