@@ -135,15 +135,26 @@ class PostAttachmentProcess(
     def process(self, post):
         if post.is_valid_attachment():
             post.checksum = post.attachment.file.key.etag.strip('"')
-            post.ready = True
-            post.ready_at = timezone.now()
-            post.bridge.uploaded = True
-            post.save(update_fields=[
-                'checksum',
-                'ready',
-                'ready_at',
-                'attachment'
-            ])
+
+            if Post.objects.filter(
+                group=post.group,
+                checksum=post.checksum
+            ).exists():
+                post.delete()
+
+                logger.warning('Dropped duplicate {file_obj}'.format(
+                    file_obj=post.attachment
+                ))
+            else:
+                post.ready = True
+                post.ready_at = timezone.now()
+                post.bridge.uploaded = True
+                post.save(update_fields=[
+                    'checksum',
+                    'ready',
+                    'ready_at',
+                    'attachment'
+                ])
         else:
             post.delete()
 

@@ -340,6 +340,9 @@ class Post(
         permissions = (
             ('view_post', 'Can view Post'),
         )
+        unique_together = (
+            ('checksum', 'group'),
+        )
 
     tracker = FieldTracker()
 
@@ -352,6 +355,7 @@ class Post(
     #     return md5.hexdigest()
 
     def mark_deleted(self):
+        self.checksum = None
         self.deleted = True
         self.save()
 
