@@ -380,6 +380,7 @@ class Post(
                 file_name=file_obj.name,
                 mime=mime
             ))
+
             return False
 
         if (
@@ -390,12 +391,14 @@ class Post(
             logger.error('{file_name} exceeded capacity'.format(
                 file_name=file_obj.name
             ))
+
             return False
 
         if file_obj.file.size == 0:
             logger.error('{file_name} size is 0'.format(
                 file_name=file_obj.name
             ))
+
             return False
 
         return True
@@ -417,16 +420,17 @@ class Post(
                     'x': image_size[0],
                     'y': image_size[1]
                 }
-
-                if image_size != settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
-                    logger.error('{file_name} GIF is {x}*{y}'.format(
-                        file_name=self.attachment_preview.name,
-                        x=image_size['x'],
-                        y=image_size['y']
-                    ))
-                    return False
             except Exception as e:
                 logger.exception(e)
+
+                return False
+
+            if image_size not in settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
+                logger.error('{file_name} GIF is {x}*{y}'.format(
+                    file_name=self.attachment_preview.name,
+                    x=image_size['x'],
+                    y=image_size['y']
+                ))
 
                 return False
 
