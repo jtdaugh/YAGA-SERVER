@@ -62,8 +62,9 @@ class UnicodeField(
     CharField
 ):
     def __init__(self, **kwargs):
-        kwargs['max_length'] = 32
-        kwargs['min_length'] = 1
+        kwargs.setdefault('max_length', 32)
+        kwargs.setdefault('min_length', 1)
+
         self.allow_spaces = kwargs.pop('allow_spaces', False)
         super(UnicodeField, self).__init__(**kwargs)
 
