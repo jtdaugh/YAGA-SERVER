@@ -59,7 +59,7 @@ class YagaAppConf(
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 
-    APNS_MODE = os.environ.get('APNS_MODE', 'sandox')
+    APNS_MODE = os.environ.get('APNS_MODE', 'sandbox')
 
     APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
