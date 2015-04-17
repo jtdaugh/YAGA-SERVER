@@ -38,6 +38,14 @@ class YagaAppConf(
         {
             'x': 200,
             'y': 200
+        },
+        {
+            'x': 240,
+            'y': 200
+        },
+        {
+            'x': 200,
+            'y': 240
         }
     ]
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
