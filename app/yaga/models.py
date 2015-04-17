@@ -224,6 +224,8 @@ class Group(
             ('view_group', 'Can view Group'),
         )
 
+    tracker = FieldTracker()
+
     def __str__(self):
         return smart_text(self.pk)
 

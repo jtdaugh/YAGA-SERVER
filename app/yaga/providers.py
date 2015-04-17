@@ -561,6 +561,34 @@ class NewLikeIOSNotification(
         }
 
 
+class GroupRenameIOSNotification(
+    IOSNotification
+):
+    BROADCAST = True
+
+    def get_group(self):
+        return self.group
+
+    def get_meta(self):
+        return {
+            'event': 'rename',
+            'group_id': str(self.group.pk),
+        }
+
+    def get_emitter(self):
+        return self.namer
+
+    def get_broadcast_kwargs(self):
+        return {
+            'namer': self.namer.get_username(),
+            'old_name': self.old_name,
+            'new_name': self.group.name
+        }
+
+    def get_broadcast_message(self):
+        return _('{namer} renamed {old_name} to {new_name}')
+
+
 class NewCaptionIOSNotification(
     IOSNotification
 ):

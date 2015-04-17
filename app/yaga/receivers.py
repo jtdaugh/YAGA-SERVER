@@ -184,3 +184,24 @@ class GroupReceiver(
         instance = kwargs['instance']
 
         instance.bridge.new_members = []
+
+    @staticmethod
+    def pre_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if instance.pk and instance.tracker.previous('name') != instance.name:
+            if hasattr(instance.bridge, 'namer'):
+                user = instance.bridge.namer
+            else:
+                user = get_request().user
+
+            old_name = instance.tracker.previous('name')
+
+            def push_notification():
+                providers.GroupRenameIOSNotification(
+                    group=instance,
+                    namer=user,
+                    old_name=old_name
+                )
+
+            connection.on_commit(push_notification)
