@@ -4,7 +4,6 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-import datetime
 import logging
 
 from . import celery
@@ -18,7 +17,7 @@ if not settings.DEBUG:
     class SelfHeartBeat(
         celery.PeriodicTask
     ):
-        run_every = datetime.timedelta(minutes=5)
+        run_every = settings.SELF_HEARTBEAT_RUN_EVERY
 
         def run(self, *args, **kwargs):
             session = get_requests_session()

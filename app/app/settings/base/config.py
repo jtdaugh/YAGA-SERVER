@@ -4,6 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import datetime
 import os
 
 import closure
@@ -78,6 +79,10 @@ class BaseConfiguration(
     GLOBAL_PERMISSIONS = [
         'view_stats'
     ]
+    # -------------------------------------------------------
+    # self http heartbeat
+    # -------------------------------------------------------
+    SELF_HEARTBEAT_RUN_EVERY = datetime.timedelta(minutes=5)
     # -------------------------------------------------------
     # flanker configuration
     # -------------------------------------------------------
