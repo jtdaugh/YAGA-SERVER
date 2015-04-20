@@ -2,7 +2,7 @@ amqp==1.4.6
 anyjson==0.3.3
 -e hg+http://bitbucket.org/dtbog/apns-client@875f12af6dd23e8c2c58be0849706b682d57ec41#egg=apns_client-dev
 bcrypt==1.1.1
-billiard==3.3.0.19
+billiard==3.3.0.20
 boto==2.38.0
 cchardet==0.3.5
 celery==3.1.17
@@ -20,7 +20,7 @@ Django==1.7.7
 django-activeurl==0.1.8
 django-appconf==1.0.1
 django-bower==5.0.4
-django-braces==1.4.0
+django-braces==1.8.0
 django-cached-authentication-middleware==0.2.0
 django-celery==3.1.16
 -e git://github.com/DigiACTive/django-celery-email@f8d18a574a2cabb72cd568b39c82e570eae42f67#egg=django_celery_email-master
@@ -136,8 +136,8 @@ requests==2.6.0
 responses==0.3.0
 rest-condition==1.0.1
 six==1.9.0
-SQLAlchemy==0.9.9
-sqlparse==0.1.14
+SQLAlchemy==1.0.0
+sqlparse==0.1.15
 tox==1.9.2
 ujson==1.33
 uWSGI==2.0.10
