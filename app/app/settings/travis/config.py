@@ -62,8 +62,9 @@ class TravisConfiguration(
     ALLOWED_HOSTS = [
         '*'
     ]
-    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_HOST = False
     BEHIND_PROXY = False
+    CLOUDFLARE_BEHIND = False
     # -------------------------------------------------------
     # database configuration
     # -------------------------------------------------------

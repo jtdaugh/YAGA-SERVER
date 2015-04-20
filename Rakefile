@@ -18,6 +18,7 @@ task :deploy do
     sh 'python manage.py collectstatic --noinput'
     sh 'python manage.py clean_compress'
     sh 'python manage.py compress'
+    sh 'python manage.py cloudflare_load'
   end
 end
 

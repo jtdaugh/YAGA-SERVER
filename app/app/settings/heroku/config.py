@@ -68,8 +68,9 @@ class HerokuConfiguration(
         'api-dev.yagaprivate.com',
         'www-dev.yagaprivate.com'
     ]
-    USE_X_FORWARDED_HOST = True
-    BEHIND_PROXY = True
+    USE_X_FORWARDED_HOST = False
+    BEHIND_PROXY = False
+    CLOUDFLARE_BEHIND = True
     # -------------------------------------------------------
     # database configuration
     # -------------------------------------------------------

@@ -155,6 +155,7 @@ class BaseConfiguration(
     ALLOWED_HOSTS = ['127.0.0.1']
     USE_X_FORWARDED_HOST = False
     BEHIND_PROXY = False
+    CLOUDFLARE_BEHIND = False
     # -------------------------------------------------------
     # database configuration
     # -------------------------------------------------------
@@ -459,6 +460,7 @@ class BaseConfiguration(
         # local contrib
         'app',
         'accounts',
+        'cloudflare',
 
         # local
         'content',
@@ -687,6 +689,13 @@ class Implementation(
     object
 ):
     def implement(self):
+        # -------------------------------------------------------
+        # hosts implementation
+        # -------------------------------------------------------
+        if self.CLOUDFLARE_BEHIND:
+            self.MIDDLEWARE_CLASSES.insert(
+                0, 'cloudflare.middleware.CloudFlareMiddleware'
+            )
         # -------------------------------------------------------
         # storages implementation
         # -------------------------------------------------------
