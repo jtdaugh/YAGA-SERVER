@@ -4,11 +4,15 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import logging
+
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from werkzeug.contrib.fixers import ProxyFix
 
 from .conf import settings
 from .utils import cloudflare_mask
+
+logger = logging.getLogger(__name__)
 
 
 class CloudFlareProxyFix(
@@ -16,7 +20,10 @@ class CloudFlareProxyFix(
 ):
     def get_remote_addr(self, forwarded_for):
         if forwarded_for:
-            return forwarded_for[-1]
+            remote_addr = forwarded_for[-1]
+            logging.info(remote_addr)
+
+            return remote_addr
 
 
 class CloudFlareFix(
@@ -28,6 +35,10 @@ class CloudFlareFix(
     def __call__(self, environ, start_response):
         if settings.CLOUDFLARE_BEHIND:
             cf_connecting_ip = environ.get('HTTP_CF_CONNECTING_IP', None)
+
+            logger.info('HTTP_CF_CONNECTING_IP {cf_connecting_ip}'.format(
+                cf_connecting_ip=cf_connecting_ip
+            ))
 
             environ['CF_FORBIDDEN'] = False
 
