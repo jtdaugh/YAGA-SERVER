@@ -504,7 +504,7 @@ class NewMembersBatchIOSNotification(
 
     def get_new_members(self):
         if not self.group.bridge.new_members:
-            self.True = True
+            self.SKIP = True
             return ''
         elif len(self.group.bridge.new_members) == 1:
             return self.group.bridge.new_members.pop().user.get_username()
