@@ -16,15 +16,13 @@ class CloudFlareFix(object):
 
     def __call__(self, environ, start_response):
         if settings.CLOUDFLARE_BEHIND:
-            cf_connecting_ip = cloudflare_mask.is_valid_remote_addr(
-                environ.get('HTTP_CF_CONNECTING_IP', None)
-            )
+            cf_connecting_ip = environ.get('HTTP_CF_CONNECTING_IP', None)
 
             environ['CF_FORBIDDEN'] = False
 
-            if not cf_connecting_ip:
+            if not cloudflare_mask.is_valid_remote_addr(cf_connecting_ip):
                 environ['CF_FORBIDDEN'] = True
-            elif cloudflare_mask.match(environ['REMOTE_ADDR']):
+            elif cloudflare_mask.is_cloudflare(environ['REMOTE_ADDR']):
                 environ['REMOTE_ADDR'] = cf_connecting_ip
             else:
                 environ['CF_FORBIDDEN'] = True

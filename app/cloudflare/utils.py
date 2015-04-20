@@ -48,16 +48,14 @@ class CloudFlareMask(
             return False
 
         try:
-            remote_addr = validate_ipv4_address(remote_addr)
+            validate_ipv4_address(remote_addr)
         except ValidationError:
             return False
 
-        return remote_addr
+        return True
 
     def is_cloudflare(self, remote_addr):
-        remote_addr = self.is_valid_remote_addr(remote_addr)
-
-        if not remote_addr:
+        if not self.is_valid_remote_addr(remote_addr):
             return False
 
         remote_addr = IPAddress(remote_addr)
