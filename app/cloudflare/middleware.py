@@ -35,7 +35,7 @@ class CloudFlareFix(object):
 class CloudFlareMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if settings.CLOUDFLARE_BEHIND:
-            if not request.META.get('CF_FORBIDDEN'):
+            if request.META.get('CF_FORBIDDEN', None) is None:
                 raise ImproperlyConfigured(
                     'Missing CloudFlareFix at wsgi:application'
                 )
