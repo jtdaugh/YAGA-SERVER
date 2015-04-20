@@ -55,10 +55,6 @@ class CloudFlareMask(
         return True
 
     def is_cloudflare(self, remote_addr):
-        logger.info('Check {remote_addr} as cloudflare ip'.format(
-            remote_addr=remote_addr
-        ))
-
         if not self.is_valid_remote_addr(remote_addr):
             return False
 

@@ -22,6 +22,6 @@ if settings.HANDLE_STATIC:
     })
 
 if settings.CLOUDFLARE_BEHIND:
-    application = CloudFlareFix(CloudFlareProxyFix(application))
+    application = CloudFlareProxyFix(CloudFlareFix(application))
 elif settings.BEHIND_PROXY:
     application = ProxyFix(application)
