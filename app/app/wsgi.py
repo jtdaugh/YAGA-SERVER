@@ -8,7 +8,7 @@ from configurations.wsgi import get_wsgi_application
 from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.wsgi import SharedDataMiddleware
 
-from cloudflare.middleware import CloudFlareFix
+from cloudflare.middleware import CloudFlareFix, CloudFlareProxyFix
 
 from .conf import settings
 
@@ -22,6 +22,6 @@ if settings.HANDLE_STATIC:
     })
 
 if settings.CLOUDFLARE_BEHIND:
-    application = CloudFlareFix(application)
+    application = CloudFlareFix(CloudFlareProxyFix(application))
 elif settings.BEHIND_PROXY:
     application = ProxyFix(application)

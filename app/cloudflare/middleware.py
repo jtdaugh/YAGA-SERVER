@@ -5,12 +5,23 @@ from future.builtins import (  # noqa
 )
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
+from werkzeug.contrib.fixers import ProxyFix
 
 from .conf import settings
 from .utils import cloudflare_mask
 
 
-class CloudFlareFix(object):
+class CloudFlareProxyFix(
+    ProxyFix
+):
+    def get_remote_addr(self, forwarded_for):
+        if forwarded_for:
+            return forwarded_for[-1]
+
+
+class CloudFlareFix(
+    object
+):
     def __init__(self, application):
         self.application = application
 
