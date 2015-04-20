@@ -17,7 +17,7 @@ class CloudFlareFix(object):
     def __call__(self, environ, start_response):
         if settings.CLOUDFLARE_BEHIND:
             cf_connecting_ip = cloudflare_mask.is_valid_remote_addr(
-                environ.get('CF-Connecting-IP', None)
+                environ.get('HTTP_CF_CONNECTING_IP', None)
             )
 
             environ['CF_FORBIDDEN'] = False
