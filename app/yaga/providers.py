@@ -238,6 +238,7 @@ class IOSNotification(
     VENDOR = Device.Vendor.IOS
     BROADCAST = False
     TARGET = False
+    SKIP = False
 
     def __init__(self, **kwargs):
         for key, value in list(kwargs.items()):
@@ -250,6 +251,9 @@ class IOSNotification(
 
     def rate_limited(self):
         return False
+
+    def skipped(self):
+        return self.SKIP
 
     def get_broadcast_message(self):
         raise NotImplementedError
@@ -330,10 +334,11 @@ class IOSNotification(
                     kwargs['alert'] = self.format_broadcast_alert()
                     kwargs.update(self.get_push_kwargs())
 
-                    apns_provider.scheduled_task(
-                        tokens,
-                        **kwargs
-                    )
+                    if not self.skipped():
+                        apns_provider.scheduled_task(
+                            tokens,
+                            **kwargs
+                        )
 
     def format_target_alert(self):
         return self.get_target_message().format(
@@ -352,10 +357,11 @@ class IOSNotification(
                     kwargs['alert'] = self.format_target_alert()
                     kwargs.update(self.get_push_kwargs())
 
-                    apns_provider.scheduled_task(
-                        tokens,
-                        **kwargs
-                    )
+                    if not self.skipped():
+                        apns_provider.scheduled_task(
+                            tokens,
+                            **kwargs
+                        )
 
     def push(self):
         if not self.rate_limited():
@@ -497,7 +503,10 @@ class NewMembersBatchIOSNotification(
         ]
 
     def get_new_members(self):
-        if len(self.group.bridge.new_members) == 1:
+        if not self.group.bridge.new_members:
+            self.True = True
+            return ''
+        elif len(self.group.bridge.new_members) == 1:
             return self.group.bridge.new_members.pop().user.get_username()
         elif (
             settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
