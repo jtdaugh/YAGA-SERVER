@@ -1,5 +1,5 @@
 APP_DIR = 'app'
-PROCESS_WORKERS = 5
+PROCESS_WORKERS = 3
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = false
 NEWRELIC_CMD = 'newrelic-admin run-program '
@@ -65,8 +65,14 @@ end
 task :celery_broker do
   cmd = 'celery -A app worker -c %{workers} -B'
 
+  if PROCESS_WORKERS > 2
+    workers = PROCESS_WORKERS - 1
+  else
+    workers = 1
+  end
+
   cmd = cmd % {
-    workers: PROCESS_WORKERS
+    workers: workers
   }
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
