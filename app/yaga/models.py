@@ -273,6 +273,18 @@ class Post(
         null=True
     )
 
+    rotation = models.PositiveSmallIntegerField(
+        verbose_name=_('Rotation'),
+        blank=True,
+        null=True
+    )
+
+    scale = models.PositiveSmallIntegerField(
+        verbose_name=_('Scale'),
+        blank=True,
+        null=True
+    )
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User')

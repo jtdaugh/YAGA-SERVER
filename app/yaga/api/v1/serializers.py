@@ -196,9 +196,17 @@ class PostSerializer(
         min_value=0, max_value=20, required=False
     )
 
+    rotation = serializers.IntegerField(
+        min_value=0, max_value=359, required=False
+    )
+
+    scale = serializers.IntegerField(
+        min_value=0, max_value=100, required=False
+    )
+
     class Meta:
         model = Post
-        caption_fields = ('name_x', 'name_y', 'font')
+        caption_fields = ('name_x', 'name_y', 'font', 'rotation', 'scale')
         fields = (
             'attachment', 'attachment_preview', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'deleted', 'likers', 'namer'
