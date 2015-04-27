@@ -1,0 +1,33 @@
+{% extends 'yaga/user/list.html' %}
+
+{% load i18n %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {{ user.pk }}
+{% endblock %}
+
+{% block breadcrumbs_list %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'yaga:user:list' %}">
+            {% trans 'List' %}
+        </a>
+    </li>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+    {{ user.pk }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-offset-1 col-md-10 well">
+            {% crispy form %}
+        </div>
+    </div>
+{% endblock %}
+

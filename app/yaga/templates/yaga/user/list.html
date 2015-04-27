@@ -81,7 +81,13 @@
             {% for user in users %}
                 <tr>
                     <td>
-                        {{ user.pk }}
+                        {% if perms.accounts.change_user %}
+                            <a href="{% url 'yaga:user:detail' user_id=user.pk %}">
+                                {{ user.pk }}
+                            </a>
+                        {% else %}
+                            {{ user.pk }}
+                        {% endif %}
                     </td>
                     <td>
                         {{ user.phone }}

@@ -13,3 +13,6 @@ class AccountsAppConfig(
 ):
     name = 'accounts'
     verbose_name = _('Accounts')
+
+    def ready(self):
+        from . import dispatch  # noqa # isort:skip

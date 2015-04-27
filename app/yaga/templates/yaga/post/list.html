@@ -91,7 +91,13 @@
                         {{ post.pk }}
                     </td>
                     <td>
-                        {{ post.user.pk }}
+                        {% if perms.accounts.change_user %}
+                            <a href="{% url 'yaga:user:detail' user_id=user.pk %}">
+                                {{ post.user.pk }}
+                            </a>
+                        {% else %}
+                            {{ post.user.pk }}
+                        {% endif %}
                     </td>
                     <td>
                         {{ post.group.pk }}

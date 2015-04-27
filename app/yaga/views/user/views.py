@@ -7,16 +7,25 @@ from future.builtins import (  # noqa
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import ListView
+from django.views.generic import ListView, UpdateView
 from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
 from .filters import UserFilterSet
+from .forms import UserForm
+
+
+class UserView(
+    LoginRequiredMixin,
+    PermissionRequiredMixin
+):
+    raise_exception = True
+    permission_required = 'accounts.view_user'
 
 
 class UserBaseRedirectView(
-    LoginRequiredMixin,
+    UserView,
     RedirectView
 ):
     permanent = False
@@ -27,17 +36,32 @@ class UserBaseRedirectView(
 
 
 class UserListView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    UserView,
     CrispyFilterView,
     ListView
 ):
     paginate_by = 25
     template_name = 'yaga/user/list.html'
-    raise_exception = True
-    permission_required = 'accounts.view_user'
     context_object_name = 'users'
     filterset_class = UserFilterSet
 
     def get_queryset(self):
         return get_user_model().objects.all().order_by('-date_joined')
+
+
+class UserUpdateView(
+    UserView,
+    UpdateView
+):
+    pk_url_kwarg = 'user_id'
+    template_name = 'yaga/user/detail.html'
+    permission_required = 'accounts.change_user'
+    form_class = UserForm
+
+    def get_queryset(self):
+        return get_user_model().objects.all()
+
+    def get_success_url(self):
+        return reverse_lazy('yaga:user:detail', kwargs={
+            'user_id': self.object.pk
+        })

@@ -10,7 +10,7 @@ from .api.v1.urls import urlpatterns as api_urlpatterns_v1
 from .views.group.views import GroupBaseRedirectView, GroupListView
 from .views.post.views import PostBaseRedirectView, PostListView
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
-from .views.user.views import UserBaseRedirectView, UserListView
+from .views.user import views as user_view
 
 api_urlpatterns = patterns(
     '',
@@ -38,14 +38,19 @@ user_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        UserBaseRedirectView.as_view(),
+        user_view.UserBaseRedirectView.as_view(),
         name='base'
     ),
     url(
         r'^list/$',
-        UserListView.as_view(),
+        user_view.UserListView.as_view(),
         name='list'
     ),
+    url(
+        r'^list/(?P<user_id>[\-a-z0-9]{32,36})/$',
+        user_view.UserUpdateView.as_view(),
+        name='detail'
+    )
 )
 
 post_urlpatterns = patterns(
