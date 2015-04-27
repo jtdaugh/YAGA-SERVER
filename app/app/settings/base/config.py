@@ -283,6 +283,7 @@ class BaseConfiguration(
         'respond#1.4.2',
         'jquery#2.1.3',
         'bootstrap#3.3.4',
+        'bootstrap-select#1.6.5',
         'font-awesome#4.3.0',
         'handlebars#3.0.2',
         'underscore#1.8.3',
