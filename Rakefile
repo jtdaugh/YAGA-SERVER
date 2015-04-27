@@ -65,11 +65,7 @@ end
 task :celery_broker do
   cmd = 'celery -A app worker -c %{workers} -B'
 
-  if PROCESS_WORKERS > 1
-    workers = PROCESS_WORKERS - 1
-  else
-    workers = 1
-  end
+  workers = PROCESS_WORKERS - 1 if PROCESS_WORKERS > 1
 
   cmd = cmd % {
     workers: workers

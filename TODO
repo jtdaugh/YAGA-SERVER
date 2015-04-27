@@ -1,6 +1,5 @@
 msg_cods
 fix tests
-cloudfalre IP
 
 fix likes_lookup twice
 nexmo updates
@@ -9,10 +8,6 @@ all push logick to celery
 
 view/delete/update - admin options
 
-remove fabric
-update node
-update bower
-update ruby
 fix travis
 caniuse3???
 
