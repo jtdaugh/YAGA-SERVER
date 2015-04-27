@@ -69,6 +69,9 @@
                     {% trans 'Posts' %}
                 </th>
                 <th>
+                    {% trans 'Likes' %}
+                </th>
+                <th>
                     {% trans 'Verified' %}
                 </th>
                 <th>
@@ -106,6 +109,9 @@
                     </td>
                     <td>
                         {{ user.post_set.count}}
+                    </td>
+                    <td>
+                        {{ user.like_set.count}}
                     </td>
                     <td>
                         {% if user.verified %}
