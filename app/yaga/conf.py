@@ -20,6 +20,8 @@ class YagaAppConf(
     SMS_KEY = '354d4cc5'
     SMS_SECRET = '066e303e'
 
+    SMS_DEFAULT_LANGUAGE_CODE = 'en-us'
+
     SLOP_FACTOR = datetime.timedelta(seconds=5)
 
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=10)

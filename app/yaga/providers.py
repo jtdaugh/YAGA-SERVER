@@ -131,6 +131,8 @@ class NexmoProvider(
 
         if locale is not None:
             params['lg'] = locale
+        else:
+            params['lg'] = settings.YAGA_SMS_DEFAULT_LANGUAGE_CODE
 
         return self.request(
             self.SEND_VERIFY_ENDPOINT,
