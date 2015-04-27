@@ -46,8 +46,7 @@ class BasicStatsTemplateView(
         context['stats'] = {
             'today': {
                 'users': get_user_model().objects.filter(
-                    date_joined__gte=today,
-                    verified=True
+                    verified_at__gte=today
                 ).count(),
                 'groups': Group.objects.filter(
                     created_at__gte=today
