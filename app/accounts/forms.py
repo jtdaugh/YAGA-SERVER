@@ -5,9 +5,9 @@ from future.builtins import (  # noqa
 )
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Field
 from django import forms
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, _clean_credentials
 from django.contrib.auth.forms import (
     AuthenticationForm, PasswordChangeForm, ReadOnlyPasswordHashField
 )
@@ -109,16 +109,16 @@ class SignInForm(
     @property
     def helper(self):
         helper = FormHelper()
-        helper.add_input(Submit('submit', _('Sign in')))
-
-        return helper
-
-
-class SignUpForm(UserCreationForm):
-    @property
-    def helper(self):
-        helper = FormHelper()
-        helper.add_input(Submit('submit', _('Sign up')))
+        helper.layout = Layout(
+            Fieldset(
+                _('Sign In'),
+                Field('username'),
+                Field('password')
+            ),
+            ButtonHolder(
+                Submit('submit', _('Sign in'))
+            )
+        )
 
         return helper
 
@@ -158,14 +158,28 @@ class ChangePasswordForm(
         try:
             return super(ChangePasswordForm, self).clean_old_password()
         except forms.ValidationError as e:
-            user_login_failed.send(None, credentials={
-                'username': self.user.get_username()
-            })
+            user_login_failed.send(__name__, credentials=_clean_credentials({
+                'username': getattr(
+                    self.user, get_user_model().USERNAME_FIELD
+                ),
+                'password': self.cleaned_data['old_password']
+            }))
             raise e
 
     @property
     def helper(self):
         helper = FormHelper()
-        helper.add_input(Submit('submit', _('Change password')))
+
+        helper.layout = Layout(
+            Fieldset(
+                _('Change Password'),
+                Field('old_password'),
+                Field('new_password1'),
+                Field('new_password2'),
+            ),
+            ButtonHolder(
+                Submit('submit', _('Change password'))
+            )
+        )
 
         return helper
