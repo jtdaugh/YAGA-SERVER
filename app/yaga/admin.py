@@ -51,6 +51,8 @@ class MemberModelAdmin(
 ):
     list_display = ('user', 'group', 'mute', 'joined_at')
 
+    list_filter = ('mute',)
+
     ordering = ('-joined_at', 'mute')
 
 
