@@ -5,6 +5,7 @@ from future.builtins import (  # noqa
 )
 
 from django.contrib import admin
+from django.forms.models import BaseInlineFormSet
 
 from .models import (
     Code, Contact, Device, Group, Like, Member, MonkeyUser, Post
@@ -21,6 +22,32 @@ class CodeModelAdmin(
     search_fields = ('phone', 'request_id',)
 
 
+class MemberTabularInline(
+    admin.TabularInline
+):
+    model = Member
+
+
+class PostBaseInlineFormSet(
+    BaseInlineFormSet
+):
+    def get_queryset(self):
+        return super(PostBaseInlineFormSet, self).get_queryset().filter(
+            ready=True,
+            deleted=False
+        )
+
+
+class PostTabularInline(
+    admin.TabularInline
+):
+    model = Post
+
+    formset = PostBaseInlineFormSet
+
+    fields = ('name', 'user', 'attachment', 'attachment_preview')
+
+
 class GroupModelAdmin(
     admin.ModelAdmin
 ):
@@ -29,6 +56,8 @@ class GroupModelAdmin(
     ordering = ('-created_at',)
 
     search_fields = ('name', 'id')
+
+    inlines = (MemberTabularInline, PostTabularInline)
 
 
 class PostModelAdmin(
