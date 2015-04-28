@@ -54,7 +54,7 @@ class UserUpdateView(
     UpdateView
 ):
     pk_url_kwarg = 'user_id'
-    template_name = 'yaga/user/detail.html'
+    template_name = 'yaga/user/update.html'
     permission_required = 'accounts.change_user'
     form_class = UserForm
     context_object_name = 'user'

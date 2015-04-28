@@ -288,6 +288,7 @@ class BaseConfiguration(
         'handlebars#3.0.2',
         'underscore#1.8.3',
         'video.js#4.12.5',
+        'bootstrap-switch#3.3.2',
         'json3#3.3.2',
     )
     # -------------------------------------------------------

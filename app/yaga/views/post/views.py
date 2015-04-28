@@ -6,14 +6,15 @@ from future.builtins import (  # noqa
 
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import ListView, UpdateView
+from django.http import HttpResponseRedirect
+from django.views.generic import DeleteView, ListView
 from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
 from ...models import Post
 from .filters import PostFilterSet
-from .forms import PostForm
+from .forms import PageDeleteForm
 
 
 class PostView(
@@ -49,20 +50,29 @@ class PostListView(
         return Post.objects.all().order_by('-created_at')
 
 
-class PostUpdateView(
+class PostDeleteView(
     PostView,
-    UpdateView
+    DeleteView
 ):
     pk_url_kwarg = 'post_id'
-    template_name = 'yaga/post/detail.html'
-    permission_required = 'yaga.change_post'
-    form_class = PostForm
+    template_name = 'yaga/post/delete.html'
+    permission_required = 'yaga.delete_post'
     context_object_name = 'post'
+    form_class = PageDeleteForm
 
     def get_queryset(self):
         return Post.objects.all()
 
     def get_success_url(self):
-        return reverse_lazy('yaga:post:detail', kwargs={
-            'post_id': self.object.pk
-        })
+        return reverse_lazy('yaga:post:list')
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.mark_deleted()
+        return HttpResponseRedirect(success_url)
+
+    def get_context_data(self, **kwargs):
+        context = super(PostDeleteView, self).get_context_data(**kwargs)
+        context['form'] = self.form_class()
+        return context

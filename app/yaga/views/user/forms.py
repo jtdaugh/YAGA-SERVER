@@ -23,9 +23,9 @@ class UserForm(
         helper = FormHelper()
         helper.layout = Layout(
             Fieldset(
-                _('Change User'),
+                _('Update User'),
                 Field('name'),
-                Field('phone', disabled=True),
+                Field('phone', readonly=True),
                 Field('is_active')
             ),
             ButtonHolder(

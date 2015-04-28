@@ -49,7 +49,7 @@ user_urlpatterns = patterns(
     url(
         r'^list/(?P<user_id>[\-a-z0-9]{32,36})/$',
         user_view.UserUpdateView.as_view(),
-        name='detail'
+        name='update'
     )
 )
 
@@ -66,9 +66,9 @@ post_urlpatterns = patterns(
         name='list'
     ),
     url(
-        r'^list/(?P<post_id>[\-a-z0-9]{32,36})/$',
-        post_view.PostUpdateView.as_view(),
-        name='detail'
+        r'^list/(?P<post_id>[\-a-z0-9]{32,36})/delete/$',
+        post_view.PostDeleteView.as_view(),
+        name='delete'
     )
 )
 
