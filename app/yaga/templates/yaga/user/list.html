@@ -72,6 +72,9 @@
                     {% trans 'Likes' %}
                 </th>
                 <th>
+                    {% trans 'Tokens' %}
+                </th>
+                <th>
                     {% trans 'Verified' %}
                 </th>
                 <th>
@@ -114,10 +117,15 @@
                         {% endif %}
                     </td>
                     <td>
-                        {{ user.post_set.count}}
+                        <a href="{% url 'yaga:post:list' %}?user={{ user.pk | urlencode }}">
+                            {{ user.post_set.count}}
+                        </a>
                     </td>
                     <td>
                         {{ user.like_set.count}}
+                    </td>
+                    <td>
+                        {{ user.token_set.count}}
                     </td>
                     <td>
                         {% if user.verified %}

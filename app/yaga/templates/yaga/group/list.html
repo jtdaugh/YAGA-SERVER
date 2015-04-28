@@ -59,6 +59,12 @@
                 <th>
                     {% trans 'Created At' %}
                 </th>
+                <th>
+                    {% trans 'Posts' %}
+                </th>
+                <th>
+                    {% trans 'Users' %}
+                </th>
             </tr>
             {% for group in groups %}
                 <tr>
@@ -70,6 +76,14 @@
                     </td>
                     <td>
                         {{ group.created_at }}
+                    </td>
+                    <td>
+                        <a href="{% url 'yaga:post:list' %}?group={{ group.pk | urlencode }}">
+                            {{ group.post_set.count }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ group.member_set.count }}
                     </td>
                 </tr>
             {% endfor %}
