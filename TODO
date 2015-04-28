@@ -6,13 +6,16 @@ nexmo updates
 no caption push if not member
 all push logick to celery
 
-view/delete/update - admin options
+admin options
+post likers list
+group members list
+post preview feature (gif)
+tokens list
 
 fix travis
+
 caniuse3???
 
 celery ack later - celery retry
-
-_set. - prefetch???
 
 APNS feedback

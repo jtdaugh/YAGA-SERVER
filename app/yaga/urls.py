@@ -47,7 +47,7 @@ user_urlpatterns = patterns(
         name='list'
     ),
     url(
-        r'^list/(?P<user_id>[\-a-z0-9]{32,36})/$',
+        r'^list/(?P<user_id>[\-a-z0-9]{32,36})/update/$',
         user_view.UserUpdateView.as_view(),
         name='update'
     )
