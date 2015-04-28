@@ -15,6 +15,12 @@ from .forms import UserChangeForm, UserCreationForm
 from .models import Token
 
 
+class TokenTabularInline(
+    admin.TabularInline
+):
+    model = Token
+
+
 class UserModelAdmin(
     BaseUserAdmin, HijackUserAdminMixin
 ):
@@ -99,6 +105,8 @@ class UserModelAdmin(
     ordering = ('-date_joined',)
 
     filter_horizontal = ('groups', 'user_permissions')
+
+    inlines = (TokenTabularInline,)
 
 
 class TokenModelAdmin(
