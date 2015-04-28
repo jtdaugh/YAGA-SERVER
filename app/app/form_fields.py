@@ -12,7 +12,7 @@ class PhoneNumberField(
     BasePhoneNumberField
 ):
     def to_python(self, value):
-        if not value.startswith('+'):
+        if value is not None and not value.startswith('+'):
             value = '+{value}'.format(
                 value=value
             )
