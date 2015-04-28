@@ -57,6 +57,7 @@ class UserUpdateView(
     template_name = 'yaga/user/detail.html'
     permission_required = 'accounts.change_user'
     form_class = UserForm
+    context_object_name = 'user'
 
     def get_queryset(self):
         return get_user_model().objects.all()

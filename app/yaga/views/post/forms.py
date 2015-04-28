@@ -7,29 +7,39 @@ from future.builtins import (  # noqa
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Field, Fieldset, Layout, Submit
 from django import forms
-from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
+from ...models import Post
 
-class UserForm(
+
+class Delete(
+    Submit
+):
+    field_classes = 'btn btn-danger'
+
+
+class PostForm(
     forms.ModelForm
 ):
+    user = forms.CharField(label=_('User'))
+
     class Meta:
-        model = get_user_model()
-        fields = ('name', 'phone', 'is_active',)
+        model = Post
+        fields = ('name', 'user', 'ready', 'deleted')
 
     @property
     def helper(self):
         helper = FormHelper()
         helper.layout = Layout(
             Fieldset(
-                _('Change User'),
-                Field('name'),
-                Field('phone', disabled=True),
-                Field('is_active')
+                _('Change Post'),
+                Field('name', disabled=True),
+                Field('user', disabled=True),
+                Field('ready', disabled=True),
+                Field('deleted', disabled=True)
             ),
             ButtonHolder(
-                Submit('submit', _('Save User'))
+                Submit('submit', _('Save Post'))
             )
         )
         return helper

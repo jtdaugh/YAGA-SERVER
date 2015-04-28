@@ -88,7 +88,13 @@
             {% for post in posts %}
                 <tr>
                     <td>
-                        {{ post.pk }}
+                        {% if perms.yaga.change_post %}
+                            <a href="{% url 'yaga:post:detail' post_id=post.pk %}">
+                                {{ post.pk }}
+                            </a>
+                        {% else %}
+                            {{ post.pk }}
+                        {% endif %}
                     </td>
                     <td>
                         {% if perms.accounts.change_user %}

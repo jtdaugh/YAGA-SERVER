@@ -287,6 +287,7 @@ class BaseConfiguration(
         'font-awesome#4.3.0',
         'handlebars#3.0.2',
         'underscore#1.8.3',
+        'video.js#4.12.5',
         'json3#3.3.2',
     )
     # -------------------------------------------------------

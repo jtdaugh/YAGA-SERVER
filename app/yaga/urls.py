@@ -8,7 +8,7 @@ from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
 from .views.group.views import GroupBaseRedirectView, GroupListView
-from .views.post.views import PostBaseRedirectView, PostListView
+from .views.post import views as post_view
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
 from .views.user import views as user_view
 
@@ -57,14 +57,19 @@ post_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        PostBaseRedirectView.as_view(),
+        post_view.PostBaseRedirectView.as_view(),
         name='base'
     ),
     url(
         r'^list/$',
-        PostListView.as_view(),
+        post_view.PostListView.as_view(),
         name='list'
     ),
+    url(
+        r'^list/(?P<post_id>[\-a-z0-9]{32,36})/$',
+        post_view.PostUpdateView.as_view(),
+        name='detail'
+    )
 )
 
 group_urlpatterns = patterns(
