@@ -5,9 +5,9 @@ from future.builtins import (  # noqa
 )
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Fieldset, ButtonHolder, Submit, Field
+from crispy_forms.layout import ButtonHolder, Field, Fieldset, Layout, Submit
 from django import forms
-from django.contrib.auth import get_user_model, _clean_credentials
+from django.contrib.auth import _clean_credentials, get_user_model
 from django.contrib.auth.forms import (
     AuthenticationForm, PasswordChangeForm, ReadOnlyPasswordHashField
 )

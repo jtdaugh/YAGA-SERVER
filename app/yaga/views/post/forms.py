@@ -4,10 +4,10 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django import forms
-from django.utils.translation import ugettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Fieldset, Layout, Submit
+from django import forms
+from django.utils.translation import ugettext_lazy as _
 
 
 class Delete(
