@@ -106,7 +106,13 @@
                         {% endif %}
                     </td>
                     <td>
-                        {{ post.group.pk }}
+                        {% if perms.yaga.view_group %}
+                            <a href="{% url 'yaga:group:detail' group_id=post.group.pk %}">
+                                {{ post.group.pk }}
+                            </a>
+                        {% else %}
+                            {{ post.group.pk }}
+                        {% endif %}
                     </td>
                     <td>
                         {% if post.name %}
