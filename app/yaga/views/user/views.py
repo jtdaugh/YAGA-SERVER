@@ -23,6 +23,9 @@ class UserView(
     raise_exception = True
     permission_required = 'accounts.view_user'
 
+    def get_queryset(self):
+        return get_user_model().objects.all()
+
 
 class UserBaseRedirectView(
     UserView,
@@ -46,7 +49,9 @@ class UserListView(
     filterset_class = UserFilterSet
 
     def get_queryset(self):
-        return get_user_model().objects.all().order_by('-date_joined')
+        return super(
+            UserListView, self
+        ).get_queryset().order_by('-date_joined')
 
 
 class UserUpdateView(
@@ -58,9 +63,6 @@ class UserUpdateView(
     permission_required = 'accounts.change_user'
     form_class = UserForm
     context_object_name = 'user'
-
-    def get_queryset(self):
-        return get_user_model().objects.all()
 
     def get_success_url(self):
         return reverse_lazy('yaga:user:detail', kwargs={

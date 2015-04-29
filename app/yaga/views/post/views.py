@@ -24,6 +24,9 @@ class PostView(
     raise_exception = True
     permission_required = 'posts.view_post'
 
+    def get_queryset(self):
+        return Post.objects.all()
+
 
 class PostBaseRedirectView(
     PostView,
@@ -47,7 +50,9 @@ class PostListView(
     filterset_class = PostFilterSet
 
     def get_queryset(self):
-        return Post.objects.all().order_by('-created_at')
+        return super(
+            PostListView, self
+        ).get_queryset().order_by('-created_at')
 
 
 class PostDeleteView(
@@ -59,9 +64,6 @@ class PostDeleteView(
     permission_required = 'yaga.delete_post'
     context_object_name = 'post'
     form_class = PageDeleteForm
-
-    def get_queryset(self):
-        return Post.objects.all()
 
     def get_success_url(self):
         return reverse_lazy('yaga:post:list')
