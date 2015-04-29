@@ -96,25 +96,13 @@
     {% if group.post_set %}
         <div class="row">
             <div class="col-md-offset-2 col-md-8 well">
-                {% trans 'Posts' %} {{ group.post_set.count }}
-                <hr>
-                {% for post in group.post_set.all %}
-                    {% if perms.yaga.delete_post %}
-                        <a href="{% url 'yaga:post:delete' post_id=post.pk %}">
-                            {% if post.attachment_preview %}
-                                <img class="img-responsive img-thumbnail" src="{{ post.attachment_preview.url }}"/>
-                            {% else %}
-                                {{ post.pk }}
-                            {% endif %}
-                        </a>
-                    {% else %}
-                        {% if post.attachment_preview %}
-                            <img class="img-responsive img-thumbnail" src="{{ post.attachment_preview.url }}"/>
-                        {% else %}
-                            {{ post.pk }}
-                        {% endif %}
-                    {% endif %}
-                {% endfor %}
+                {% if perms.yaga.view_post %}
+                    <a href="{% url 'yaga:post:list' %}?group={{ group.pk | urlencode }}">
+                        {% trans 'Posts' %} {{ group.post_set.count }}
+                    </a>
+                {% else %}
+                    {% trans 'Posts' %} {{ group.post_set.count }}
+                {% endif %}
             </div>
         </div>
     {% endif %}
