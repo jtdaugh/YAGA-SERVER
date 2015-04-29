@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
-from .views.group.views import GroupBaseRedirectView, GroupListView
+from .views.group import views as group_view
 from .views.post import views as post_view
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
 from .views.user import views as user_view
@@ -76,13 +76,18 @@ group_urlpatterns = patterns(
     '',
     url(
         r'^$',
-        GroupBaseRedirectView.as_view(),
+        group_view.GroupBaseRedirectView.as_view(),
         name='base'
     ),
     url(
         r'^list/$',
-        GroupListView.as_view(),
+        group_view.GroupListView.as_view(),
         name='list'
+    ),
+    url(
+        r'^list/(?P<group_id>[\-a-z0-9]{32,36})/$',
+        group_view.GroupDetailView.as_view(),
+        name='detail'
     ),
 )
 

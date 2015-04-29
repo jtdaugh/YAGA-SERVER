@@ -69,7 +69,9 @@
             {% for group in groups %}
                 <tr>
                     <td>
-                        {{ group.pk }}
+                        <a href="{% url 'yaga:group:detail' group_id=group.pk %}">
+                            {{ group.pk }}
+                        </a>
                     </td>
                     <td>
                         {{ group.name }}

@@ -6,7 +6,7 @@ from future.builtins import (  # noqa
 
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
@@ -15,8 +15,19 @@ from ...models import Group
 from .filters import GroupFilterSet
 
 
-class GroupBaseRedirectView(
+class GroupView(
     LoginRequiredMixin,
+    PermissionRequiredMixin,
+):
+    raise_exception = True
+    permission_required = 'posts.view_group'
+
+    def get_queryset(self):
+        return Group.objects.all()
+
+
+class GroupBaseRedirectView(
+    GroupView,
     RedirectView
 ):
     permanent = False
@@ -27,17 +38,25 @@ class GroupBaseRedirectView(
 
 
 class GroupListView(
-    LoginRequiredMixin,
-    PermissionRequiredMixin,
+    GroupView,
     CrispyFilterView,
     ListView
 ):
     paginate_by = 25
     template_name = 'yaga/group/list.html'
-    raise_exception = True
-    permission_required = 'posts.view_group'
     context_object_name = 'groups'
     filterset_class = GroupFilterSet
 
     def get_queryset(self):
-        return Group.objects.all().order_by('-created_at')
+        return super(
+            GroupListView, self
+        ).get_queryset().order_by('-created_at')
+
+
+class GroupDetailView(
+    GroupView,
+    DetailView
+):
+    context_object_name = 'group'
+    pk_url_kwarg = 'group_id'
+    template_name = 'yaga/group/detail.html'
