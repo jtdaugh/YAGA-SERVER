@@ -207,15 +207,13 @@
                     {% trans 'Likes' %} {{ post.like_set.count }}
                     <hr>
                     {% for like in post.like_set.all %}
-                        <span>
-                            {% if perms.accounts.change_user %}
-                                <a href="{% url 'yaga:user:update' user_id=like.user.pk %}">
-                                    {{ like.user.pk }}
-                                </a>
-                            {% else %}
+                        {% if perms.accounts.change_user %}
+                            <a href="{% url 'yaga:user:update' user_id=like.user.pk %}">
                                 {{ like.user.pk }}
-                            {% endif %}
-                        </span>
+                            </a>
+                        {% else %}
+                            {{ like.user.pk }}
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
