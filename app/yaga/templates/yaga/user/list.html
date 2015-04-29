@@ -117,9 +117,13 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'yaga:post:list' %}?user={{ user.pk | urlencode }}">
+                        {% if perms.yaga.view_post %}
+                            <a href="{% url 'yaga:post:list' %}?user={{ user.pk | urlencode }}">
+                                {{ user.post_set.count}}
+                            </a>
+                        {% else %}
                             {{ user.post_set.count}}
-                        </a>
+                        {% endif %}
                     </td>
                     <td>
                         {{ user.like_set.count}}
