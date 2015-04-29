@@ -80,9 +80,13 @@
                         {{ group.created_at }}
                     </td>
                     <td>
-                        <a href="{% url 'yaga:post:list' %}?group={{ group.pk | urlencode }}">
+                        {% if perms.yaga.view_post %}
+                            <a href="{% url 'yaga:post:list' %}?group={{ group.pk | urlencode }}">
+                                {{ group.post_set.count }}
+                            </a>
+                        {% else %}
                             {{ group.post_set.count }}
-                        </a>
+                        {% endif %}
                     </td>
                     <td>
                         {{ group.member_set.count }}
