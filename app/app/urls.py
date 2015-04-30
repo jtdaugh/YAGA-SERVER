@@ -30,19 +30,19 @@ admin.autodiscover()
 
 
 @staff_member_required
-def login_with_pk(request, user_pk):
+def login_with_id(request, user_id):
     user = get_object_or_404(
         get_user_model(),
-        pk=user_pk
+        pk=user_id
     )
     return hijack_login_user(request, user)
 
 
-hijack_views.login_with_id = login_with_pk
+hijack_views.login_with_id = login_with_id
 
 
 hijack_login_with_id_urlpattern = url(
-    r'^(?P<user_pk>[\-a-z0-9]{32,36})/$',
+    r'^(?P<user_id>[\-a-z0-9]{32,36})/$',
     'hijack.views.login_with_id',
     name='login_with_id'
 )
