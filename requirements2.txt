@@ -130,7 +130,7 @@ python-dateutil==2.4.2
 python-magic==0.4.6
 pytz==2015.2
 PyYAML==3.11
-raven==5.3.0
+raven==5.3.1
 redis==2.10.3
 regex==2015.3.18
 requests==2.6.2
