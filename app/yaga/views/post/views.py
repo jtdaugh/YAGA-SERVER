@@ -44,7 +44,7 @@ class PostListView(
     CrispyFilterView,
     ListView
 ):
-    paginate_by = 1
+    paginate_by = 25
     template_name = 'yaga/post/list.html'
     context_object_name = 'posts'
     filterset_class = PostFilterSet
