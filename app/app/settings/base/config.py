@@ -281,13 +281,13 @@ class BaseConfiguration(
     BOWER_INSTALLED_APPS = (
         'modernizr#2.8.3',
         'respond#1.4.2',
-        'jquery#2.1.3',
+        'jquery#2.1.4',
         'bootstrap#3.3.4',
         'bootstrap-select#1.6.5',
         'font-awesome#4.3.0',
-        'handlebars#3.0.2',
+        'handlebars#3.0.3',
         'underscore#1.8.3',
-        'video.js#4.12.5',
+        'video.js#5.0.0-9',
         'bootstrap-switch#3.3.2',
         'json3#3.3.2',
     )
