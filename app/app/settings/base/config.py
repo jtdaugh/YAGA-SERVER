@@ -302,11 +302,6 @@ class BaseConfiguration(
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
             'DIRS': [
-                os.path.abspath(
-                    os.path.join(
-                        PROJECT_ROOT, 'app', 'templates'
-                    )
-                ),
             ],
             'OPTIONS': {
                 'context_processors': [

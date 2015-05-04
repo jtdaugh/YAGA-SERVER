@@ -15,8 +15,6 @@ class AppPermissionsTestCase(
 ):
     def test_app_permissions(self):
         for permission in settings.GLOBAL_PERMISSIONS:
-            self.assertIsNotNone(
-                Permission.objects.filter(
-                    codename=permission
-                ).first()
-            )
+            self.assertIsNotNone(Permission.objects.filter(
+                codename=permission
+            ).first())

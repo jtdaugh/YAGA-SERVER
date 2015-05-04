@@ -45,8 +45,10 @@
                     <link rel="stylesheet" type="text/stylus" href="{% static 'frontend/stylus/main.styl' %}">
                 {% endcompress %}
             {% endblock %}
-            {% block extra_css_plain %}
-            {% endblock %}
+            <style type"text/css">
+                {% block extra_css_plain %}
+                {% endblock %}
+            </style>
             {% block djnagojs %}
                 <script type="text/javascript" src="{% url 'djangojs' %}"></script>
             {% endblock %}
@@ -63,13 +65,13 @@
                     <script type="text/javascript" src="{% static 'video.js/dist/video.js' %}"></script>
                 {% endcompress %}
             {% endblock %}
-            {% block extra_js_plain %}
-                <script type="text/javascript">
+            <script type="text/javascript">
+                {% block extra_js_plain %}
                     'use strict';
 
                     var LANGUAGE_CODE = '{{ LANGUAGE_CODE }}';
-                </script>
-            {% endblock %}
+                {% endblock %}
+            </script>
             {% block extra_js %}
                 {% compress js %}
                     <script type="text/coffeescript" src="{% static 'frontend/coffee/main.coffee' %}"></script>

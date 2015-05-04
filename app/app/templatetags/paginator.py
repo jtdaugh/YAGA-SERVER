@@ -25,7 +25,7 @@ class Paginator(
 
     options = Options(
         Argument('page_obj'),
-        Argument('slice', required=False, default=5),
+        Argument('slice', required=False, default=3),
     )
 
     def get_context(self, context, page_obj, slice):
