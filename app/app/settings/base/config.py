@@ -371,6 +371,7 @@ class BaseConfiguration(
         java=JAVA,
         jar=closure.get_jar_filename()
     )
+    COMPRESS_CLOSURE_COMPILER_ARGUMENTS = '--language_in=ECMASCRIPT5'
     COMPRESS_OUTPUT_DIR = 'compress'
     COMPRESS_PARSER = 'compressor.parser.LxmlParser'
     # -------------------------------------------------------
