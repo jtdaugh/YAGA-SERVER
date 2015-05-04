@@ -16,7 +16,6 @@ script:
   - python manage.py test -v 2 --with-coverage
 services:
   - redis-server
-  - memcached
   - rabbitmq
 addons:
   postgresql: "9.3"
