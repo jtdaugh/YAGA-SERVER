@@ -3,13 +3,12 @@ python:
   - "2.7"
   - "3.4"
 install:
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then REQ_VERSION=3; else REQ_VERSION=2; fi
-  - REQUIREMENTS="requirements$REQ_VERSION.txt"
+
   - pip install virtualenv
   - virtualenv env
   - source env/bin/activate
   - pip install setuptools==9.1
-  - pip install -r "$REQUIREMENTS"
+  - pip install -r requirements.txt
 script:
   - flake8 app
   - frosted -r app
