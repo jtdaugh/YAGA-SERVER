@@ -60,12 +60,14 @@ def view():
 @task
 def stop():
     local('heroku maintenance:on')
+
+    sleep(STOP_TIMEOUT)
+
     for name in DYNOS.iterkeys():
         with warn_only():
             local('heroku ps:scale {name}=0'.format(
                 name=name
             ))
-            sleep(STOP_TIMEOUT)
 
 
 @task
@@ -75,7 +77,8 @@ def start():
             name=name,
             dynos=dynos
         ))
-        sleep(START_TIMEOUT)
+
+    sleep(START_TIMEOUT)
 
     local('heroku maintenance:off')
 
