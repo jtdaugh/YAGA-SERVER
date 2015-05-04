@@ -515,7 +515,7 @@ class BaseConfiguration(
         'hijack',
         'compat',
         'raven.contrib.django',
-        'guardian',
+        # 'guardian',
     ]
     # -------------------------------------------------------
     # hijack backends configuration
@@ -528,7 +528,7 @@ class BaseConfiguration(
     # -------------------------------------------------------
     AUTHENTICATION_BACKENDS = (
         'django.contrib.auth.backends.ModelBackend',
-        'guardian.backends.ObjectPermissionBackend',
+        # 'guardian.backends.ObjectPermissionBackend',
         'yaga.backends.CodeBackend',
     )
     ANONYMOUS_USER_ID = 'b25d71af-3dd0-4955-9305-ed495e34727b'  # -1
