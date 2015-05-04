@@ -1,6 +1,7 @@
 {% extends 'yaga/post/list.html' %}
 
 {% load i18n %}
+{% load static %}
 
 {% load crispy_forms_tags %}
 
@@ -32,7 +33,22 @@
                         {% trans 'Attachment' %}
                     </h3>
                     <hr>
-                    <video data-setup='{"controls": true, "autoplay": false, "preload": "none", "loop": "true", "width": 640, "height": 640}' id="attachment" class="video-js vjs-default-skin vjs-big-play-centered">
+                    <video
+                        data-setup='{
+                            "techOrder": ["html5", "flash"],
+                            "flash": {
+                                "swf": "{% static 'video.js/dist/video-js.swf' %}"
+                            },
+                            "controls": true,
+                            "autoplay": false,
+                            "preload": "none",
+                            "loop": "true",
+                            "width": 640,
+                            "height": 640
+                        }'
+                        id="attachment"
+                        class="video-js vjs-default-skin vjs-big-play-centered
+                    ">
                         <source src="{{ post.attachment.url }}" type='video/mp4' />
                     </video>
                     <hr>
