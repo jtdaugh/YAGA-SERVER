@@ -57,7 +57,7 @@ django-rest-swagger==0.2.9
 django-reversion==1.8.6
 django-save-the-change==1.1.0
 django-secure==1.0.1
-django-storages==1.1.8
+django-storages-redux==1.2.3
 django-templates-macros==0.1
 django-transaction-hooks==0.2
 djangorestframework==3.1.1
