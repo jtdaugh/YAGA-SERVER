@@ -789,7 +789,7 @@ class Implementation(
             self.TEMPLATES[0]['OPTIONS']['loaders'] = (
                 (
                     'django.template.loaders.cached.Loader',
-                    self.TEMPLATES['OPTIONS']['loaders']
+                    self.TEMPLATES[0]['OPTIONS']['loaders']
                 ),
             )
         # -------------------------------------------------------
