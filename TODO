@@ -7,14 +7,9 @@ no caption push if not member
 all push logick to celery
 
 admin options
-post likers list
-group members list
-post preview feature (gif)
 tokens list
 
 fix travis
-
-caniuse3???
 
 celery ack later - celery retry
 
