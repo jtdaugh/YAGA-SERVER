@@ -17,10 +17,8 @@ DYNOS = {
     'celery_worker': 0,
     'sqs': 1
 }
-# STOP_TIMEOUT = 30
-# START_TIMEOUT = 30
-STOP_TIMEOUT = 0
-START_TIMEOUT = 0
+STOP_TIMEOUT = 35
+START_TIMEOUT = 35
 
 
 def ensure_prompt(label):
