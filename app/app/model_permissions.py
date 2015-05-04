@@ -4,6 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import django
 from django.apps import apps
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -19,9 +20,20 @@ def get_app_content_type():
 
     if _app_content_type is None:
         app = apps.get_app_config('app')
+
+        query = {
+            'app_label': app.label
+        }
+
+        if django.VERSION[:2] >= (1, 8):
+            name_field = 'model'
+        else:
+            name_field = 'name'
+
+        query[name_field] = app.name
+
         _app_content_type, created = ContentType.objects.get_or_create(
-            name=app.name,
-            app_label=app.label
+            **query
         )
 
     return _app_content_type

@@ -298,14 +298,38 @@ class BaseConfiguration(
     # -------------------------------------------------------
     # templates configuration
     # -------------------------------------------------------
-    TEMPLATE_LOADERS = (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-        'django.template.loaders.eggs.Loader',
-    )
-    TEMPLATE_DIRS = (
-        os.path.abspath(os.path.join(PROJECT_ROOT, 'app', 'templates')),
-    )
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [
+                os.path.abspath(
+                    os.path.join(
+                        PROJECT_ROOT, 'app', 'templates'
+                    )
+                ),
+            ],
+            'OPTIONS': {
+                'context_processors': [
+                    'django.contrib.auth.context_processors.auth',
+                    'django.core.context_processors.i18n',
+                    'django.core.context_processors.media',
+                    'django.core.context_processors.static',
+                    'django.core.context_processors.tz',
+                    'django.contrib.messages.context_processors.messages',
+                    'django.core.context_processors.request',
+                    # vendor
+                    'django_mobile.context_processors.flavour',
+                    # local
+                    'app.context_processors.environment',
+                ],
+                'loaders': [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    'django.template.loaders.eggs.Loader',
+                ]
+            }
+        },
+    ]
     # -------------------------------------------------------
     # java configuration configuration
     # -------------------------------------------------------
@@ -492,22 +516,6 @@ class BaseConfiguration(
         'compat',
         'raven.contrib.django',
         'guardian',
-    ]
-    # -------------------------------------------------------
-    # template context processors configuration
-    # -------------------------------------------------------
-    TEMPLATE_CONTEXT_PROCESSORS = [
-        'django.contrib.auth.context_processors.auth',
-        'django.core.context_processors.i18n',
-        'django.core.context_processors.media',
-        'django.core.context_processors.static',
-        'django.core.context_processors.tz',
-        'django.contrib.messages.context_processors.messages',
-        'django.core.context_processors.request',
-        # vendor
-        'django_mobile.context_processors.flavour',
-        # local
-        'app.context_processors.environment',
     ]
     # -------------------------------------------------------
     # hijack backends configuration
@@ -718,13 +726,10 @@ class Implementation(
 
         self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------
-        # Python 2 capability features
-        # -------------------------------------------------------
-        # -------------------------------------------------------
         # debug context processor implementation
         # -------------------------------------------------------
         if self.DEBUG:
-            self.TEMPLATE_CONTEXT_PROCESSORS.append(
+            self.TEMPLATES[0]['OPTIONS']['context_processors'].append(
                 'django.core.context_processors.debug'
             )
         # -------------------------------------------------------
@@ -781,10 +786,10 @@ class Implementation(
         # template cache implementation
         # -------------------------------------------------------
         if self.TEMPLATE_CACHE:
-            self.TEMPLATE_LOADERS = (
+            self.TEMPLATES[0]['OPTIONS']['loaders'] = (
                 (
                     'django.template.loaders.cached.Loader',
-                    self.TEMPLATE_LOADERS
+                    self.TEMPLATES['OPTIONS']['loaders']
                 ),
             )
         # -------------------------------------------------------
