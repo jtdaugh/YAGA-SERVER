@@ -3,6 +3,7 @@
 
 bindVideo = ->
   $(document).ready ->
+
     attachment = videojs('attachment', {
       'techOrder': [
         'html5'
