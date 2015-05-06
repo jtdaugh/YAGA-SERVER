@@ -65,6 +65,6 @@ class UserUpdateView(
     context_object_name = 'user'
 
     def get_success_url(self):
-        return reverse_lazy('yaga:user:detail', kwargs={
+        return reverse_lazy('yaga:user:update', kwargs={
             'user_id': self.object.pk
         })
