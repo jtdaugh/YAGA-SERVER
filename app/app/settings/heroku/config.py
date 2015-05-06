@@ -130,7 +130,7 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # model auto registration configuration
     # -------------------------------------------------------
-    MODELS_AUTO_REGISTRATION = False
+    MODELS_AUTO_REGISTRATION = True
     # -------------------------------------------------------
     # storages configuration
     # -------------------------------------------------------
