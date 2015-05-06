@@ -98,7 +98,7 @@
                     </td>
                     <td>
                         {% if perms.accounts.change_user %}
-                            <a href="{% url 'yaga:user:update' user_id=user.pk %}">
+                            <a href="{% url 'yaga:user:update' user_id=post.user.pk %}">
                                 {{ post.user.pk }}
                             </a>
                         {% else %}
