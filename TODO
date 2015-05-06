@@ -16,3 +16,10 @@ fix travis
 celery ack later - celery retry
 
 APNS feedback
+
+admin show total counters
+
+
+admin rename unique bug
+
+admin all FK to string_ids
