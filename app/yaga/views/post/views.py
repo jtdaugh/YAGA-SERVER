@@ -22,7 +22,7 @@ class PostView(
     PermissionRequiredMixin
 ):
     raise_exception = True
-    permission_required = 'posts.view_post'
+    permission_required = 'yaga.view_post'
 
     def get_queryset(self):
         return Post.objects.all()

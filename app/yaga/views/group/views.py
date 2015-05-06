@@ -20,7 +20,7 @@ class GroupView(
     PermissionRequiredMixin,
 ):
     raise_exception = True
-    permission_required = 'posts.view_group'
+    permission_required = 'yaga.view_group'
 
     def get_queryset(self):
         return Group.objects.all()
