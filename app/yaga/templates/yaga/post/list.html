@@ -149,7 +149,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {{ post.likes }}
+                        {{ post.like_set.count }}
                     </td>
                     <td>
                         {% if post.attachment_preview %}

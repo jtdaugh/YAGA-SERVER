@@ -212,6 +212,12 @@ def create():
         value=SECRET_KEY
     ))
 
+    CLOUDFRONT_HOST = ensure_prompt('CLOUDFRONT_HOST')
+
+    local('heroku config:set CLOUDFRONT_HOST={value}'.format(
+        value=CLOUDFRONT_HOST
+    ))
+
     DOMAIN = ensure_prompt('DOMAIN (http domain for dashboard)')
 
     local('heroku config:set DOMAIN={value}'.format(

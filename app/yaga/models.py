@@ -10,7 +10,6 @@ import hmac
 import json
 import logging
 import os
-from cStringIO import StringIO
 
 import magic
 from django.db import models
@@ -20,10 +19,9 @@ from django.utils.functional import SimpleLazyObject
 from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
-from PIL import Image
 
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import Choice, smart_text
+from app.utils import Choice
 
 from .conf import settings
 
@@ -113,7 +111,7 @@ class Code(
         verbose_name_plural = _('Codes')
 
     def __str__(self):
-        return smart_text(self.request_id)
+        return str(self.request_id)
 
 
 @python_2_unicode_compatible
@@ -162,7 +160,7 @@ class Member(
         )
 
     def __str__(self):
-        return smart_text(self.user.phone.as_e164)
+        return self.user.phone.as_e164
 
 
 @python_2_unicode_compatible
@@ -204,18 +202,7 @@ class Group(
         db_index=True
     )
 
-    def members_count(self):
-        return self.member_set.count()
-    members_count.short_description = _('Members Count')
-
-    def posts_count(self):
-        return Post.objects.filter(
-            group=self
-        ).count()
-    posts_count.short_description = _('Posts Count')
-
-    def mark_updated(self):
-        self.save(update_fields=['updated_at'])
+    tracker = FieldTracker()
 
     class Meta:
         verbose_name = _('Group')
@@ -224,10 +211,19 @@ class Group(
             ('view_group', 'Can view Group'),
         )
 
-    tracker = FieldTracker()
+    def member_count(self):
+        return self.member_set.count()
+    member_count.short_description = _('Members Count')
+
+    def post_count(self):
+        return self.post_set.count()
+    post_count.short_description = _('Posts Count')
+
+    def mark_updated(self):
+        self.save(update_fields=['updated_at'])
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -303,14 +299,6 @@ class Post(
         default=''
     )
 
-    attachment_preview = models.FileField(
-        verbose_name=_('Attachment Preview'),
-        upload_to=post_attachment_preview_upload_to,
-        blank=True,
-        null=False,
-        default=''
-    )
-
     checksum = models.CharField(
         verbose_name=_('Checksum'),
         max_length=255,
@@ -348,6 +336,8 @@ class Post(
         db_index=True
     )
 
+    tracker = FieldTracker()
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
@@ -358,16 +348,6 @@ class Post(
             ('checksum', 'group'),
         )
 
-    tracker = FieldTracker()
-
-    # def get_checksum(self, chunks):
-    #     md5 = hashlib.md5()
-
-    #     for data in chunks:
-    #         md5.update(data)
-
-    #     return md5.hexdigest()
-
     def mark_deleted(self):
         self.checksum = None
         self.deleted = True
@@ -376,8 +356,9 @@ class Post(
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
 
-    def likes(self):
-        return self.like_set.all().count()
+    def like_count(self):
+        return self.like_set.count()
+    like_count.short_description = _('Like Count')
 
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
@@ -423,38 +404,6 @@ class Post(
 
     def is_valid_attachment(self):
         return self.is_valid_file_obj('attachment')
-
-    def is_valid_attachment_preview(self):
-        if self.is_valid_file_obj('attachment_preview'):
-            try:
-                self.attachment_preview.file.seek(0)
-                stream = self.attachment_preview.file.read()
-
-                image = Image.open(StringIO(stream))
-
-                image_size = image.size
-
-                image_size = {
-                    'x': image_size[0],
-                    'y': image_size[1]
-                }
-            except Exception as e:
-                logger.exception(e)
-
-                return False
-
-            if image_size not in settings.YAGA_ATTACHMENT_PREVIEW_SIZE:
-                logger.error('{file_name} GIF is {x}*{y}'.format(
-                    file_name=self.attachment_preview.name,
-                    x=image_size['x'],
-                    y=image_size['y']
-                ))
-
-                return False
-
-            return True
-        else:
-            return False
 
     def sign_s3(self, mime, path_fn):
         access_key = settings.AWS_ACCESS_KEY_ID
@@ -502,7 +451,9 @@ class Post(
         )
 
         signature = hmac.new(
-            secret_access_key.encode(), policy, hashlib.sha1
+            secret_access_key.encode(),
+            policy,
+            hashlib.sha1
         ).digest()
 
         signature = base64.b64encode(signature)
@@ -521,26 +472,24 @@ class Post(
             }
         }
 
-        def save(self, *args, **kwargs):
-            if kwargs.get('update_fields'):
-                if 'updated_at' not in kwargs['update_fields']:
-                    kwargs['update_fields'] = list(kwargs['update_fields'])
-                    kwargs['update_fields'].append('updated_at')
+    def save(self, *args, **kwargs):
+        if self.pk:
+            if not kwargs.get('update_fields'):
+                is_dirty = list(self.tracker.changed().keys())
 
-            return super(Post, self).save(*args, **kwargs)
+                if is_dirty:
+                    kwargs['update_fields'] = is_dirty
+                else:
+                    kwargs['update_fields'] = []
 
-    # def save(self, *args, **kwargs):
-    #     if kwargs.get('update_fields', None) is None:
-    #         if self.pk:
-    #             is_dirty = list(self.tracker.changed().keys())
+            if 'updated_at' not in kwargs['update_fields']:
+                kwargs['update_fields'] = list(kwargs['update_fields'])
+                kwargs['update_fields'].append('updated_at')
 
-    #             if is_dirty:
-    #                 kwargs['update_fields'] = is_dirty
-
-    #     return super(Post, self).save(*args, **kwargs)
+        return super(Post, self).save(*args, **kwargs)
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -577,7 +526,7 @@ class Like(
         )
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -601,6 +550,7 @@ class Device(
         (Vendor.IOS, Vendor.IOS_VALUE),
         (Vendor.ANDROID, Vendor.ANDROID_VALUE)
     )
+
     vendor = models.PositiveSmallIntegerField(
         verbose_name=_('Vendor'),
         choices=VENDOR_CHOICES,
@@ -636,7 +586,7 @@ class Device(
         )
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -670,7 +620,7 @@ class Contact(
         verbose_name_plural = _('Contacts')
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -693,4 +643,4 @@ class MonkeyUser(
         verbose_name_plural = _('Monkey Users')
 
     def __str__(self):
-        return smart_text(self.pk)
+        return str(self.pk)

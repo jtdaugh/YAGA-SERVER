@@ -19,7 +19,6 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
 
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import reverse_host, smart_text
 
 from .conf import settings
 
@@ -157,9 +156,9 @@ class AbstractUser(
 
     def get_username(self):
         if self.name:
-            return smart_text(self.name)
+            return self.name
 
-        return smart_text(self.phone.as_e164)
+        return self.phone.as_e164
 
     def get_full_name(self):
         return self.get_username()
@@ -177,9 +176,6 @@ class AbstractUser(
         return reverse(
             'admin:accounts_user_change', args=(self.pk,)
         )
-
-    def get_admin_absolute_url(self):
-        return reverse_host(self.get_admin_url())
 
 
 AbstractUser._meta.get_field('last_login').default = models.fields.NOT_PROVIDED
@@ -242,4 +238,4 @@ class Token(
         return get_random_string(self.KEY_LENGTH, self.KEY_CHARS)
 
     def __str__(self):
-        return smart_text(self.key)
+        return self.key

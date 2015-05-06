@@ -281,7 +281,7 @@ class SentryCeleryClient(
             user_info = {'is_authenticated': False}
         else:
             user_info = {
-                'id': smart_text(user.pk),
+                'id': str(user.pk),
                 'is_authenticated': True,
                 'username': user.get_username()
             }

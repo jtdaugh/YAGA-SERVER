@@ -12,8 +12,6 @@ from django.utils.encoding import iri_to_uri
 from django.utils.html import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from ..utils import smart_text
-
 register = template.Library()
 
 
@@ -42,7 +40,7 @@ class Paginator(
                 params=iri_to_uri(get.urlencode(safe='/'))
             ))
 
-        if not get.get('page', None) is None:
+        if get.get('page'):
             del get['page']
 
         range_start = page_obj.number - slice
@@ -63,7 +61,7 @@ class Paginator(
                 'get': render_link(page_obj.number),
                 'number': '{symbol} {label}'.format(
                     symbol=mark_safe('<<'),
-                    label=smart_text(_('First'))
+                    label=_('First')
                 )
             })
         else:
@@ -72,7 +70,7 @@ class Paginator(
                 'get': render_link(1),
                 'number': '{symbol} {label}'.format(
                     symbol=mark_safe('<<'),
-                    label=smart_text(_('First'))
+                    label=_('First')
                 )
             })
 
@@ -82,7 +80,7 @@ class Paginator(
                 'get': render_link(page_obj.previous_page_number()),
                 'number': '{symbol} {label}'.format(
                     symbol=mark_safe('<'),
-                    label=smart_text(_('Previous'))
+                    label=_('Previous')
                 )
             })
 
@@ -105,7 +103,7 @@ class Paginator(
                 'class': '',
                 'get': render_link(page_obj.next_page_number()),
                 'number': '{symbol} {label}'.format(
-                    label=smart_text(_('Next')),
+                    label=_('Next'),
                     symbol=mark_safe('>')
                 )
             })
@@ -115,7 +113,7 @@ class Paginator(
                 'class': 'disabled',
                 'get': render_link(page_obj.paginator.num_pages),
                 'number': '{symbol} {label}'.format(
-                    label=smart_text(_('Last')),
+                    label=_('Last'),
                     symbol=mark_safe('>>')
                 )
             })
@@ -124,7 +122,7 @@ class Paginator(
                 'class': '',
                 'get': render_link(page_obj.paginator.num_pages),
                 'number': '{symbol} {label}'.format(
-                    label=smart_text(_('Last')),
+                    label=_('Last'),
                     symbol=mark_safe('>>')
                 )
             })
@@ -132,5 +130,6 @@ class Paginator(
         return {
             'pages': pages
         }
+
 
 register.tag(Paginator)

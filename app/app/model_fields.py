@@ -15,7 +15,6 @@ from phonenumber_field.modelfields import \
 
 from .conf import settings
 from .form_fields import PhoneNumberField as FormPhoneNumberField
-from .utils import smart_text
 
 if settings.USE_FLANKER:
     from django_flanker.models import EmailField as BaseEmailField
@@ -50,7 +49,7 @@ class UUIDRepresentation(
         else:
             value = super(UUIDRepresentation, self).__str__()
 
-        return smart_text(value)
+        return str(value)
 
     def __len__(self):
         return len(self.__str__())
@@ -60,7 +59,7 @@ def uuid_representation(value):
     if not value:
         return None
 
-    return UUIDRepresentation(smart_text(value))
+    return UUIDRepresentation(str(value))
 
 
 class UUIDField(
@@ -100,7 +99,7 @@ class UUIDField(
             raise ImproperlyConfigured
 
     def set_default(self, model_instance):
-        value = smart_text(self.create_uuid())
+        value = str(self.create_uuid())
         setattr(model_instance, self.attname, value)
 
         return value

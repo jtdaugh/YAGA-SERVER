@@ -47,13 +47,13 @@ class PostTabularInline(
 
     formset = PostBaseInlineFormSet
 
-    fields = ('name', 'user', 'attachment', 'attachment_preview')
+    fields = ('name', 'user', 'attachment')
 
 
 class GroupModelAdmin(
     admin.ModelAdmin
 ):
-    list_display = ('pk', 'name', 'created_at', 'members_count', 'posts_count')
+    list_display = ('pk', 'name', 'created_at', 'member_count', 'post_count')
 
     ordering = ('-created_at',)
 
@@ -68,7 +68,7 @@ class PostModelAdmin(
     admin.ModelAdmin
 ):
     list_display = (
-        'pk', 'name', 'user', 'likes', 'group',
+        'pk', 'name', 'user', 'like_count', 'group',
         'ready', 'deleted', 'created_at'
     )
 

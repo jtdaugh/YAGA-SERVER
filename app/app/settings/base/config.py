@@ -155,6 +155,7 @@ class BaseConfiguration(
     ALLOWED_HOSTS = ['127.0.0.1']
     USE_X_FORWARDED_HOST = False
     BEHIND_PROXY = False
+
     CLOUDFLARE_BEHIND = False
     # -------------------------------------------------------
     # database configuration
@@ -405,6 +406,9 @@ class BaseConfiguration(
     AWS_ACCESS_KEY_ID = 'AKIAJ3BOSZSPPD7EX7KA'
     AWS_SECRET_ACCESS_KEY = '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'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
+
+    # CLOUDFRONT_HOST = 'cloudfront-dev.yagaprivate.com'
+    CLOUDFRONT_HOST = 'd2wxdqvi5302or.cloudfront.net'
 
     AWS_PRELOAD_METADATA = False
     AWS_S3_SECURE_URLS = True
@@ -711,14 +715,22 @@ class Implementation(
             region=self.AWS_REGION
         )
 
-        self.S3_HOST = 'https://{domain}/'.format(
-            domain=self.AWS_S3_CUSTOM_DOMAIN
+        self.S3_HOST = '{protocol}://{domain}/'.format(
+            domain=self.AWS_S3_CUSTOM_DOMAIN,
+            protocol='https' if self.AWS_S3_SECURE_URLS else 'http'
         )
 
-        self.MEDIA_URL = '{host}{location}/'.format(
-            location=self.MEDIA_LOCATION,
-            host=self.S3_HOST
-        )
+        if self.CLOUDFRONT_HOST:
+            self.MEDIA_URL = '{protocol}://{host}/{location}/'.format(
+                protocol='https' if self.AWS_S3_SECURE_URLS else 'http',
+                location=self.MEDIA_LOCATION,
+                host=self.CLOUDFRONT_HOST
+            )
+        else:
+            self.MEDIA_URL = '{host}{location}/'.format(
+                location=self.MEDIA_LOCATION,
+                host=self.S3_HOST
+            )
 
         self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------

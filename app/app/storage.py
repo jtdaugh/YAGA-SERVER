@@ -5,6 +5,7 @@ from future.builtins import (  # noqa
 )
 
 from django.core.files.storage import get_storage_class
+from django.utils.encoding import filepath_to_uri
 from storages.backends.s3boto import S3BotoStorage
 
 from .conf import settings
@@ -37,6 +38,14 @@ class S3MediaStorage(
     def __init__(self, *args, **kwargs):
         kwargs['location'] = settings.MEDIA_LOCATION
         super(S3MediaStorage, self).__init__(*args, **kwargs)
+
+    def url(self, name, headers=None, response_headers=None):
+        name = filepath_to_uri(self._normalize_name(self._clean_name(name)))
+
+        return '{media_url}{name}'.format(
+            media_url=settings.MEDIA_URL,
+            name=name.replace(settings.MEDIA_LOCATION, '', 1).strip('/')
+        )
 
 
 class CachedS3StaticStorage(
