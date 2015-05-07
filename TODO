@@ -6,10 +6,7 @@ nexmo updates
 no caption push if not member
 all push logick to celery
 
-count admin disaply refactor
-
-admin options
-tokens list
+tokens list\delete views
 
 fix travis
 
@@ -17,9 +14,12 @@ celery ack later - celery retry
 
 APNS feedback
 
-admin show total counters
+server side gifs
 
+delete\ready fix
 
-admin rename unique bug
+fix cleanup tasks
 
-admin all FK to string_ids
+remove fabric
+
+rake\cap $PORT to env['??']

@@ -783,13 +783,13 @@ class Implementation(
         # -------------------------------------------------------
         # template debug implementation
         # -------------------------------------------------------
-        self.TEMPLATE_DEBUG = self.DEBUG
-
-        if self.TEMPLATE_DEBUG:
+        if self.DEBUG:
             fallback = InvalidTemplateObject()
         else:
             fallback = ''
-        self.TEMPLATE_STRING_IF_INVALID = fallback
+        self.TEMPLATES[0]['OPTIONS']['string_if_invalid'] = fallback
+
+        self.TEMPLATES[0]['OPTIONS']['debug'] = self.DEBUG
         # -------------------------------------------------------
         # template cache implementation
         # -------------------------------------------------------

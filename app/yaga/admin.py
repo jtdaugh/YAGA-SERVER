@@ -7,13 +7,15 @@ from future.builtins import (  # noqa
 from django.contrib import admin
 from django.forms.models import BaseInlineFormSet
 
+from app.admin import DisableNonSuperuserMixin
+
 from .models import (
     Code, Contact, Device, Group, Like, Member, MonkeyUser, Post
 )
 
 
 class CodeModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('phone', 'request_id', 'expire_at')
 
@@ -28,6 +30,8 @@ class MemberTabularInline(
     admin.TabularInline
 ):
     model = Member
+
+    raw_id_fields = ('user', 'creator',)
 
 
 class PostBaseInlineFormSet(
@@ -49,9 +53,11 @@ class PostTabularInline(
 
     fields = ('name', 'user', 'attachment')
 
+    raw_id_fields = ('user', )
+
 
 class GroupModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('pk', 'name', 'created_at', 'member_count', 'post_count')
 
@@ -63,9 +69,11 @@ class GroupModelAdmin(
 
     date_hierarchy = 'created_at'
 
+    raw_id_fields = ('creator',)
+
 
 class PostModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = (
         'pk', 'name', 'user', 'like_count', 'group',
@@ -80,9 +88,11 @@ class PostModelAdmin(
 
     date_hierarchy = 'created_at'
 
+    raw_id_fields = ('user', 'group', 'namer')
+
 
 class MemberModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('user', 'group', 'mute', 'joined_at')
 
@@ -92,9 +102,11 @@ class MemberModelAdmin(
 
     date_hierarchy = 'joined_at'
 
+    raw_id_fields = ('user', 'group')
+
 
 class LikeModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('user', 'post', 'created_at')
 
@@ -102,9 +114,11 @@ class LikeModelAdmin(
 
     date_hierarchy = 'created_at'
 
+    raw_id_fields = ('user', 'post')
+
 
 class DeviceModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('user', 'token', 'vendor', 'locale', 'created_at')
 
@@ -116,19 +130,25 @@ class DeviceModelAdmin(
 
     date_hierarchy = 'created_at'
 
+    raw_id_fields = ('user',)
+
 
 class ContactModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('pk', 'user', 'created_at')
 
     date_hierarchy = 'created_at'
+
+    raw_id_fields = ('user',)
 
 
 class MonkeyUserModelAdmin(
     admin.ModelAdmin
 ):
     list_display = ('pk', 'user')
+
+    raw_id_fields = ('user',)
 
 
 admin.site.register(Group, GroupModelAdmin)

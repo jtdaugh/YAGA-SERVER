@@ -9,7 +9,7 @@ import string
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError, models
 from django.utils import timezone
@@ -176,6 +176,14 @@ class AbstractUser(
         return reverse(
             'admin:accounts_user_change', args=(self.pk,)
         )
+
+    def clean(self):
+        if self._default_manager.filter(
+            name__iexact=self.name
+        ).exclude(
+            pk=self.pk
+        ).exists():
+            raise ValidationError('This name is already taken.')
 
 
 AbstractUser._meta.get_field('last_login').default = models.fields.NOT_PROVIDED

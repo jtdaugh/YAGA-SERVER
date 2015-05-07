@@ -11,6 +11,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import ugettext_lazy as _
 from hijack.admin import HijackUserAdminMixin
 
+from app.admin import DisableNonSuperuserMixin
+
+from .filters import PasswordSimpleListFilter
 from .forms import UserChangeForm, UserCreationForm
 from .models import Token
 
@@ -22,7 +25,7 @@ class TokenTabularInline(
 
 
 class UserModelAdmin(
-    BaseUserAdmin, HijackUserAdminMixin
+    DisableNonSuperuserMixin, BaseUserAdmin, HijackUserAdminMixin
 ):
     def get_urls(self):
         password_urlpatterns = patterns(
@@ -45,6 +48,12 @@ class UserModelAdmin(
         urlpatterns = password_urlpatterns + base_urlpatterns
 
         return urlpatterns
+
+    def lookup_allowed(self, lookup, value):
+        if lookup.startswith('password'):
+            return True
+
+        return super(UserModelAdmin, self).lookup_allowed(lookup, value)
 
     fieldsets = (
         (None, {
@@ -97,7 +106,8 @@ class UserModelAdmin(
     )
 
     list_filter = (
-        'verified', 'is_active', 'is_staff', 'is_superuser', 'groups'
+        'verified', 'is_active', 'is_staff', 'is_superuser', 'groups',
+        PasswordSimpleListFilter
     )
 
     search_fields = ('phone', 'name')
@@ -110,7 +120,7 @@ class UserModelAdmin(
 
 
 class TokenModelAdmin(
-    admin.ModelAdmin
+    DisableNonSuperuserMixin, admin.ModelAdmin
 ):
     list_display = ('user', 'key', 'created_at')
 
