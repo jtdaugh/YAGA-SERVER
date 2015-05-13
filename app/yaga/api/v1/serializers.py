@@ -6,6 +6,7 @@ from future.builtins import (  # noqa
 
 import regex
 from django.contrib.auth import authenticate, get_user_model
+from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -208,11 +209,11 @@ class PostSerializer(
         model = Post
         caption_fields = ('name_x', 'name_y', 'font', 'rotation', 'scale')
         fields = (
-            'attachment', 'attachment_preview', 'ready_at', 'updated_at',
+            'attachment', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'deleted', 'likers', 'namer'
         ) + caption_fields
         read_only_fields = (
-            'attachment', 'attachment_preview', 'ready_at', 'deleted'
+            'attachment', 'ready_at', 'deleted'
         )
 
     def validate(self, attrs):
@@ -259,6 +260,16 @@ class PostSerializer(
             self.instance.namer = self.instance.bridge.updater
 
         return attrs
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            with instance.atomic as post:
+                if post:
+                    return super(
+                        PostSerializer, self
+                    ).update(post, validated_data)
+                else:
+                    return instance
 
 
 class MemberSerializer(

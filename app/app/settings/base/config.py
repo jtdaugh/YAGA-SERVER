@@ -288,7 +288,7 @@ class BaseConfiguration(
         'font-awesome#4.3.0',
         'handlebars#3.0.3',
         'underscore#1.8.3',
-        'video.js#5.0.0-10',
+        'video.js#5.0.0-11',
         'bootstrap-switch#3.3.2',
         'json3#3.3.2',
     )
@@ -407,7 +407,6 @@ class BaseConfiguration(
     AWS_SECRET_ACCESS_KEY = 'v0n4oxhLMhLEUbOE70a8RQ9HsLdVhJw+C3cOhBj0'
     AWS_STORAGE_BUCKET_NAME = 'yaga-dev'
 
-    # CLOUDFRONT_HOST = 'cloudfront-dev.yagaprivate.com'
     CLOUDFRONT_HOST = 'd2wxdqvi5302or.cloudfront.net'
 
     AWS_PRELOAD_METADATA = False
@@ -454,7 +453,7 @@ class BaseConfiguration(
         # requestprovider
         'requestprovider.middleware.RequestProviderMiddleware',
         # sentry 404
-        # 'raven.contrib.django.middleware.Sentry404CatchMiddleware',
+        'raven.contrib.django.middleware.Sentry404CatchMiddleware',
     ]
     # -------------------------------------------------------
     # django south migrations
@@ -693,6 +692,7 @@ class Initialization(
 ):
     def __init__(self):
         self.implement()
+        self.configure()
         self.connect()
 
 
@@ -716,23 +716,21 @@ class Implementation(
         )
 
         self.S3_HOST = '{protocol}://{domain}/'.format(
-            domain=self.AWS_S3_CUSTOM_DOMAIN,
-            protocol='https' if self.AWS_S3_SECURE_URLS else 'http'
+            protocol='https' if self.AWS_S3_SECURE_URLS else 'http',
+            domain=self.AWS_S3_CUSTOM_DOMAIN
         )
 
         if self.CLOUDFRONT_HOST:
             self.MEDIA_URL = '{protocol}://{host}/{location}/'.format(
                 protocol='https' if self.AWS_S3_SECURE_URLS else 'http',
-                location=self.MEDIA_LOCATION,
-                host=self.CLOUDFRONT_HOST
+                host=self.CLOUDFRONT_HOST,
+                location=self.MEDIA_LOCATION
             )
         else:
             self.MEDIA_URL = '{host}{location}/'.format(
-                location=self.MEDIA_LOCATION,
-                host=self.S3_HOST
+                host=self.S3_HOST,
+                location=self.MEDIA_LOCATION
             )
-
-        self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------
         # debug context processor implementation
         # -------------------------------------------------------
@@ -826,6 +824,9 @@ class Implementation(
         # -------------------------------------------------------
         self.REST_FRAMEWORK_EXTENSIONS['DEFAULT_CACHE_RESPONSE_TIMEOUT'] = \
             self.VIEW_CACHE_TIMEOUT
+
+    def configure(self):
+        self.COMPRESS_URL = self.STATIC_URL
 
     def connect(self):
         pass

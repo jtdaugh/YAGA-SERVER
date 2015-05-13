@@ -4,6 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from urllib.parse import urljoin
+
 from django.core.files.storage import get_storage_class
 from django.utils.encoding import filepath_to_uri
 from storages.backends.s3boto import S3BotoStorage
@@ -42,9 +44,9 @@ class S3MediaStorage(
     def url(self, name, headers=None, response_headers=None):
         name = filepath_to_uri(self._normalize_name(self._clean_name(name)))
 
-        return '{media_url}{name}'.format(
-            media_url=settings.MEDIA_URL,
-            name=name.replace(settings.MEDIA_LOCATION, '', 1).strip('/')
+        return urljoin(
+            settings.MEDIA_URL,
+            name.replace(settings.MEDIA_LOCATION, '', 1).strip('/')
         )
 
 

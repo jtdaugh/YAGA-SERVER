@@ -1,5 +1,5 @@
 msg_cods
-fix tests
+fix tests - fix travis
 
 fix likes_lookup twice
 nexmo updates
@@ -8,7 +8,11 @@ all push logick to celery
 
 tokens list\delete views
 
-fix travis
+user change posts link
+
+group list -> posts\user link
+
+group user filter
 
 celery ack later - celery retry
 
@@ -21,5 +25,3 @@ delete\ready fix
 fix cleanup tasks
 
 remove fabric
-
-rake\cap $PORT to env['??']

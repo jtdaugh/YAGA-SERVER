@@ -12,7 +12,7 @@ import logging
 import os
 
 import magic
-from django.db import models
+from django.db import connection, transaction, models
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import SimpleLazyObject
@@ -20,10 +20,13 @@ from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
 
+from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import Choice
 
 from .conf import settings
+
+# from .tasks import CleanStorageTask
 
 logger = logging.getLogger(__name__)
 
@@ -58,16 +61,20 @@ def post_upload_to(instance, filename=None, prefix=None):
 
 def post_attachment_upload_to(instance, filename=None):
     return post_upload_to(
-        instance, filename=filename,
+        instance,
+        filename=filename,
         prefix=settings.YAGA_ATTACHMENT_PREFIX
     )
 
 
-def post_attachment_preview_upload_to(instance, filename=None):
+def post_attachment_upload_to_trash(instance, filename=None):
     return post_upload_to(
-        instance, filename=filename,
-        prefix=settings.YAGA_ATTACHMENT_PREVIEW_PREFIX
+        instance,
+        filename=filename,
+        prefix='trash'
     )
+
+post_attachment_preview_upload_to = post_attachment_upload_to_trash  # backward
 
 
 @python_2_unicode_compatible
@@ -338,6 +345,9 @@ class Post(
 
     tracker = FieldTracker()
 
+    objects = models.Manager()
+    atomic_objects = AtomicManager()
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
@@ -348,10 +358,86 @@ class Post(
             ('checksum', 'group'),
         )
 
+    @property
+    def lock(self):
+        try:
+            post = Post.atomic_objects.get(
+                pk=self.pk
+            )
+        except Post.DoesNotExist:
+            post = False
+
+        return post
+
+    @property
+    def atomic(self):
+        this = self
+
+        class Atomic(
+            object
+        ):
+            def __enter__(self):
+                return this.lock
+
+            def __exit__(self, *args, **kwargs):
+                pass
+
+        return Atomic()
+
+    def atomic_delete(self):
+        with transaction.atomic():
+            with self.atomic as post:
+                if post:
+                    post.delete()
+
+    def mark_ready(self):
+        with transaction.atomic():
+            with self.atomic as post:
+                if post:
+                    post.path = self.path
+
+                    post.checksum = self.checksum
+
+                    if post.deleted:
+                        post.ready = True
+
+                        post.clean_storage()
+
+                        post.save()
+
+                    elif not post.ready:
+                        post.ready = True
+
+                        post.push()
+
+                        post.save()
+                    else:
+                        post.clean_storage()
+
     def mark_deleted(self):
-        self.checksum = None
-        self.deleted = True
-        self.save()
+        with transaction.atomic():
+            with self.atomic as post:
+                if post:
+                    post.clean_storage()
+
+    def clean_storage(self, save=True):
+        if self.attachment:
+            self.checksum = None
+            # path = self.attachment.name
+
+            self.attachment = None
+
+            def delete_attachment():
+                # CleanStorageTask().delay(path)
+                pass
+
+            connection.on_commit(delete_attachment)
+
+        if not self.deleted:
+            self.deleted = True
+
+        if save:
+            self.save()
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
@@ -363,47 +449,54 @@ class Post(
     def get_mime(self, stream):
         return magic.from_buffer(stream, mime=True)
 
-    def is_valid_file_obj(self, field):
-        file_obj = getattr(self, field)
+    def get_checksum(self):
+        try:
+            return self.attachment.file.key.etag.strip('"')
+        except Exception:
+            md5 = hashlib.md5()
 
-        if not file_obj:
+            for chunk in self.attachment.chunks():
+                md5.update(chunk)
+
+            return md5.hexdigest()
+
+    def is_valid_attachment(self):
+        if not self.attachment:
             return False
 
-        file_obj.file.seek(0)
-        stream = file_obj.file.read()
+        for chunk in self.attachment.chunks():
+            header = chunk
+            break
 
-        mime = self.get_mime(stream)
+        mime = self.get_mime(header)
 
-        if mime != settings.YAGA_AWS_ALLOWED_MIME[field]:
+        if mime != settings.YAGA_AWS_UPLOAD_MIME:
             logger.error('{file_name} unexpected mime {mime}'.format(
-                file_name=file_obj.name,
+                file_name=self.attachment.name,
                 mime=mime
             ))
 
             return False
 
         if (
-            file_obj.file.size
+            self.attachment.size
             >
             settings.YAGA_AWS_UPLOAD_MAX_LENGTH
         ):
             logger.error('{file_name} exceeded capacity'.format(
-                file_name=file_obj.name
+                file_name=self.attachment.name
             ))
 
             return False
 
-        if file_obj.file.size == 0:
+        if self.attachmentj.size == 0:
             logger.error('{file_name} size is 0'.format(
-                file_name=file_obj.name
+                file_name=self.attachment.name
             ))
 
             return False
 
         return True
-
-    def is_valid_attachment(self):
-        return self.is_valid_file_obj('attachment')
 
     def sign_s3(self, mime, path_fn):
         access_key = settings.AWS_ACCESS_KEY_ID
@@ -473,20 +566,33 @@ class Post(
         }
 
     def save(self, *args, **kwargs):
+        if self.checksum == '':
+            self.checksum = None
+
         if self.pk:
             if not kwargs.get('update_fields'):
-                is_dirty = list(self.tracker.changed().keys())
+                changes = list(self.tracker.changed().keys())
 
-                if is_dirty:
-                    kwargs['update_fields'] = is_dirty
-                else:
-                    kwargs['update_fields'] = []
+                changes = list(filter(
+                    lambda change: (
+                        self.tracker.previous(change)
+                        !=
+                        getattr(self, change)
+                    ),
+                    changes
+                ))
+
+                kwargs['update_fields'] = changes
 
             if 'updated_at' not in kwargs['update_fields']:
                 kwargs['update_fields'] = list(kwargs['update_fields'])
                 kwargs['update_fields'].append('updated_at')
 
         return super(Post, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.clean_storage(save=False)
+        return super(Post, self).delete(*args, **kwargs)
 
     def __str__(self):
         return str(self.pk)

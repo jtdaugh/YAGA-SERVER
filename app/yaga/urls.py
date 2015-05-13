@@ -96,7 +96,7 @@ urlpatterns = patterns(
     url(
         r'^$',
         StatsBaseRedirectView.as_view(),
-        name='stats_base_redirec'
+        name='stats_base_redirect'
     ),
     url(
         r'^api/',

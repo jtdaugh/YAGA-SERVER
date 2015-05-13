@@ -13,17 +13,18 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from app.views import NonAtomicView, PatchAsPutMixin
+from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
 from . import permissions, serializers, throttling
 from ...conf import settings
 from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post,
-    post_attachment_preview_upload_to, post_attachment_upload_to
+    post_attachment_upload_to, post_attachment_upload_to_trash
 )
 
 
 class UserRetrieveUpdateAPIView(
+    SafeNonAtomicView,
     PatchAsPutMixin,
     generics.RetrieveUpdateAPIView,
 ):
@@ -121,6 +122,7 @@ class CodeCreateAPIView(
 
 
 class CodeRetrieveAPIView(
+    NonAtomicView,
     generics.RetrieveAPIView
 ):
     serializer_class = serializers.CodeRetrieveSerializer
@@ -201,6 +203,7 @@ class TokenCreateAPIView(
 
 
 class TokenDestroyAPIView(
+    NonAtomicView,
     generics.DestroyAPIView
 ):
     permission_classes = (IsAuthenticated, permissions.TokenOwner)
@@ -217,6 +220,7 @@ class TokenDestroyAPIView(
 
 
 class GroupListCreateAPIView(
+    SafeNonAtomicView,
     generics.ListCreateAPIView
 ):
     permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
@@ -226,7 +230,7 @@ class GroupListCreateAPIView(
         return Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.prefetch_related('user')
+                queryset=Member.objects.select_related('user')
             ),
         ).filter(
             members=self.request.user
@@ -257,6 +261,7 @@ class GroupListCreateAPIView(
 
 
 class GroupRetrieveUpdateAPIView(
+    SafeNonAtomicView,
     PatchAsPutMixin,
     generics.RetrieveUpdateAPIView
 ):
@@ -285,22 +290,24 @@ class GroupRetrieveUpdateAPIView(
         queryset = Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.prefetch_related('user')
+                queryset=Member.objects.select_related('user')
             ),
             Prefetch(
                 'post_set',
-                queryset=Post.objects.prefetch_related(
+                queryset=Post.objects.select_related(
                     'user',
-                    'namer',
+                    'namer'
+                ).prefetch_related(
                     Prefetch(
                         'like_set',
-                        queryset=Like.objects.prefetch_related('user')
+                        queryset=Like.objects.select_related('user')
                     )
                 ).filter(
                     **post_filter
                 ).order_by('-updated_at'),
             )
         )
+
         return queryset
 
 
@@ -408,6 +415,7 @@ class GroupMemberUpdateDestroyAPIView(
 
 
 class GroupMemberMuteAPIView(
+    NonAtomicView,
     PatchAsPutMixin,
     generics.UpdateAPIView,
 ):
@@ -444,6 +452,7 @@ class GroupMemberMuteAPIView(
 
 
 class PostCreateAPIView(
+    NonAtomicView,
     generics.CreateAPIView
 ):
     lookup_url_kwarg = 'group_id'
@@ -476,12 +485,12 @@ class PostCreateAPIView(
 
         response['meta'] = {
             'attachment': obj.sign_s3(
-                settings.YAGA_AWS_ALLOWED_MIME['attachment'],
+                settings.YAGA_AWS_UPLOAD_MIME,
                 post_attachment_upload_to
             ),
             'attachment_preview': obj.sign_s3(
-                settings.YAGA_AWS_ALLOWED_MIME['attachment_preview'],
-                post_attachment_preview_upload_to
+                'application/octet-stream',
+                post_attachment_upload_to_trash
             )
         }
 
@@ -509,6 +518,7 @@ class PostAPIView(
 
 
 class PostRetrieveUpdateDestroyAPIView(
+    SafeNonAtomicView,
     PostAPIView,
     PatchAsPutMixin,
     generics.RetrieveUpdateDestroyAPIView
@@ -520,12 +530,13 @@ class PostRetrieveUpdateDestroyAPIView(
     )
 
     def get_queryset(self):
-        return Post.objects.prefetch_related(
+        return Post.objects.select_related(
             'user',
-            'namer',
+            'namer'
+        ).prefetch_related(
             Prefetch(
                 'like_set',
-                queryset=Like.objects.prefetch_related('user')
+                queryset=Like.objects.select_related('user')
             )
         )
 
@@ -547,9 +558,8 @@ class PostRetrieveUpdateDestroyAPIView(
 
         response = dict(serializer.data)
 
-        # files actually deleted by signals, just representation hack
+        # files actually queued for delete
         response['attachment'] = None
-        response['attachment_preview'] = None
 
         return Response(
             response,
@@ -558,6 +568,7 @@ class PostRetrieveUpdateDestroyAPIView(
 
 
 class LikeCreateDestroyAPIView(
+    NonAtomicView,
     PostAPIView,
     generics.CreateAPIView,
     generics.DestroyAPIView
@@ -608,6 +619,7 @@ class LikeCreateDestroyAPIView(
 
 
 class DeviceCreateAPIView(
+    NonAtomicView,
     generics.CreateAPIView
 ):
     permission_classes = (IsAuthenticated,)

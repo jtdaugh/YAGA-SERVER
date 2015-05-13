@@ -8,7 +8,7 @@ import json
 import logging
 from urllib.parse import urlencode
 
-from apnsclient import APNs, Message, Session
+from apns_clerk import APNs, Message, Session
 from django.utils import timezone
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
@@ -202,7 +202,7 @@ class APNSProvider(
         return self.service
 
     def scheduled_task(self, *args, **kwargs):
-        APNSPush().delay(*args, **kwargs)
+        APNSPushTask().delay(*args, **kwargs)
 
     def push(self, receivers, **kwargs):
         service = self.get_service()
@@ -761,4 +761,4 @@ apns_provider = APNSProvider()
 
 code_provider = NexmoProvider()
 
-from .tasks import APNSPush  # noqa # isort:skip
+from .tasks import APNSPushTask  # noqa # isort:skip

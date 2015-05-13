@@ -23,11 +23,12 @@ task :deploy do
 end
 
 task :uwsgi do
-  cmd = 'uwsgi --module=app.wsgi:application --http-keepalive=0 --master --processes=%{workers} --harakiri=%{timeout} --vacuum --single-interpreter --enable-threads --http :$PORT'
+  cmd = 'uwsgi --module=app.wsgi:application --http-keepalive=0 --master --processes=%{workers} --harakiri=%{timeout} --vacuum --single-interpreter --enable-threads --http :%{port}'
 
   cmd = cmd % {
     workers: PROCESS_WORKERS,
-    timeout: HTTP_TIMEOUT
+    timeout: HTTP_TIMEOUT,
+    port: ENV['PORT'] || 8000
   }
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
@@ -38,11 +39,12 @@ task :uwsgi do
 end
 
 task :gunicorn do
-  cmd = 'gunicorn app.wsgi:application --keep-alive=0 --workers=%{workers} --timeout=%{timeout} --preload --access-logfile=- --error-logfile=-'
+  cmd = 'gunicorn app.wsgi:application --keep-alive=0 --workers=%{workers} --timeout=%{timeout} --preload --access-logfile=- --error-logfile=- --bind=:%{port}'
 
   cmd = cmd % {
     workers: PROCESS_WORKERS,
-    timeout: HTTP_TIMEOUT
+    timeout: HTTP_TIMEOUT,
+    port: ENV['PORT'] || 8000
   }
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC

@@ -4,7 +4,6 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-import django
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models import get_models
 from django.db.models.signals import post_migrate
@@ -12,7 +11,7 @@ from django.db.models.signals import post_migrate
 from .model_permissions import register_global_permission
 from .receivers import ModelReceiver
 from .signals import ModelSignal, register
-from .utils import Bridge, update_permissions
+from .utils import Bridge
 
 
 def receiver_factory():
@@ -59,6 +58,3 @@ for model in get_models():
 
 
 post_migrate.connect(register_global_permission)
-
-if django.VERSION[:2] < (1, 7):
-    post_migrate.connect(update_permissions)

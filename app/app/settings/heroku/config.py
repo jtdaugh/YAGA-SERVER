@@ -4,9 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-import os
-
 import dj_database_url
+from decouple import config
 
 from ..base.config import BaseConfiguration, Implementation, Initialization
 
@@ -91,7 +90,7 @@ class HerokuConfiguration(
     CACHES = {
         'default': {
             'BACKEND': 'django_redis.cache.RedisCache',
-            'LOCATION': os.environ['REDISCLOUD_URL'],
+            'LOCATION': config('REDISCLOUD_URL'),
             'OPTIONS': {
                 'PICKLE_VERSION': 2,
                 'IGNORE_EXCEPTIONS': True
@@ -106,15 +105,15 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------
-    SESSION_COOKIE_DOMAIN = os.environ['DOMAIN']
-    CSRF_COOKIE_DOMAIN = os.environ['DOMAIN']
+    SESSION_COOKIE_DOMAIN = config('DOMAIN')
+    CSRF_COOKIE_DOMAIN = config('DOMAIN')
     # -------------------------------------------------------
     # email backend configuration
     # -------------------------------------------------------
     EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
     EMAIL_HOST = 'smtp.sendgrid.net'
-    EMAIL_HOST_USER = os.environ['SENDGRID_USERNAME']
-    EMAIL_HOST_PASSWORD = os.environ['SENDGRID_PASSWORD']
+    EMAIL_HOST_USER = config('SENDGRID_USERNAME')
+    EMAIL_HOST_PASSWORD = config('SENDGRID_PASSWORD')
     EMAIL_PORT = 587
     EMAIL_USE_TLS = True
     SERVER_EMAIL = 'root@127.0.0.1'
@@ -123,9 +122,9 @@ class HerokuConfiguration(
     # celery configuration
     # -------------------------------------------------------
     CELERY_ALWAYS_EAGER = False
-    BROKER_URL = os.environ['RABBITMQ_BIGWIG_URL']
+    BROKER_URL = config('RABBITMQ_BIGWIG_URL')
     CELERYD_LOG_LEVEL = 'INFO'
-    CELERY_RESULT_BACKEND = os.environ['RABBITMQ_BIGWIG_URL']
+    CELERY_RESULT_BACKEND = config('RABBITMQ_BIGWIG_URL')
     # BROKER_POOL_LIMIT = 1
     # -------------------------------------------------------
     # model auto registration configuration
@@ -134,10 +133,12 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # storages configuration
     # -------------------------------------------------------
-    AWS_REGION = os.environ['AWS_REGION']
-    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-    AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+    AWS_REGION = config('AWS_REGION')
+    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+
+    CLOUDFRONT_HOST = config('CLOUDFRONT_HOST', default='')
 
     STATICFILES_STORAGE = 'app.storage.CachedS3StaticStorage'
     COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
@@ -155,14 +156,10 @@ class HerokuImplementation(
             location=self.STATIC_LOCATION,
             host=self.S3_HOST
         )
-        self.COMPRESS_URL = self.STATIC_URL
         # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
         self.INSTALLED_APPS.append('collectfast')
-
-    def connect(self):
-        pass
 
 
 class Configuration(

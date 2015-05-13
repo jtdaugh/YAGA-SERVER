@@ -7,7 +7,6 @@ from future.builtins import (  # noqa
 import logging
 
 from django.core.files.storage import default_storage
-from django.db import transaction
 from django.utils import timezone
 
 from app import celery
@@ -15,11 +14,23 @@ from app import celery
 from .conf import settings
 from .models import Code, Group, Post
 from .providers import apns_provider
+from .utils import post_attachment_re
 
 logger = logging.getLogger(__name__)
 
 
-class CodeCleanup(
+class CleanStorageTask(
+    celery.Task
+):
+    def run(self, key):
+        path = key.replace(settings.MEDIA_LOCATION, '')
+
+        path = path.strip('/')
+
+        default_storage.delete(path)
+
+
+class CodeCleanupAtomicPeriodicTask(
     celery.AtomicPeriodicTask
 ):
     run_every = settings.YAGA_CLEANUP_RUN_EVERY
@@ -31,7 +42,7 @@ class CodeCleanup(
             code.delete()
 
 
-class GroupCleanup(
+class GroupCleanupAtomicPeriodicTask(
     celery.AtomicPeriodicTask
 ):
     run_every = settings.YAGA_CLEANUP_RUN_EVERY
@@ -42,7 +53,7 @@ class GroupCleanup(
         ):
             keep_group = False
 
-            for post in Post.objects.filter(
+            for post in Post.atomic_objects.filter(
                 group=group
             ):
                 if post.ready:
@@ -54,7 +65,7 @@ class GroupCleanup(
                 group.delete()
 
 
-class PostCleanup(
+class PostCleanupAtomicPeriodicTask(
     celery.AtomicPeriodicTask
 ):
     run_every = settings.YAGA_CLEANUP_RUN_EVERY
@@ -62,118 +73,73 @@ class PostCleanup(
     def run(self, *args, **kwargs):
         expired = timezone.now() - settings.YAGA_ATTACHMENT_READY_EXPIRES
 
-        for post in Post.objects.filter(
+        for post in Post.atomic_objects.filter(
             created_at__lte=expired,
             ready=False
         ):
             post.delete()
 
 
-class DeletedPostCleanup(
-    celery.PeriodicTask
-):
-    run_every = settings.YAGA_CLEANUP_RUN_EVERY
-
-    def run(self, *args, **kwargs):
-        for post in Post.objects.filter(
-            deleted=True
-        ).exclude(
-            attachment='',
-            attachment_preview=''
-        ):
-            if post.attachment:
-                with transaction.atomic():
-                    post.attachment.delete(save=True)
-
-            if post.attachment_preview:
-                with transaction.atomic():
-                    post.attachment_preview.delete(save=True)
-
-
-class UploadProcess(
+class UploadProcessTask(
     celery.Task
 ):
     def run(self, key):
-        if settings.YAGA_ATTACHMENT_PREVIEW_PREFIX in key:
-            PostAttachmentPreviewProcess().delay(key)
-        elif settings.YAGA_ATTACHMENT_PREFIX in key:
-            PostAttachmentProcess().delay(key)
+        if post_attachment_re.match(key):
+            PostAttachmentValidateTask.delay(key)
+        else:
+            CleanStorageTask().delay(key)
 
 
-class PostAttachmentProcess(
-    celery.AtomicTask
+class PostAttachmentValidateTask(
+    celery.Task
 ):
-    file_obj = 'attachment'
-
     def run(self, key):
         path = key.replace(settings.MEDIA_LOCATION, '')
 
         path = path.strip('/')
 
-        folder, group_pk, post_pk = path.split('/')
+        prefix, group_pk, post_pk = path.split('/')
 
         try:
-            post = Post.objects.select_for_update().get(
+            post = Post.objects.get(
                 group__pk=group_pk,
                 pk=post_pk
             )
         except Post.DoesNotExist:
-            default_storage.delete(key)
+            CleanStorageTask().delay(path)
+
             logger.error('No model instance found for {key}'.format(
                 key=key
             ))
         else:
-            if getattr(post, self.file_obj):
-                post.delete()
+            if post.attachment:
+                post.mark_deleted()
+
                 logger.error('Attempt to override {file_obj}'.format(
-                    file_obj=self.file_obj
+                    file_obj=post.attachment.name
                 ))
             else:
-                setattr(post, self.file_obj, path)
-                self.process(post)
+                post.attachment = path
 
-    def process(self, post):
-        if post.is_valid_attachment():
-            post.checksum = post.attachment.file.key.etag.strip('"')
+                if post.is_valid_attachment():
+                    post.checksum = post.get_checksum()
 
-            if Post.objects.filter(
-                group=post.group,
-                checksum=post.checksum
-            ).exists():
-                post.delete()
+                    if Post.objects.filter(
+                        group=post.group,
+                        checksum=post.checksum
+                    ).exists():
+                        post.atomic_delete()
 
-                logger.error('Dropped duplicate {file_obj}'.format(
-                    file_obj=post.attachment
-                ))
-            else:
-                post.ready = True
-                post.ready_at = timezone.now()
-                post.bridge.uploaded = True
-                post.save(update_fields=[
-                    'checksum',
-                    'ready',
-                    'ready_at',
-                    'attachment'
-                ])
-        else:
-            post.delete()
+                        logger.error('Dropped duplicate {file_obj}'.format(
+                            file_obj=post.attachment.name
+                        ))
+                    else:
+                        post.mark_ready()
+                else:
+                    post.atomic_delete()
 
 
-class PostAttachmentPreviewProcess(
-    PostAttachmentProcess
-):
-    file_obj = 'attachment_preview'
-
-    def process(self, post):
-        if post.is_valid_attachment_preview():
-            post.save(update_fields=[
-                'attachment_preview'
-            ])
-        else:
-            post.attachment_preview.delete()
-
-
-class APNSPush(
+class APNSPushTask(
     celery.Task
 ):
     def run(self, receivers, **kwargs):

@@ -186,11 +186,6 @@ class AbstractUser(
             raise ValidationError('This name is already taken.')
 
 
-AbstractUser._meta.get_field('last_login').default = models.fields.NOT_PROVIDED
-AbstractUser._meta.get_field('last_login').blank = True
-AbstractUser._meta.get_field('last_login').null = True
-
-
 class User(
     AbstractUser
 ):

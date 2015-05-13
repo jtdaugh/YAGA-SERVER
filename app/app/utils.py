@@ -12,9 +12,9 @@ import requests
 import ujson
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from django.db import transaction
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
-from django.core.management import call_command
 from django.core.urlresolvers import NoReverseMatch, reverse
 from django.utils import six
 from django.utils.functional import SimpleLazyObject
@@ -82,6 +82,15 @@ def show_toolbar(request):
     return settings.DEBUG_TOOLBAR
 
 
+def savepoint(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        with transaction.atomic():
+            return fn(*args, **kwargs)
+
+    return wrapper
+
+
 _once = []
 
 
@@ -89,8 +98,12 @@ def once(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         if fn.func_name not in _once:
-            fn(*args, **kwargs)
-            _once.append(fn.func_name)
+            try:
+                fn(*args, **kwargs)
+                _once.append(fn.func_name)
+            except Exception:
+                pass
+
     return wrapper
 
 
@@ -220,11 +233,6 @@ def get_sentry_client():
         return get_client()
 
     return SimpleLazyObject(_get_sentry_cleint)
-
-
-@once
-def update_permissions(*args, **kwargs):
-    call_command('update_permissions')
 
 
 class Bridge(

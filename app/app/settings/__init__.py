@@ -6,16 +6,15 @@ from future.builtins import (  # noqa
 
 import os
 
+from decouple import config
 from django.utils.module_loading import import_by_path
 
 if os.environ.get('DYNO'):
     os.environ['ENV'] = 'heroku'
 elif os.environ.get('TRAVIS'):
     os.environ['ENV'] = 'travis'
-else:
-    os.environ['ENV'] = 'local'
 
-ENV = os.environ['ENV']
+ENV = config('ENV', default='local')
 
 Configuration = import_by_path(
     'app.settings.{env}.config.Configuration'.format(

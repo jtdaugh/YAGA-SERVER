@@ -4,7 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.db import connection, transaction
+from django.db import connection
 
 from app.receivers import ModelReceiver
 from requestprovider import get_request
@@ -97,53 +97,10 @@ class PostReceiver(
     ModelReceiver
 ):
     @staticmethod
-    def post_delete(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if instance.attachment:
-            def delete_attachment():
-                instance.attachment.delete(save=False)
-
-            connection.on_commit(delete_attachment)
-
-        if instance.attachment_preview:
-            def delete_attachment_preview():
-                instance.attachment_preview.delete(save=False)
-
-            connection.on_commit(delete_attachment_preview)
-
-    @staticmethod
-    def post_save(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if instance.deleted:
-            if instance.attachment:
-                def delete_attachment():
-                    with transaction.atomic():
-                        instance.attachment.delete(save=True)
-
-                connection.on_commit(delete_attachment)
-
-            if instance.attachment_preview:
-                def delete_attachment_preview():
-                    with transaction.atomic():
-                        instance.attachment_preview.delete(save=True)
-
-                connection.on_commit(delete_attachment_preview)
-
-    @staticmethod
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
         instance.group.mark_updated()
-
-        if hasattr(instance.bridge, 'uploaded'):
-            def push_notification():
-                providers.NewVideoIOSNotification(
-                    post=instance
-                )
-
-            connection.on_commit(push_notification)
 
         if instance.pk is not None:
             if instance.tracker.previous('name') != instance.name:

@@ -52,7 +52,13 @@ class AvailablePost(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        return obj.ready and not obj.deleted
+        if obj.deleted:
+            return False
+
+        if obj.ready:
+            return True
+
+        return obj.user == request.user
 
 
 class IsAnonymous(

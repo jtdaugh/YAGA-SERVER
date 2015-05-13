@@ -22,23 +22,6 @@ else:
     from django.db.models import EmailField as BaseEmailField
 
 
-try:
-    # Django > 1.8
-    BaseUUIDField = models.UUIDField
-    builtin_uuid = True
-except AttributeError:
-    builtin_uuid = False
-    # Django < 1.8
-    if connection.vendor == 'postgresql':
-        import psycopg2.extras
-        psycopg2.extras.register_uuid()
-        from django_extensions.db.fields import (
-            PostgreSQLUUIDField as BaseUUIDField
-        )
-    else:
-        from django_extensions.db.fields import UUIDField as BaseUUIDField
-
-
 @python_2_unicode_compatible
 class UUIDRepresentation(
     uuid.UUID
@@ -63,24 +46,21 @@ def uuid_representation(value):
 
 
 class UUIDField(
-    six.with_metaclass(models.SubfieldBase, BaseUUIDField)
+    six.with_metaclass(models.SubfieldBase, models.UUIDField)
 ):
     def __init__(self, *args, **kwargs):
-        if builtin_uuid:
-            self.version = kwargs.pop('version', 4)
-            self.auto = kwargs.pop('auto', True)
+        self.version = kwargs.pop('version', 4)
+        self.auto = kwargs.pop('auto', True)
 
-            self.node = kwargs.pop('node', None)
-            self.clock_seq = kwargs.pop('clock_seq', None)
-            self.namespace = kwargs.pop('namespace', None)
-            self.uuid_name = kwargs.pop('uuid_name', None)
+        self.node = kwargs.pop('node', None)
+        self.clock_seq = kwargs.pop('clock_seq', None)
+        self.namespace = kwargs.pop('namespace', None)
+        self.uuid_name = kwargs.pop('uuid_name', None)
 
-            if self.auto:
-                self.empty_strings_allowed = False
-                kwargs['blank'] = True
-                kwargs.setdefault('editable', False)
-        else:
-            kwargs['max_length'] = 32
+        if self.auto:
+            self.empty_strings_allowed = False
+            kwargs['blank'] = True
+            kwargs.setdefault('editable', False)
 
         super(UUIDField, self).__init__(*args, **kwargs)
 

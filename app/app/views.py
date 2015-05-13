@@ -11,6 +11,7 @@ from django.template import Context, loader
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django_filters.views import FilterView
+from rest_framework.permissions import SAFE_METHODS
 
 from .utils import cache_view, crispy_filter_helper, user_cache_view
 
@@ -56,6 +57,12 @@ class CacheView(
         return super(CacheView, self).dispatch(request, *args, **kwargs)
 
 
+class BaseAtomicView(
+    object
+):
+    pass
+
+
 class AtomicView(
     object
 ):
@@ -70,6 +77,19 @@ class NonAtomicView(
     @method_decorator(transaction.non_atomic_requests)
     def dispatch(self, *args, **kwargs):
         return super(NonAtomicView, self).dispatch(*args, **kwargs)
+
+
+class SafeNonAtomicView(
+    object
+):
+    @method_decorator(transaction.non_atomic_requests)
+    def dispatch(self, *args, **kwargs):
+        dispatch = super(SafeNonAtomicView, self).dispatch
+
+        if self.request.method not in SAFE_METHODS:
+            dispatch = transaction.atomic(dispatch)
+
+        return dispatch(*args, **kwargs)
 
 
 class CrispyFilterView(
