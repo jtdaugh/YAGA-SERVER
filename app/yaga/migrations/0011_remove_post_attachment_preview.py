@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def clean_attachment_previews(apps, schema_editor):
     Post = apps.get_model('yaga', 'Post')
 
-    for post in Post.objects.filter(
+    for post in Post.objects.exclude(
         attachment_preview=''
     ):
         try:

@@ -12,7 +12,6 @@ import requests
 import ujson
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from django.db import transaction
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import NoReverseMatch, reverse
@@ -80,15 +79,6 @@ def snless(content):
 
 def show_toolbar(request):
     return settings.DEBUG_TOOLBAR
-
-
-def savepoint(fn):
-    @wraps(fn)
-    def wrapper(*args, **kwargs):
-        with transaction.atomic():
-            return fn(*args, **kwargs)
-
-    return wrapper
 
 
 _once = []
@@ -317,15 +307,6 @@ class SendRaw(
         super(SentryCeleryClient, sentry_client).send_encoded(*args, **kwargs)
 
 
-sentry_client = get_sentry_client()
-
-
-class Choice(
-    object
-):
-    pass
-
-
 class Singleton(type):
     _instances = {}
 
@@ -336,3 +317,42 @@ class Singleton(type):
             ).__call__(*args, **kwargs)
 
         return self._instances[self]
+
+
+class Choice(
+    six.with_metaclass(Singleton, object)
+):
+    def __init__(self):
+        self._map = {}
+        self._reverse_map = {}
+
+        for key in dir(self):
+            if not key.startswith('_') and key.upper() == key:
+                key = u(key)
+                self._map[key] = getattr(self, key)
+                self._reverse_map[self._map[key]] = key
+
+    def __iter__(self):
+        for pair in self.choices:
+            yield pair
+
+    @property
+    def keys(self):
+        return list(self._map.keys())
+
+    @property
+    def values(self):
+        return list(self._map.values())
+
+    @property
+    def choices(self):
+        return list(self._reverse_map.items())
+
+    def value(self, value):
+        return self._reverse_map[value]
+
+    def key(self, key):
+        return self._map[key]
+
+
+sentry_client = get_sentry_client()

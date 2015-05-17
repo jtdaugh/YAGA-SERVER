@@ -10,8 +10,8 @@ from .signals import (
     GroupSignal, LikeSignal, MemberSignal, PostSignal, UserSignal
 )
 
-register(LikeSignal)
-register(MemberSignal)
-register(PostSignal)
-register(UserSignal)
-register(GroupSignal)
+# register(LikeSignal)
+# register(MemberSignal)
+# register(PostSignal)
+# register(UserSignal)
+# register(GroupSignal)

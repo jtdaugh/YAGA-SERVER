@@ -5,7 +5,7 @@ from future.builtins import (  # noqa
 )
 
 
-class DisableNonSuperuserMixin(
+class ForceSuperuserAccess(
     object
 ):
     def has_permission(self, request):

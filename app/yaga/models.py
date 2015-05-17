@@ -12,7 +12,7 @@ import logging
 import os
 
 import magic
-from django.db import connection, transaction, models
+from django.db import connection, models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.functional import SimpleLazyObject
@@ -22,8 +22,8 @@ from model_utils import FieldTracker
 
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import Choice
 
+from .choices import StateChoice, VendorChoice
 from .conf import settings
 
 # from .tasks import CleanStorageTask
@@ -313,10 +313,13 @@ class Post(
         null=True
     )
 
-    ready = models.BooleanField(
-        verbose_name=_('Ready'),
+    state_choices = StateChoice()
+
+    state = models.PositiveSmallIntegerField(
+        verbose_name=_('State'),
+        choices=state_choices,
         db_index=True,
-        default=False
+        default=state_choices.PENDING
     )
 
     created_at = models.DateTimeField(
@@ -337,12 +340,6 @@ class Post(
         db_index=True
     )
 
-    deleted = models.BooleanField(
-        verbose_name=_('Deleted'),
-        default=False,
-        db_index=True
-    )
-
     tracker = FieldTracker()
 
     objects = models.Manager()
@@ -359,70 +356,86 @@ class Post(
         )
 
     @property
-    def lock(self):
+    def ready(self):
+        return self.state == self.state_choices.READY
+
+    @ready.setter
+    def ready_setter(self, value):
+        if value:
+            self.state = self.state_choices.READY
+        else:
+            raise NotImplementedError
+
+    @property
+    def deleted(self):
+        return self.state == self.state_choices.DELETED
+
+    @deleted.setter
+    def deleted_setter(self, value):
+        if value:
+            self.state = self.state_choices.DELETED
+        else:
+            raise NotImplementedError
+
+    @property
+    def atomic(self):
         try:
             post = Post.atomic_objects.get(
                 pk=self.pk
             )
+            return post
         except Post.DoesNotExist:
-            post = False
-
-        return post
-
-    @property
-    def atomic(self):
-        this = self
-
-        class Atomic(
-            object
-        ):
-            def __enter__(self):
-                return this.lock
-
-            def __exit__(self, *args, **kwargs):
-                pass
-
-        return Atomic()
+            return False
 
     def atomic_delete(self):
         with transaction.atomic():
-            with self.atomic as post:
-                if post:
-                    post.delete()
+            post = self.atomic
 
-    def mark_ready(self):
+            if post:
+                post.delete()
+
+    def mark_uploaded(self):
         with transaction.atomic():
-            with self.atomic as post:
-                if post:
-                    post.path = self.path
+            post = self.atomic
 
-                    post.checksum = self.checksum
+            if post:
+                post.path = self.path
 
-                    if post.deleted:
-                        post.ready = True
+                post.checksum = self.checksum
 
-                        post.clean_storage()
+                if post.deleted:
+                    post.ready = True
 
-                        post.save()
-
-                    elif not post.ready:
-                        post.ready = True
-
-                        post.push()
-
-                        post.save()
-                    else:
-                        post.clean_storage()
-
-    def mark_deleted(self):
-        with transaction.atomic():
-            with self.atomic as post:
-                if post:
                     post.clean_storage()
 
+                    return
+
+                if not post.ready:
+                    post.ready = True
+
+                    post.push()
+
+                    post.save()
+                else:
+                    post.clean_storage()
+
+    def mark_deleted(self, save=True):
+        with transaction.atomic():
+            post = self.atomic
+
+            if post:
+                post.clean_storage(save=False)
+
+                if not self.deleted:
+                    self.deleted = True
+
+                if save:
+                    self.save()
+
     def clean_storage(self, save=True):
+        self.checksum = None
+
         if self.attachment:
-            self.checksum = None
             # path = self.attachment.name
 
             self.attachment = None
@@ -432,9 +445,6 @@ class Post(
                 pass
 
             connection.on_commit(delete_attachment)
-
-        if not self.deleted:
-            self.deleted = True
 
         if save:
             self.save()
@@ -645,21 +655,11 @@ class Device(
         version=4
     )
 
-    class Vendor(
-        Choice
-    ):
-        IOS = 0
-        IOS_VALUE = 'IOS'
-        ANDROID = 1
-        ANDROID_VALUE = 'ANDROID'
-    VENDOR_CHOICES = (
-        (Vendor.IOS, Vendor.IOS_VALUE),
-        (Vendor.ANDROID, Vendor.ANDROID_VALUE)
-    )
+    vendor_choices = VendorChoice()
 
     vendor = models.PositiveSmallIntegerField(
         verbose_name=_('Vendor'),
-        choices=VENDOR_CHOICES,
+        choices=vendor_choices,
         db_index=True
     )
 

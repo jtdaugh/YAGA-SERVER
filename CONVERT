@@ -1,0 +1,1 @@
+ffmpeg -i xxx.mp4 -vf "transpose=1,scale=200:-1"  -r 4 -f image2pipe -vcodec ppm - | convert -delay 16.6 +dither -coalesce -layers Optimize -gravity Center -crop 200x200+0+0 +repage - gif:- | gifsicle -O3 > xxx.gif

@@ -18,10 +18,11 @@ celery ack later - celery retry
 
 APNS feedback
 
-server side gifs
-
-delete\ready fix
-
 fix cleanup tasks
 
 remove fabric
+
+#######
+delete\ready fix
+
+server side gifs

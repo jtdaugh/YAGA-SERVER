@@ -6,13 +6,13 @@ from future.builtins import (  # noqa
 
 from django.contrib import admin
 
-from app.admin import DisableNonSuperuserMixin
+from app.admin import ForceSuperuserAccess
 
 from .models import Mask
 
 
 class MaskModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('value', 'created_at')
 

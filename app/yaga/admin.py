@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 from django.contrib import admin
 from django.forms.models import BaseInlineFormSet
 
-from app.admin import DisableNonSuperuserMixin
+from app.admin import ForceSuperuserAccess
 
 from .models import (
     Code, Contact, Device, Group, Like, Member, MonkeyUser, Post
@@ -15,7 +15,7 @@ from .models import (
 
 
 class CodeModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('phone', 'request_id', 'expire_at')
 
@@ -57,7 +57,7 @@ class PostTabularInline(
 
 
 class GroupModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('pk', 'name', 'created_at', 'member_count', 'post_count')
 
@@ -73,16 +73,16 @@ class GroupModelAdmin(
 
 
 class PostModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = (
         'pk', 'name', 'user', 'like_count', 'group',
-        'ready', 'deleted', 'created_at'
+        'state', 'created_at'
     )
 
     ordering = ('-created_at',)
 
-    list_filter = ('ready', 'deleted')
+    list_filter = ('state',)
 
     search_fields = ('attachment', 'name', 'id')
 
@@ -92,7 +92,7 @@ class PostModelAdmin(
 
 
 class MemberModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('user', 'group', 'mute', 'joined_at')
 
@@ -106,7 +106,7 @@ class MemberModelAdmin(
 
 
 class LikeModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('user', 'post', 'created_at')
 
@@ -118,7 +118,7 @@ class LikeModelAdmin(
 
 
 class DeviceModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('user', 'token', 'vendor', 'locale', 'created_at')
 
@@ -134,7 +134,7 @@ class DeviceModelAdmin(
 
 
 class ContactModelAdmin(
-    DisableNonSuperuserMixin, admin.ModelAdmin
+    ForceSuperuserAccess, admin.ModelAdmin
 ):
     list_display = ('pk', 'user', 'created_at')
 

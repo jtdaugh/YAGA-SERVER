@@ -68,7 +68,9 @@ class SinceSerializer(
 class UserSerializer(
     serializers.ModelSerializer
 ):
-    name = UnicodeField(required=False, validators=[UniqueLowerUserName()])
+    name = UnicodeField(
+        required=False, numeric=False, validators=[UniqueLowerUserName()]
+    )
 
     class Meta:
         model = get_user_model()
@@ -177,7 +179,7 @@ class LikerSerializer(
 class PostSerializer(
     serializers.ModelSerializer
 ):
-    name = UnicodeField(required=False, allow_spaces=True, max_length=200)
+    name = UnicodeField(required=False, spaces=True, max_length=200)
 
     user = UserSerializer(read_only=True)
 
@@ -263,13 +265,14 @@ class PostSerializer(
 
     def update(self, instance, validated_data):
         with transaction.atomic():
-            with instance.atomic as post:
-                if post:
-                    return super(
-                        PostSerializer, self
-                    ).update(post, validated_data)
-                else:
-                    return instance
+            post = instance.atomic
+
+            if post:
+                return super(
+                    PostSerializer, self
+                ).update(post, validated_data)
+            else:
+                return instance
 
 
 class MemberSerializer(
@@ -286,7 +289,7 @@ class GroupSerializer(
     serializers.ModelSerializer
 ):
     members = MemberSerializer(many=True, read_only=True, source='member_set')
-    name = UnicodeField(required=False, allow_spaces=True)
+    name = UnicodeField(required=False, spaces=True)
 
     class Meta:
         model = Group
@@ -354,12 +357,9 @@ class DeviceSerializer(
     def to_representation(self, instance):
         ret = super(DeviceSerializer, self).to_representation(instance)
 
-        model_vendor = int(ret['vendor'])
-
-        for vendor, value in self.Meta.model.VENDOR_CHOICES:
-            if vendor == model_vendor:
-                ret['vendor'] = value
-                break
+        ret['vendor'] = self.Meta.model.vendor_choices.value(
+            int(ret['vendor'])
+        )
 
         return ret
 
@@ -391,8 +391,15 @@ class DeviceSerializer(
         return super(DeviceSerializer, self).save(**kwargs)
 
     def validate_vendor(self, value):
-        if value == self.Meta.model.Vendor.IOS_VALUE:
-            return self.Meta.model.Vendor.IOS
+        try:
+            if (
+                self.Meta.model.vendor_choices.key(value)
+                ==
+                self.Meta.model.vendor_choices.IOS
+            ):
+                return self.Meta.model.vendor_choices.IOS
+        except KeyError:
+            pass
 
         msg = _('Unsupported vendor.')
         raise ValidationError(msg)
@@ -409,13 +416,15 @@ class DeviceSerializer(
         token = attrs['token']
         locale = attrs['locale']
 
-        if vendor == Device.Vendor.IOS:
+        if vendor == Device.vendor_choices.IOS:
             if len(token) != 64:
                 msg = _('Invalid token.')
                 raise ValidationError(msg)
 
-        if locale not in [code for code, title in settings.LANGUAGES]:
-            locale = settings.LANGUAGE_CODE
+        if locale.lower() not in [
+            code.lower() for code, title in settings.LANGUAGES
+        ]:
+            locale = settings.LANGUAGE_CODE.lower()
 
         attrs['locale'] = locale
 

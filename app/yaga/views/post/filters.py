@@ -27,6 +27,8 @@ class PostFilterSet(
         }
     }
 
+    state = django_filters.ChoiceFilter(choices=Post.state_choices)
+
     class Meta:
         model = Post
-        fields = ['id', 'user', 'group', 'name', 'ready', 'deleted']
+        fields = ['id', 'user', 'group', 'name', 'state']

@@ -134,7 +134,7 @@ class PostAttachmentValidateTask(
                             file_obj=post.attachment.name
                         ))
                     else:
-                        post.mark_ready()
+                        post.mark_uploaded()
                 else:
                     post.atomic_delete()
 
