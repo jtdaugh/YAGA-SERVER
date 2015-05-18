@@ -10,9 +10,4 @@ from app.receivers import ModelReceiver
 class UserReceiver(
     ModelReceiver
 ):
-    @staticmethod
-    def pre_save(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if instance.name == '':
-            instance.name = None
+    pass

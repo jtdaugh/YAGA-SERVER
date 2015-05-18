@@ -130,3 +130,9 @@ class EmailField(
     BaseEmailField
 ):
     pass
+
+
+class BridgeStorage(
+    object
+):
+    bridge = None

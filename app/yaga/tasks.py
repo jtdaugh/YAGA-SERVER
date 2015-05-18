@@ -22,18 +22,24 @@ logger = logging.getLogger(__name__)
 class CleanStorageTask(
     celery.Task
 ):
-    def run(self, key):
+    def run(self, key, *args, **kwargs):
         path = key.replace(settings.MEDIA_LOCATION, '')
 
         path = path.strip('/')
 
-        default_storage.delete(path)
+        try:
+            default_storage.delete(path)
+        except Exception as e:
+
+            self.retry(key, *args, exc=e, **kwargs)
+
+            logger.error(e)
 
 
 class CodeCleanupAtomicPeriodicTask(
     celery.AtomicPeriodicTask
 ):
-    run_every = settings.YAGA_CLEANUP_RUN_EVERY
+    run_every = settings.YAGA_CODE_CLEANUP_RUN_EVERY
 
     def run(self, *args, **kwargs):
         for code in Code.objects.filter(
@@ -75,7 +81,7 @@ class PostCleanupAtomicPeriodicTask(
 
         for post in Post.atomic_objects.filter(
             created_at__lte=expired,
-            ready=False
+            state=Post.state_choices.PENDING
         ):
             post.delete()
 
@@ -83,17 +89,22 @@ class PostCleanupAtomicPeriodicTask(
 class UploadProcessTask(
     celery.Task
 ):
-    def run(self, key):
-        if post_attachment_re.match(key):
-            PostAttachmentValidateTask.delay(key)
-        else:
-            CleanStorageTask().delay(key)
+    def run(self, key, *args, **kwargs):
+        try:
+            if post_attachment_re.match(key):
+                PostAttachmentValidateTask.delay(key)
+            else:
+                CleanStorageTask().delay(key)
+        except Exception as e:
+            self.retry(key, *args, exc=e, **kwargs)
+
+            logger.exception(e)
 
 
 class PostAttachmentValidateTask(
     celery.Task
 ):
-    def run(self, key):
+    def run(self, key, *args, **kwargs):
         path = key.replace(settings.MEDIA_LOCATION, '')
 
         path = path.strip('/')
@@ -142,6 +153,12 @@ class PostAttachmentValidateTask(
 class APNSPushTask(
     celery.Task
 ):
-    def run(self, receivers, **kwargs):
+    def run(self, receivers, *args, **kwargs):
         if receivers:
-            apns_provider.push(receivers, **kwargs)
+            try:
+                apns_provider.push(receivers, **kwargs)
+            except Exception as e:
+
+                self.retry(receivers, *args, exc=e, **kwargs)
+
+                logger.exception(e)

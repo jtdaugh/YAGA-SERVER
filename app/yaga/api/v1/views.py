@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -73,7 +73,7 @@ class CodeCreateAPIView(
                     user__phone=serializer.validated_data['phone']
                 ).first()
 
-                if monkey is not None:
+                if monkey:
                     serializer = serializers.AuthStatusResponseSerializer(
                         data={
                             'expire_at': datetime.datetime(
@@ -273,7 +273,7 @@ class GroupRetrieveUpdateAPIView(
 
     def get_queryset(self):
         post_filter = {
-            'ready': True
+            # 'state': Post.state_choices.READY
         }
 
         serializer = serializers.SinceSerializer(
@@ -361,57 +361,74 @@ class GroupMemberUpdateDestroyAPIView(
         )
 
     def perform_update(self, instance, validated_data):
-        users = []
+        query = None
 
         if validated_data.get('names'):
-            for name in validated_data['names']:
-                user = get_user_model().objects.filter(
-                    name__iexact=name
-                ).first()
-
-                if user:
-                    users.append(user)
+            query = Q(name__in=validated_data['names'])
 
         if validated_data.get('phones'):
-            for phone in validated_data['phones']:
-                user = get_user_model().objects.get_or_create(
-                    phone=phone
-                )
+            _query = Q(phone__in=validated_data['phones'])
 
-                users.append(user)
+            if query:
+                query |= _query
+            else:
+                query = _query
 
-        users = list(set(users))
+        if query:
+            users = get_user_model().objects.filter(
+                query
+            )
 
-        if self.request.user in users:
-            users.remove(self.request.user)
+            users = set(list(users))
 
-        for user in users:
-            if user.is_active:
-                obj = instance.member_set.filter(
-                    group=instance,
-                    user=user
-                ).first()
+            if validated_data.get('phones'):
+                existing_phones = {user.phone.as_e164 for user in users}
 
-                if not obj:
-                    obj = Member()
-                    obj.group = instance
-                    obj.user = user
-                    obj.creator = self.request.user
-                    obj.save()
+                new_phones = set(validated_data['phones']) - existing_phones
+
+                for phone in new_phones:
+                    new_user = get_user_model().objects.get_or_create(
+                        phone=phone
+                    )
+
+                    users.add(new_user)
+
+            try:
+                users.remove(self.request.user)
+            except KeyError:
+                pass
+
+            existing_members = instance.member_set.filter(
+                user__in=users
+            )
+
+            existing_users = {member.user for member in existing_members}
+
+            new_users = users - existing_users
+
+            new_active_users = [user for user in new_users if user.is_active]
+
+            for user in new_active_users:
+                obj = Member()
+                obj.group = instance
+                obj.user = user
+                obj.creator = self.request.user
+                obj.save()
 
     def perform_destroy(self, instance, validated_data):
-        user = get_user_model().objects.get_or_create(
-            phone=validated_data['phone']
-        )
+        try:
+            user = get_user_model().objects.get(
+                phone=validated_data['phone']
+            )
 
-        obj = instance.member_set.filter(
-            group=instance,
-            user=user
-        ).first()
+            obj = instance.member_set.get(
+                user=user
+            )
 
-        if obj:
             obj.bridge.deleter = self.request.user
             obj.delete()
+        except (get_user_model().DoesNotExist, Group.DoesNotExist):
+            pass
 
 
 class GroupMemberMuteAPIView(

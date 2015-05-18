@@ -288,7 +288,7 @@ class BaseConfiguration(
         'font-awesome#4.3.0',
         'handlebars#3.0.3',
         'underscore#1.8.3',
-        'video.js#5.0.0-11',
+        'video.js#5.0.0-16',
         'bootstrap-switch#3.3.2',
         'json3#3.3.2',
     )
@@ -637,6 +637,7 @@ class BaseConfiguration(
     CELERY_IGNORE_RESULT = False
     CELERYD_HIJACK_ROOT_LOGGER = False
     CELERY_ACKS_LATE = True
+    CELERYD_PREFETCH_MULTIPLIER = 1
     CELERY_REDIRECT_STDOUTS = False
     # CELERYD_TASK_TIME_LIMIT = 60
     # CELERYD_TASK_SOFT_TIME_LIMIT = 30

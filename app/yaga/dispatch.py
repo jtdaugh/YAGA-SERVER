@@ -4,11 +4,11 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from app.signals import register
+# from app.signals import register
 
-from .signals import (
-    GroupSignal, LikeSignal, MemberSignal, PostSignal, UserSignal
-)
+# from .signals import (
+#     GroupSignal, LikeSignal, MemberSignal, PostSignal, UserSignal
+# )
 
 # register(LikeSignal)
 # register(MemberSignal)

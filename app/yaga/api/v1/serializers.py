@@ -207,12 +207,20 @@ class PostSerializer(
         min_value=0, max_value=100, required=False
     )
 
+    ready = serializers.BooleanField(
+        read_only=True
+    )
+
+    deleted = serializers.BooleanField(
+        read_only=True
+    )
+
     class Meta:
         model = Post
         caption_fields = ('name_x', 'name_y', 'font', 'rotation', 'scale')
         fields = (
             'attachment', 'ready_at', 'updated_at',
-            'user', 'id', 'name', 'deleted', 'likers', 'namer'
+            'user', 'id', 'name', 'ready', 'deleted', 'likers', 'namer'
         ) + caption_fields
         read_only_fields = (
             'attachment', 'ready_at', 'deleted'
@@ -378,7 +386,7 @@ class DeviceSerializer(
             vendor=self.validated_data['vendor']
         ).first()
 
-        if instance is not None:
+        if instance:
             self.instance = instance
 
             if (

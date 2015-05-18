@@ -185,6 +185,12 @@ class AbstractUser(
         ).exists():
             raise ValidationError('This name is already taken.')
 
+    def save(self, *args, **kwargs):
+        if self.name == '':
+            self.name = None
+
+        return super(AbstractUser, self).save(*args, **kwargs)
+
 
 class User(
     AbstractUser

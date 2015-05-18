@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 
 from apns_clerk import APNs, Message, Session
 from django.utils import timezone
+from django.utils.functional import SimpleLazyObject
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ungettext
@@ -160,6 +161,8 @@ class NexmoProvider(
 class APNSProvider(
     object
 ):
+    _task = None
+
     def __init__(self):
         self.release_service()
 
@@ -201,8 +204,17 @@ class APNSProvider(
 
         return self.service
 
+    @property
+    def task(self):
+        if self._task is None:
+            from .tasks import APNSPushTask
+
+            self._task = APNSPushTask
+
+        return self._task
+
     def scheduled_task(self, *args, **kwargs):
-        APNSPushTask().delay(*args, **kwargs)
+        self.task().delay(*args, **kwargs)
 
     def push(self, receivers, **kwargs):
         service = self.get_service()
@@ -218,9 +230,15 @@ class APNSProvider(
         response = service.send(message)
 
         for token, (reason, explanation) in list(response.failed.items()):
-            Device.objects.filter(
-                token=token
-            ).delete()
+
+            try:
+                device = Device.objects.get(
+                    token=token
+                )
+
+                device.delete()
+            except Device.DoesNotExist:
+                continue
 
             if token in receivers:
                 receivers.remove(token)
@@ -760,5 +778,3 @@ class NewUserIOSNotification(
 apns_provider = APNSProvider()
 
 code_provider = NexmoProvider()
-
-from .tasks import APNSPushTask  # noqa # isort:skip

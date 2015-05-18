@@ -39,7 +39,8 @@ class YagaAppConf(
     ]
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
-    CLEANUP_RUN_EVERY = datetime.timedelta(minutes=1)
+    CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
+    CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)
 
     AWS_SQS_QUEUE = config('AWS_SQS_QUEUE', default='yaga-dev')
 

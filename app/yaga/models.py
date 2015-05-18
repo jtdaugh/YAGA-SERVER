@@ -15,7 +15,6 @@ import magic
 from django.db import connection, models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
-from django.utils.functional import SimpleLazyObject
 from django.utils.translation import ugettext_lazy as _
 from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
@@ -26,25 +25,7 @@ from app.model_fields import PhoneNumberField, UUIDField
 from .choices import StateChoice, VendorChoice
 from .conf import settings
 
-# from .tasks import CleanStorageTask
-
 logger = logging.getLogger(__name__)
-
-_provider = None
-
-
-def get_lazy_provider():
-    def _get_lazy_provider():
-        global _provider
-
-        if _provider is None:
-            from .providers import code_provider
-
-            _provider = code_provider
-
-        return _provider
-
-    return SimpleLazyObject(_get_lazy_provider)
 
 
 def code_expire_at():
@@ -81,8 +62,6 @@ post_attachment_preview_upload_to = post_attachment_upload_to_trash  # backward
 class Code(
     models.Model
 ):
-    provider = get_lazy_provider()
-
     request_id = models.CharField(
         verbose_name=_('Request Id'),
         primary_key=True,
@@ -100,6 +79,10 @@ class Code(
         default=code_expire_at,
         db_index=True
     )
+
+    @property
+    def provider(self):
+        return code_provider
 
     def check_code(self, code):
         response = self.provider.check(self.request_id, code)
@@ -355,6 +338,38 @@ class Post(
             ('checksum', 'group'),
         )
 
+    def save(self, *args, **kwargs):
+        if self.checksum == '':
+            self.checksum = None
+
+        if self.pk:
+            if not kwargs.get('update_fields'):
+                changes = list(self.tracker.changed().keys())
+
+                changes = list(filter(
+                    lambda change: (
+                        self.tracker.previous(change)
+                        !=
+                        getattr(self, change)
+                    ),
+                    changes
+                ))
+
+                kwargs['update_fields'] = changes
+
+            if 'updated_at' not in kwargs['update_fields']:
+                kwargs['update_fields'] = list(kwargs['update_fields'])
+                kwargs['update_fields'].append('updated_at')
+
+        return super(Post, self).save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        self.clean_storage(save=False)
+        return super(Post, self).delete(*args, **kwargs)
+
+    def __str__(self):
+        return str(self.pk)
+
     @property
     def ready(self):
         return self.state == self.state_choices.READY
@@ -363,6 +378,7 @@ class Post(
     def ready_setter(self, value):
         if value:
             self.state = self.state_choices.READY
+            self.notify()
         else:
             raise NotImplementedError
 
@@ -413,8 +429,6 @@ class Post(
                 if not post.ready:
                     post.ready = True
 
-                    post.push()
-
                     post.save()
                 else:
                     post.clean_storage()
@@ -436,13 +450,12 @@ class Post(
         self.checksum = None
 
         if self.attachment:
-            # path = self.attachment.name
+            path = self.attachment.name
 
             self.attachment = None
 
             def delete_attachment():
-                # CleanStorageTask().delay(path)
-                pass
+                CleanStorageTask().delay(path)
 
             connection.on_commit(delete_attachment)
 
@@ -574,38 +587,6 @@ class Post(
                 'Content-Type': content_type
             }
         }
-
-    def save(self, *args, **kwargs):
-        if self.checksum == '':
-            self.checksum = None
-
-        if self.pk:
-            if not kwargs.get('update_fields'):
-                changes = list(self.tracker.changed().keys())
-
-                changes = list(filter(
-                    lambda change: (
-                        self.tracker.previous(change)
-                        !=
-                        getattr(self, change)
-                    ),
-                    changes
-                ))
-
-                kwargs['update_fields'] = changes
-
-            if 'updated_at' not in kwargs['update_fields']:
-                kwargs['update_fields'] = list(kwargs['update_fields'])
-                kwargs['update_fields'].append('updated_at')
-
-        return super(Post, self).save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        self.clean_storage(save=False)
-        return super(Post, self).delete(*args, **kwargs)
-
-    def __str__(self):
-        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -750,3 +731,7 @@ class MonkeyUser(
 
     def __str__(self):
         return str(self.pk)
+
+
+from .tasks import CleanStorageTask  # noqa # isort:skip
+from .providers import code_provider  # noqa # isort:skip

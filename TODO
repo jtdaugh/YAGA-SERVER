@@ -14,11 +14,7 @@ group list -> posts\user link
 
 group user filter
 
-celery ack later - celery retry
-
 APNS feedback
-
-fix cleanup tasks
 
 remove fabric
 

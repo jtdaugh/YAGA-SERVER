@@ -48,13 +48,14 @@ bridge_storage = {}
 
 
 for model in get_models():
-    bridge_storage[model] = {}
-    bridge_storage[model]['receiver'] = receiver_factory()
-    bridge_storage[model]['signal'] = signal_factory(
-        model, bridge_storage[model]
-    )
+    if hasattr(model, 'bridge'):
+        bridge_storage[model] = {}
+        bridge_storage[model]['receiver'] = receiver_factory()
+        bridge_storage[model]['signal'] = signal_factory(
+            model, bridge_storage[model]
+        )
 
-    register(bridge_storage[model]['signal'])
+        register(bridge_storage[model]['signal'])
 
 
 post_migrate.connect(register_global_permission)
