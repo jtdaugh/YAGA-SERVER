@@ -189,7 +189,7 @@ class AbstractUser(
         if self.name == '':
             self.name = None
 
-        return super(AbstractUser, self).save(*args, **kwargs)
+        super(AbstractUser, self).save(*args, **kwargs)
 
 
 class User(
@@ -237,11 +237,11 @@ class Token(
                 try:
                     self.key = self.generate_key()
 
-                    return super(Token, self).save(*args, **kwargs)
+                    super(Token, self).save(*args, **kwargs)
                 except IntegrityError:
                     continue
         else:
-            return super(Token, self).save(*args, **kwargs)
+            super(Token, self).save(*args, **kwargs)
 
     def generate_key(self):
         return get_random_string(self.KEY_LENGTH, self.KEY_CHARS)

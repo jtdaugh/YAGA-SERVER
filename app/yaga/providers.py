@@ -10,7 +10,6 @@ from urllib.parse import urlencode
 
 from apns_clerk import APNs, Message, Session
 from django.utils import timezone
-from django.utils.functional import SimpleLazyObject
 from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ungettext

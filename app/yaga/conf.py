@@ -27,16 +27,48 @@ class YagaAppConf(
 
     AWS_UPLOAD_EXPIRES = datetime.timedelta(minutes=10)
     AWS_UPLOAD_MAX_LENGTH = 25 * 1024 * 1024
-    AWS_UPLOAD_MIME = 'video/mp4',
+    AWS_UPLOAD_MIME = 'video/mp4'
+
     ATTACHMENT_PREFIX = 'posts'
-    ATTACHMENT_PREVIEWS = [
-        {
-            'x': 200,
-            'y': 200,
-            'speed': 1.5,
-            'fps': 4
-        }
-    ]
+    ATTACHMENT_PREVIEW_PREFIX = 'posts_preview'
+    ATTACHMENT_PREVIEW = {
+        'width': 200,
+        'height': 200,
+        'speed': 1.5,
+        'fps': 4
+    }
+    ATTACHMENT_VALIDATE_CMD = 'ffprobe {path}'
+    ATTACHMENT_VALIDATE_RULES = (
+        ('major_brand', 'mp42'),
+        ('compatible_brands', 'mp41mp42isom'),
+        ('Stream #0:0(und): Audio', 'aac'),
+        ('Stream #0:0(und): Audio', 'mp4a'),
+        ('Stream #0:1(und): Video', 'h264'),
+        ('Stream #0:1(und): Video', 'avc1'),
+        ('Stream #0:1(und): Video', 'yuv420p'),
+        ('Stream #0:1(und): Video', '640x480'),
+        ('Stream #0:1(und): Video:', '30 fps')
+    )
+
+    ATTACHMENT_TRANSCODE_CMD = (
+        'ffmpeg -i {input} '
+        +
+        '-vf "transpose=1,scale={width}:-1"  -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
+            width=ATTACHMENT_PREVIEW['width'],
+            height=ATTACHMENT_PREVIEW['height'],
+            fps=ATTACHMENT_PREVIEW['fps'],
+            speed=int(
+                1000
+                /
+                ATTACHMENT_PREVIEW['fps']
+                /
+                ATTACHMENT_PREVIEW['speed']
+            )
+        )
+        +
+        '{output}'
+    )
+
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)

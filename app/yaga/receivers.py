@@ -20,8 +20,6 @@ class MemberReceiver(
         instance = kwargs['instance']
 
         if not instance.pk:
-            instance.group.mark_updated()
-
             if instance.user.name is not None:
                 if instance.creator != instance.user:
                     instance.group.bridge.new_members.append(instance)
@@ -45,8 +43,6 @@ class MemberReceiver(
     @staticmethod
     def pre_delete(sender, **kwargs):
         instance = kwargs['instance']
-
-        instance.group.mark_updated()
 
         if hasattr(instance.bridge, 'deleter'):
             user = instance.bridge.deleter
@@ -100,9 +96,10 @@ class PostReceiver(
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        instance.group.mark_updated()
+        if not instance.pk:
+            instance.group.mark_updated()
 
-        if instance.pk is not None:
+        else:
             if instance.tracker.previous('name') != instance.name:
                 if instance.namer and instance.namer != instance.user:
                     def push_notification():

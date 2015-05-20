@@ -90,18 +90,13 @@ class UploadProcessTask(
     celery.Task
 ):
     def run(self, key, *args, **kwargs):
-        try:
-            if post_attachment_re.match(key):
-                PostAttachmentValidateTask.delay(key)
-            else:
-                CleanStorageTask().delay(key)
-        except Exception as e:
-            self.retry(key, *args, exc=e, **kwargs)
-
-            logger.exception(e)
+        if post_attachment_re.match(key):
+            PostAttachmentProcessTask().delay(key)
+        else:
+            CleanStorageTask().delay(key)
 
 
-class PostAttachmentValidateTask(
+class PostAttachmentProcessTask(
     celery.Task
 ):
     def run(self, key, *args, **kwargs):
@@ -123,31 +118,32 @@ class PostAttachmentValidateTask(
                 key=key
             ))
         else:
-            if post.attachment:
+            post.attachment = path
+
+            if post.is_valid_attachment():
+                post.checksum = post.get_checksum()
+
+                post.mark_uploaded(
+                    attachment=post.attachment.name,
+                    checksum=post.checksum
+                )
+            else:
                 post.mark_deleted()
 
-                logger.error('Attempt to override {file_obj}'.format(
-                    file_obj=post.attachment.name
-                ))
-            else:
-                post.attachment = path
 
-                if post.is_valid_attachment():
-                    post.checksum = post.get_checksum()
+class TranscodingTask(
+    celery.Task
+):
+    def run(self, pk, *args, **kwargs):
+        post = Post.objects.filter(
+            pk=pk
+        ).first()
 
-                    if Post.objects.filter(
-                        group=post.group,
-                        checksum=post.checksum
-                    ).exists():
-                        post.atomic_delete()
-
-                        logger.error('Dropped duplicate {file_obj}'.format(
-                            file_obj=post.attachment.name
-                        ))
-                    else:
-                        post.mark_uploaded()
-                else:
-                    post.atomic_delete()
+        if post:
+            if post.transcode():
+                post.mark_ready(
+                    attachment_preview=post.attachment_preview
+                )
 
 
 class APNSPushTask(

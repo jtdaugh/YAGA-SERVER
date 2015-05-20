@@ -11,7 +11,7 @@ import boto.sqs
 from django.core.management.base import NoArgsCommand
 
 from ...conf import settings
-from ...tasks import UploadProcess
+from ...tasks import UploadProcessTask
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class Command(
                                 key = data['Records'][0]['s3']['object']['key']
 
                                 if key.startswith(settings.MEDIA_LOCATION):
-                                    UploadProcess().delay(key)
+                                    UploadProcessTask().delay(key)
                         event.delete()
                     except Exception as e:
                         logger.exception(e)

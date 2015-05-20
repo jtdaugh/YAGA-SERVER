@@ -4,6 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import subprocess
 from functools import wraps
 from urllib.parse import urljoin
 
@@ -223,6 +224,58 @@ def get_sentry_client():
         return get_client()
 
     return SimpleLazyObject(_get_sentry_cleint)
+
+
+class ShellResponse(
+    object
+):
+    SUCCESS_CODE = 0
+
+    def __init__(self, process):
+        self.process = process
+
+        self._stdout = None
+        self._stderr = None
+
+    @property
+    def returncode(self):
+        return int(self.process.returncode)
+
+    @property
+    def stdout(self):
+        if self._stdout is None:
+            self._stdout = self.process.stdout.read()
+
+        return self._stdout
+
+    @property
+    def stderr(self):
+        if self._stderr is None:
+            self._stderr = self.process.stderr.read()
+
+        return self._stderr
+
+    @property
+    def success(self):
+        return self.returncode == self.SUCCESS_CODE
+
+    def __bool__(self):
+        return self.success
+
+    __nonzero__ = __bool__
+
+
+def sh(cmd):
+    process = subprocess.Popen(
+        cmd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        close_fds=True
+    )
+    process.wait()
+
+    return ShellResponse(process)
 
 
 class Bridge(

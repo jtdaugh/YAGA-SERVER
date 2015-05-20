@@ -19,6 +19,5 @@ class StateChoice(
 ):
     PENDING = 0
     UPLOADED = 1
-    # be ready to many other future states
     READY = 5
     DELETED = 10

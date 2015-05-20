@@ -10,8 +10,10 @@ import hmac
 import json
 import logging
 import os
+import tempfile
 
 import magic
+from django.core.files.base import File
 from django.db import connection, models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -21,6 +23,7 @@ from model_utils import FieldTracker
 
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
+from app.utils import sh
 
 from .choices import StateChoice, VendorChoice
 from .conf import settings
@@ -55,7 +58,13 @@ def post_attachment_upload_to_trash(instance, filename=None):
         prefix='trash'
     )
 
-post_attachment_preview_upload_to = post_attachment_upload_to_trash  # backward
+
+def post_attachment_preview_upload_to(instance, filename=None):
+    return post_upload_to(
+        instance,
+        filename=filename,
+        prefix=settings.YAGA_ATTACHMENT_PREVIEW_PREFIX
+    )
 
 
 @python_2_unicode_compatible
@@ -289,6 +298,14 @@ class Post(
         default=''
     )
 
+    attachment_preview = models.FileField(
+        verbose_name=_('Attachment Preview'),
+        upload_to=post_attachment_preview_upload_to,
+        blank=True,
+        null=False,
+        default=''
+    )
+
     checksum = models.CharField(
         verbose_name=_('Checksum'),
         max_length=255,
@@ -343,7 +360,11 @@ class Post(
             self.checksum = None
 
         if self.pk:
-            if not kwargs.get('update_fields'):
+            update_fields = list(kwargs.get('update_fields', []))
+
+            if update_fields == ['updated_at']:
+                super(Post, self).save(*args, **kwargs)
+            else:
                 changes = list(self.tracker.changed().keys())
 
                 changes = list(filter(
@@ -355,43 +376,114 @@ class Post(
                     changes
                 ))
 
-                kwargs['update_fields'] = changes
+                updates = set(changes) | set(update_fields)
 
-            if 'updated_at' not in kwargs['update_fields']:
-                kwargs['update_fields'] = list(kwargs['update_fields'])
-                kwargs['update_fields'].append('updated_at')
+                if updates:
+                    updates.add('updated_at')
 
-        return super(Post, self).save(*args, **kwargs)
+                    kwargs['update_fields'] = list(updates)
+
+                    super(Post, self).save(*args, **kwargs)
+        else:
+            super(Post, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.clean_storage(save=False)
-        return super(Post, self).delete(*args, **kwargs)
+        self.clean_storage()
+        super(Post, self).delete(*args, **kwargs)
 
     def __str__(self):
         return str(self.pk)
 
     @property
     def ready(self):
-        return self.state == self.state_choices.READY
-
-    @ready.setter
-    def ready_setter(self, value):
-        if value:
-            self.state = self.state_choices.READY
-            self.notify()
-        else:
-            raise NotImplementedError
+        return self.state in (
+            self.state_choices.DELETED,
+            self.state_choices.READY
+        )
 
     @property
     def deleted(self):
         return self.state == self.state_choices.DELETED
 
-    @deleted.setter
-    def deleted_setter(self, value):
-        if value:
-            self.state = self.state_choices.DELETED
-        else:
-            raise NotImplementedError
+    class TmpAttachment(object):
+        def __init__(self, instance):
+            self.instance = instance
+
+        def __enter__(self):
+            self.f = tempfile.NamedTemporaryFile(delete=False)
+
+            for chunk in self.instance.attachment.chunks():
+                self.f.write(chunk)
+
+            self.f.flush()
+            self.f.close()
+
+            return self.f
+
+        def __exit__(self, type, value, traceback):
+            try:
+                os.unlink(self.f.name)
+            except IOError:
+                pass
+
+    def schedule_transcoding(self):
+        TranscodingTask().delay(self.pk)
+
+    def transcode(self):
+        with self.TmpAttachment(self) as attachment:
+            try:
+                output = tempfile.NamedTemporaryFile(delete=False)
+                output.flush()
+                output.close()
+
+                process = sh(
+                    settings.YAGA_ATTACHMENT_TRANSCODE_CMD.format(
+                        input=attachment.name,
+                        output=output.name
+                    )
+                )
+
+                if process:
+                    with open(output.name, 'rb') as stream:
+                        fd = File(stream)
+
+                        self.attachment_preview.save(
+                            post_attachment_preview_upload_to(self),
+                            fd,
+                            save=False
+                        )
+
+                        fd.close()
+
+                        try:
+                            self.attachment_preview.file.key.set_remote_metadata(  # noqa
+                                {
+                                    'Content-Type':
+                                    'image/gif'
+                                },
+                                {},
+                                True
+                            )
+                        except Exception:
+                            pass
+
+                        return True
+                else:
+                    logger.error(
+                        '{file_name} transcoding process failed '
+                        '\n stdout->{stdout} \n stderr->{stderr}'.format(
+                            file_name=self.attachment.name,
+                            stdout=process.stdout,
+                            stderr=process.stderr
+                        )
+                    )
+            finally:
+                try:
+                    os.unlink(output.name)
+                except IOError:
+                    pass
+
+        return False
 
     @property
     def atomic(self):
@@ -403,64 +495,108 @@ class Post(
         except Post.DoesNotExist:
             return False
 
-    def atomic_delete(self):
+    def update(self, **kwargs):
+        for key, value in list(kwargs.items()):
+            setattr(self, key, value)
+
+    def mark_uploaded(self, **kwargs):
         with transaction.atomic():
             post = self.atomic
 
             if post:
-                post.delete()
+                post.update(**kwargs)
 
-    def mark_uploaded(self):
-        with transaction.atomic():
-            post = self.atomic
+                if post.state in (
+                    self.state_choices.UPLOADED,
+                    self.state_choices.READY
+                ):
+                    post.mark_deleted()
 
-            if post:
-                post.path = self.path
+                    logger.error('Attempt to override {file_obj}'.format(
+                        file_obj=post.attachment.name
+                    ))
+                elif post.state == self.state_choices.DELETED:
+                    post.mark_deleted()
 
-                post.checksum = self.checksum
+                    logger.error('Removed deleted {file_obj}'.format(
+                        file_obj=post.attachment.name
+                    ))
+                elif post.is_duplicate():
+                    post.mark_deleted()
 
-                if post.deleted:
-                    post.ready = True
-
-                    post.clean_storage()
-
-                    return
-
-                if not post.ready:
-                    post.ready = True
-
-                    post.save()
+                    logger.error('Dropped duplicate {file_obj}'.format(
+                        file_obj=post.attachment.name
+                    ))
                 else:
-                    post.clean_storage()
+                    post.state = self.state_choices.UPLOADED
 
-    def mark_deleted(self, save=True):
+                    connection.on_commit(self.schedule_transcoding)
+
+                post.save()
+
+    def mark_ready(self, **kwargs):
         with transaction.atomic():
             post = self.atomic
 
             if post:
-                post.clean_storage(save=False)
+                post.update(**kwargs)
 
-                if not self.deleted:
-                    self.deleted = True
+                if post.state != self.state_choices.UPLOADED:
+                    post.clean_storage()
+                else:
+                    post.state = self.state_choices.READY
+                    post.ready_at = timezone.now()
+                    # post.push()
 
-                if save:
-                    self.save()
+                post.save()
+            else:
+                self.delete()
 
-    def clean_storage(self, save=True):
-        self.checksum = None
+    def mark_deleted(self):
+        with transaction.atomic():
+            post = self.atomic
+
+            if post:
+                post.state = self.state_choices.DELETED
+                post.clean_storage()
+                post.save()
+
+    def clean_storage(self, path=None):
+        if path is not None:
+            if isinstance(path, (list, tuple)):
+                for item in path:
+                    def delete_item():
+                        CleanStorageTask().delay(item)
+
+                    connection.on_commit(delete_item)
+            else:
+                def delete_path():
+                    CleanStorageTask().delay(path)
+
+                connection.on_commit(delete_path)
+
+        if self.checksum:
+            self.checksum = None
 
         if self.attachment:
             path = self.attachment.name
 
-            self.attachment = None
+            self.attachment = ''
 
             def delete_attachment():
                 CleanStorageTask().delay(path)
 
             connection.on_commit(delete_attachment)
 
-        if save:
-            self.save()
+        if self.attachment_preview:
+            path = self.attachment_preview.name
+
+            self.attachment_preview = ''
+
+            def delete_attachment_preview():
+                CleanStorageTask().delay(path)
+
+            connection.on_commit(delete_attachment_preview)
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
@@ -482,6 +618,12 @@ class Post(
                 md5.update(chunk)
 
             return md5.hexdigest()
+
+    def is_duplicate(self):
+        return Post.atomic_objects.filter(
+            group=self.group,
+            checksum=self.checksum
+        ).exists()
 
     def is_valid_attachment(self):
         if not self.attachment:
@@ -512,12 +654,47 @@ class Post(
 
             return False
 
-        if self.attachmentj.size == 0:
+        if self.attachment.size == 0:
             logger.error('{file_name} size is 0'.format(
                 file_name=self.attachment.name
             ))
 
             return False
+
+        with self.TmpAttachment(self) as attachment:
+            process = sh(
+                settings.YAGA_ATTACHMENT_VALIDATE_CMD.format(
+                    path=attachment.name
+                )
+            )
+
+            if process:
+                for key, value in settings.YAGA_ATTACHMENT_VALIDATE_RULES:
+                    for line in process.stderr.splitlines():
+                        if key in line:
+                            if value not in line:
+                                logger.error(
+                                    '{file_name} validation key "{key}" '
+                                    'with "{value}" not in "{line}"'.format(
+                                        file_name=self.attachment.name,
+                                        key=key,
+                                        value=value,
+                                        line=line
+                                    )
+                                )
+
+                                return False
+            else:
+                logger.error(
+                    '{file_name} validation process failed '
+                    '\n stdout->{stdout} \n stderr->{stderr}'.format(
+                        file_name=self.attachment.name,
+                        stdout=process.stdout,
+                        stderr=process.stderr
+                    )
+                )
+
+                return False
 
         return True
 
@@ -733,5 +910,5 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .tasks import CleanStorageTask  # noqa # isort:skip
+from .tasks import CleanStorageTask, TranscodingTask  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip

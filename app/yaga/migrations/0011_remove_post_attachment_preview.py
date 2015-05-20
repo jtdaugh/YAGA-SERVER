@@ -5,6 +5,8 @@ import logging
 
 from django.db import models, migrations
 
+from ..tasks import CleanStorageTask
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,7 +17,7 @@ def clean_attachment_previews(apps, schema_editor):
         attachment_preview=''
     ):
         try:
-            post.attachment_preview.delete(save=False)
+            CleanStorageTask().delay(post.attachment_preview.name)
         except Exception as e:
             logger.exception(e)
 

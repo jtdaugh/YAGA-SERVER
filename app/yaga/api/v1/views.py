@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.db.models import Prefetch, Q
+from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -273,7 +273,10 @@ class GroupRetrieveUpdateAPIView(
 
     def get_queryset(self):
         post_filter = {
-            # 'state': Post.state_choices.READY
+            'state__in': (
+                Post.state_choices.READY,
+                Post.state_choices.DELETED
+            )
         }
 
         serializer = serializers.SinceSerializer(
@@ -677,8 +680,11 @@ class ContactListCreateAPIView(
         self.perform_create(serializer)
 
     def perform_create(self, serializer):
-        Contact.objects.filter(
+        contact = Contact.objects.filter(
             user=self.request.user
-        ).delete()
+        ).first()
+
+        if contact:
+            contact.delete()
 
         serializer.save(user=self.request.user)
