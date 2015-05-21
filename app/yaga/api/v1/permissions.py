@@ -8,6 +8,8 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from accounts.models import Token
 
+from ...models import Post
+
 
 class TokenOwner(
     BasePermission
@@ -52,10 +54,10 @@ class AvailablePost(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        if obj.deleted:
+        if obj.state == Post.state_choices.DELETED:
             return False
 
-        if obj.ready:
+        if obj.state == Post.state_choices.READY:
             return True
 
         return obj.user == request.user

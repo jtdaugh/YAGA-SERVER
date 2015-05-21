@@ -79,6 +79,7 @@ flanker==0.4.29
 frosted==1.4.1
 future==0.14.3
 futures==3.0.2
+gcm-clerk==0.1.5
 geoip2==2.1.0
 gnureadline==6.3.3
 gunicorn==19.3.0

@@ -53,7 +53,10 @@ class BasicStatsTemplateView(
                 ).count(),
                 'posts': Post.objects.filter(
                     created_at__gte=today,
-                    ready=True
+                    state__in=[
+                        Post.state_choices.READY,
+                        Post.state_choices.DELETED
+                    ]
                 ).count(),
                 'likes': Like.objects.filter(
                     created_at__gte=today
@@ -65,7 +68,10 @@ class BasicStatsTemplateView(
                 ).count(),
                 'groups': Group.objects.all().count(),
                 'posts': Post.objects.filter(
-                    ready=True
+                    state__in=[
+                        Post.state_choices.READY,
+                        Post.state_choices.DELETED
+                    ]
                 ).count(),
                 'likes': Like.objects.all().count()
             }

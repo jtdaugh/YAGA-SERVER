@@ -21,6 +21,7 @@ from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post,
     post_attachment_preview_upload_to_trash, post_attachment_upload_to
 )
+from ...notifications import InviteDirectNotification
 
 
 class UserRetrieveUpdateAPIView(
@@ -411,12 +412,20 @@ class GroupMemberUpdateDestroyAPIView(
 
             new_active_users = [user for user in new_users if user.is_active]
 
+            # new_members = []
+
             for user in new_active_users:
                 obj = Member()
                 obj.group = instance
                 obj.user = user
                 obj.creator = self.request.user
                 obj.save()
+
+                # new_members.append(obj)
+
+                InviteDirectNotification.schedule(
+                    member=obj.pk
+                )
 
     def perform_destroy(self, instance, validated_data):
         try:
@@ -428,7 +437,6 @@ class GroupMemberUpdateDestroyAPIView(
                 user=user
             )
 
-            obj.bridge.deleter = self.request.user
             obj.delete()
         except (get_user_model().DoesNotExist, Group.DoesNotExist):
             pass
@@ -562,12 +570,6 @@ class PostRetrieveUpdateDestroyAPIView(
 
     def perform_destroy(self, instance):
         instance.mark_deleted()
-
-    def get_object(self):
-        instance = super(PostRetrieveUpdateDestroyAPIView, self).get_object()
-        instance.bridge.updater = self.request.user
-
-        return instance
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

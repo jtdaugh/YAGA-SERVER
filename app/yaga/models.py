@@ -404,10 +404,10 @@ class Post(
 
     @property
     def ready(self):
-        return self.state in (
+        return self.state in [
             self.state_choices.DELETED,
             self.state_choices.READY
-        )
+        ]
 
     @property
     def deleted(self):
@@ -433,6 +433,11 @@ class Post(
                 os.unlink(self.f.name)
             except IOError:
                 pass
+
+    def notify(self):
+        PostGroupNotification.schedule(
+            post=self.pk
+        )
 
     def schedule_transcoding(self):
         TranscodingTask().delay(self.pk)
@@ -514,10 +519,10 @@ class Post(
             if post:
                 post.update(**kwargs)
 
-                if post.state in (
+                if post.state in [
                     self.state_choices.UPLOADED,
                     self.state_choices.READY
-                ):
+                ]:
                     post.mark_deleted()
 
                     logger.error('Attempt to override {file_obj}'.format(
@@ -540,7 +545,7 @@ class Post(
 
                     connection.on_commit(self.schedule_transcoding)
 
-                post.save()
+                    post.save()
 
     def mark_ready(self, **kwargs):
         with transaction.atomic():
@@ -550,17 +555,19 @@ class Post(
                 post.update(**kwargs)
 
                 if post.state != self.state_choices.UPLOADED:
-                    post.clean_storage()
+                    post.mark_deleted()
                 else:
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
-                    # post.push()
+                    self.notify()
 
-                post.save()
+                    post.save()
             else:
                 self.delete()
 
     def mark_deleted(self):
+        self.clean_storage()
+
         with transaction.atomic():
             post = self.atomic
 
@@ -857,6 +864,11 @@ class Device(
         auto_now_add=True
     )
 
+    updated_at = models.DateTimeField(
+        verbose_name=_('Updated At'),
+        auto_now=True
+    )
+
     class Meta:
         verbose_name = _('Device')
         verbose_name_plural = _('Devices')
@@ -925,5 +937,6 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .tasks import CleanStorageTask, TranscodingTask  # noqa # isort:skip
+from .notifications import PostGroupNotification # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
+from .tasks import CleanStorageTask, TranscodingTask  # noqa # isort:skip

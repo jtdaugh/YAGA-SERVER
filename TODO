@@ -1,23 +1,37 @@
 msg_cods
-fix tests - fix travis
+fix tests
+fix travis
 
-fix likes_lookup twice
-nexmo updates
-no caption push if not member
-all push logick to celery
+fix likes_lookup twice on prefetch
 
 tokens list\delete views
-
 user change posts link
 group list -> posts\user link
 group user filter
 
-remove fabric
+nexmo updates
 
 u\b\force fixes
-
 first exist none refactor
 
-APNS feedback
+no caption push if not member
+
 #######
+
 server side copy to group
+
+PUSHES
+
+NEW POST
+LIKE POST
+CAPTION POST
+
+NEW_MEMBER
+NEW_MEMBERS
+DELETE_MEMBER
+LEAVE_MEMBER
+new user
+user join
+group rename
+
+push rate limit

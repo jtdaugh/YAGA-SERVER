@@ -360,7 +360,9 @@ class SendRaw(
         super(SentryCeleryClient, sentry_client).send_encoded(*args, **kwargs)
 
 
-class Singleton(type):
+class Singleton(
+    type
+):
     _instances = {}
 
     def __call__(self, *args, **kwargs):

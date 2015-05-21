@@ -39,8 +39,7 @@ class PostBaseInlineFormSet(
 ):
     def get_queryset(self):
         return super(PostBaseInlineFormSet, self).get_queryset().filter(
-            ready=True,
-            deleted=False
+            state__in=[Post.state_choices.READY, Post.state_choices.DELETED]
         )
 
 
@@ -51,7 +50,7 @@ class PostTabularInline(
 
     formset = PostBaseInlineFormSet
 
-    fields = ('name', 'user', 'attachment')
+    fields = ('name', 'user', 'attachment', 'state')
 
     raw_id_fields = ('user', )
 
@@ -120,7 +119,9 @@ class LikeModelAdmin(
 class DeviceModelAdmin(
     ForceSuperuserAccess, admin.ModelAdmin
 ):
-    list_display = ('user', 'token', 'vendor', 'locale', 'created_at')
+    list_display = (
+        'user', 'token', 'vendor', 'locale', 'created_at', 'updated_at'
+    )
 
     list_filter = ('vendor', 'locale')
 

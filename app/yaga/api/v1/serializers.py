@@ -260,14 +260,14 @@ class PostSerializer(
                 msg = _('Options name_x and name_y must be set together.')
                 raise ValidationError(msg)
 
-        if (
-            self.instance
-            and
-            attrs.get('name')
-            and
-            self.instance.tracker.previous('name') != attrs['name']
-        ):
-            self.instance.namer = self.instance.bridge.updater
+        # if (
+        #     self.instance
+        #     and
+        #     attrs.get('name')
+        #     and
+        #     self.instance.tracker.previous('name') != attrs['name']
+        # ):
+        #     self.instance.namer = self.instance.bridge.updater
 
         return attrs
 
@@ -356,11 +356,11 @@ class GroupManageMemberRemoveSerializer(
 class DeviceSerializer(
     serializers.ModelSerializer
 ):
-    user = UserSerializer(read_only=True)
     vendor = serializers.CharField()
 
     class Meta:
         model = Device
+        fields = ('vendor', 'token', 'locale')
 
     def to_representation(self, instance):
         ret = super(DeviceSerializer, self).to_representation(instance)
@@ -394,6 +394,8 @@ class DeviceSerializer(
                 and
                 self.instance.locale == self.validated_data['locale']
             ):
+                self.instance.save(update_fields=['updated_at'])
+
                 return self.instance
 
         return super(DeviceSerializer, self).save(**kwargs)

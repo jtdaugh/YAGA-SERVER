@@ -4,46 +4,62 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.contrib.auth import get_user_model
-
 from app.signals import ModelSignal
 
-from .models import Group, Like, Member, Post
-from .receivers import (
-    GroupReceiver, LikeReceiver, MemberReceiver, PostReceiver, UserReceiver
-)
+from . import models, receivers
 
 
-class PostSignal(
+class CodeSignal(
     ModelSignal
 ):
-    model = Post
-    receiver = PostReceiver
+    model = models.Code
+    receiver = receivers.CodeReceiver
 
 
-class MemberSignal(
+class ContactSignal(
     ModelSignal
 ):
-    model = Member
-    receiver = MemberReceiver
+    model = models.Contact
+    receiver = receivers.ContactReceiver
 
 
-class LikeSignal(
+class DeviceSignal(
     ModelSignal
 ):
-    model = Like
-    receiver = LikeReceiver
+    model = models.Device
+    receiver = receivers.DeviceReceiver
 
 
-class UserSignal(
+class MonkeyUserSignal(
     ModelSignal
 ):
-    model = get_user_model()
-    receiver = UserReceiver
+    model = models.MonkeyUser
+    receiver = receivers.MonkeyUserReceiver
 
 
 class GroupSignal(
     ModelSignal
 ):
-    model = Group
-    receiver = GroupReceiver
+    model = models.Group
+    receiver = receivers.GroupReceiver
+
+
+class MemberSignal(
+    ModelSignal
+):
+    model = models.Member
+    receiver = receivers.MemberReceiver
+
+
+class PostSignal(
+    ModelSignal
+):
+    model = models.Post
+    receiver = receivers.PostReceiver
+
+
+class LikeSignal(
+    ModelSignal
+):
+    model = models.Like
+    receiver = receivers.LikeReceiver

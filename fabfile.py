@@ -12,10 +12,10 @@ from fabric.operations import prompt
 
 APP_DIR = 'app'
 DYNOS = {
-    'web': 1,
-    'celery_broker': 1,
-    'celery_worker': 0,
-    'sqs': 1
+    'web': 0,
+    'celery_broker': 0,
+    'celery_worker': 2,
+    'sqs': 0
 }
 STOP_TIMEOUT = 35
 START_TIMEOUT = 35
@@ -241,26 +241,6 @@ def create():
         <AllowedHeader>*</AllowedHeader>
     </CORSRule>
 </CORSConfiguration>
-
-{
-  "Version": "2008-10-17",
-  "Id": "arn:aws:sqs:us-west-1:609367773239:yaga-dev/SQSDefaultPolicy",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "*"
-      },
-      "Action": "SQS:SendMessage",
-      "Resource": "arn:aws:sqs:us-west-1:609367773239:yaga-dev",
-      "Condition": {
-        "ArnLike": {
-          "aws:SourceArn": "arn:aws:s3:*:*:yaga-dev"
-        }
-      }
-    }
-  ]
-}
 ''')
 
 

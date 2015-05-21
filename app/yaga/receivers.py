@@ -4,89 +4,43 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.db import connection
-
 from app.receivers import ModelReceiver
-from requestprovider import get_request
 
-from . import providers
+
+class CodeReceiver(
+    ModelReceiver
+):
+    pass
+
+
+class ContactReceiver(
+    ModelReceiver
+):
+    pass
+
+
+class DeviceReceiver(
+    ModelReceiver
+):
+    pass
+
+
+class GroupReceiver(
+    ModelReceiver
+):
+    pass
+
+
+class MonkeyUserReceiver(
+    ModelReceiver
+):
+    pass
 
 
 class MemberReceiver(
     ModelReceiver
 ):
-    @staticmethod
-    def pre_save(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if not instance.pk:
-            if instance.user.name is not None:
-                if instance.creator != instance.user:
-                    instance.group.bridge.new_members.append(instance)
-
-                    def push_notification():
-                        providers.NewMemberIOSNotification(
-                            member=instance
-                        )
-
-                    connection.on_commit(push_notification)
-
-                if len(instance.group.bridge.new_members) == 1:
-                    def push_notification():
-                        providers.NewMembersBatchIOSNotification(
-                            group=instance.group,
-                            creator=instance.creator
-                        )
-
-                    connection.on_commit(push_notification)
-
-    @staticmethod
-    def pre_delete(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if hasattr(instance.bridge, 'deleter'):
-            user = instance.bridge.deleter
-        else:
-            user = get_request().user
-
-        if instance.user.name is not None:
-            if user != instance.user:
-                def push_notification():
-                    providers.DeleteMemberIOSNotification(
-                        member=instance,
-                        deleter=user
-                    )
-            else:
-                def push_notification():
-                    providers.GroupLeaveIOSNotification(
-                        member=instance
-                    )
-
-            connection.on_commit(push_notification)
-
-
-class LikeReceiver(
-    ModelReceiver
-):
-    @staticmethod
-    def pre_save(sender, **kwargs):
-        instance = kwargs['instance']
-
-        instance.post.mark_updated()
-
-        if instance.post.user != instance.user:
-            def push_notification():
-                providers.NewLikeIOSNotification(
-                    like=instance
-                )
-
-            connection.on_commit(push_notification)
-
-    @staticmethod
-    def pre_delete(sender, **kwargs):
-        instance = kwargs['instance']
-
-        instance.post.mark_updated()
+    pass
 
 
 class PostReceiver(
@@ -99,63 +53,18 @@ class PostReceiver(
         if not instance.pk:
             instance.group.mark_updated()
 
-        else:
-            if instance.tracker.previous('name') != instance.name:
-                if instance.namer and instance.namer != instance.user:
-                    def push_notification():
-                        providers.NewCaptionIOSNotification(
-                            post=instance
-                        )
 
-                    connection.on_commit(push_notification)
-
-
-class UserReceiver(
+class LikeReceiver(
     ModelReceiver
 ):
     @staticmethod
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        if (
-            instance.tracker.previous('name') is None
-            and
-            instance.name is not None
-        ):
-            def push_notification():
-                providers.NewUserIOSNotification(
-                    user=instance
-                )
-
-            connection.on_commit(push_notification)
-
-
-class GroupReceiver(
-    ModelReceiver
-):
-    @staticmethod
-    def post_init(sender, **kwargs):
-        instance = kwargs['instance']
-
-        instance.bridge.new_members = []
+        instance.post.mark_updated()
 
     @staticmethod
-    def pre_save(sender, **kwargs):
+    def pre_delete(sender, **kwargs):
         instance = kwargs['instance']
 
-        if instance.pk and instance.tracker.previous('name') != instance.name:
-            if hasattr(instance.bridge, 'namer'):
-                user = instance.bridge.namer
-            else:
-                user = get_request().user
-
-            old_name = instance.tracker.previous('name')
-
-            def push_notification():
-                providers.GroupRenameIOSNotification(
-                    group=instance,
-                    namer=user,
-                    old_name=old_name
-                )
-
-            connection.on_commit(push_notification)
+        instance.post.mark_updated()

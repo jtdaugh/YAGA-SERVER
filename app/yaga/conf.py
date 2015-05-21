@@ -15,6 +15,8 @@ from django.conf import settings  # noqa
 class YagaAppConf(
     AppConf
 ):
+    PERIODIC_CLEANUP = True
+
     SMS_EXPIRATION = datetime.timedelta(minutes=5)
     SMS_TITLE = 'yaga'
 
@@ -79,12 +81,16 @@ class YagaAppConf(
 
     AWS_SQS_QUEUE = config('AWS_SQS_QUEUE', default='yaga-dev')
 
-    PUSH_POST_WINDOW = datetime.timedelta(minutes=5)
     PUSH_NEW_MEMBERS_BATCH_LIMIT = 3
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 
     APNS_MODE = config('APNS_MODE', default='sandbox')
+
+    APNS_FEEDBACK_MODE = 'feedback_{mode}'.format(
+        mode=APNS_MODE
+    )
+    APNS_FEEDBACK_RUN_EVERY = datetime.timedelta(hours=12)
 
     APNS_CERT = os.path.join(
         settings.PROJECT_ROOT,
