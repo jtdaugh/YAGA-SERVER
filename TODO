@@ -9,12 +9,8 @@ all push logick to celery
 tokens list\delete views
 
 user change posts link
-
 group list -> posts\user link
-
 group user filter
-
-APNS feedback
 
 remove fabric
 
@@ -22,7 +18,6 @@ u\b\force fixes
 
 first exist none refactor
 
+APNS feedback
 #######
-delete\ready fix
-
-server side gifs
+server side copy to group

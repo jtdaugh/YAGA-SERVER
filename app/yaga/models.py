@@ -51,11 +51,11 @@ def post_attachment_upload_to(instance, filename=None):
     )
 
 
-def post_attachment_upload_to_trash(instance, filename=None):
+def post_attachment_preview_upload_to_trash(instance, filename=None):
     return post_upload_to(
         instance,
         filename=filename,
-        prefix='trash'
+        prefix=settings.YAGA_ATTACHMENT_TRASH_PREFIX
     )
 
 
@@ -64,6 +64,14 @@ def post_attachment_preview_upload_to(instance, filename=None):
         instance,
         filename=filename,
         prefix=settings.YAGA_ATTACHMENT_PREVIEW_PREFIX
+    )
+
+
+def post_attachment_server_preview_upload_to(instance, filename=None):
+    return post_upload_to(
+        instance,
+        filename=filename,
+        prefix=settings.YAGA_ATTACHMENT_SERVER_PREVIEW_PREFIX
     )
 
 
@@ -300,7 +308,7 @@ class Post(
 
     attachment_preview = models.FileField(
         verbose_name=_('Attachment Preview'),
-        upload_to=post_attachment_preview_upload_to,
+        upload_to=post_attachment_server_preview_upload_to,
         blank=True,
         null=False,
         default=''
@@ -579,24 +587,31 @@ class Post(
             self.checksum = None
 
         if self.attachment:
-            path = self.attachment.name
+            attachment_path = self.attachment.name
 
             self.attachment = ''
 
             def delete_attachment():
-                CleanStorageTask().delay(path)
+                CleanStorageTask().delay(attachment_path)
 
             connection.on_commit(delete_attachment)
 
         if self.attachment_preview:
-            path = self.attachment_preview.name
+            attachment_preview_path = self.attachment_preview.name
 
             self.attachment_preview = ''
 
             def delete_attachment_preview():
-                CleanStorageTask().delay(path)
+                CleanStorageTask().delay(attachment_preview_path)
 
             connection.on_commit(delete_attachment_preview)
+
+        old_attachment_preview_path = post_attachment_preview_upload_to(self)
+
+        def delete_old_attachment_preview():
+            CleanStorageTask().delay(old_attachment_preview_path)
+
+        connection.on_commit(delete_old_attachment_preview)
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])

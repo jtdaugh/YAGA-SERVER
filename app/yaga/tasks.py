@@ -14,6 +14,7 @@ from app import celery
 from .conf import settings
 from .models import Code, Group, Post
 from .providers import apns_provider
+from .storage import cloudfront_storage
 from .utils import post_attachment_re
 
 logger = logging.getLogger(__name__)
@@ -23,17 +24,18 @@ class CleanStorageTask(
     celery.Task
 ):
     def run(self, key, *args, **kwargs):
+        full_path = key
+
         path = key.replace(settings.MEDIA_LOCATION, '')
 
         path = path.strip('/')
 
         try:
             default_storage.delete(path)
+            cloudfront_storage.delete(full_path)
         except Exception as e:
-
-            self.retry(key, *args, exc=e, **kwargs)
-
             logger.error(e)
+            raise self.retry(exc=e)
 
 
 class CodeCleanupAtomicPeriodicTask(
@@ -154,7 +156,5 @@ class APNSPushTask(
             try:
                 apns_provider.push(receivers, **kwargs)
             except Exception as e:
-
-                self.retry(receivers, *args, exc=e, **kwargs)
-
                 logger.exception(e)
+                raise self.retry(exc=e)

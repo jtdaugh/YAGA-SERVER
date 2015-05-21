@@ -219,11 +219,11 @@ class PostSerializer(
         model = Post
         caption_fields = ('name_x', 'name_y', 'font', 'rotation', 'scale')
         fields = (
-            'attachment', 'ready_at', 'updated_at',
+            'attachment', 'attachment_preview', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'ready', 'deleted', 'likers', 'namer'
         ) + caption_fields
         read_only_fields = (
-            'attachment', 'ready_at', 'deleted'
+            'attachment', 'attachment_preview', 'ready_at', 'deleted'
         )
 
     def validate(self, attrs):

@@ -19,7 +19,7 @@ from . import permissions, serializers, throttling
 from ...conf import settings
 from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post,
-    post_attachment_upload_to, post_attachment_upload_to_trash
+    post_attachment_upload_to, post_attachment_preview_upload_to_trash
 )
 
 
@@ -510,7 +510,7 @@ class PostCreateAPIView(
             ),
             'attachment_preview': obj.sign_s3(
                 'application/octet-stream',
-                post_attachment_upload_to_trash
+                post_attachment_preview_upload_to_trash
             )
         }
 
