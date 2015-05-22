@@ -187,6 +187,7 @@ class TokenCreateAPIView(
             data=request.data
         )
         serializer.is_valid(raise_exception=True)
+
         self.perform_create(serializer)
 
         serializer = serializers.TokenResponseSerializer(

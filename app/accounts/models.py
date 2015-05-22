@@ -238,6 +238,8 @@ class Token(
                     self.key = self.generate_key()
 
                     super(Token, self).save(*args, **kwargs)
+
+                    return
                 except IntegrityError:
                     continue
         else:
