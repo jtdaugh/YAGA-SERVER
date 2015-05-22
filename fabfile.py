@@ -5,18 +5,19 @@ from __future__ import (
     unicode_literals
 )
 
+from collections import OrderedDict
 from time import sleep
 
 from fabric.api import local, task, warn_only
 from fabric.operations import prompt
 
 APP_DIR = 'app'
-DYNOS = {
-    'web': 1,
-    'celery_broker': 1,
-    'celery_worker': 0,
-    'sqs': 1
-}
+DYNOS = OrderedDict((
+    ('web', 1),
+    ('sqs', 1),
+    ('celery_broker', 1),
+    ('celery_worker', 0),
+))
 STOP_TIMEOUT = 35
 START_TIMEOUT = 35
 
@@ -61,10 +62,10 @@ def view():
 def stop():
     local('heroku maintenance:on')
 
-    sleep(STOP_TIMEOUT)
-
-    for name in DYNOS.iterkeys():
+    for name in DYNOS:
         with warn_only():
+            sleep(STOP_TIMEOUT)
+
             local('heroku ps:scale {name}=0'.format(
                 name=name
             ))
@@ -72,7 +73,7 @@ def stop():
 
 @task
 def start():
-    for name, dynos in DYNOS.iteritems():
+    for name, dynos in DYNOS.items():
         local('heroku ps:scale {name}={dynos}'.format(
             name=name,
             dynos=dynos
@@ -124,7 +125,7 @@ def ssh():
 
 
 @task
-def resetdb():
+def resetdb(migrate=False):
     stop()
 
     info = local('heroku config', capture=True).splitlines()
@@ -150,11 +151,10 @@ def resetdb():
 
     local('heroku pg:promote {name}'.format(name=DB_NAME))
 
-    # local('heroku run "cd {app} && python manage.py migrate"'.format(
-    #     app=APP_DIR
-    # ))
-
-    # start()
+    if migrate:
+        local('heroku run "cd {app} && python manage.py migrate"'.format(
+            app=APP_DIR
+        ))
 
 
 @task
