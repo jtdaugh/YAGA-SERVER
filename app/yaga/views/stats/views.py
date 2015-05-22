@@ -54,6 +54,7 @@ class BasicStatsTemplateView(
                 'posts': Post.objects.filter(
                     created_at__gte=today,
                     state__in=[
+                        Post.state_choices.UPLOADED,
                         Post.state_choices.READY,
                         Post.state_choices.DELETED
                     ]
@@ -69,6 +70,7 @@ class BasicStatsTemplateView(
                 'groups': Group.objects.all().count(),
                 'posts': Post.objects.filter(
                     state__in=[
+                        Post.state_choices.UPLOADED,
                         Post.state_choices.READY,
                         Post.state_choices.DELETED
                     ]
