@@ -607,7 +607,15 @@ class PostRetrieveUpdateDestroyAPIView(
             serializer.validated_data['namer'] = self.request.user
 
             if (
-                serializer.validated_data['name'] != serializer.instance.name
+                (
+                    serializer.validated_data['name']
+                    !=
+                    serializer.instance.name
+                    or
+                    serializer.instance.namer
+                    !=
+                    self.request.user
+                )
                 and
                 serializer.instance.user != self.request.user
             ):
