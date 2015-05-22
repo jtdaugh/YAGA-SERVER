@@ -58,12 +58,12 @@ class YagaAppConf(
     ATTACHMENT_TRANSCODE_CMD = (
         'ffmpeg -i {input} '
         +
-        '-vf "transpose=1,scale={width}:-1"  -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
+        '-vf "transpose=1,scale={width}:-1" -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
             width=ATTACHMENT_PREVIEW['width'],
             height=ATTACHMENT_PREVIEW['height'],
             fps=ATTACHMENT_PREVIEW['fps'],
             speed=int(
-                1000
+                100
                 /
                 ATTACHMENT_PREVIEW['fps']
                 /
