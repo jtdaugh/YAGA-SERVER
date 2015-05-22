@@ -471,7 +471,7 @@ class GroupMemberUpdateDestroyAPIView(
                     group=instance.pk,
                     emitter=self.request.user.pk
                 )
-        except (get_user_model().DoesNotExist, Group.DoesNotExist):
+        except (get_user_model().DoesNotExist, Member.DoesNotExist):
             pass
 
 
