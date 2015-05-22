@@ -69,7 +69,7 @@ if settings.YAGA_PERIODIC_CLEANUP:
                 created_at__lte=expired,
                 state=Post.state_choices.PENDING
             ):
-                post.delete()
+                post.mark_deleted()
 
     class APNSFeedBackPeriodicTask(
         celery.PeriodicTask
