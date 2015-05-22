@@ -604,12 +604,12 @@ class PostRetrieveUpdateDestroyAPIView(
 
     def perform_update(self, serializer):
         if serializer.validated_data.get('name'):
-            serializer.instance.namer = self.request.user
+            serializer.validated_data['namer'] = self.request.user
 
             if (
                 serializer.validated_data['name'] != serializer.instance.name
                 and
-                serializer.instance.user != serializer.instance.namer
+                serializer.instance.user != self.request.user
             ):
                 notifications.CaptionDirectNotification.schedule(
                     post=serializer.instance.pk

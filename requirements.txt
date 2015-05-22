@@ -142,7 +142,7 @@ sqlparse==0.1.15
 tox==2.0.1
 ujson==1.33
 uWSGI==2.0.10
-virtualenv==12.1.1
+virtualenv==13.0.0
 wcwidth==0.1.4
 WebOb==1.4.1
 Werkzeug==0.10.4
