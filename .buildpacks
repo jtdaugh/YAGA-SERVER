@@ -2,3 +2,5 @@ https://github.com/yagainc/heroku-buildpack-python-emoji.git
 https://github.com/heroku/heroku-buildpack-nodejs.git
 https://github.com/heroku/heroku-buildpack-java.git
 https://github.com/heroku/heroku-buildpack-ruby.git
+https://github.com/yagainc/heroku-buildpack-gifsicle
+https://github.com/yagainc/heroku-buildpack-ffmpeg
