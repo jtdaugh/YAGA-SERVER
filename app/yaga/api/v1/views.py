@@ -16,12 +16,12 @@ from rest_framework.response import Response
 from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
 from . import permissions, serializers, throttling
+from ... import notifications
 from ...conf import settings
 from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post,
     post_attachment_preview_upload_to_trash, post_attachment_upload_to
 )
-from ...notifications import InviteDirectNotification
 
 
 class UserRetrieveUpdateAPIView(
@@ -314,6 +314,21 @@ class GroupRetrieveUpdateAPIView(
 
         return queryset
 
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('name'):
+            if (
+                serializer.validated_data['name'] != serializer.instance.name
+            ):
+                notifications.RenameGroupNotification.schedule(
+                    group=serializer.instance.pk,
+                    old_name=serializer.instance.name,
+                    emitter=self.request.user.pk
+                )
+
+        super(
+            GroupRetrieveUpdateAPIView, self
+        ).perform_update(serializer)
+
 
 class GroupMemberUpdateDestroyAPIView(
     PatchAsPutMixin,
@@ -423,7 +438,7 @@ class GroupMemberUpdateDestroyAPIView(
 
                 # new_members.append(obj)
 
-                InviteDirectNotification.schedule(
+                notifications.InviteDirectNotification.schedule(
                     member=obj.pk
                 )
 
@@ -438,6 +453,24 @@ class GroupMemberUpdateDestroyAPIView(
             )
 
             obj.delete()
+
+            if user == self.request.user:
+                notifications.LeftGroupNotification.schedule(
+                    user=user.pk,
+                    group=instance.pk
+                )
+            else:
+                notifications.KickGroupNotification.schedule(
+                    user=user.pk,
+                    group=instance.pk,
+                    emitter=self.request.user.pk
+                )
+
+                notifications.KickDirectNotification.schedule(
+                    user=user.pk,
+                    group=instance.pk,
+                    emitter=self.request.user.pk
+                )
         except (get_user_model().DoesNotExist, Group.DoesNotExist):
             pass
 
@@ -568,6 +601,23 @@ class PostRetrieveUpdateDestroyAPIView(
             )
         )
 
+    def perform_update(self, serializer):
+        if serializer.validated_data.get('name'):
+            serializer.instance.namer = self.request.user
+
+            if (
+                serializer.validated_data['name'] != serializer.instance.name
+                and
+                serializer.instance.user != serializer.instance.namer
+            ):
+                notifications.CaptionDirectNotification.schedule(
+                    post=serializer.instance.pk
+                )
+
+        super(
+            PostRetrieveUpdateDestroyAPIView, self
+        ).perform_update(serializer)
+
     def perform_destroy(self, instance):
         instance.mark_deleted()
 
@@ -631,6 +681,10 @@ class LikeCreateDestroyAPIView(
             obj.user = self.request.user
             obj.post = instance
             obj.save()
+
+            notifications.LikeDirectNotification.schedule(
+                like=obj.pk
+            )
 
         serializer = self.get_serializer(instance)
 

@@ -4,16 +4,20 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.db import connection
 from django.contrib.auth import get_user_model
-from django.utils.translation import override, ungettext
-from django.utils.translation import ugettext_lazy as _
-from django.utils.lru_cache import lru_cache
+from django.db import connection
 from django.utils import six
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import override
 
 from .conf import settings
-from .models import Contact, Group, Post, Device, Member, Like
+from .models import Device, Group, Like, Member, Post
 from .providers import apns_provider
+
+
+# from django.utils.lru_cache import lru_cache
+# , ungettext
+# Contact,
 
 
 class NotificationInstances(
@@ -56,16 +60,23 @@ class Notification(
 
         instance.send()
 
-    def get_object(self):
+    def check_condition(self):
+        return True
+
+    def check_threshold(self):
+        return True
+
+    @property
+    def object(self):
         if self._object is None:
-            self._object = self._get_object()
+            self._object = self.get_object()
 
         return self._object
 
     def get_meta(self):
         return {}
 
-    def _get_object(self):
+    def get_object(self):
         raise NotImplementedError
 
     def get_message(self):
@@ -115,19 +126,28 @@ class Notification(
         raise NotImplementedError
 
     def send(self):
-        token_map = self.get_token_map(self.get_devices(self.get_receivers()))
-
-        for code, title in settings.LANGUAGES:
-            with override(code.lower()):
-                apns_provider.schedule(
-                    token_map[Device.vendor_choices.IOS][code.lower()],
-                    **self.get_ios_push_kwargs()
+        if self.check_condition() and self.check_threshold():
+            token_map = self.get_token_map(
+                self.get_devices(
+                    self.get_receivers()
                 )
+            )
 
-                # gcm_provider.schedule(
-                #     token_map[Device.vendor_choices.ANDROID][code.lower()],
-                #     **self.get_android_notification_kwargs()
-                # )
+            for code, title in settings.LANGUAGES:
+                with override(code.lower()):
+                    apns_provider.schedule(
+                        token_map[
+                            Device.vendor_choices.IOS
+                        ][code.lower()],
+                        **self.get_ios_push_kwargs()
+                    )
+
+                    # gcm_provider.schedule(
+                    #     token_map[
+                    #         Device.vendor_choices.ANDROID
+                    #     ][code.lower()],
+                    #     **self.get_android_notification_kwargs()
+                    # )
 
 
 class DirectNotification(
@@ -169,7 +189,7 @@ class GroupNotification(
 class PostGroupNotification(
     GroupNotification
 ):
-    def _get_object(self):
+    def get_object(self):
         return Post.objects.get(
             pk=self.kwargs['post']
         )
@@ -177,14 +197,14 @@ class PostGroupNotification(
     def get_meta(self):
         return {
             'event': 'post',
-            'group_id': str(self.get_object().group.pk)
+            'group_id': str(self.object.group.pk)
         }
 
     def get_group(self):
-        return self.get_object().group
+        return self.object.group
 
     def get_emitter(self):
-        return self.get_object().user
+        return self.object.user
 
     def get_message(self):
         return _('{user} posted into {group}')
@@ -199,7 +219,7 @@ class PostGroupNotification(
 class InviteDirectNotification(
     DirectNotification
 ):
-    def _get_object(self):
+    def get_object(self):
         return Member.objects.get(
             pk=self.kwargs['member']
         )
@@ -207,20 +227,249 @@ class InviteDirectNotification(
     def get_meta(self):
         return {
             'event': 'invite',
-            'group_id': str(self.get_object().group.pk)
+            'group_id': str(self.object.group.pk)
         }
 
     def get_target(self):
-        return self.get_object().user
+        return self.object.user
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_object().group.name,
-            'creator': self.get_object().creator.get_username()
+            'group': self.object.group.name,
+            'emitter': self.object.creator.get_username()
         }
 
     def get_message(self):
-        return _('{creator} has added you to {group}')
+        return _('{emitter} has added you to {group}')
+
+
+class LikeDirectNotification(
+    DirectNotification
+):
+    def get_object(self):
+        return Like.objects.get(
+            pk=self.kwargs['like']
+        )
+
+    def get_meta(self):
+        return {
+            'event': 'like',
+            'post_id': str(self.object.post.pk),
+            'group_id': str(self.object.post.group.pk),
+        }
+
+    def get_target(self):
+        return self.object.post.user
+
+    def get_message_kwargs(self):
+        return {
+            'user': self.object.user.get_username(),
+            'group': self.object.post.group.name,
+        }
+
+    def get_message(self):
+        return _('{user} liked your video in {group}')
+
+
+class LeftGroupNotification(
+    GroupNotification
+):
+    def get_object(self):
+        class Object(
+            object
+        ):
+            def __init__(self, this):
+                self.user = get_user_model().objects.get(
+                    pk=this.kwargs['user']
+                )
+
+                self.group = Group.objects.get(
+                    pk=this.kwargs['group']
+                )
+
+        return Object(self)
+
+    def get_meta(self):
+        return {
+            'event': 'leave',
+            'user_id': str(self.object.user.pk),
+            'group_id': str(self.object.group.pk),
+        }
+
+    def get_group(self):
+        return self.object.group
+
+    def get_emitter(self):
+        return self.object.user
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.object.group.name,
+            'member': self.object.user.get_username(),
+        }
+
+    def get_message(self):
+        return _('{member} has left {group}')
+
+
+class KickGroupNotification(
+    GroupNotification
+):
+    def get_object(self):
+        class Object(
+            object
+        ):
+            def __init__(self, this):
+                self.user = get_user_model().objects.get(
+                    pk=this.kwargs['user']
+                )
+
+                self.group = Group.objects.get(
+                    pk=this.kwargs['group']
+                )
+
+                self.emitter = get_user_model().objects.get(
+                    pk=this.kwargs['emitter']
+                )
+
+        return Object(self)
+
+    def get_meta(self):
+        return {
+            'event': 'kick',
+            'user_id': str(self.object.user.pk),
+            'group_id': str(self.object.group.pk),
+        }
+
+    def get_group(self):
+        return self.object.group
+
+    def get_emitter(self):
+        return self.object.emitter
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.object.group.name,
+            'member': self.object.user.get_username(),
+            'emitter': self.object.emitter.get_username()
+        }
+
+    def get_message(self):
+        return _('{emitter} removed {member} from {group}')
+
+
+class KickDirectNotification(
+    DirectNotification
+):
+    def get_object(self):
+        class Object(
+            object
+        ):
+            def __init__(self, this):
+                self.user = get_user_model().objects.get(
+                    pk=this.kwargs['user']
+                )
+
+                self.group = Group.objects.get(
+                    pk=this.kwargs['group']
+                )
+
+                self.emitter = get_user_model().objects.get(
+                    pk=this.kwargs['emitter']
+                )
+
+        return Object(self)
+
+    def get_meta(self):
+        return {
+            'event': 'kick',
+            'user_id': str(self.object.user.pk),
+            'group_id': str(self.object.group.pk),
+        }
+
+    def get_target(self):
+        return self.object.user
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.object.group.name,
+            'member': self.object.user.get_username(),
+            'emitter': self.object.emitter.get_username()
+        }
+
+    def get_message(self):
+        return _('{emitter} has removed you from {group}')
+
+
+class CaptionDirectNotification(
+    DirectNotification
+):
+    def get_object(self):
+        return Post.objects.get(
+            pk=self.kwargs['post']
+        )
+
+    def get_meta(self):
+        return {
+            'event': 'caption',
+            'post_id': str(self.object.pk),
+            'group_id': str(self.object.group.pk),
+        }
+
+    def get_target(self):
+        return self.object.user
+
+    def get_message_kwargs(self):
+        return {
+            'user': self.object.namer.get_username(),
+            'group': self.object.group.name,
+        }
+
+    def get_message(self):
+        return _('{user} captioned your video in {group}')
+
+
+class RenameGroupNotification(
+    GroupNotification
+):
+    def get_object(self):
+        class Object(
+            object
+        ):
+            def __init__(self, this):
+                self.group = Group.objects.get(
+                    pk=this.kwargs['group']
+                )
+
+                self.emitter = get_user_model().objects.get(
+                    pk=this.kwargs['emitter']
+                )
+
+                self.old_name = this.kwargs['old_name']
+
+        return Object(self)
+
+    def get_group(self):
+        return self.object.group
+
+    def get_meta(self):
+        return {
+            'event': 'rename',
+            'group_id': str(self.object.group.pk),
+        }
+
+    def get_emitter(self):
+        return self.object.emitter
+
+    def get_message_kwargs(self):
+        return {
+            'emitter': self.object.emitter.get_username(),
+            'old_name': self.object.old_name,
+            'new_name': self.object.group.name
+        }
+
+    def get_message(self):
+        return _('{emitter} renamed {old_name} to {new_name}')
 
 
 # class NewMembersBatchIOSNotification(
@@ -306,151 +555,6 @@ class InviteDirectNotification(
 #         return _('{creator} added {targets} to {group}')
 
 
-# class NewLikeIOSNotification(
-#     IOSNotification
-# ):
-#     TARGET = True
-
-#     def get_meta(self):
-#         return {
-#             'event': 'like',
-#             'post_id': str(self.like.post.pk),
-#             'group_id': str(self.like.post.group.pk),
-#         }
-
-#     def get_target(self):
-#         return self.like.post.user
-
-#     def get_target_message(self):
-#         return _('{user} liked your video in {group}')
-
-#     def get_target_kwargs(self):
-#         return {
-#             'user': self.like.user.get_username(),
-#             'group': self.like.post.group.name,
-#         }
-
-
-# class GroupRenameIOSNotification(
-#     IOSNotification
-# ):
-#     BROADCAST = True
-
-#     def get_group(self):
-#         return self.group
-
-#     def get_meta(self):
-#         return {
-#             'event': 'rename',
-#             'group_id': str(self.group.pk),
-#         }
-
-#     def get_emitter(self):
-#         return self.namer
-
-#     def get_broadcast_kwargs(self):
-#         return {
-#             'namer': self.namer.get_username(),
-#             'old_name': self.old_name,
-#             'new_name': self.group.name
-#         }
-
-#     def get_broadcast_message(self):
-#         return _('{namer} renamed {old_name} to {new_name}')
-
-
-# class NewCaptionIOSNotification(
-#     IOSNotification
-# ):
-#     TARGET = True
-
-#     def get_meta(self):
-#         return {
-#             'event': 'caption',
-#             'post_id': str(self.post.pk),
-#             'group_id': str(self.post.group.pk),
-#         }
-
-#     def get_target(self):
-#         return self.post.user
-
-#     def get_target_message(self):
-#         return _('{user} captioned your video in {group}')
-
-#     def get_target_kwargs(self):
-#         return {
-#             'user': self.post.namer.get_username(),
-#             'group': self.post.group.name,
-#         }
-
-
-# class DeleteMemberIOSNotification(
-#     IOSNotification
-# ):
-#     BROADCAST = True
-#     TARGET = True
-
-#     def get_meta(self):
-#         return {
-#             'event': 'kick',
-#             'user_id': str(self.member.user.pk),
-#             'group_id': str(self.member.group.pk),
-#         }
-
-#     def get_group(self):
-#         return self.member.group
-
-#     def get_emitter(self):
-#         return self.deleter
-
-#     def get_target(self):
-#         return self.member.user
-
-#     def get_broadcast_message(self):
-#         return _('{deleter} removed {member} from {group}')
-
-#     def get_broadcast_kwargs(self):
-#         return {
-#             'group': self.member.group.name,
-#             'member': self.member.user.get_username(),
-#             'deleter': self.deleter
-#         }
-
-#     def get_target_message(self):
-#         return _('{deleter} has removed you from {group}')
-
-#     def get_target_kwargs(self):
-#         return self.get_broadcast_kwargs()
-
-
-# class GroupLeaveIOSNotification(
-#     IOSNotification
-# ):
-#     BROADCAST = True
-
-#     def get_meta(self):
-#         return {
-#             'event': 'leave',
-#             'user_id': str(self.member.user.pk),
-#             'group_id': str(self.member.group.pk),
-#         }
-
-#     def get_group(self):
-#         return self.member.group
-
-#     def get_emitter(self):
-#         return self.member.user
-
-#     def get_broadcast_message(self):
-#         return _('{member} has left {group}')
-
-#     def get_broadcast_kwargs(self):
-#         return {
-#             'group': self.member.group.name,
-#             'member': self.member.user.get_username(),
-#         }
-
-
 # class NewUserIOSNotification(
 #     IOSNotification
 # ):
@@ -514,4 +618,4 @@ class InviteDirectNotification(
 #         }
 
 #         self.push_broadcast()
-from .tasks import NotificationTask
+from .tasks import NotificationTask  # noqa # isort:skip

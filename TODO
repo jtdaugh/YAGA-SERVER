@@ -14,24 +14,22 @@ nexmo updates
 u\b\force fixes
 first exist none refactor
 
-no caption push if not member
-
 #######
 
 server side copy to group
 
-PUSHES
+#######
 
-NEW POST
-LIKE POST
-CAPTION POST
-
-NEW_MEMBER
 NEW_MEMBERS
-DELETE_MEMBER
-LEAVE_MEMBER
+
 new user
 user join
-group rename
 
-push rate limit
+#######
+
+group namer
+
+members deleter
+members active flag
+member block
+user block

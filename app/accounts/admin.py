@@ -4,7 +4,6 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.conf.urls import patterns, url
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -27,28 +26,6 @@ class TokenTabularInline(
 class UserModelAdmin(
     ForceSuperuserAccess, BaseUserAdmin, HijackUserAdminMixin
 ):
-    def get_urls(self):
-        password_urlpatterns = patterns(
-            '',
-            url(
-                r'^([\-a-z0-9]{32,36})/password/$',
-                self.admin_site.admin_view(self.user_change_password)
-            )
-        )
-
-        base_urlpatterns = super(UserModelAdmin, self).get_urls()
-
-        for urlpattern in base_urlpatterns:
-            if '/password/' in urlpattern._regex:
-                password_pattern = urlpattern
-                break
-
-        base_urlpatterns.remove(password_pattern)
-
-        urlpatterns = password_urlpatterns + base_urlpatterns
-
-        return urlpatterns
-
     def lookup_allowed(self, lookup, value):
         if lookup.startswith('password'):
             return True
@@ -127,6 +104,8 @@ class TokenModelAdmin(
     ordering = ('-created_at',)
 
     search_fields = ('key',)
+
+    raw_id_fields = ('user',)
 
 
 admin.site.register(get_user_model(), UserModelAdmin)

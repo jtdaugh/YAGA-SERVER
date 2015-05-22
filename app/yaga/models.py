@@ -14,6 +14,7 @@ import tempfile
 
 import magic
 from django.core.files.base import File
+from django.core.files.storage import default_storage
 from django.db import connection, models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -457,6 +458,10 @@ class Post(
                 )
 
                 if process:
+                    default_storage.delete(
+                        post_attachment_preview_upload_to(self)
+                    )
+
                     with open(output.name, 'rb') as stream:
                         fd = File(stream)
 
@@ -937,6 +942,6 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .notifications import PostGroupNotification # noqa # isort:skip
+from .notifications import PostGroupNotification  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
 from .tasks import CleanStorageTask, TranscodingTask  # noqa # isort:skip

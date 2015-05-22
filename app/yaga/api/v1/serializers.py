@@ -260,15 +260,6 @@ class PostSerializer(
                 msg = _('Options name_x and name_y must be set together.')
                 raise ValidationError(msg)
 
-        # if (
-        #     self.instance
-        #     and
-        #     attrs.get('name')
-        #     and
-        #     self.instance.tracker.previous('name') != attrs['name']
-        # ):
-        #     self.instance.namer = self.instance.bridge.updater
-
         return attrs
 
     def update(self, instance, validated_data):
@@ -365,7 +356,7 @@ class DeviceSerializer(
     def to_representation(self, instance):
         ret = super(DeviceSerializer, self).to_representation(instance)
 
-        ret['vendor'] = self.Meta.model.vendor_choices.value(
+        ret['vendor'] = Device.vendor_choices.value(
             int(ret['vendor'])
         )
 
@@ -381,7 +372,7 @@ class DeviceSerializer(
         return validators
 
     def save(self, **kwargs):
-        instance = self.Meta.model.objects.filter(
+        instance = Device.objects.filter(
             token=self.validated_data['token'],
             vendor=self.validated_data['vendor']
         ).first()
@@ -402,12 +393,9 @@ class DeviceSerializer(
 
     def validate_vendor(self, value):
         try:
-            if (
-                self.Meta.model.vendor_choices.key(value)
-                ==
-                self.Meta.model.vendor_choices.IOS
-            ):
-                return self.Meta.model.vendor_choices.IOS
+            vendor = Device.vendor_choices.key(value)
+
+            return vendor
         except KeyError:
             pass
 
