@@ -52,7 +52,7 @@ class YagaAppConf(
         ('Stream #0:1(und): Video', 'avc1'),
         ('Stream #0:1(und): Video', 'yuv420p'),
         ('Stream #0:1(und): Video', '640x480'),
-        ('Stream #0:1(und): Video:', '30 fps')
+        ('Stream #0:1(und): Video:', 'fps')
     )
 
     ATTACHMENT_TRANSCODE_CMD = (
