@@ -1,7 +1,7 @@
 require 'rake'
 
 APP_DIR = 'app'
-PROCESS_WORKERS = 2
+PROCESS_WORKERS = 3
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = {
   web: true,
