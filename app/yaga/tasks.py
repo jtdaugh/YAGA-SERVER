@@ -86,7 +86,7 @@ class CleanStorageTask(
     def run(self, key):
         full_path = key
 
-        path = key.replace(settings.MEDIA_LOCATION, '')
+        path = key.replace(settings.MEDIA_LOCATION, '', 1)
 
         path = path.strip('/')
 
@@ -112,7 +112,7 @@ class PostAttachmentProcessTask(
     celery.Task
 ):
     def run(self, key):
-        path = key.replace(settings.MEDIA_LOCATION, '')
+        path = key.replace(settings.MEDIA_LOCATION, '', 1)
 
         path = path.strip('/')
 
