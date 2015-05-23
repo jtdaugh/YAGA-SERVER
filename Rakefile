@@ -1,3 +1,5 @@
+require 'rake'
+
 APP_DIR = 'app'
 PROCESS_WORKERS = 2
 HTTP_TIMEOUT = 30
@@ -34,8 +36,7 @@ task :uwsgi do
     port: ENV['PORT'] || 8000
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['web']
-
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:web]
   Dir.chdir(APP_DIR) do
     sh cmd
   end
@@ -50,7 +51,7 @@ task :gunicorn do
     port: ENV['PORT'] || 8000
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['web']
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:web]
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -60,7 +61,7 @@ end
 task :sqs do
   cmd = 'python manage.py sqs'
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -76,7 +77,7 @@ task :celery_broker do
     workers: workers
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -90,7 +91,7 @@ task :celery_worker do
     workers: PROCESS_WORKERS
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]
 
   Dir.chdir(APP_DIR) do
     sh cmd
