@@ -27,6 +27,7 @@
         <table class="table table-striped table-bordered">
             <tr>
                 <th>
+                    {% trans 'Stat' %}
                 </th>
                 <th>
                     {% trans 'Total' %}
@@ -36,48 +37,59 @@
                 </th>
             </tr>
             <tr>
-                <th>
+                <td>
                     {% trans 'Users' %}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.total.users }}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.today.users }}
-                </th>
+                </td>
             </tr>
             <tr>
-                <th>
+                <td>
+                    {% trans 'Members' %}
+                </td>
+                <td>
+                    {{ stats.total.members }}
+                </td>
+                <td>
+                    {{ stats.today.members }}
+                </td>
+            </tr>
+            <tr>
+                <td>
                     {% trans 'Groups' %}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.total.groups }}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.today.groups }}
-                </th>
+                </td>
             </tr>
             <tr>
-                <th>
+                <td>
                     {% trans 'Posts' %}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.total.posts }}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.today.posts }}
-                </th>
+                </td>
             </tr>
             <tr>
-                <th>
+                <td>
                     {% trans 'Likes' %}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.total.likes }}
-                </th>
-                <th>
+                </td>
+                <td>
                     {{ stats.today.likes }}
-                </th>
+                </td>
             </tr>
         </table>
     </div>

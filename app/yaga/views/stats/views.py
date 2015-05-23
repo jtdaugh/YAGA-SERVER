@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
+from ...conf import settings
 from ...models import Group, Like, Post
 
 
@@ -46,18 +47,22 @@ class BasicStatsTemplateView(
         context['stats'] = {
             'today': {
                 'users': get_user_model().objects.filter(
+                    verified=True,
                     verified_at__gte=today
+                ).exclude(
+                    pk=settings.ANONYMOUS_USER_ID
+                ).count(),
+                'members': get_user_model().objects.filter(
+                    verified=False,
+                    date_joined__gte=today
+                ).exclude(
+                    pk=settings.ANONYMOUS_USER_ID
                 ).count(),
                 'groups': Group.objects.filter(
                     created_at__gte=today
                 ).count(),
                 'posts': Post.objects.filter(
                     created_at__gte=today,
-                    state__in=[
-                        Post.state_choices.UPLOADED,
-                        Post.state_choices.READY,
-                        Post.state_choices.DELETED
-                    ]
                 ).count(),
                 'likes': Like.objects.filter(
                     created_at__gte=today
@@ -66,15 +71,16 @@ class BasicStatsTemplateView(
             'total': {
                 'users': get_user_model().objects.filter(
                     verified=True
+                ).exclude(
+                    pk=settings.ANONYMOUS_USER_ID
+                ).count(),
+                'members': get_user_model().objects.filter(
+                    verified=False
+                ).exclude(
+                    pk=settings.ANONYMOUS_USER_ID
                 ).count(),
                 'groups': Group.objects.all().count(),
-                'posts': Post.objects.filter(
-                    state__in=[
-                        Post.state_choices.UPLOADED,
-                        Post.state_choices.READY,
-                        Post.state_choices.DELETED
-                    ]
-                ).count(),
+                'posts': Post.objects.all().count(),
                 'likes': Like.objects.all().count()
             }
         }

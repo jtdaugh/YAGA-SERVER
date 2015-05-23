@@ -52,7 +52,7 @@ django-pylibmc==0.6.0
 django-pylibmc-sasl==0.2.4
 django-redis==4.0.0
 django-redis-sessions-fork==0.6.2
-django-rest-swagger==0.2.9
+django-rest-swagger==0.3.0
 django-reversion==1.8.7
 django-secure==1.0.1
 django-storages-redux==1.2.3
@@ -143,7 +143,7 @@ sqlparse==0.1.15
 tox==2.0.1
 ujson==1.33
 uWSGI==2.0.10
-virtualenv==13.0.0
+virtualenv==13.0.1
 wcwidth==0.1.4
 WebOb==1.4.1
 Werkzeug==0.10.4

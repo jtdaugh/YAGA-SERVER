@@ -110,14 +110,16 @@ class AbstractUser(
     # here is function lower unique index at migration
 
     is_staff = models.BooleanField(
-        verbose_name=_('Staff status'), default=False,
+        verbose_name=_('Staff status'),
+        default=False,
         help_text=_(
             'Designates whether the user can log into this admin site.'
         )
     )
 
     is_active = models.BooleanField(
-        verbose_name=_('Active'), default=True,
+        verbose_name=_('Active'),
+        default=True,
         help_text=_(
             'Designates whether this user should be treated as '
             'active. Unselect this instead of deleting accounts.'
@@ -138,7 +140,8 @@ class AbstractUser(
     verified_at = models.DateTimeField(
         verbose_name=_('Verified At'),
         default=None,
-        null=True, blank=True
+        null=True,
+        blank=True
     )
 
     objects = UserManager()

@@ -12,6 +12,7 @@ from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
+from ...conf import settings
 from .filters import UserFilterSet
 from .forms import UserForm
 
@@ -24,7 +25,9 @@ class UserView(
     permission_required = 'accounts.view_user'
 
     def get_queryset(self):
-        return get_user_model().objects.all()
+        return get_user_model().objects.all().exclude(
+            pk=settings.ANONYMOUS_USER_ID
+        )
 
 
 class UserBaseRedirectView(
