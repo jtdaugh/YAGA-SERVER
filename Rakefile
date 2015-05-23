@@ -1,7 +1,10 @@
 APP_DIR = 'app'
 PROCESS_WORKERS = 2
 HTTP_TIMEOUT = 30
-USE_NEWRELIC = false
+USE_NEWRELIC = {
+  web: true,
+  background: false
+}
 NEWRELIC_CMD = 'newrelic-admin run-program '
 
 task default: [:env]
@@ -31,7 +34,7 @@ task :uwsgi do
     port: ENV['PORT'] || 8000
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['web']
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -47,7 +50,7 @@ task :gunicorn do
     port: ENV['PORT'] || 8000
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['web']
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -57,7 +60,7 @@ end
 task :sqs do
   cmd = 'python manage.py sqs'
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -73,7 +76,7 @@ task :celery_broker do
     workers: workers
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
 
   Dir.chdir(APP_DIR) do
     sh cmd
@@ -87,7 +90,7 @@ task :celery_worker do
     workers: PROCESS_WORKERS
   }
 
-  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC
+  cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC['background']
 
   Dir.chdir(APP_DIR) do
     sh cmd

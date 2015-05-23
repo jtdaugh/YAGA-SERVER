@@ -165,15 +165,14 @@ def create():
         name=name
     ))
 
-    local('heroku addons:add heroku-postgresql')
-    local('heroku addons:add memcachier')
-    local('heroku addons:add newrelic')
-    local('heroku addons:add pgbackups:auto-month')
-    local('heroku addons:add logentries')
-    local('heroku addons:add rabbitmq-bigwig')
-    local('heroku addons:add rediscloud')
-    local('heroku addons:add sentry')
-    local('heroku addons:add sendgrid')
+    local('heroku addons:create heroku-postgresql')
+    local('heroku addons:create newrelic:wayne')
+    local('heroku addons:create pgbackups:auto-month')
+    local('heroku addons:create logentries')
+    local('heroku addons:create rabbitmq-bigwig')
+    local('heroku addons:create rediscloud')
+    local('heroku addons:create sentry')
+    local('heroku addons:create sendgrid')
 
     local('heroku config:set DISABLE_COLLECTSTATIC=1')
     local('heroku config:add BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git')
