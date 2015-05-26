@@ -206,6 +206,18 @@ class PostGroupNotification(
         self.group = self.post.group
         self.emitter = self.post.user
 
+    def get_caption(self):
+        if (
+            self.get_post().name
+            and
+            self.get_post().namer == self.get_emitter()
+        ):
+            return _(' with caption {caption}').format(
+                caption=self.get_post().name
+            )
+        else:
+            return ''
+
     def get_meta(self):
         return {
             'event': 'post',
@@ -214,12 +226,13 @@ class PostGroupNotification(
         }
 
     def get_message(self):
-        return _('{emitter} posted into {group}')
+        return _('{emitter} posted into {group}{caption}')
 
     def get_message_kwargs(self):
         return {
             'group': self.get_group().name,
-            'emitter': self.get_emitter().get_username()
+            'emitter': self.get_emitter().get_username(),
+            'caption': self.get_caption()
         }
 
 
