@@ -7,6 +7,7 @@
 {% load crispy_forms_tags %}
 
 {% load paginator %}
+{% load choice %}
 
 {% block title %}
     {{ block.super }}
@@ -79,6 +80,9 @@
                     {% trans 'Created At' %}
                 </th>
                 <th>
+                    {% trans 'State' %}
+                </th>
+                <th>
                     {% trans 'Ready' %}
                 </th>
                 <th>
@@ -131,6 +135,9 @@
                     </td>
                     <td>
                         {{ post.created_at }}
+                    </td>
+                    <td>
+                        {{ post.state|choice:post.state_choices }}
                     </td>
                     <td>
                         {% if post.ready %}

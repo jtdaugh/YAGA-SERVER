@@ -19,6 +19,8 @@ icontains = {
     }
 }
 
+empty_choice = (('', '---------'),)
+
 
 class UUIDFilter(
     django_filters.CharFilter

@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import django_filters
 from django.db import models
 
-from app.filters import UUIDFilter, icontains
+from app.filters import UUIDFilter, empty_choice, icontains
 from app.model_fields import UUIDField
 
 from ...models import Post
@@ -27,7 +27,9 @@ class PostFilterSet(
         }
     }
 
-    state = django_filters.ChoiceFilter(choices=Post.state_choices)
+    state = django_filters.ChoiceFilter(
+        choices=empty_choice + tuple(Post.state_choices)
+    )
 
     class Meta:
         model = Post

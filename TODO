@@ -26,9 +26,7 @@ new user
 user join
 
 #######
-
 group namer
-
 members deleter
 members active flag
 member block
