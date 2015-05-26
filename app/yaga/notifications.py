@@ -264,7 +264,11 @@ class LikeDirectNotification(
     DirectNotification
 ):
     def check_condition(self):
-        return self.get_target() != self.get_emitter()
+        return (
+            self.get_target() != self.get_emitter()
+            and
+            self.get_post().state == self.post.state_choices.READY
+        )
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
@@ -371,9 +375,13 @@ class CaptionDirectNotification(
     DirectNotification
 ):
     def check_condition(self):
-        return self.group.member_set.filter(
-            user=self.target
-        ).first() is not None
+        return (
+            self.get_group().member_set.filter(
+                user=self.target
+            ).first() is not None
+            and
+            self.get_post().state == self.post.state_choices.READY
+        )
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
