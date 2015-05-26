@@ -34,16 +34,16 @@ class BaseScopedRateThrottle(
 class CodeScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '10/hour'
+    rate = '5/hour'
 
 
 class TokenScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '50/hour'
+    rate = '5/hour'
 
 
 class UserSearchScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '30/hour'
+    rate = '10/hour'
