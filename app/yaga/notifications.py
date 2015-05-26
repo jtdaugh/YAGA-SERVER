@@ -8,22 +8,22 @@ from django.contrib.auth import get_user_model
 from django.db import connection
 from django.utils import six
 from django.utils.translation import ugettext_lazy as _
-from django.utils.translation import override
+from django.utils.translation import override, ungettext
+from django.utils.lru_cache import lru_cache
 
 from .conf import settings
-from .models import Device, Group, Like, Member, Post
+from .models import Device, Group, Post
 from .providers import apns_provider
-
-
-# from django.utils.lru_cache import lru_cache
-# , ungettext
-# Contact,
 
 
 class NotificationInstances(
     type
 ):
     _instances = {}
+
+    @classmethod
+    def get_instance(cls, instance):
+        return cls._instances[instance]
 
     def __new__(cls, name, parents, dct):
         instance = super(NotificationInstances, cls).__new__(
@@ -39,9 +39,8 @@ class NotificationInstances(
 class Notification(
     six.with_metaclass(NotificationInstances, object)
 ):
-    def __init__(self):
-        self.kwargs = None
-        self._object = None
+    def __init__(self, **kwargs):
+        raise NotImplementedError
 
     @classmethod
     def schedule(cls, **kwargs):
@@ -52,13 +51,39 @@ class Notification(
 
         connection.on_commit(_schedule)
 
-    @classmethod
-    def notify(cls, **kwargs):
-        instance = cls()
+    def load_post(self, pk):
+        return Post.objects.select_related(
+            'user',
+            'group'
+        ).get(
+            pk=pk
+        )
 
-        instance.kwargs = kwargs
+    def load_group(self, pk):
+        return Group.objects.get(
+            pk=pk
+        )
 
-        instance.send()
+    def load_user(self, pk):
+        return get_user_model().objects.get(
+            pk=pk
+        )
+
+    @lru_cache()
+    def get_post(self):
+        return self.post
+
+    @lru_cache()
+    def get_group(self):
+        return self.group
+
+    @lru_cache()
+    def get_target(self):
+        return self.target
+
+    @lru_cache()
+    def get_emitter(self):
+        return self.emitter
 
     def check_condition(self):
         return True
@@ -66,17 +91,7 @@ class Notification(
     def check_threshold(self):
         return True
 
-    @property
-    def object(self):
-        if self._object is None:
-            self._object = self.get_object()
-
-        return self._object
-
     def get_meta(self):
-        return {}
-
-    def get_object(self):
         raise NotImplementedError
 
     def get_message(self):
@@ -114,7 +129,7 @@ class Notification(
             **self.get_message_kwargs()
         )
 
-    def get_ios_push_kwargs(self):
+    def get_ios_push(self):
         return {
             'badge': settings.YAGA_PUSH_BADGE,
             'sound': settings.YAGA_PUSH_SOUND,
@@ -122,10 +137,10 @@ class Notification(
             'alert': self.format_message()
         }
 
-    def get_android_notification_kwargs(self):
+    def get_android_message(self):
         raise NotImplementedError
 
-    def send(self):
+    def notify(self):
         if self.check_condition() and self.check_threshold():
             token_map = self.get_token_map(
                 self.get_devices(
@@ -135,27 +150,30 @@ class Notification(
 
             for code, title in settings.LANGUAGES:
                 with override(code.lower()):
-                    apns_provider.schedule(
-                        token_map[
-                            Device.vendor_choices.IOS
-                        ][code.lower()],
-                        **self.get_ios_push_kwargs()
-                    )
+                    ios_receivers = token_map[
+                        Device.vendor_choices.IOS
+                    ][code.lower()]
 
-                    # gcm_provider.schedule(
-                    #     token_map[
-                    #         Device.vendor_choices.ANDROID
-                    #     ][code.lower()],
-                    #     **self.get_android_notification_kwargs()
-                    # )
+                    if ios_receivers:
+                        apns_provider.schedule(
+                            ios_receivers,
+                            **self.get_ios_push()
+                        )
+
+                    # android_receivers = token_map[
+                    #     Device.vendor_choices.ANDROID
+                    # ][code.lower()]
+
+                    # if android_receivers:
+                    #     gcm_provider.schedule(
+                    #         android_receivers,
+                    #         **self.get_android_notification_kwargs()
+                    #     )
 
 
 class DirectNotification(
     Notification
 ):
-    def get_target(self):
-        raise NotImplementedError
-
     def get_receivers(self):
         return [self.get_target()]
 
@@ -163,12 +181,6 @@ class DirectNotification(
 class GroupNotification(
     Notification
 ):
-    def get_group(self):
-        raise NotImplementedError
-
-    def get_emitter(self):
-        raise NotImplementedError
-
     def get_exclude(self):
         return {
             'user': self.get_emitter()
@@ -189,54 +201,46 @@ class GroupNotification(
 class PostGroupNotification(
     GroupNotification
 ):
-    def get_object(self):
-        return Post.objects.get(
-            pk=self.kwargs['post']
-        )
+    def __init__(self, **kwargs):
+        self.post = self.load_post(kwargs['post'])
+        self.group = self.post.group
+        self.emitter = self.post.user
 
     def get_meta(self):
         return {
             'event': 'post',
-            'group_id': str(self.object.group.pk)
+            'post_id': str(self.get_post().pk),
+            'group_id': str(self.get_group().pk)
         }
 
-    def get_group(self):
-        return self.object.group
-
-    def get_emitter(self):
-        return self.object.user
-
     def get_message(self):
-        return _('{user} posted into {group}')
+        return _('{emitter} posted into {group}')
 
     def get_message_kwargs(self):
         return {
             'group': self.get_group().name,
-            'user': self.get_emitter().get_username()
+            'emitter': self.get_emitter().get_username()
         }
 
 
 class InviteDirectNotification(
     DirectNotification
 ):
-    def get_object(self):
-        return Member.objects.get(
-            pk=self.kwargs['member']
-        )
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.target = self.load_user(kwargs['target'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'invite',
-            'group_id': str(self.object.group.pk)
+            'group_id': str(self.get_group().pk)
         }
-
-    def get_target(self):
-        return self.object.user
 
     def get_message_kwargs(self):
         return {
-            'group': self.object.group.name,
-            'emitter': self.object.creator.get_username()
+            'group': self.get_group().name,
+            'emitter': self.get_emitter().get_username()
         }
 
     def get_message(self):
@@ -246,155 +250,104 @@ class InviteDirectNotification(
 class LikeDirectNotification(
     DirectNotification
 ):
-    def get_object(self):
-        return Like.objects.get(
-            pk=self.kwargs['like']
-        )
+    def check_condition(self):
+        return self.get_target() != self.get_emitter()
+
+    def __init__(self, **kwargs):
+        self.post = self.load_post(kwargs['post'])
+        self.group = self.post.group
+        self.target = self.post.user
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'like',
-            'post_id': str(self.object.post.pk),
-            'group_id': str(self.object.post.group.pk),
+            'post_id': str(self.get_post().pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_target(self):
-        return self.object.post.user
 
     def get_message_kwargs(self):
         return {
-            'user': self.object.user.get_username(),
-            'group': self.object.post.group.name,
+            'emitter': self.get_emitter().get_username(),
+            'group': self.get_group().name,
         }
 
     def get_message(self):
-        return _('{user} liked your video in {group}')
+        return _('{emitter} liked your video in {group}')
 
 
 class LeftGroupNotification(
     GroupNotification
 ):
-    def get_object(self):
-        class Object(
-            object
-        ):
-            def __init__(self, this):
-                self.user = get_user_model().objects.get(
-                    pk=this.kwargs['user']
-                )
-
-                self.group = Group.objects.get(
-                    pk=this.kwargs['group']
-                )
-
-        return Object(self)
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'leave',
-            'user_id': str(self.object.user.pk),
-            'group_id': str(self.object.group.pk),
+            'user_id': str(self.get_emitter().pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_group(self):
-        return self.object.group
-
-    def get_emitter(self):
-        return self.object.user
 
     def get_message_kwargs(self):
         return {
-            'group': self.object.group.name,
-            'member': self.object.user.get_username(),
+            'group': self.get_group().name,
+            'emitter': self.get_emitter().get_username(),
         }
 
     def get_message(self):
-        return _('{member} has left {group}')
+        return _('{emitter} has left {group}')
 
 
 class KickGroupNotification(
     GroupNotification
 ):
-    def get_object(self):
-        class Object(
-            object
-        ):
-            def __init__(self, this):
-                self.user = get_user_model().objects.get(
-                    pk=this.kwargs['user']
-                )
+    def check_condition(self):
+        return self.get_target().name is not None
 
-                self.group = Group.objects.get(
-                    pk=this.kwargs['group']
-                )
-
-                self.emitter = get_user_model().objects.get(
-                    pk=this.kwargs['emitter']
-                )
-
-        return Object(self)
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.target = self.load_user(kwargs['target'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'kick',
-            'user_id': str(self.object.user.pk),
-            'group_id': str(self.object.group.pk),
+            'user_id': str(self.get_target().pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_group(self):
-        return self.object.group
-
-    def get_emitter(self):
-        return self.object.emitter
 
     def get_message_kwargs(self):
         return {
-            'group': self.object.group.name,
-            'member': self.object.user.get_username(),
-            'emitter': self.object.emitter.get_username()
+            'group': self.get_group().name,
+            'target': self.get_target().get_username(),
+            'emitter': self.get_emitter().get_username()
         }
 
     def get_message(self):
-        return _('{emitter} removed {member} from {group}')
+        return _('{emitter} removed {target} from {group}')
 
 
 class KickDirectNotification(
     DirectNotification
 ):
-    def get_object(self):
-        class Object(
-            object
-        ):
-            def __init__(self, this):
-                self.user = get_user_model().objects.get(
-                    pk=this.kwargs['user']
-                )
-
-                self.group = Group.objects.get(
-                    pk=this.kwargs['group']
-                )
-
-                self.emitter = get_user_model().objects.get(
-                    pk=this.kwargs['emitter']
-                )
-
-        return Object(self)
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.target = self.load_user(kwargs['target'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'kick',
-            'user_id': str(self.object.user.pk),
-            'group_id': str(self.object.group.pk),
+            'user_id': str(self.get_target().pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_target(self):
-        return self.object.user
 
     def get_message_kwargs(self):
         return {
-            'group': self.object.group.name,
-            'member': self.object.user.get_username(),
-            'emitter': self.object.emitter.get_username()
+            'group': self.get_group().name,
+            'emitter': self.get_emitter().get_username()
         }
 
     def get_message(self):
@@ -404,155 +357,142 @@ class KickDirectNotification(
 class CaptionDirectNotification(
     DirectNotification
 ):
-    def get_object(self):
-        return Post.objects.get(
-            pk=self.kwargs['post']
-        )
+    def check_condition(self):
+        return self.group.member_set.filter(
+            user=self.target
+        ).first() is not None
+
+    def __init__(self, **kwargs):
+        self.post = self.load_post(kwargs['post'])
+        self.group = self.post.group
+        self.target = self.post.user
+        self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
             'event': 'caption',
-            'post_id': str(self.object.pk),
-            'group_id': str(self.object.group.pk),
+            'post_id': str(self.get_post().pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_target(self):
-        return self.object.user
 
     def get_message_kwargs(self):
         return {
-            'user': self.object.namer.get_username(),
-            'group': self.object.group.name,
+            'group': self.get_group().name,
+            'emitter': self.get_target().get_username()
         }
 
     def get_message(self):
-        return _('{user} captioned your video in {group}')
+        return _('{emitter} captioned your video in {group}')
 
 
 class RenameGroupNotification(
     GroupNotification
 ):
-    def get_object(self):
-        class Object(
-            object
-        ):
-            def __init__(self, this):
-                self.group = Group.objects.get(
-                    pk=this.kwargs['group']
-                )
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
-                self.emitter = get_user_model().objects.get(
-                    pk=this.kwargs['emitter']
-                )
-
-                self.old_name = this.kwargs['old_name']
-
-        return Object(self)
-
-    def get_group(self):
-        return self.object.group
+        self.old_name = kwargs['old_name']
+        self.new_name = kwargs['new_name']
 
     def get_meta(self):
         return {
             'event': 'rename',
-            'group_id': str(self.object.group.pk),
+            'group_id': str(self.get_group().pk),
         }
-
-    def get_emitter(self):
-        return self.object.emitter
 
     def get_message_kwargs(self):
         return {
-            'emitter': self.object.emitter.get_username(),
-            'old_name': self.object.old_name,
-            'new_name': self.object.group.name
+            'emitter': self.get_emitter().get_username(),
+            'old_name': self.old_name,
+            'new_name': self.new_name
         }
 
     def get_message(self):
         return _('{emitter} renamed {old_name} to {new_name}')
 
 
-# class NewMembersBatchIOSNotification(
-#     NewMemberIOSNotification
-# ):
-#     BROADCAST = True
-#     TARGET = False
+class MembersGroupNotification(
+    GroupNotification
+):
+    def check_condition(self):
+        return bool(self.get_targets())
 
-#     def get_meta(self):
-#         return {
-#             'event': 'members',
-#             'group_id': str(self.group.pk)
-#         }
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.targets = self.load_users(kwargs['targets'])
+        self.emitter = self.load_user(kwargs['emitter'])
 
-#     def get_group(self):
-#         return self.group
+    def load_users(self, pks):
+        return get_user_model().objects.filter(
+            pk__in=pks
+        ).exclude(
+            name=None
+        )
 
-#     def get_emitter(self):
-#         return self.creator
+    @lru_cache()
+    def get_targets(self):
+        return list(self.targets)
 
-#     def get_targets(self):
-#         return [member.user for member in self.members]
+    def get_usernames(self, users):
+        return [user.get_username() for user in users]
 
-#     def get_broadcast_exclude(self):
-#         return {
-#             'user__in': list(set([
-#                 self.get_emitter()
-#             ] + self.get_targets()))
-#         }
+    def get_targets_string(self):
+        if len(self.get_targets()) == 1:
+            return self.get_targets()[0].get_username()
+        elif (
+            settings.YAGA_PUSH_NEW_MEMBERS_LIMIT
+            >=
+            len(self.get_targets())
+        ):
+            users = self.get_usernames(self.get_targets())
 
-#     def get_broadcast_kwargs(self):
-#         return {
-#             'group': self.group.name,
-#             'targets': self.get_new_members(),
-#             'creator': self.creator.get_username()
-#         }
+            return _('{list} and {last}').format(
+                list=', '.join(users[:-1]),
+                last=users[-1]
+            )
+        else:
+            users = self.get_usernames(
+                self.get_targets()[:settings.YAGA_PUSH_NEW_MEMBERS_LIMIT - 1]
+            )
 
-#     def map_members(self, members):
-#         return [
-#             member.user.get_username() for member in members
-#         ]
+            count = (
+                len(self.get_targets())
+                -
+                settings.YAGA_PUSH_NEW_MEMBERS_LIMIT
+            ) + 1
 
-#     def get_new_members(self):
-#         if not self.group.bridge.new_members:
-#             self.SKIP = True
-#             return ''
-#         elif len(self.group.bridge.new_members) == 1:
-#             return self.group.bridge.new_members.pop().user.get_username()
-#         elif (
-#             settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
-#             >=
-#             len(self.group.bridge.new_members)
-#         ):
-#             users = self.map_members(self.group.bridge.new_members)
+            return ungettext(
+                '{list} and {count} other',
+                '{list} and {count} others',
+                count
+            ).format(
+                list=', '.join(users),
+                count=count
+            )
 
-#             return _('{list} and {last}').format(
-#                 list=', '.join(users[:-1]),
-#                 last=users[-1]
-#             )
-#         else:
-#             member_list = self.group.bridge.new_members[
-#                 :settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT - 1
-#             ]
+    def get_exclude(self):
+        return {
+            'user__in': list(set(
+                [self.get_emitter()] + self.get_targets()
+            ))
+        }
 
-#             users = self.map_members(member_list)
+    def get_meta(self):
+        return {
+            'event': 'members',
+            'group_id': str(self.get_group().pk)
+        }
 
-#             count = (
-#                 len(self.group.bridge.new_members)
-#                 -
-#                 settings.YAGA_PUSH_NEW_MEMBERS_BATCH_LIMIT
-#             ) + 1
+    def get_message_kwargs(self):
+        return {
+            'group': self.get_group().name,
+            'targets': self.get_targets_string(),
+            'emitter': self.get_emitter().get_username()
+        }
 
-#             return ungettext(
-#                 '{list} and {count} other',
-#                 '{list} and {count} others',
-#                 count
-#             ).format(
-#                 list=', '.join(users),
-#                 count=count
-#             )
-
-#     def get_broadcast_message(self):
-#         return _('{creator} added {targets} to {group}')
+    def get_message(self):
+        return _('{emitter} added {targets} to {group}')
 
 
 # class NewUserIOSNotification(

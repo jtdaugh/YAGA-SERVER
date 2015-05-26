@@ -181,7 +181,9 @@ class NotificationTask(
     celery.Task
 ):
     def run(self, instance, **kwargs):
-        NotificationInstances._instances[instance].notify(**kwargs)
+        NotificationInstances.get_instance(instance)(
+            **kwargs
+        ).notify()
 
 
 class APNSPushTask(

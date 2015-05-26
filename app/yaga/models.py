@@ -119,7 +119,7 @@ class Code(
         verbose_name_plural = _('Codes')
 
     def __str__(self):
-        return str(self.request_id)
+        return str(self.pk)
 
 
 @python_2_unicode_compatible
@@ -168,7 +168,7 @@ class Member(
         )
 
     def __str__(self):
-        return self.user.phone.as_e164
+        return str(self.pk)
 
 
 @python_2_unicode_compatible

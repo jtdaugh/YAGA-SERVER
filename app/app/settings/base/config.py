@@ -544,6 +544,11 @@ class BaseConfiguration(
         'handlers': ['console', 'sentry'],
         'propagate': False,
     }
+    INFO_LOGGER = {
+        'level': 'INFO',
+        'handlers': ['console', 'sentry'],
+        'propagate': False,
+    }
     ERROR_LOGGER = {
         'level': 'ERROR',
         'handlers': ['console', 'sentry'],
@@ -573,17 +578,21 @@ class BaseConfiguration(
             }
         },
         'loggers': {
+            'apns_clerk': ERROR_LOGGER,
+            'apns_client': ERROR_LOGGER,
             # 'amqp': DEBUG_LOGGER,
             # 'kombu': DEBUG_LOGGER,
             # 'kombu.common': DEBUG_LOGGER,
             # 'kombu.connection': DEBUG_LOGGER,
-            'celery': DEBUG_LOGGER,
+            'celery': INFO_LOGGER,
             # 'celery.worker': DEBUG_LOGGER,
             # 'celery.task': DEBUG_LOGGER,
             # 'celery.app.builtins': DEBUG_LOGGER,
             # 'celery.app': DEBUG_LOGGER,
 
-            'gunicorn': DEBUG_LOGGER,
+            'uwgi': ERROR_LOGGER,
+
+            'gunicorn': ERROR_LOGGER,
             # 'gunicorn.http': DEBUG_LOGGER,
             # 'gunicorn.http.wsgi': DEBUG_LOGGER,
             # 'gunicorn.access': DEBUG_LOGGER,
@@ -601,12 +610,12 @@ class BaseConfiguration(
 
             'boto': ERROR_LOGGER,
 
-            'requests': DEBUG_LOGGER,
+            'requests': INFO_LOGGER,
 
             'yaga': DEBUG_LOGGER,
             'app': DEBUG_LOGGER
         },
-        'root': DEBUG_LOGGER,
+        'root': INFO_LOGGER,
     }
     # import logging
     # for logger in logging.root.manager.loggerDict:

@@ -322,8 +322,9 @@ class GroupRetrieveUpdateAPIView(
             ):
                 notifications.RenameGroupNotification.schedule(
                     group=serializer.instance.pk,
+                    emitter=self.request.user.pk,
                     old_name=serializer.instance.name,
-                    emitter=self.request.user.pk
+                    new_name=serializer.validated_data['name']
                 )
 
         super(
@@ -428,7 +429,7 @@ class GroupMemberUpdateDestroyAPIView(
 
             new_active_users = [user for user in new_users if user.is_active]
 
-            # new_members = []
+            new_members = []
 
             for user in new_active_users:
                 obj = Member()
@@ -437,10 +438,19 @@ class GroupMemberUpdateDestroyAPIView(
                 obj.creator = self.request.user
                 obj.save()
 
-                # new_members.append(obj)
+                new_members.append(obj)
 
                 notifications.InviteDirectNotification.schedule(
-                    member=obj.pk
+                    group=obj.group.pk,
+                    target=obj.user.pk,
+                    emitter=obj.creator.pk
+                )
+
+            if new_members:
+                notifications.MembersGroupNotification.schedule(
+                    group=obj.group.pk,
+                    targets=[member.user.pk for member in new_members],
+                    emitter=obj.creator.pk
                 )
 
     def perform_destroy(self, instance, validated_data):
@@ -457,19 +467,19 @@ class GroupMemberUpdateDestroyAPIView(
 
             if user == self.request.user:
                 notifications.LeftGroupNotification.schedule(
-                    user=user.pk,
-                    group=instance.pk
+                    group=instance.pk,
+                    emitter=user.pk
                 )
             else:
                 notifications.KickGroupNotification.schedule(
-                    user=user.pk,
                     group=instance.pk,
+                    target=user.pk,
                     emitter=self.request.user.pk
                 )
 
                 notifications.KickDirectNotification.schedule(
-                    user=user.pk,
                     group=instance.pk,
+                    target=user.pk,
                     emitter=self.request.user.pk
                 )
         except (get_user_model().DoesNotExist, Member.DoesNotExist):
@@ -620,7 +630,8 @@ class PostRetrieveUpdateDestroyAPIView(
                 serializer.instance.user != self.request.user
             ):
                 notifications.CaptionDirectNotification.schedule(
-                    post=serializer.instance.pk
+                    post=serializer.instance.pk,
+                    emitter=self.request.user.pk
                 )
 
         super(
@@ -692,7 +703,8 @@ class LikeCreateDestroyAPIView(
             obj.save()
 
             notifications.LikeDirectNotification.schedule(
-                like=obj.pk
+                post=obj.post.pk,
+                emitter=obj.user.pk
             )
 
         serializer = self.get_serializer(instance)

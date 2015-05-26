@@ -81,7 +81,7 @@ class YagaAppConf(
 
     AWS_SQS_QUEUE = config('AWS_SQS_QUEUE', default='yaga-dev')
 
-    PUSH_NEW_MEMBERS_BATCH_LIMIT = 3
+    PUSH_NEW_MEMBERS_LIMIT = 3
     PUSH_BADGE = 1
     PUSH_SOUND = 'push.m4a'
 

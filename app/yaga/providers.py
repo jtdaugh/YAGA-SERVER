@@ -210,8 +210,9 @@ class APNSProvider(
 
         return self._task
 
-    def schedule(self, *args, **kwargs):
-        self.task().delay(*args, **kwargs)
+    def schedule(self, receivers, **kwargs):
+        if receivers:
+            self.task().delay(receivers, **kwargs)
 
     def push(self, receivers, **kwargs):
         service = self.get_service()
