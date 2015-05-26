@@ -126,8 +126,9 @@ class PostAttachmentProcessTask(
         except Post.DoesNotExist:
             CleanStorageTask().delay(path)
 
-            logger.error('No model instance found for {key}'.format(
-                key=key
+            logger.error('No model found {group_id}/{post_id}'.format(
+                group_id=group_pk,
+                post_id=post_pk
             ))
         else:
             post.attachment = path
@@ -169,8 +170,9 @@ class TranscodingTask(
                     attachment_preview=post.attachment_preview
                 )
             else:
-                logger.error('Transcoding failed {file_obj}'.format(
-                    file_obj=post.attachment.name
+                logger.error('Transcoding failed {group}/{post}'.format(
+                    group=post.group.pk,
+                    post=post.pk
                 ))
                 raise self.retry()
 

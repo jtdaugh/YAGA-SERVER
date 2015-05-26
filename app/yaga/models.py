@@ -530,21 +530,30 @@ class Post(
                 ]:
                     post.mark_deleted()
 
-                    logger.error('Attempt to override {file_obj}'.format(
-                        file_obj=post.attachment.name
-                    ))
+                    logger.error(
+                        'Attempt to override {group_id}/{post_id}'.format(
+                            group_id=post.group.pk,
+                            post_id=post.pk
+                        )
+                    )
                 elif post.state == self.state_choices.DELETED:
                     post.mark_deleted()
 
-                    logger.error('Removed deleted {file_obj}'.format(
-                        file_obj=post.attachment.name
-                    ))
+                    logger.error(
+                        'Deleted due state {group_id}/{post_id}'.format(
+                            group_id=post.group.pk,
+                            post_id=post.pk
+                        )
+                    )
                 elif post.is_duplicate():
                     post.mark_deleted()
 
-                    logger.error('Dropped duplicate {file_obj}'.format(
-                        file_obj=post.attachment.name
-                    ))
+                    logger.error(
+                        'Dropped duplicate {group_id}/{post_id}'.format(
+                            group_id=post.group.pk,
+                            post_id=post.pk
+                        )
+                    )
                 else:
                     post.state = self.state_choices.UPLOADED
 
@@ -663,8 +672,9 @@ class Post(
         mime = self.get_mime(header)
 
         if mime != settings.YAGA_AWS_UPLOAD_MIME:
-            logger.error('{file_name} unexpected mime {mime}'.format(
-                file_name=self.attachment.name,
+            logger.error('{group_id}/{post_id} unexpected mime {mime}'.format(
+                group_id=self.group.pk,
+                post_id=self.pk,
                 mime=mime
             ))
 
@@ -675,15 +685,18 @@ class Post(
             >
             settings.YAGA_AWS_UPLOAD_MAX_LENGTH
         ):
-            logger.error('{file_name} exceeded capacity'.format(
-                file_name=self.attachment.name
+            logger.error('{group_id}/{post_id} size is {size}'.format(
+                group_id=self.group.pk,
+                post_id=self.pk,
+                size=self.attachment.size
             ))
 
             return False
 
         if self.attachment.size == 0:
-            logger.error('{file_name} size is 0'.format(
-                file_name=self.attachment.name
+            logger.error('{group_id}/{post_id} size is 0'.format(
+                group_id=self.group.pk,
+                post_id=self.pk
             ))
 
             return False
@@ -701,9 +714,11 @@ class Post(
                         if key in line:
                             if value not in line:
                                 logger.error(
-                                    '{file_name} validation key "{key}" '
-                                    'with "{value}" not in "{line}"'.format(
-                                        file_name=self.attachment.name,
+                                    '{group_id}/{post_id} validation '
+                                    'key "{key}" with "{value}" '
+                                    'not in "{line}"'.format(
+                                        group_id=self.group.pk,
+                                        post_id=self.pk,
                                         key=key,
                                         value=value,
                                         line=line
@@ -713,9 +728,10 @@ class Post(
                                 return False
             else:
                 logger.error(
-                    '{file_name} validation process failed '
-                    '\n stdout->{stdout} \n stderr->{stderr}'.format(
-                        file_name=self.attachment.name,
+                    '{group_id}/{post_id} validation process failed\n'
+                    'stdout->{stdout}\nstderr->{stderr}'.format(
+                        group_id=self.group.pk,
+                        post_id=self.pk,
                         stdout=process.stdout,
                         stderr=process.stderr
                     )
