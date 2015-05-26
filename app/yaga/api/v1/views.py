@@ -463,6 +463,8 @@ class GroupMemberUpdateDestroyAPIView(
                 user=user
             )
 
+            is_muted_group = obj.mute
+
             obj.delete()
 
             if user == self.request.user:
@@ -477,11 +479,12 @@ class GroupMemberUpdateDestroyAPIView(
                     emitter=self.request.user.pk
                 )
 
-                notifications.KickDirectNotification.schedule(
-                    group=instance.pk,
-                    target=user.pk,
-                    emitter=self.request.user.pk
-                )
+                if not is_muted_group:
+                    notifications.KickDirectNotification.schedule(
+                        group=instance.pk,
+                        target=user.pk,
+                        emitter=self.request.user.pk
+                    )
         except (get_user_model().DoesNotExist, Member.DoesNotExist):
             pass
 

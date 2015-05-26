@@ -85,6 +85,15 @@ class Notification(
     def get_emitter(self):
         return self.emitter
 
+    def is_muted_group(self):
+        return self.get_group().member_set.filter(
+            user=self.get_target(),
+            mute=False
+        ).first() is None
+
+    def is_ready_post(self):
+        return self.get_post().state == self.get_post().state_choices.READY
+
     def check_condition(self):
         return True
 
@@ -265,9 +274,11 @@ class LikeDirectNotification(
 ):
     def check_condition(self):
         return (
-            self.get_target() != self.get_emitter()
+            not self.is_muted_group()
             and
-            self.get_post().state == self.post.state_choices.READY
+            self.is_ready_post()
+            and
+            self.get_target() != self.get_emitter()
         )
 
     def __init__(self, **kwargs):
@@ -375,13 +386,7 @@ class CaptionDirectNotification(
     DirectNotification
 ):
     def check_condition(self):
-        return (
-            self.get_group().member_set.filter(
-                user=self.target
-            ).first() is not None
-            and
-            self.get_post().state == self.post.state_choices.READY
-        )
+        return (not self.is_muted_group() and self.is_ready_post())
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
