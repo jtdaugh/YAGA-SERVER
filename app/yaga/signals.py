@@ -4,6 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from django.contrib.auth import get_user_model
+
 from app.signals import ModelSignal
 
 from . import models, receivers
@@ -63,3 +65,10 @@ class LikeSignal(
 ):
     model = models.Like
     receiver = receivers.LikeReceiver
+
+
+class UserSignal(
+    ModelSignal
+):
+    model = get_user_model()
+    receiver = receivers.UserReceiver

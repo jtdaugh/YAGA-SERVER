@@ -7,12 +7,12 @@ from future.builtins import (  # noqa
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.utils import six
+from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ungettext
-from django.utils.lru_cache import lru_cache
 
 from .conf import settings
-from .models import Device, Group, Post
+from .models import Contact, Device, Group, Member, Post
 from .providers import apns_provider
 
 
@@ -495,67 +495,75 @@ class MembersGroupNotification(
         return _('{emitter} added {targets} to {group}')
 
 
-# class NewUserIOSNotification(
-#     IOSNotification
-# ):
-#     @lru_cache()
-#     def get_groups(self):
-#         return [member.group for member in Member.objects.filter(
-#             user=self.user
-#         )]
+class JoinGroupNotification(
+    GroupNotification
+):
+    def __init__(self, **kwargs):
+        self.emitter = self.load_user(kwargs['emitter'])
+        self.groups = self.load_groups(self.get_emitter())
+        self.users = self.load_users(self.get_groups())
 
-#     def get_emitter(self):
-#         return self.user
+    def load_groups(self, user):
+        return [member.group for member in user.member_set.select_related(
+            'group'
+        )]
 
-#     def push(self):
-#         self.push_broadcast_groups()
+    def load_users(self, groups):
+        return [member.user for member in Member.objects.select_related(
+            'user'
+        ).filter(
+            group__in=self.get_groups()
+        ).distinct('user')]
 
-#         self.push_broadcast_contacts()
+    @lru_cache()
+    def get_groups(self):
+        return self.groups
 
-#     def push_broadcast_groups(self):
-#         groups = self.get_groups()
+    @lru_cache()
+    def get_users(self):
+        return self.users
 
-#         self.get_broadcast_message = lambda: _('{member} joined {group}')
+    def notify(self):
+        self.get_message = lambda: _('{emitter} joined {group}')
 
-#         for group in groups:
-#             self.get_meta = lambda: {
-#                 'event': 'join',
-#                 'user_id': str(self.user.pk),
-#                 'group_id': str(group.pk),
-#             }
+        for group in self.get_groups():
+            self.get_group = lambda: group
 
-#             self.get_broadcast_kwargs = lambda: {
-#                 'member': self.user.get_username(),
-#                 'group': group.name
-#             }
+            self.get_meta = lambda: {
+                'event': 'join',
+                'user_id': str(self.get_emitter().pk),
+                'group_id': str(self.get_group().pk),
+            }
 
-#             self.get_group = lambda: group
+            self.get_message_kwargs = lambda: {
+                'emitter': self.get_emitter().get_username(),
+                'group': self.get_group().name
+            }
 
-#             self.push_broadcast()
+            super(JoinGroupNotification, self).notify()
 
-#     def push_broadcast_contacts(self):
-#         users = [member.user for member in Member.objects.filter(
-#             group__in=self.get_groups()
-#         ).distinct('user')]
+        self.get_receivers = lambda: [
+            contact.user for contact in Contact.objects.select_related(
+                'user'
+            ).filter(
+                phones__contains=[self.get_emitter().phone.as_e164],
+            ).exclude(
+                user__in=self.get_users()
+            )
+        ]
 
-#         self.get_broadcast_receivers = lambda: [
-#             contact.user for contact in Contact.objects.filter(
-#                 phones__contains=[self.user.phone.as_e164],
-#             ).exclude(
-#                 user__in=users
-#             )
-#         ]
+        self.get_meta = lambda: {
+            'event': 'registration',
+            'user_id': str(self.get_emitter().pk)
+        }
 
-#         self.get_meta = lambda: {
-#             'event': 'registration',
-#             'user_id': str(self.user.pk)
-#         }
+        self.get_message_kwargs = lambda: {
+            'emitter': self.get_emitter().get_username()
+        }
 
-#         self.get_broadcast_message = lambda: _('{member} joined Yaga')
+        self.get_message = lambda: _('{emitter} joined Yaga')
 
-#         self.get_broadcast_kwargs = lambda: {
-#             'member': self.user.get_username()
-#         }
+        super(JoinGroupNotification, self).notify()
 
-#         self.push_broadcast()
+
 from .tasks import NotificationTask  # noqa # isort:skip

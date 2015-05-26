@@ -6,6 +6,8 @@ from future.builtins import (  # noqa
 
 from app.receivers import ModelReceiver
 
+from .notifications import JoinGroupNotification
+
 
 class CodeReceiver(
     ModelReceiver
@@ -68,3 +70,20 @@ class LikeReceiver(
         instance = kwargs['instance']
 
         instance.post.mark_updated()
+
+
+class UserReceiver(
+    ModelReceiver
+):
+    @staticmethod
+    def pre_save(sender, **kwargs):
+        instance = kwargs['instance']
+
+        if (
+            instance.pk
+            and instance.name
+            and instance.tracker.previous('name') is None
+        ):
+            JoinGroupNotification.schedule(
+                emitter=instance.pk
+            )
