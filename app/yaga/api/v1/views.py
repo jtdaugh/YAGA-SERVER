@@ -386,10 +386,14 @@ class GroupMemberUpdateDestroyAPIView(
         query = None
 
         if validated_data.get('names'):
-            query = Q(name__in=validated_data['names'])
+            name_filter = Q()
+            for name in list(set(validated_data['names'])):
+                name_filter |= Q(name__iexact=name)
+
+            query = name_filter
 
         if validated_data.get('phones'):
-            _query = Q(phone__in=validated_data['phones'])
+            _query = Q(phone__in=list(set(validated_data['phones'])))
 
             if query:
                 query |= _query
@@ -748,7 +752,7 @@ class ContactListCreateAPIView(
 
         return get_user_model().objects.filter(
             verified=True,
-            phone__in=serializer.validated_data['phones']
+            phone__in=list(set(serializer.validated_data['phones']))
         )
 
     def post(self, request, *args, **kwargs):
