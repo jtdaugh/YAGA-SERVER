@@ -573,7 +573,7 @@ class Post(
                 else:
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
-                    # self.notify()
+                    self.notify()
 
                     post.save()
             else:
