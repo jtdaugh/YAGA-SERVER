@@ -337,6 +337,7 @@ class GroupMemberUpdateDestroyAPIView(
     generics.UpdateAPIView,
     generics.DestroyAPIView
 ):
+    throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
         IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
@@ -530,6 +531,7 @@ class PostCreateAPIView(
     NonAtomicView,
     generics.CreateAPIView
 ):
+    throttle_classes = (throttling.PostScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.PostSerializer
     permission_classes = (
@@ -668,6 +670,7 @@ class LikeCreateDestroyAPIView(
     generics.CreateAPIView,
     generics.DestroyAPIView
 ):
+    throttle_classes = (throttling.LikeScopedRateThrottle,)
     serializer_class = serializers.PostSerializer
     permission_classes = (
         IsAuthenticated, permissions.PostGroupMember,
@@ -722,6 +725,7 @@ class DeviceCreateAPIView(
     NonAtomicView,
     generics.CreateAPIView
 ):
+    throttle_classes = (throttling.DeviceScopedRateThrottle,)
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.DeviceSerializer
 

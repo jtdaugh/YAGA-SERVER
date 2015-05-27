@@ -47,3 +47,27 @@ class UserSearchScopedRateThrottle(
     BaseScopedRateThrottle
 ):
     rate = '10/hour'
+
+
+class MemberScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '50/hour'
+
+
+class PostScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '50/hour'
+
+
+class LikeScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '100/hour'
+
+
+class DeviceScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '2/hour'
