@@ -7,7 +7,6 @@ from future.builtins import (  # noqa
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.utils import six
-from django.utils.lru_cache import lru_cache
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ungettext
 
@@ -69,30 +68,14 @@ class Notification(
             pk=pk
         )
 
-    @lru_cache()
-    def get_post(self):
-        return self.post
-
-    @lru_cache()
-    def get_group(self):
-        return self.group
-
-    @lru_cache()
-    def get_target(self):
-        return self.target
-
-    @lru_cache()
-    def get_emitter(self):
-        return self.emitter
-
     def is_muted_group(self):
-        return self.get_group().member_set.filter(
-            user=self.get_target(),
+        return self.group.member_set.filter(
+            user=self.target,
             mute=False
         ).first() is None
 
     def is_ready_post(self):
-        return self.get_post().state == self.get_post().state_choices.READY
+        return self.post.state == self.post.state_choices.READY
 
     def check_condition(self):
         return True
@@ -184,7 +167,7 @@ class DirectNotification(
     Notification
 ):
     def get_receivers(self):
-        return [self.get_target()]
+        return [self.target]
 
 
 class GroupNotification(
@@ -192,11 +175,11 @@ class GroupNotification(
 ):
     def get_exclude(self):
         return {
-            'user': self.get_emitter()
+            'user': self.emitter
         }
 
     def get_receivers(self):
-        members = self.get_group().member_set.select_related(
+        members = self.group.member_set.select_related(
             'user'
         ).filter(
             mute=False
@@ -217,12 +200,12 @@ class PostGroupNotification(
 
     def get_caption(self):
         if (
-            self.get_post().name
+            self.post.name
             and
-            self.get_post().namer == self.get_emitter()
+            self.post.namer == self.emitter
         ):
             return _(' with caption {caption}').format(
-                caption=self.get_post().name
+                caption=self.post.name
             )
         else:
             return ''
@@ -230,8 +213,8 @@ class PostGroupNotification(
     def get_meta(self):
         return {
             'event': 'post',
-            'post_id': str(self.get_post().pk),
-            'group_id': str(self.get_group().pk)
+            'post_id': str(self.post.pk),
+            'group_id': str(self.group.pk)
         }
 
     def get_message(self):
@@ -239,8 +222,8 @@ class PostGroupNotification(
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'emitter': self.get_emitter().get_username(),
+            'group': self.group.name,
+            'emitter': self.emitter.get_username(),
             'caption': self.get_caption()
         }
 
@@ -256,13 +239,13 @@ class InviteDirectNotification(
     def get_meta(self):
         return {
             'event': 'invite',
-            'group_id': str(self.get_group().pk)
+            'group_id': str(self.group.pk)
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'emitter': self.get_emitter().get_username()
+            'group': self.group.name,
+            'emitter': self.emitter.get_username()
         }
 
     def get_message(self):
@@ -278,7 +261,7 @@ class LikeDirectNotification(
             and
             self.is_ready_post()
             and
-            self.get_target() != self.get_emitter()
+            self.target != self.emitter
         )
 
     def __init__(self, **kwargs):
@@ -290,14 +273,14 @@ class LikeDirectNotification(
     def get_meta(self):
         return {
             'event': 'like',
-            'post_id': str(self.get_post().pk),
-            'group_id': str(self.get_group().pk),
+            'post_id': str(self.post.pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'emitter': self.get_emitter().get_username(),
-            'group': self.get_group().name,
+            'emitter': self.emitter.get_username(),
+            'group': self.group.name,
         }
 
     def get_message(self):
@@ -314,14 +297,14 @@ class LeftGroupNotification(
     def get_meta(self):
         return {
             'event': 'leave',
-            'user_id': str(self.get_emitter().pk),
-            'group_id': str(self.get_group().pk),
+            'user_id': str(self.emitter.pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'emitter': self.get_emitter().get_username(),
+            'group': self.group.name,
+            'emitter': self.emitter.get_username(),
         }
 
     def get_message(self):
@@ -332,7 +315,7 @@ class KickGroupNotification(
     GroupNotification
 ):
     def check_condition(self):
-        return self.get_target().name is not None
+        return self.target.name is not None
 
     def __init__(self, **kwargs):
         self.group = self.load_group(kwargs['group'])
@@ -342,15 +325,15 @@ class KickGroupNotification(
     def get_meta(self):
         return {
             'event': 'kick',
-            'user_id': str(self.get_target().pk),
-            'group_id': str(self.get_group().pk),
+            'user_id': str(self.target.pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'target': self.get_target().get_username(),
-            'emitter': self.get_emitter().get_username()
+            'group': self.group.name,
+            'target': self.target.get_username(),
+            'emitter': self.emitter.get_username()
         }
 
     def get_message(self):
@@ -368,14 +351,14 @@ class KickDirectNotification(
     def get_meta(self):
         return {
             'event': 'kick',
-            'user_id': str(self.get_target().pk),
-            'group_id': str(self.get_group().pk),
+            'user_id': str(self.target.pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'emitter': self.get_emitter().get_username()
+            'group': self.group.name,
+            'emitter': self.emitter.get_username()
         }
 
     def get_message(self):
@@ -397,14 +380,14 @@ class CaptionDirectNotification(
     def get_meta(self):
         return {
             'event': 'caption',
-            'post_id': str(self.get_post().pk),
-            'group_id': str(self.get_group().pk),
+            'post_id': str(self.post.pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
-            'emitter': self.get_target().get_username()
+            'group': self.group.name,
+            'emitter': self.target.get_username()
         }
 
     def get_message(self):
@@ -424,12 +407,12 @@ class RenameGroupNotification(
     def get_meta(self):
         return {
             'event': 'rename',
-            'group_id': str(self.get_group().pk),
+            'group_id': str(self.group.pk),
         }
 
     def get_message_kwargs(self):
         return {
-            'emitter': self.get_emitter().get_username(),
+            'emitter': self.emitter.get_username(),
             'old_name': self.old_name,
             'new_name': self.new_name
         }
@@ -442,7 +425,7 @@ class MembersGroupNotification(
     GroupNotification
 ):
     def check_condition(self):
-        return bool(self.get_targets())
+        return bool(self.targets)
 
     def __init__(self, **kwargs):
         self.group = self.load_group(kwargs['group'])
@@ -450,28 +433,24 @@ class MembersGroupNotification(
         self.emitter = self.load_user(kwargs['emitter'])
 
     def load_users(self, pks):
-        return get_user_model().objects.filter(
+        return list(get_user_model().objects.filter(
             pk__in=pks
         ).exclude(
             name=None
-        )
-
-    @lru_cache()
-    def get_targets(self):
-        return list(self.targets)
+        ))
 
     def get_usernames(self, users):
         return [user.get_username() for user in users]
 
     def get_targets_string(self):
-        if len(self.get_targets()) == 1:
-            return self.get_targets()[0].get_username()
+        if len(self.targets) == 1:
+            return self.targets[0].get_username()
         elif (
             settings.YAGA_PUSH_NEW_MEMBERS_LIMIT
             >=
-            len(self.get_targets())
+            len(self.targets)
         ):
-            users = self.get_usernames(self.get_targets())
+            users = self.get_usernames(self.targets)
 
             return _('{list} and {last}').format(
                 list=', '.join(users[:-1]),
@@ -479,11 +458,11 @@ class MembersGroupNotification(
             )
         else:
             users = self.get_usernames(
-                self.get_targets()[:settings.YAGA_PUSH_NEW_MEMBERS_LIMIT - 1]
+                self.targets[:settings.YAGA_PUSH_NEW_MEMBERS_LIMIT - 1]
             )
 
             count = (
-                len(self.get_targets())
+                len(self.targets)
                 -
                 settings.YAGA_PUSH_NEW_MEMBERS_LIMIT
             ) + 1
@@ -500,21 +479,21 @@ class MembersGroupNotification(
     def get_exclude(self):
         return {
             'user__in': list(set(
-                [self.get_emitter()] + self.get_targets()
+                [self.emitter] + self.targets
             ))
         }
 
     def get_meta(self):
         return {
             'event': 'members',
-            'group_id': str(self.get_group().pk)
+            'group_id': str(self.group.pk)
         }
 
     def get_message_kwargs(self):
         return {
-            'group': self.get_group().name,
+            'group': self.group.name,
             'targets': self.get_targets_string(),
-            'emitter': self.get_emitter().get_username()
+            'emitter': self.emitter.get_username()
         }
 
     def get_message(self):
@@ -526,8 +505,8 @@ class JoinGroupNotification(
 ):
     def __init__(self, **kwargs):
         self.emitter = self.load_user(kwargs['emitter'])
-        self.groups = self.load_groups(self.get_emitter())
-        self.users = self.load_users(self.get_groups())
+        self.groups = self.load_groups(self.emitter)
+        self.users = self.load_users(self.groups)
 
     def load_groups(self, user):
         return [member.group for member in user.member_set.select_related(
@@ -538,32 +517,24 @@ class JoinGroupNotification(
         return [member.user for member in Member.objects.select_related(
             'user'
         ).filter(
-            group__in=self.get_groups()
+            group__in=self.groups
         ).distinct('user')]
 
-    @lru_cache()
-    def get_groups(self):
-        return self.groups
-
-    @lru_cache()
-    def get_users(self):
-        return self.users
-
     def notify(self):
-        self.get_message = lambda: _('{emitter} joined {group}')
+        self.get_message = lambda: _('{emitter} joined {instance}')
 
-        for group in self.get_groups():
-            self.get_group = lambda: group
+        for group in self.groups:
+            self.group = group
 
             self.get_meta = lambda: {
                 'event': 'join',
-                'user_id': str(self.get_emitter().pk),
-                'group_id': str(self.get_group().pk),
+                'user_id': str(self.emitter.pk),
+                'group_id': str(self.group.pk),
             }
 
             self.get_message_kwargs = lambda: {
-                'emitter': self.get_emitter().get_username(),
-                'group': self.get_group().name
+                'emitter': self.emitter.get_username(),
+                'instance': self.group.name,
             }
 
             super(JoinGroupNotification, self).notify()
@@ -572,22 +543,21 @@ class JoinGroupNotification(
             contact.user for contact in Contact.objects.select_related(
                 'user'
             ).filter(
-                phones__contains=[self.get_emitter().phone.as_e164],
+                phones__contains=[self.emitter.phone.as_e164],
             ).exclude(
-                user__in=self.get_users()
+                user__in=self.users
             )
         ]
 
         self.get_meta = lambda: {
             'event': 'registration',
-            'user_id': str(self.get_emitter().pk)
+            'user_id': str(self.emitter.pk)
         }
 
         self.get_message_kwargs = lambda: {
-            'emitter': self.get_emitter().get_username()
+            'emitter': self.emitter.get_username(),
+            'instance': 'Yaga'
         }
-
-        self.get_message = lambda: _('{emitter} joined Yaga')
 
         super(JoinGroupNotification, self).notify()
 
