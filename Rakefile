@@ -2,6 +2,7 @@ require 'rake'
 
 APP_DIR = 'app'
 PROCESS_WORKERS = 3
+LIMIT = 1000
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = {
   web: true,
@@ -28,9 +29,11 @@ task :deploy do
 end
 
 task :uwsgi do
-  cmd = 'uwsgi --module=app.wsgi:application --http-keepalive=0 --master --processes=%{workers} --harakiri=%{timeout} --vacuum --single-interpreter --enable-threads --http :%{port}'
+  cmd = 'uwsgi --min-worker-lifetime=0 --max-requests=%{limit} --logformat=%{format} --module=app.wsgi:application --http-keepalive=0 --master --processes=%{workers} --harakiri=%{timeout} --vacuum --single-interpreter --enable-threads --http=:%{port}'
 
   cmd = cmd % {
+    limit: LIMIT,
+    format: '"%(addr) \"%(method) %(uri) %(proto)\" -> %(status) in %(msecs)ms"',
     workers: PROCESS_WORKERS,
     timeout: HTTP_TIMEOUT,
     port: ENV['PORT'] || 8000
@@ -43,9 +46,11 @@ task :uwsgi do
 end
 
 task :gunicorn do
-  cmd = 'gunicorn app.wsgi:application --keep-alive=0 --workers=%{workers} --timeout=%{timeout} --preload --access-logfile=- --error-logfile=- --bind=:%{port}'
+  cmd = 'gunicorn --max-requests=%{limit} --access-logformat=%{format} app.wsgi:application --keep-alive=0 --workers=%{workers} --timeout=%{timeout} --preload --access-logfile=- --error-logfile=- --bind=:%{port}'
 
   cmd = cmd % {
+    limit: LIMIT,
+    format: '"%(h)s \"%(r)s\" -> %(s)s in %(L)ss"',
     workers: PROCESS_WORKERS,
     timeout: HTTP_TIMEOUT,
     port: ENV['PORT'] || 8000
@@ -69,12 +74,13 @@ task :sqs do
 end
 
 task :celery_broker do
-  cmd = 'celery -A app worker -c %{workers} -B'
+  cmd = 'celery -A app worker -c %{workers} -B --maxtasksperchild %{limit}'
 
   workers = PROCESS_WORKERS - 1 if PROCESS_WORKERS > 1
 
   cmd = cmd % {
-    workers: workers
+    workers: workers,
+    limit: LIMIT
   }
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]
@@ -85,10 +91,11 @@ task :celery_broker do
 end
 
 task :celery_worker do
-  cmd = 'celery -A app worker -c %{workers}'
+  cmd = 'celery -A app worker -c %{workers} --maxtasksperchild %{limit}'
 
   cmd = cmd % {
-    workers: PROCESS_WORKERS
+    workers: PROCESS_WORKERS,
+    limit: LIMIT
   }
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]

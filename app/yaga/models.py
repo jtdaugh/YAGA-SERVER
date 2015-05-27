@@ -656,7 +656,7 @@ class Post(
             return md5.hexdigest()
 
     def is_duplicate(self):
-        return Post.atomic_objects.filter(
+        return Post.objects.filter(
             group=self.group,
             checksum=self.checksum
         ).exists()

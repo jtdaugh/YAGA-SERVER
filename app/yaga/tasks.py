@@ -94,7 +94,7 @@ class CleanStorageTask(
             default_storage.delete(path)
             cloudfront_storage.delete(full_path)
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             raise self.retry(exc=e)
 
 

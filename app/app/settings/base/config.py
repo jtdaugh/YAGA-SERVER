@@ -453,7 +453,7 @@ class BaseConfiguration(
         # requestprovider
         'requestprovider.middleware.RequestProviderMiddleware',
         # sentry 404
-        'raven.contrib.django.middleware.Sentry404CatchMiddleware',
+        # 'raven.contrib.django.middleware.Sentry404CatchMiddleware',
     ]
     # -------------------------------------------------------
     # django south migrations
@@ -541,17 +541,17 @@ class BaseConfiguration(
     MANAGERS = ADMINS
     DEBUG_LOGGER = {
         'level': 'DEBUG',
-        'handlers': ['console', 'sentry'],
+        'handlers': ['debug', 'sentry'],
         'propagate': False,
     }
     INFO_LOGGER = {
         'level': 'INFO',
-        'handlers': ['console', 'sentry'],
+        'handlers': ['info', 'sentry'],
         'propagate': False,
     }
     ERROR_LOGGER = {
         'level': 'ERROR',
-        'handlers': ['console', 'sentry'],
+        'handlers': ['error', 'sentry'],
         'propagate': False,
     }
     LOGGING = {
@@ -562,12 +562,22 @@ class BaseConfiguration(
                 'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
             },
             'simple': {
-                'format': '%(levelname)s %(message)s'
+                'format': '%(message)s'
             },
         },
         'handlers': {
-            'console': {
+            'info': {
+                'level': 'INFO',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+            },
+            'debug': {
                 'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose'
+            },
+            'error': {
+                'level': 'ERROR',
                 'class': 'logging.StreamHandler',
                 'formatter': 'verbose'
             },
@@ -580,28 +590,12 @@ class BaseConfiguration(
         'loggers': {
             'apns_clerk': ERROR_LOGGER,
             'apns_client': ERROR_LOGGER,
-            # 'amqp': DEBUG_LOGGER,
-            # 'kombu': DEBUG_LOGGER,
-            # 'kombu.common': DEBUG_LOGGER,
-            # 'kombu.connection': DEBUG_LOGGER,
+
             'celery': INFO_LOGGER,
-            # 'celery.worker': DEBUG_LOGGER,
-            # 'celery.task': DEBUG_LOGGER,
-            # 'celery.app.builtins': DEBUG_LOGGER,
-            # 'celery.app': DEBUG_LOGGER,
 
-            'uwgi': ERROR_LOGGER,
+            'gunicorn': INFO_LOGGER,
 
-            'gunicorn': ERROR_LOGGER,
-            # 'gunicorn.http': DEBUG_LOGGER,
-            # 'gunicorn.http.wsgi': DEBUG_LOGGER,
-            # 'gunicorn.access': DEBUG_LOGGER,
-            # 'gunicorn.error': DEBUG_LOGGER,
-
-            # 'configurations.importer': DEBUG_LOGGER,
-            'configurations': DEBUG_LOGGER,
-
-            # 'multiprocessing': DEBUG_LOGGER,
+            # 'uwsgi': INFO_LOGGER,
 
             'django': ERROR_LOGGER,
             # 'django.request': DEBUG_LOGGER,
@@ -610,7 +604,7 @@ class BaseConfiguration(
 
             'boto': ERROR_LOGGER,
 
-            'requests': INFO_LOGGER,
+            'requests': ERROR_LOGGER,
 
             'yaga': DEBUG_LOGGER,
             'app': DEBUG_LOGGER
@@ -648,7 +642,7 @@ class BaseConfiguration(
     CELERY_ACKS_LATE = True
     CELERYD_PREFETCH_MULTIPLIER = 1
     CELERY_REDIRECT_STDOUTS = False
-    # CELERYD_TASK_TIME_LIMIT = 60
+    CELERYD_TASK_TIME_LIMIT = 30
     # CELERYD_TASK_SOFT_TIME_LIMIT = 30
     # -------------------------------------------------------
     # rest framework configuration
