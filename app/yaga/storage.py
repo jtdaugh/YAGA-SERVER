@@ -5,9 +5,36 @@ from future.builtins import (  # noqa
 )
 
 import boto
+from django.core.cache import cache
 from django.core.files.storage import default_storage
 
 from .conf import settings
+
+
+class CacheStorage(
+    object
+):
+    def __init__(self):
+        self.ttl = settings.YAGA_CLOUDFRONT_CLEAN_CACHE_KEY_TTL
+        self.key = settings.YAGA_CLOUDFRONT_CLEAN_CACHE_KEY
+
+    def get(self):
+        value = cache.get(self.key)
+
+        if not value:
+            value = []
+
+        return value
+
+    def remove(self, value):
+        value = list(set(self.get()) - set(value))
+
+        return cache.set(self.key, value, self.ttl)
+
+    def add(self, value):
+        value = list(set(self.get() + value))
+
+        return cache.set(self.key, value, self.ttl)
 
 
 class CloudfrontStorage(
@@ -21,6 +48,8 @@ class CloudfrontStorage(
         self.enabled = bool(settings.CLOUDFRONT_HOST)
 
         if self.enabled:
+            self.cache_storage = CacheStorage()
+
             self.connection = boto.connect_cloudfront(
                 aws_access_key_id,
                 aws_secret_access_key
@@ -35,12 +64,32 @@ class CloudfrontStorage(
                     self.distribution = distribution
                     break
 
+    def to_list(self, keys):
+        if not isinstance(keys, (list, tuple)):
+            keys = [keys]
+
+        keys = list(set(keys))
+
+        return keys
+
+    def schedule(self, keys):
+        if self.enabled:
+            keys = self.to_list(keys)
+
+            self.cache_storage.add(keys)
+
+    def clean(self):
+        if self.enabled:
+            keys = self.cache_storage.get()
+
+            if keys:
+                self.delete(keys)
+
+                self.cache_storage.remove(keys)
+
     def delete(self, keys):
         if self.enabled:
-            if not isinstance(keys, (list, tuple)):
-                keys = [keys]
-
-            keys = list(set(keys))
+            keys = self.to_list(keys)
 
             absolute_keys = []
 
@@ -53,7 +102,8 @@ class CloudfrontStorage(
                 absolute_keys.append(key)
 
             return self.connection.create_invalidation_request(
-                self.distribution.id, absolute_keys
+                self.distribution.id,
+                absolute_keys
             )
 
 

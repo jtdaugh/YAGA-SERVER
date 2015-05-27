@@ -20,13 +20,27 @@ from .utils import post_attachment_re
 logger = logging.getLogger(__name__)
 
 
+if cloudfront_storage.enabled:
+    class CloudfrontCleanStoragePeriodicTask(
+        celery.PeriodicTask
+    ):
+        run_every = settings.YAGA_CLOUDFRONT_CLEAN_RUN_EVERY
+
+        def run(self):
+            try:
+                cloudfront_storage.clean()
+            except Exception as e:
+                logger.exception(e)
+                raise self.retry(exc=e)
+
+
 if settings.YAGA_PERIODIC_CLEANUP:
     class CodeCleanupAtomicPeriodicTask(
         celery.AtomicPeriodicTask
     ):
         run_every = settings.YAGA_CODE_CLEANUP_RUN_EVERY
 
-        def run(self, *args, **kwargs):
+        def run(self):
             for code in Code.objects.filter(
                 expire_at__lte=timezone.now()
             ):
@@ -92,10 +106,11 @@ class CleanStorageTask(
 
         try:
             default_storage.delete(path)
-            cloudfront_storage.delete(full_path)
         except Exception as e:
             logger.exception(e)
             raise self.retry(exc=e)
+
+        cloudfront_storage.schedule(full_path)
 
 
 class UploadProcessTask(
