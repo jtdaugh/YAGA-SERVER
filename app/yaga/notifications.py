@@ -207,6 +207,9 @@ class GroupNotification(
 class PostGroupNotification(
     GroupNotification
 ):
+    def check_condition(self):
+        return self.is_ready_post()
+
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
 
