@@ -38,6 +38,8 @@ class NotificationInstances(
 class Notification(
     six.with_metaclass(NotificationInstances, object)
 ):
+    setup = True
+
     def __init__(self, **kwargs):
         raise NotImplementedError
 
@@ -51,12 +53,15 @@ class Notification(
         connection.on_commit(_schedule)
 
     def load_post(self, pk):
-        return Post.objects.select_related(
-            'user',
-            'group'
-        ).get(
-            pk=pk
-        )
+        try:
+            return Post.objects.select_related(
+                'user',
+                'group'
+            ).get(
+                pk=pk
+            )
+        except Post.DoesNotExist:
+            self.setup = False
 
     def load_group(self, pk):
         return Group.objects.get(
@@ -79,6 +84,9 @@ class Notification(
 
     def check_condition(self):
         return True
+
+    def check_setup(self):
+        return self.setup
 
     def check_threshold(self):
         return True
@@ -133,7 +141,13 @@ class Notification(
         raise NotImplementedError
 
     def notify(self):
-        if self.check_condition() and self.check_threshold():
+        if (
+            self.check_setup()
+            and
+            self.check_condition()
+            and
+            self.check_threshold()
+        ):
             token_map = self.get_token_map(
                 self.get_devices(
                     self.get_receivers()
@@ -195,8 +209,10 @@ class PostGroupNotification(
 ):
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
-        self.group = self.post.group
-        self.emitter = self.post.user
+
+        if self.post:
+            self.group = self.post.group
+            self.emitter = self.post.user
 
     def get_caption(self):
         if (
@@ -266,9 +282,11 @@ class LikeDirectNotification(
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
-        self.group = self.post.group
-        self.target = self.post.user
-        self.emitter = self.load_user(kwargs['emitter'])
+
+        if self.post:
+            self.group = self.post.group
+            self.target = self.post.user
+            self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {
@@ -373,9 +391,11 @@ class CaptionDirectNotification(
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
-        self.group = self.post.group
-        self.target = self.post.user
-        self.emitter = self.load_user(kwargs['emitter'])
+
+        if self.post:
+            self.group = self.post.group
+            self.target = self.post.user
+            self.emitter = self.load_user(kwargs['emitter'])
 
     def get_meta(self):
         return {

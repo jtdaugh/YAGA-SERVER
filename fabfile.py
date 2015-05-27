@@ -16,7 +16,7 @@ DYNOS = OrderedDict((
     ('web', 1),
     ('sqs', 1),
     ('celery_broker', 1),
-    ('celery_worker', 0),
+    ('celery_worker', 1),
 ))
 STOP_TIMEOUT = 35
 START_TIMEOUT = 10
