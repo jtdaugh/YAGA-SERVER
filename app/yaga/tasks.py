@@ -6,6 +6,7 @@ from future.builtins import (  # noqa
 
 import logging
 
+from celery.exceptions import SoftTimeLimitExceeded
 from django.core.files.storage import default_storage
 from django.utils import timezone
 
@@ -150,6 +151,8 @@ class PostAttachmentProcessTask(
 
             try:
                 is_valid_attachment = post.is_valid_attachment()
+            except SoftTimeLimitExceeded:
+                raise self.retry()
             except Exception as e:
                 logger.exception(e)
                 raise self.retry(exc=e)
@@ -176,6 +179,8 @@ class TranscodingTask(
         if post:
             try:
                 transcoded = post.transcode()
+            except SoftTimeLimitExceeded:
+                raise self.retry()
             except Exception as e:
                 logger.exception(e)
                 raise self.retry(exc=e)
