@@ -73,7 +73,7 @@ def stop():
 
 @task
 def start():
-    for name, dynos in DYNOS.items():
+    for name, dynos in reversed(DYNOS.items()):
         local('heroku ps:scale {name}={dynos}'.format(
             name=name,
             dynos=dynos
