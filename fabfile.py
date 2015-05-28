@@ -13,9 +13,9 @@ from fabric.operations import prompt
 
 APP_DIR = 'app'
 DYNOS = OrderedDict((
-    ('web', 1),
-    ('sqs', 1),
-    ('celery_broker', 1),
+    ('web', 0),
+    ('sqs', 0),
+    ('celery_broker', 0),
     ('celery_worker', 0),
 ))
 STOP_TIMEOUT = 35
