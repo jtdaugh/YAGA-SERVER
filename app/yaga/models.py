@@ -630,6 +630,13 @@ class Post(
 
             connection.on_commit(delete_attachment_preview)
 
+        old_attachment_preview_path = post_attachment_preview_upload_to(self)
+
+        def delete_old_attachment_preview():
+            CleanStorageTask().delay(old_attachment_preview_path)
+
+        connection.on_commit(delete_old_attachment_preview)
+
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
 
