@@ -1,7 +1,7 @@
 require 'rake'
 
 APP_DIR = 'app'
-PROCESS_WORKERS = 2
+PROCESS_WORKERS = 3
 LIMIT = 1000
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = {
@@ -74,14 +74,7 @@ task :sqs do
 end
 
 task :celery_broker do
-  cmd = 'celery -A app worker -c %{workers} -B --maxtasksperchild %{limit}'
-
-  workers = PROCESS_WORKERS - 1 if PROCESS_WORKERS > 1
-
-  cmd = cmd % {
-    workers: workers,
-    limit: LIMIT
-  }
+  cmd = 'celery -A app beat'
 
   cmd = NEWRELIC_CMD + cmd if USE_NEWRELIC[:background]
 
