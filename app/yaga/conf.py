@@ -42,6 +42,7 @@ class YagaAppConf(
         'speed': 1.5,
         'fps': 4
     }
+    ATTACHMENT_VALIDATE_TIMEOUT = 60 * 3
     ATTACHMENT_VALIDATE_CMD = 'ffprobe {path}'
     ATTACHMENT_VALIDATE_RULES = (
         ('major_brand', 'mp42'),
@@ -76,7 +77,10 @@ class YagaAppConf(
 
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
-    ATTACHMENT_TRANSCODE_TIMEOUT = datetime.timedelta(minutes=60)
+    ATTACHMENT_TRANSCODE_EXPIRES = datetime.timedelta(minutes=90)
+    ATTACHMENT_TRANSCODE_TIMEOUT = 20 * 60
+    ATTACHMENT_TRANSCODE_DEADLINE = datetime.timedelta(hours=6)
+    ATTACHMENT_TRANSCODE_RUN_EVERY = datetime.timedelta(minutes=30)
 
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
     CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)

@@ -459,10 +459,6 @@ class Post(
 
                 if process:
                     default_storage.delete(
-                        post_attachment_preview_upload_to(self)
-                    )
-
-                    default_storage.delete(
                         post_attachment_server_preview_upload_to(self)
                     )
 
@@ -579,7 +575,7 @@ class Post(
                 elif post.state == self.state_choices.UPLOADED:
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
-                    # self.notify()
+                    self.notify()
 
                     post.save()
             else:

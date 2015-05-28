@@ -89,18 +89,25 @@ if settings.YAGA_PERIODIC_CLEANUP:
     class PostTranscodeAtomicPeriodicTask(
         celery.AtomicPeriodicTask
     ):
-        run_every = settings.YAGA_CLEANUP_RUN_EVERY
+        run_every = settings.YAGA_ATTACHMENT_TRANSCODE_RUN_EVERY
 
         def run(self):
             expired = (
-                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_TIMEOUT
+                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_EXPIRES
+            )
+
+            deadline = (
+                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_DEADLINE
             )
 
             for post in Post.atomic_objects.filter(
                 created_at__lte=expired,
                 state=Post.state_choices.UPLOADED
             ):
-                post.schedule_transcoding()
+                if post.created_at < deadline:
+                    post.mark_deleted()
+                else:
+                    post.schedule_transcoding()
 
     class APNSFeedBackPeriodicTask(
         celery.PeriodicTask
@@ -143,6 +150,8 @@ class UploadProcessTask(
 class PostAttachmentProcessTask(
     celery.Task
 ):
+    soft_time_limit = settings.YAGA_ATTACHMENT_VALIDATE_TIMEOUT
+
     def run(self, key):
         path = key.replace(settings.MEDIA_LOCATION, '', 1)
 
@@ -187,6 +196,8 @@ class PostAttachmentProcessTask(
 class TranscodingTask(
     celery.Task
 ):
+    soft_time_limit = settings.YAGA_ATTACHMENT_TRANSCODE_TIMEOUT
+
     def run(self, pk):
         post = Post.objects.filter(
             pk=pk
