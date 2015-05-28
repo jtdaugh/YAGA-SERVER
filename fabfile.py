@@ -18,8 +18,8 @@ DYNOS = OrderedDict((
     ('celery_broker', 0),
     ('celery_worker', 0),
 ))
-STOP_TIMEOUT = 35
-START_TIMEOUT = 10
+STOP_TIMEOUT = 5
+START_TIMEOUT = 5
 
 
 def ensure_prompt(label):
