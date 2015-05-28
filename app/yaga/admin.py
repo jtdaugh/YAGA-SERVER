@@ -101,7 +101,7 @@ class MemberModelAdmin(
 
     date_hierarchy = 'joined_at'
 
-    raw_id_fields = ('user', 'group')
+    raw_id_fields = ('user', 'group', 'creator')
 
 
 class LikeModelAdmin(
