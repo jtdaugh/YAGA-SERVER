@@ -642,8 +642,8 @@ class BaseConfiguration(
     CELERY_ACKS_LATE = True
     CELERYD_PREFETCH_MULTIPLIER = 1
     CELERY_REDIRECT_STDOUTS = False
-    CELERYD_TASK_TIME_LIMIT = 200 * 2
-    CELERYD_TASK_SOFT_TIME_LIMIT = 180 * 2
+    # CELERYD_TASK_SOFT_TIME_LIMIT = 5 * 60
+    # CELERYD_TASK_TIME_LIMIT = CELERYD_TASK_SOFT_TIME_LIMIT + 30
     # -------------------------------------------------------
     # rest framework configuration
     # -------------------------------------------------------

@@ -462,11 +462,15 @@ class Post(
                         post_attachment_preview_upload_to(self)
                     )
 
+                    default_storage.delete(
+                        post_attachment_server_preview_upload_to(self)
+                    )
+
                     with open(output.name, 'rb') as stream:
                         fd = File(stream)
 
                         self.attachment_preview.save(
-                            post_attachment_preview_upload_to(self),
+                            post_attachment_server_preview_upload_to(self),
                             fd,
                             save=False
                         )
@@ -629,13 +633,6 @@ class Post(
                 CleanStorageTask().delay(attachment_preview_path)
 
             connection.on_commit(delete_attachment_preview)
-
-        old_attachment_preview_path = post_attachment_preview_upload_to(self)
-
-        def delete_old_attachment_preview():
-            CleanStorageTask().delay(old_attachment_preview_path)
-
-        connection.on_commit(delete_old_attachment_preview)
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
