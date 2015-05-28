@@ -568,9 +568,11 @@ class Post(
             if post:
                 post.update(**kwargs)
 
-                if post.state != self.state_choices.UPLOADED:
+                if post.state == self.state_choices.READY:
+                    post.save()
+                elif post.state == self.state_choices.DELETED:
                     post.mark_deleted()
-                else:
+                elif post.state == self.state_choices.UPLOADED:
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
                     self.notify()
@@ -587,6 +589,7 @@ class Post(
 
             if post:
                 post.state = self.state_choices.DELETED
+                post.ready_at = timezone.now()
                 post.clean_storage()
                 post.save()
 

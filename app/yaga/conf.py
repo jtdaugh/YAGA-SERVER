@@ -76,6 +76,8 @@ class YagaAppConf(
 
     ATTACHMENT_READY_EXPIRES = datetime.timedelta(minutes=60)
 
+    ATTACHMENT_TRANSCODE_TIMEOUT = datetime.timedelta(minutes=60)
+
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
     CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)
 
@@ -110,7 +112,7 @@ class YagaAppConf(
 
     CLOUDFRONT_CLEAN_CACHE_KEY_TTL = 60 * 30
     CLOUDFRONT_CLEAN_CACHE_KEY = 'yaga:cloudfront_purge_cache_key'
-    CLOUDFRONT_CLEAN_RUN_EVERY = datetime.timedelta(minutes=10)
+    CLOUDFRONT_CLEAN_RUN_EVERY = datetime.timedelta(minutes=5)
 
     class Meta:
         prefix = 'yaga'

@@ -86,6 +86,22 @@ if settings.YAGA_PERIODIC_CLEANUP:
             ):
                 post.mark_deleted()
 
+    class PostTranscodeAtomicPeriodicTask(
+        celery.AtomicPeriodicTask
+    ):
+        run_every = settings.YAGA_CLEANUP_RUN_EVERY
+
+        def run(self):
+            expired = (
+                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_TIMEOUT
+            )
+
+            for post in Post.atomic_objects.filter(
+                created_at__lte=expired,
+                state=Post.state_choices.UPLOADED
+            ):
+                post.schedule_transcoding()
+
     class APNSFeedBackPeriodicTask(
         celery.PeriodicTask
     ):
@@ -176,7 +192,7 @@ class TranscodingTask(
             pk=pk
         ).first()
 
-        if post:
+        if post and post.state == Post.state_choices.UPLOADED:
             try:
                 transcoded = post.transcode()
             except SoftTimeLimitExceeded:
