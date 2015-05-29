@@ -477,9 +477,6 @@ class Post(
                 output.flush()
                 output.close()
 
-                if self.is_transcoded():
-                    return True
-
                 process = sh(
                     settings.YAGA_ATTACHMENT_TRANSCODE_CMD.format(
                         input=attachment.name,
