@@ -223,7 +223,7 @@ class PostGroupNotification(
             and
             self.post.namer == self.emitter
         ):
-            return _(' with caption {caption}').format(
+            return _(' with caption "{caption}"').format(
                 caption=self.post.name
             )
         else:
@@ -410,7 +410,7 @@ class CaptionDirectNotification(
     def get_message_kwargs(self):
         return {
             'group': self.group.name,
-            'emitter': self.target.get_username()
+            'emitter': self.emitter.get_username()
         }
 
     def get_message(self):
