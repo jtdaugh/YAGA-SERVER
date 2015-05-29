@@ -13,6 +13,7 @@ import os
 import tempfile
 
 import magic
+from celery import states as celery_states
 from django.core.files.base import File
 from django.core.files.storage import default_storage
 from django.db import connection, models, transaction
@@ -440,15 +441,44 @@ class Post(
             post=self.pk
         )
 
+    def is_transcoded(self):
+        if self.transcoding_result.state == celery_states.SUCCESS:
+            return True
+
+        return default_storage.exists(
+            post_attachment_server_preview_upload_to(self)
+        )
+
+    @property
+    def transcoding_task_id(self):
+        return '{pk}_transcoding'.format(
+            pk=str(self.pk)
+        )
+
+    @property
+    def transcoding_result(self):
+        result = TranscodingTask().AsyncResult(
+            self.transcoding_task_id
+        )
+        return result
+
     def schedule_transcoding(self):
-        TranscodingTask().delay(self.pk)
+        TranscodingTask().apply_async(
+            (self.pk,), task_id=self.transcoding_task_id
+        )
 
     def transcode(self):
+        if self.is_transcoded():
+            return True
+
         with self.TmpAttachment(self) as attachment:
             try:
                 output = tempfile.NamedTemporaryFile(delete=False)
                 output.flush()
                 output.close()
+
+                if self.is_transcoded():
+                    return True
 
                 process = sh(
                     settings.YAGA_ATTACHMENT_TRANSCODE_CMD.format(
@@ -458,9 +488,8 @@ class Post(
                 )
 
                 if process:
-                    default_storage.delete(
-                        post_attachment_server_preview_upload_to(self)
-                    )
+                    if self.is_transcoded():
+                        return True
 
                     with open(output.name, 'rb') as stream:
                         fd = File(stream)
@@ -498,7 +527,7 @@ class Post(
             finally:
                 try:
                     os.unlink(output.name)
-                except IOError:
+                except Exception:
                     pass
 
         return False
