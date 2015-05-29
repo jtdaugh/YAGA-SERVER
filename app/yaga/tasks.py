@@ -101,7 +101,7 @@ if settings.YAGA_PERIODIC_CLEANUP:
                 timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_DEADLINE
             )
 
-            for post in Post.atomic_objects.filter(
+            for post in Post.objects.filter(
                 created_at__lte=expired,
                 state=Post.state_choices.UPLOADED
             ):
