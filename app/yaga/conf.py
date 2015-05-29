@@ -80,7 +80,7 @@ class YagaAppConf(
     ATTACHMENT_TRANSCODE_EXPIRES = datetime.timedelta(minutes=90)
     ATTACHMENT_TRANSCODE_TIMEOUT = 20 * 60
     ATTACHMENT_TRANSCODE_DEADLINE = datetime.timedelta(hours=6)
-    ATTACHMENT_TRANSCODE_RUN_EVERY = datetime.timedelta(minutes=30)
+    ATTACHMENT_TRANSCODE_RUN_EVERY = datetime.timedelta(minutes=10)
 
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
     CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)
