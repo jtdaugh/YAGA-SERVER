@@ -309,7 +309,7 @@ class GroupRetrieveUpdateAPIView(
                     )
                 ).filter(
                     **post_filter
-                ).order_by('-updated_at'),
+                ).order_by('-ready_at'),
             )
         )
 
