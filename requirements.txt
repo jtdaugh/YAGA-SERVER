@@ -113,7 +113,7 @@ paramiko==1.15.2
 pep8==1.5.7
 pep8-naming==0.2.2
 pgcli==0.17.0
-phonenumbers==7.0.4
+phonenumbers==7.0.5
 pies==2.6.3
 pies2overrides==2.6.3
 Pillow==2.8.1
