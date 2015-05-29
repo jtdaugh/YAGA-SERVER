@@ -124,7 +124,8 @@ class HerokuConfiguration(
     CELERY_ALWAYS_EAGER = False
     BROKER_URL = config('RABBITMQ_BIGWIG_URL')
     CELERYD_LOG_LEVEL = 'INFO'
-    CELERY_RESULT_BACKEND = config('RABBITMQ_BIGWIG_URL')
+    # CELERY_RESULT_BACKEND = config('RABBITMQ_BIGWIG_URL')
+    CELERY_RESULT_BACKEND = config('REDISCLOUD_URL')
     # BROKER_POOL_LIMIT = 1
     # -------------------------------------------------------
     # model auto registration configuration
