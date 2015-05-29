@@ -263,7 +263,11 @@ class APNSProvider(
             ).first()
 
             if device:
-                if device.updated_at < when:
+                if (
+                    device.updated_at.astimezone(
+                        timezone.utc
+                    ).replace(tzinfo=None) < when
+                ):
                     device.delete()
 
         del service
