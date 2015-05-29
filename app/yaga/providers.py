@@ -25,6 +25,17 @@ class NexmoResponse(
     def __init__(self, response):
         self.response = response
 
+        if self.response:
+            if self.response.get('error_text'):
+                if self.response.get('status') not in ('16', '17'):
+                    _logger = logger.error
+                else:
+                    _logger = logger.warning
+            else:
+                _logger = logger.info
+
+            _logger(response)
+
     def is_valid(self):
         if self.response and self.response.get('status') == '0':
             return True
@@ -99,8 +110,6 @@ class NexmoProvider(
             response = self.session.get(self.format_request(url, params))
 
             data = self.validate(self.parse(response))
-
-            logger.info(data)
         except Exception as e:
             logger.exception(e)
 
