@@ -279,8 +279,6 @@ class LikeDirectNotification(
             not self.is_muted_group()
             and
             self.is_ready_post()
-            and
-            self.target != self.emitter
         )
 
     def __init__(self, **kwargs):

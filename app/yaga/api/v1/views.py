@@ -712,10 +712,11 @@ class LikeCreateDestroyAPIView(
             obj.post = instance
             obj.save()
 
-            notifications.LikeDirectNotification.schedule(
-                post=obj.post.pk,
-                emitter=obj.user.pk
-            )
+            if obj.user != obj.post.user:
+                notifications.LikeDirectNotification.schedule(
+                    post=obj.post.pk,
+                    emitter=obj.user.pk
+                )
 
         serializer = self.get_serializer(instance)
 
