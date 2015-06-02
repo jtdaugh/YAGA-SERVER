@@ -188,11 +188,11 @@ class PostSerializer(
     likers = LikerSerializer(read_only=True, many=True, source='like_set')
 
     name_x = serializers.IntegerField(
-        min_value=0, max_value=100, required=False
+        min_value=0, max_value=10000, required=False
     )
 
     name_y = serializers.IntegerField(
-        min_value=0, max_value=100, required=False
+        min_value=0, max_value=10000, required=False
     )
 
     font = serializers.IntegerField(
@@ -200,11 +200,11 @@ class PostSerializer(
     )
 
     rotation = serializers.IntegerField(
-        min_value=0, max_value=359, required=False
+        min_value=0, max_value=3599, required=False
     )
 
     scale = serializers.IntegerField(
-        min_value=0, max_value=100, required=False
+        min_value=0, max_value=10000, required=False
     )
 
     ready = serializers.BooleanField(
