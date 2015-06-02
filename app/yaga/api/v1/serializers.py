@@ -288,7 +288,7 @@ class GroupSerializer(
     serializers.ModelSerializer
 ):
     members = MemberSerializer(many=True, read_only=True, source='member_set')
-    name = UnicodeField(required=False, spaces=True)
+    name = UnicodeField(required=True, spaces=True)
 
     class Meta:
         model = Group

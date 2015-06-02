@@ -34,13 +34,13 @@ class BaseScopedRateThrottle(
 class CodeScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '5/hour'
+    rate = '10/hour'
 
 
 class TokenScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '5/hour'
+    rate = '10/hour'
 
 
 class UserSearchScopedRateThrottle(
@@ -70,4 +70,10 @@ class LikeScopedRateThrottle(
 class DeviceScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '2/hour'
+    rate = '3/hour'
+
+
+class GroupScopedRateThrottle(
+    BaseScopedRateThrottle
+):
+    rate = '20/hour'

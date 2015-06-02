@@ -228,6 +228,12 @@ class GroupListCreateAPIView(
     permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
     serializer_class = serializers.GroupListSerializer
 
+    def get_throttles(self):
+        if self.request.method != 'GET':
+            return [throttling.GroupScopedRateThrottle()]
+        else:
+            return []
+
     def get_queryset(self):
         return Group.objects.prefetch_related(
             Prefetch(
