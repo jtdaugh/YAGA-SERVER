@@ -6,12 +6,14 @@ from future.builtins import (  # noqa
 
 import logging
 
-from celery.exceptions import SoftTimeLimitExceeded
 from celery import states as celery_states
+from celery.exceptions import SoftTimeLimitExceeded
 from django.core.files.storage import default_storage
 from django.utils import timezone
+from requests.exceptions import HTTPError
 
 from app import celery
+from app.utils import get_requests_session
 
 from .conf import settings
 from .models import Code, Group, Post
@@ -229,6 +231,19 @@ class TranscodingTask(
                     post=post.pk
                 ))
                 raise self.retry()
+
+
+class CoudfrontCacheBoostTask(
+    celery.Task
+):
+    def run(self, urls):
+        session = get_requests_session()
+
+        for url in urls:
+            try:
+                session.get(url)
+            except HTTPError:
+                pass
 
 
 class NotificationTask(

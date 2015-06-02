@@ -441,6 +441,17 @@ class Post(
             post=self.pk
         )
 
+    def download_cache_boost(self):
+        def schedule_downlo_adcache_boost():
+            CoudfrontCacheBoostTask().delay(
+                [
+                    self.attachment_preview.url,
+                    self.attachment.url
+                ]
+            )
+
+        connection.on_commit(schedule_downlo_adcache_boost)
+
     def is_transcoded(self):
         if self.transcoding_result.state == celery_states.SUCCESS:
             return True
@@ -602,6 +613,7 @@ class Post(
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
                     self.notify()
+                    self.download_cache_boos()
 
                     post.save()
             else:
@@ -989,4 +1001,4 @@ class MonkeyUser(
 
 from .notifications import PostGroupNotification  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
-from .tasks import CleanStorageTask, TranscodingTask  # noqa # isort:skip
+from .tasks import CleanStorageTask, CoudfrontCacheBoostTask, TranscodingTask  # noqa # isort:skip
