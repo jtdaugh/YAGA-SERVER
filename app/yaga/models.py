@@ -442,15 +442,16 @@ class Post(
         )
 
     def download_cache_boost(self):
-        def schedule_downlo_adcache_boost():
-            CoudfrontCacheBoostTask().delay(
-                [
-                    self.attachment_preview.url,
-                    self.attachment.url
-                ]
-            )
+        for url in [
+            self.attachment_preview.url,
+            self.attachment.url
+        ]:
+            def schedule_download_cache_boost():
+                CoudfrontCacheBoostTask().delay(
+                    [url]
+                )
 
-        connection.on_commit(schedule_downlo_adcache_boost)
+            connection.on_commit(schedule_download_cache_boost)
 
     def is_transcoded(self):
         if self.transcoding_result.state == celery_states.SUCCESS:
@@ -613,8 +614,9 @@ class Post(
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
 
-                    self.notify()
                     self.download_cache_boost()
+
+                    self.notify()
 
                     post.save()
             else:
