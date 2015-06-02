@@ -612,8 +612,9 @@ class Post(
                 elif post.state == self.state_choices.UPLOADED:
                     post.state = self.state_choices.READY
                     post.ready_at = timezone.now()
+
                     self.notify()
-                    self.download_cache_boos()
+                    self.download_cache_boost()
 
                     post.save()
             else:
