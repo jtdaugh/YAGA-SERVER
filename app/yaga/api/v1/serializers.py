@@ -4,6 +4,8 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from decimal import Decimal
+
 import regex
 from django.contrib.auth import authenticate, get_user_model
 from django.db import transaction
@@ -187,25 +189,35 @@ class PostSerializer(
 
     likers = LikerSerializer(read_only=True, many=True, source='like_set')
 
-    name_x = serializers.IntegerField(
-        min_value=0, max_value=10000, required=False
-    )
-
-    name_y = serializers.IntegerField(
-        min_value=0, max_value=10000, required=False
-    )
-
     font = serializers.IntegerField(
-        min_value=0, max_value=20, required=False
+        required=False, min_value=0, max_value=20
     )
 
-    rotation = serializers.IntegerField(
-        min_value=0, max_value=3599, required=False
+    name_x = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
     )
 
-    scale = serializers.IntegerField(
-        min_value=0, max_value=10000, required=False
+    name_y = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
     )
+
+    rotation = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
+    )
+
+    scale = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4
+    )
+
+    miscellaneous = UnicodeField(required=False, spaces=True, max_length=255)
 
     ready = serializers.BooleanField(
         read_only=True
@@ -217,7 +229,9 @@ class PostSerializer(
 
     class Meta:
         model = Post
-        caption_fields = ('name_x', 'name_y', 'font', 'rotation', 'scale')
+        caption_fields = (
+            'font', 'name_x', 'name_y', 'rotation', 'scale', 'miscellaneous'
+        )
         fields = (
             'attachment', 'attachment_preview', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'ready', 'deleted', 'likers', 'namer'
@@ -243,7 +257,7 @@ class PostSerializer(
                 !=
                 0
             ):
-                msg = _('Can not set caption option without name.')
+                msg = _('Can not set caption attributes without name.')
                 raise ValidationError(msg)
         else:
             coords = ('name_y', 'name_x')

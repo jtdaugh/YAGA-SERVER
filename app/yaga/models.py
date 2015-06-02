@@ -260,32 +260,43 @@ class Post(
         blank=True
     )
 
-    name_x = models.PositiveSmallIntegerField(
-        verbose_name=_('Name X'),
-        blank=True,
-        null=True
-    )
-
-    name_y = models.PositiveSmallIntegerField(
-        verbose_name=_('Name Y'),
-        blank=True,
-        null=True
-    )
-
     font = models.PositiveSmallIntegerField(
         verbose_name=_('Font'),
         blank=True,
         null=True
     )
 
-    rotation = models.PositiveSmallIntegerField(
-        verbose_name=_('Rotation'),
+    name_x = models.DecimalField(
+        verbose_name=_('Name X'),
+        max_digits=7, decimal_places=4,
         blank=True,
         null=True
     )
 
-    scale = models.PositiveSmallIntegerField(
+    name_y = models.DecimalField(
+        verbose_name=_('Name Y'),
+        max_digits=7, decimal_places=4,
+        blank=True,
+        null=True
+    )
+
+    rotation = models.DecimalField(
+        verbose_name=_('Rotation'),
+        max_digits=7, decimal_places=4,
+        blank=True,
+        null=True
+    )
+
+    scale = models.DecimalField(
         verbose_name=_('Scale'),
+        max_digits=7, decimal_places=4,
+        blank=True,
+        null=True
+    )
+
+    miscellaneous = models.CharField(
+        verbose_name=_('Miscellaneous'),
+        max_length=255,
         blank=True,
         null=True
     )
