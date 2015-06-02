@@ -616,6 +616,12 @@ class PostRetrieveUpdateDestroyAPIView(
         permissions.AvailablePost, permissions.FulfilledProfile
     )
 
+    def get_throttles(self):
+        if self.request.method != 'GET':
+            return [throttling.PostScopedRateThrottle()]
+        else:
+            return []
+
     def get_queryset(self):
         return Post.objects.select_related(
             'user',
@@ -667,6 +673,7 @@ class PostRetrieveUpdateDestroyAPIView(
 
         # files actually queued for delete
         response['attachment'] = None
+        response['attachment_preview'] = None
 
         return Response(
             response,
