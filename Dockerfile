@@ -13,7 +13,7 @@ RUN yum -y install dnf \
     && dnf -y update \
     && dnf -y distro-sync \
     && dnf -y groupinstall "Minimal Install" "Development Tools" "Development Libraries" \
-    && dnf -y install tar wget libcurl curl libcurl-devel htop mc nano vim psmisc iotop \
+    && dnf -y install patch tar wget libcurl curl libcurl-devel htop mc nano vim psmisc iotop \
     && dnf -y install ffmpeg ffmpeg-devel gifsicle ImageMagick ImageMagick-devel \
     && dnf -y install turbojpeg turbojpeg-devel openjpeg openjpeg-devel libxslt libxslt-devel libxml2 libxml2-devel libffi libffi-devel libev libev-devel libevent libevent-devel libuv libuv-devel libmemcached libmemcached-devel postgresql postgresql-devel \
     && dnf -y install java-1.8.0-openjdk java-1.8.0-openjdk-devel \
@@ -64,10 +64,11 @@ RUN find . -type d -name "__pycache__" -exec rm -rf {} + > /dev/null 2>&1 \
 
 RUN /opt/python-ucs4/bin/virtualenv env \
     && source env/bin/activate \
-    && ./python/bin/pip install -r requirements.txt \
-    && npm install
-
-# && bundle install
+    && pip install -r requirements.txt \
+    && rm -rf /root/.cache \
+    && npm install \
+    && rm -rf /root/.npm \
+    && bundle install
 
 ENV PORT 8000
 
@@ -76,5 +77,3 @@ EXPOSE 8000
 ENTRYPOINT ["/bin/cd /yaga && . env/bin/activate && /bin/sh -c"]
 
 CMD ["bash"]
-
-# CMD ["start" "celery_worker"]
