@@ -1,8 +1,9 @@
 {
   "private": true,
   "dependencies": {
-    "stylus": "0.51.0",
-    "coffee-script": "1.9.2",
+    "npm-check-updates": "1.5.1",
+    "stylus": "0.51.1",
+    "coffee-script": "1.9.3",
     "bower": "1.4.1"
   },
   "engines": {
