@@ -74,6 +74,16 @@ ENV PORT 8000
 
 EXPOSE 8000
 
-ENTRYPOINT ["/bin/cd /yaga && . env/bin/activate && /bin/sh -c"]
+RUN echo '#!/usr/bin/env bash' > entrypoint.sh \
+    && echo 'source env/bin/activate' >> entrypoint.sh \
+    && echo 'exec "$@"' >> entrypoint.sh \
+    && chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
 
 CMD ["bash"]
+
+# docker rm $(docker ps -a -q)
+# docker rmi $(docker images -q)
+# docker build -t yaga:$(date '+%s') .
+# docker run --name celery_worker_1 -d -i -t yaga:latest foreman start celery_worker
