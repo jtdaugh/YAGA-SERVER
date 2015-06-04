@@ -87,3 +87,4 @@ CMD ["bash"]
 # docker rmi $(docker images -q)
 # docker build -t yaga:$(date '+%s') .
 # docker run --name celery_worker_1 -d -i -t yaga:latest foreman start celery_worker
+# docker attach --sig-proxy=false celery_worker_1
