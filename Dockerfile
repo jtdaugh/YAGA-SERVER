@@ -86,5 +86,6 @@ CMD ["bash"]
 # docker rm $(docker ps -a -q)
 # docker rmi $(docker images -q)
 # docker build -t yaga:$(date '+%s') .
-# docker run --name celery_worker_1 -d -i -t yaga:latest foreman start celery_worker
-# docker attach --sig-proxy=false celery_worker_1
+# docker run --name celery_worker_1 -d -i -t yaga:{TIMESTAMP} foreman start celery_worker
+# docker attach --sig-proxy=false celery_worker_1 # Ctrl-p Ctrl-q to detach
+# docker logs -f celery_worker_1
