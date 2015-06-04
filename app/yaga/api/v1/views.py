@@ -787,6 +787,6 @@ class ContactListCreateAPIView(
         ).first()
 
         if contact:
-            contact.delete()
+            serializer.instance = contact
 
         serializer.save(user=self.request.user)
