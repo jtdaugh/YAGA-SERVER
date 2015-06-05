@@ -496,6 +496,7 @@ class BaseConfiguration(
         'frontend',
 
         # vendor
+        'guardian',
         'clear_cache',
         'django_mobile',
         'redis_sessions_fork',
@@ -514,7 +515,6 @@ class BaseConfiguration(
         'hijack',
         'compat',
         'raven.contrib.django',
-        # 'guardian',
     ]
     # -------------------------------------------------------
     # hijack backends configuration
@@ -526,9 +526,10 @@ class BaseConfiguration(
     # authentication backends configuration
     # -------------------------------------------------------
     AUTHENTICATION_BACKENDS = (
-        'django.contrib.auth.backends.ModelBackend',
-        # 'guardian.backends.ObjectPermissionBackend',
         'yaga.backends.CodeBackend',
+        'django.contrib.auth.backends.ModelBackend',
+        'guardian.backends.ObjectPermissionBackend'
+
     )
     ANONYMOUS_USER_ID = 'b25d71af-3dd0-4955-9305-ed495e34727b'  # -1
     GUARDIAN_RAISE_403 = True
