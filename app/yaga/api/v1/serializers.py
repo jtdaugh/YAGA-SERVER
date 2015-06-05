@@ -277,6 +277,10 @@ class PostSerializer(
         return attrs
 
     def update(self, instance, validated_data):
+        serializers.raise_errors_on_nested_writes(
+            'update', self, validated_data
+        )
+
         with transaction.atomic():
             post = instance.atomic
 
@@ -461,3 +465,28 @@ class ContactSerializer(
     class Meta:
         fields = ('phones',)
         model = Contact
+
+    def update(self, instance, validated_data):
+        serializers.raise_errors_on_nested_writes(
+            'update', self, validated_data
+        )
+
+        for attr, value in list(validated_data.items()):
+            if attr != 'phones':
+                setattr(instance, attr, value)
+
+        if validated_data.get('phones'):
+            phones = set(
+                instance.phones + validated_data['phones']
+            )
+
+            try:
+                phones.remove(instance.user.phone.as_e164)
+            except KeyError:
+                pass
+
+            instance.phones = list(phones)
+
+        instance.save()
+
+        return instance
