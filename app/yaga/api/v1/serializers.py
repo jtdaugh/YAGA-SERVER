@@ -466,6 +466,21 @@ class ContactSerializer(
         fields = ('phones',)
         model = Contact
 
+    def create(self, validated_data):
+        if validated_data.get('phones'):
+            validated_data['phones'] = set(validated_data['phones'])
+
+            try:
+                validated_data['phones'].remove(
+                    validated_data['user'].phone.as_e164
+                )
+            except KeyError:
+                pass
+
+            validated_data['phones'] = list(validated_data['phones'])
+
+        return super(ContactSerializer, self).create(validated_data)
+
     def update(self, instance, validated_data):
         serializers.raise_errors_on_nested_writes(
             'update', self, validated_data

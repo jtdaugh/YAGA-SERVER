@@ -4,12 +4,21 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 
 
-def remove_self_from_contacts(apps, schema_editor):
+def cleanup_contacts(apps, schema_editor):
     Contact = apps.get_model('yaga', 'Contact')
 
     for contact in Contact.objects.all():
-        if str(contact.user.phone) in contact.phones:
-            contact.phones.remove(str(contact.user.phone))
+        phones = set(contact.phones)
+
+        try:
+            phones.remove(str(contact.user.phone))
+        except KeyError:
+            pass
+
+        phones = list(phones)
+
+        if phones != contact.phones:
+            contact.phones = phones
             contact.save()
 
 
@@ -20,5 +29,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(remove_self_from_contacts),
+        migrations.RunPython(cleanup_contacts),
     ]
