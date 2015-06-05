@@ -466,42 +466,17 @@ class ContactSerializer(
         fields = ('phones',)
         model = Contact
 
-    def create(self, validated_data):
-        if validated_data.get('phones'):
-            validated_data['phones'] = set(validated_data['phones'])
+    def save(self, **kwargs):
+        user = kwargs['user']
 
-            try:
-                validated_data['phones'].remove(
-                    validated_data['user'].phone.as_e164
-                )
-            except KeyError:
-                pass
+        phones = set(self.validated_data['phones'])
 
-            validated_data['phones'] = list(validated_data['phones'])
+        try:
+            phones.remove(user.phone.as_e164)
+        except KeyError:
+            pass
 
-        return super(ContactSerializer, self).create(validated_data)
+        self.validated_data['phones'] = list(phones)
 
-    def update(self, instance, validated_data):
-        serializers.raise_errors_on_nested_writes(
-            'update', self, validated_data
-        )
-
-        for attr, value in list(validated_data.items()):
-            if attr != 'phones':
-                setattr(instance, attr, value)
-
-        if validated_data.get('phones'):
-            phones = set(
-                instance.phones + validated_data['phones']
-            )
-
-            try:
-                phones.remove(instance.user.phone.as_e164)
-            except KeyError:
-                pass
-
-            instance.phones = list(phones)
-
-        instance.save()
-
-        return instance
+        if len(self.validated_data['phones']) != 0:
+            return super(ContactSerializer, self).save(**kwargs)

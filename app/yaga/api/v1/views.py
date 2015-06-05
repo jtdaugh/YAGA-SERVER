@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -769,8 +770,16 @@ class ContactListCreateAPIView(
             phone__in=list(set(serializer.validated_data['phones']))
         )
 
+    def get(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            raise MethodNotAllowed(request.method)
+
+        return super(
+            ContactListCreateAPIView, self
+        ).get(request, *args, **kwargs)
+
     def post(self, request, *args, **kwargs):
-        super(ContactListCreateAPIView, self).post(request, *args, **kwargs)
+        self.create(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
 

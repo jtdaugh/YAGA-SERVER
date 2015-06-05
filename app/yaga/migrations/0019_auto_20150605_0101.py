@@ -17,7 +17,9 @@ def cleanup_contacts(apps, schema_editor):
 
         phones = list(phones)
 
-        if phones != contact.phones:
+        if len(phones) == 0:
+            contact.delete()
+        else:
             contact.phones = phones
             contact.save()
 
