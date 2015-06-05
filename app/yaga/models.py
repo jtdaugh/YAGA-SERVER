@@ -20,7 +20,7 @@ from django.db import connection, models, transaction
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from djorm_pgarray.fields import TextArrayField
+from djorm_pgarray.fields import ArrayField
 from model_utils import FieldTracker
 
 from app.managers import AtomicManager
@@ -971,9 +971,10 @@ class Contact(
         verbose_name=_('User')
     )
 
-    phones = TextArrayField(
-        verbose_name=_('phone'),
-        blank=True
+    phones = ArrayField(
+        verbose_name=_('Phones'),
+        dbtype='character varying(255)',
+        blank=False
     )
     # here is GIN index at migration
 
