@@ -14,3 +14,5 @@ post_attachment_re = regex.compile(
         prefix=settings.YAGA_ATTACHMENT_PREFIX
     ) + r'{32,36}'
 )
+
+uuid_re = '[0-9a-f]{8}-*[0-9a-f]{4}-*[0-9a-f]{4}-*[0-9a-f]{4}-*[0-9a-f]{12}'

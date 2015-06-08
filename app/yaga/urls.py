@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from .api.v1.urls import urlpatterns as api_urlpatterns_v1
+from .utils import uuid_re
 from .views.group import views as group_view
 from .views.post import views as post_view
 from .views.stats.views import BasicStatsTemplateView, StatsBaseRedirectView
@@ -47,7 +48,7 @@ user_urlpatterns = patterns(
         name='list'
     ),
     url(
-        r'^list/(?P<user_id>[\-a-z0-9]{32,36})/update/$',
+        r'^list/(?P<user_id>{uuid_re})/update/$'.format(uuid_re=uuid_re),
         user_view.UserUpdateView.as_view(),
         name='update'
     )
@@ -66,7 +67,7 @@ post_urlpatterns = patterns(
         name='list'
     ),
     url(
-        r'^list/(?P<post_id>[\-a-z0-9]{32,36})/delete/$',
+        r'^list/(?P<post_id>{uuid_re})/delete/$'.format(uuid_re=uuid_re),
         post_view.PostDeleteView.as_view(),
         name='delete'
     )
@@ -85,7 +86,7 @@ group_urlpatterns = patterns(
         name='list'
     ),
     url(
-        r'^list/(?P<group_id>[\-a-z0-9]{32,36})/$',
+        r'^list/(?P<group_id>{uuid_re})/$'.format(uuid_re=uuid_re),
         group_view.GroupDetailView.as_view(),
         name='detail'
     ),

@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 from django.conf.urls import include, patterns, url
 
 from . import views
+from ...utils import uuid_re
 
 auth_urlpatterns = patterns(
     '',
@@ -60,12 +61,12 @@ post_urlpatterns = patterns(
         name='create'
     ),
     url(
-        r'^(?P<post_id>[\-a-z0-9]{32,36})/like/$',
+        r'^(?P<post_id>{uuid_re})/like/$'.format(uuid_re=uuid_re),
         views.LikeCreateDestroyAPIView.as_view(),
         name='like'
     ),
     url(
-        r'^(?P<post_id>[\-a-z0-9]{32,36})/$',
+        r'^(?P<post_id>{uuid_re})/$'.format(uuid_re=uuid_re),
         views.PostRetrieveUpdateDestroyAPIView.as_view(),
         name='detail'
     )
@@ -79,22 +80,22 @@ group_urlpatterns = patterns(
         name='list-create'
     ),
     url(
-        r'^(?P<group_id>[\-a-z0-9]{32,36})/$',
+        r'^(?P<group_id>{uuid_re})/$'.format(uuid_re=uuid_re),
         views.GroupRetrieveUpdateAPIView.as_view(),
         name='retrieve-update'
     ),
     url(
-        r'^(?P<group_id>[\-a-z0-9]{32,36})/mute/$',
+        r'^(?P<group_id>{uuid_re})/mute/$'.format(uuid_re=uuid_re),
         views.GroupMemberMuteAPIView.as_view(),
         name='mute'
     ),
     url(
-        r'^(?P<group_id>[\-a-z0-9]{32,36})/members/$',
+        r'^(?P<group_id>{uuid_re})/members/$'.format(uuid_re=uuid_re),
         views.GroupMemberUpdateDestroyAPIView.as_view(),
         name='members'
     ),
     url(
-        r'^(?P<group_id>[\-a-z0-9]{32,36})/posts/',
+        r'^(?P<group_id>{uuid_re})/posts/'.format(uuid_re=uuid_re),
         include(post_urlpatterns, namespace='posts')
     )
 )
