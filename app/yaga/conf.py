@@ -112,6 +112,8 @@ class YagaAppConf(
     APNS_POOL = True
     APNS_POOL_TIMEOUT = datetime.timedelta(seconds=30)
 
+    YAGA_PUSH_POST_WINDOW = datetime.timedelta(minutes=5)
+
     MONKEY_LOGIN = True
 
     CLOUDFRONT_CLEAN_CACHE_KEY_TTL = 60 * 30

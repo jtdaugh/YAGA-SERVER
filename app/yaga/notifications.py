@@ -217,6 +217,26 @@ class PostGroupNotification(
             self.group = self.post.group
             self.emitter = self.post.user
 
+    def check_treshold(self):
+        previous_post = Post.objects.filter(
+            user=self.emitter,
+            group=self.group,
+            ready=True
+        ).exclude(
+            pk=self.post.pk
+        ).order_by(
+            '-ready_at'
+        ).first()
+
+        if previous_post is not None:
+            return not (
+                self.post.ready_at - settings.YAGA_PUSH_POST_WINDOW
+                >
+                previous_post.ready_at
+            )
+        else:
+            return False
+
     def get_caption(self):
         if (
             self.post.name
