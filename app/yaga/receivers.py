@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 from app.receivers import ModelReceiver
 
 from .notifications import JoinGroupNotification
+from .models import Post
 
 
 class CodeReceiver(
@@ -52,7 +53,11 @@ class PostReceiver(
     def pre_save(sender, **kwargs):
         instance = kwargs['instance']
 
-        if not instance.pk:
+        if (
+            instance.state == Post.state_choices.READY
+            and
+            instance.tracker.previous('state') != instance.state
+        ):
             instance.group.mark_updated()
 
 
