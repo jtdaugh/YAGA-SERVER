@@ -13,7 +13,6 @@ from mongoengine.django.sessions import BSONSerializer
 
 from .conf import settings
 
-
 if six.PY3:
     buffer = memoryview
 
@@ -50,18 +49,6 @@ celery.AtomicPeriodicTask = AtomicPeriodicTask
 celery.PeriodicTask = PeriodicTask
 
 
-bson_serializer = BSONSerializer()
-
-
-register(
-    'bson',
-    bson_serializer.dumps,
-    bson_serializer.loads,
-    content_type='bson',
-    content_encoding='binary'
-)
-
-
 class BSONBufferSerializer(
     BSONSerializer
 ):
@@ -76,10 +63,10 @@ bson_buffer_serializer = BSONBufferSerializer()
 
 
 register(
-    'bsonb',
+    'bson',
     bson_buffer_serializer.dumps,
     bson_buffer_serializer.loads,
-    content_type='bsonb',
+    content_type='bson',
     content_encoding='binary'
 )
 
