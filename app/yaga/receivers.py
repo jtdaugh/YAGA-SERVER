@@ -6,8 +6,8 @@ from future.builtins import (  # noqa
 
 from app.receivers import ModelReceiver
 
-from .notifications import JoinGroupNotification
 from .models import Post
+from .notifications import JoinGroupNotification
 
 
 class CodeReceiver(
