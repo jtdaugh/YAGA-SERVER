@@ -7,10 +7,16 @@ from future.builtins import (  # noqa
 from celery import Celery
 from celery.task import PeriodicTask
 from django.db import transaction
+from django.utils import six
 from kombu.serialization import register
 from mongoengine.django.sessions import BSONSerializer
 
 from .conf import settings
+
+
+if six.PY3:
+    buffer = memoryview
+
 
 celery = Celery(__name__)
 
@@ -56,8 +62,31 @@ register(
 )
 
 
+class BSONBufferSerializer(
+    BSONSerializer
+):
+    def loads(self, data):
+        if isinstance(data, buffer):
+            data = str(data).encode('ascii')
+
+        return super(BSONBufferSerializer, self).loads(data)
+
+
+bson_buffer_serializer = BSONBufferSerializer()
+
+
+register(
+    'bsonb',
+    bson_buffer_serializer.dumps,
+    bson_buffer_serializer.loads,
+    content_type='bsonb',
+    content_encoding='binary'
+)
+
+
 def autodiscover_tasks():
     return settings.INSTALLED_APPS
+
 
 celery.config_from_object('django.conf:settings')
 celery.autodiscover_tasks(autodiscover_tasks)

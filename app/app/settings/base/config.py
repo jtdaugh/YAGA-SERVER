@@ -620,6 +620,7 @@ class BaseConfiguration(
     # celery configuration
     # -------------------------------------------------------
     MESSAGE_PROTOCOL = 'bson'  # 'pickle'
+    NODE_MESSAGE_PROTOCOL = 'bsonb'
     CELERY_ALWAYS_EAGER = False
     BROKER_URL = 'sqla+sqlite:///{path}/broker.sqlite'.format(
         path=PROJECT_ROOT
@@ -638,7 +639,7 @@ class BaseConfiguration(
     CELERY_SEND_TASK_SENT_EVENT = True
     CELERY_MESSAGE_COMPRESSION = 'zlib'
     CELERY_RESULT_SERIALIZER = MESSAGE_PROTOCOL
-    CELERY_ACCEPT_CONTENT = (MESSAGE_PROTOCOL,)
+    CELERY_ACCEPT_CONTENT = (MESSAGE_PROTOCOL, NODE_MESSAGE_PROTOCOL)
     CELERY_IGNORE_RESULT = False
     CELERYD_HIJACK_ROOT_LOGGER = False
     CELERY_ACKS_LATE = True
