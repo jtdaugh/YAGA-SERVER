@@ -8,7 +8,7 @@ Installation Mac OS X:
 
 .. code-block:: bash
 
-    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql libmemcached ffmpeg gifsicle imagemagick
+    brew install gettext pkg-config libffi libxml2 libxslt libevent bcrypt rabbitmq redis memcached postgresql libmemcached ffmpeg gifsicle imagemagick node
 
     sudo pip install virtualenv
 
