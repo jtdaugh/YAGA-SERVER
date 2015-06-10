@@ -16,6 +16,7 @@ from rest_framework import serializers
 
 from .conf import settings
 from .form_fields import PhoneNumberField as FormPhoneNumberField
+from .serializers import PhoneField
 
 if settings.USE_FLANKER:
     from django_flanker.models import EmailField as BaseEmailField
@@ -142,3 +143,6 @@ class BridgeStorage(
 serializers.ModelSerializer.serializer_field_mapping[
     UUIDField
 ] = serializers.UUIDField
+serializers.ModelSerializer.serializer_field_mapping[
+    PhoneNumberField
+] = PhoneField

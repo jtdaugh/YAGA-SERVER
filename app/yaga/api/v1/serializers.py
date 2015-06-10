@@ -15,10 +15,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from accounts.models import Token
+from app.serializers import PhoneField
 
 from ...conf import settings
 from ...models import Code, Contact, Device, Group, Member, Post
-from .fields import CodeField, PhoneField, TimeStampField, UnicodeField
+from .fields import CodeField, TimeStampField, UnicodeField
 from .validators import UniqueLowerUserName
 
 
@@ -137,8 +138,6 @@ class TokenSerializer(
 class CodeRetrieveSerializer(
     serializers.ModelSerializer
 ):
-    phone = PhoneField()
-
     class Meta:
         model = Code
         fields = ('phone',)
