@@ -418,13 +418,13 @@ class Post(
     @property
     def ready(self):
         return self.state in [
-            self.state_choices.DELETED,
-            self.state_choices.READY
+            Post.state_choices.DELETED,
+            Post.state_choices.READY
         ]
 
     @property
     def deleted(self):
-        return self.state == self.state_choices.DELETED
+        return self.state == Post.state_choices.DELETED
 
     class TmpAttachment(object):
         def __init__(self, instance):
@@ -574,8 +574,8 @@ class Post(
                 post.update(**kwargs)
 
                 if post.state in [
-                    self.state_choices.UPLOADED,
-                    self.state_choices.READY
+                    Post.state_choices.UPLOADED,
+                    Post.state_choices.READY
                 ]:
                     post.mark_deleted()
 
@@ -585,7 +585,7 @@ class Post(
                             post_id=post.pk
                         )
                     )
-                elif post.state == self.state_choices.DELETED:
+                elif post.state == Post.state_choices.DELETED:
                     post.mark_deleted()
 
                     logger.error(
@@ -604,7 +604,7 @@ class Post(
                         )
                     )
                 else:
-                    post.state = self.state_choices.UPLOADED
+                    post.state = Post.state_choices.UPLOADED
 
                     connection.on_commit(self.schedule_transcoding)
 
@@ -617,12 +617,12 @@ class Post(
             if post:
                 post.update(**kwargs)
 
-                if post.state == self.state_choices.READY:
+                if post.state == Post.state_choices.READY:
                     post.save()
-                elif post.state == self.state_choices.DELETED:
+                elif post.state == Post.state_choices.DELETED:
                     post.mark_deleted()
-                elif post.state == self.state_choices.UPLOADED:
-                    post.state = self.state_choices.READY
+                elif post.state == Post.state_choices.UPLOADED:
+                    post.state = Post.state_choices.READY
                     post.ready_at = timezone.now()
 
                     post.download_cache_boost()
@@ -633,6 +633,21 @@ class Post(
             else:
                 self.delete()
 
+    # def mark_canceled(self):
+    #     with transaction.atomic():
+    #         post = self.atomic
+
+    #         if post:
+    #             if post.state not in (
+    #                 Post.state_choices.DELETED,
+    #                 Post.state_choices.READY
+    #             ):
+    #                 post.state = Post.state_choices.CANCELED
+    #                 post.ready_at = timezone.now()
+    #                 post.clean_storage()
+    #                 self.clean_storage()
+    #                 post.save()
+
     def mark_deleted(self):
         self.clean_storage()
 
@@ -640,7 +655,7 @@ class Post(
             post = self.atomic
 
             if post:
-                post.state = self.state_choices.DELETED
+                post.state = Post.state_choices.DELETED
                 post.ready_at = timezone.now()
                 post.clean_storage()
                 post.save()
