@@ -222,6 +222,41 @@ class TokenDestroyAPIView(
         return obj
 
 
+class GroupSearchListAPIView(
+    NonAtomicView,
+    generics.ListAPIView
+):
+    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    serializer_class = serializers.GroupListSerializer
+
+    def get_queryset(self):
+        contact = Contact.objects.filter(user=self.request.user).first()
+        if contact:
+            phone_query = Q()
+            for phone in contact.phones:
+                phone_query |= Q(member__user__phone=phone)
+            queryset = Group.objects.prefetch_related(
+                Prefetch(
+                    'member_set',
+                    queryset=Member.objects.select_related('user')
+                ),
+            ).filter(
+                Q(member__user__name__isnull=False) & phone_query
+            ).exclude(
+                members=self.request.user
+            ).distinct()
+            lst = list(queryset)
+            lst.sort(
+                key=lambda group: len(set([m.user.phone.as_e164
+                                           for m in group.member_set.all()]) &
+                                      set(contact.phones)),
+                reverse=True
+            )
+            return lst
+        else:
+            return []
+
+
 class GroupListCreateAPIView(
     SafeNonAtomicView,
     generics.ListCreateAPIView

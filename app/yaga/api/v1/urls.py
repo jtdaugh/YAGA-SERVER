@@ -102,7 +102,12 @@ group_urlpatterns = patterns(
     url(
         r'^(?P<group_id>{uuid_re})/posts/'.format(uuid_re=uuid_re),
         include(post_urlpatterns, namespace='posts')
-    )
+    ),
+    url(
+        r'^search/$',
+        views.GroupSearchListAPIView.as_view(),
+        name='search'
+    ),
 )
 
 
