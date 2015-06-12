@@ -34,46 +34,46 @@ class BaseScopedRateThrottle(
 class CodeScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '10/hour'
+    rate = '20/hour'
 
 
 class TokenScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '10/hour'
+    rate = '20/hour'
 
 
 class UserSearchScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '10/hour'
+    rate = '15/hour'
 
 
 class MemberScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '50/hour'
+    rate = '100/hour'
 
 
 class PostScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '50/hour'
+    rate = '200/hour'
 
 
 class LikeScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '100/hour'
+    rate = '300/hour'
 
 
 class DeviceScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '3/hour'
+    rate = '10/hour'
 
 
 class GroupScopedRateThrottle(
     BaseScopedRateThrottle
 ):
-    rate = '20/hour'
+    rate = '50/hour'
