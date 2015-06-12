@@ -614,7 +614,7 @@ class PostRetrieveUpdateDestroyAPIView(
     )
 
     def get_throttles(self):
-        if self.request.method != 'GET':
+        if self.request.method not in ('GET', 'DELETE'):
             return [throttling.PostScopedRateThrottle()]
         else:
             return []
