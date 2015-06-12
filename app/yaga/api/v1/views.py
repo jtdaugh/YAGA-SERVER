@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Prefetch
+from django.db.models import IntegrityError, Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
@@ -717,8 +717,15 @@ class PostCopyUpdateAPIView(
         posts = []
 
         if serializer.validated_data.get('groups'):
+            copied_groups = PostCopy.objects.filter(
+                parent=serializer.instance
+            ).values_list('group', flat=True)
+
             groups = Group.objects.filter(
-                pk__in=list(set(serializer.validated_data['groups']))
+                pk__in=serializer.validated_data['groups'],
+                members=self.request.user
+            ).exclude(
+                pk__in=copied_groups
             ).exclude(
                 pk=serializer.instance.group.pk
             )
@@ -730,23 +737,9 @@ class PostCopyUpdateAPIView(
                 post.attachment = ''
 
             for group in groups:
-                if PostCopy.objects.filter(
-                    parent=post,
-                    post__group=group
-                ).exists():
-                    continue
-
-                if (
-                    post.checksum
-                    and
-                    group.post_set.filter(
-                        checksum=post.checksum
-                    ).exists()
-                ):
-                    continue
-
                 copy = PostCopy()
                 copy.parent = post
+                copy.group = group
 
                 post.pk = None
                 post.group = group
@@ -755,9 +748,14 @@ class PostCopyUpdateAPIView(
                 post.save()
 
                 copy.post = post
-                copy.save()
 
-                posts.append(post)
+                try:
+                    copy.save()
+
+                    posts.append(post)
+                except IntegrityError:
+                    post.delete()
+                    continue
 
                 if copy.parent.state == Post.state_choices.READY:
                     copy.schedule()

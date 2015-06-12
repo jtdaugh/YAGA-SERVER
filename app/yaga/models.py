@@ -1035,6 +1035,11 @@ class PostCopy(
         version=4
     )
 
+    group = models.ForeignKey(
+        'Group',
+        verbose_name=_('Group')
+    )
+
     parent = models.ForeignKey(
         Post,
         verbose_name=_('parent'),
@@ -1108,6 +1113,9 @@ class PostCopy(
     class Meta:
         verbose_name = _('Post Copy')
         verbose_name_plural = _('Post Copies')
+        unique_together = (
+            ('parent', 'group'),
+        )
 
     def __str__(self):
         return str(self.pk)

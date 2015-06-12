@@ -155,9 +155,9 @@ class MonkeyUserModelAdmin(
 class PostCopyModelAdmin(
     admin.ModelAdmin
 ):
-    list_display = ('parent', 'post')
+    list_display = ('parent', 'post', 'group')
 
-    raw_id_fields = ('parent', 'post')
+    raw_id_fields = ('parent', 'post', 'group')
 
 
 admin.site.register(Group, GroupModelAdmin)
