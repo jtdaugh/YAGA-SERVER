@@ -807,6 +807,7 @@ class PostCopyUpdateAPIView(
                 post = Post()
                 post.state = Post.state_choices.PENDING
                 post.user = self.request.user
+                post.group = group
 
                 for attr in PostCopy.copy_attrs:
                     setattr(post, attr, getattr(parent, attr))

@@ -561,6 +561,8 @@ class Post(
                 except Exception:
                     pass
 
+        return False
+
     @property
     def atomic(self):
         try:
@@ -569,7 +571,7 @@ class Post(
             )
             return post
         except Post.DoesNotExist:
-            pass
+            return False
 
     def update(self, **kwargs):
         for key, value in list(kwargs.items()):
@@ -1057,7 +1059,7 @@ class PostCopy(
     )
 
     copy_attrs = (
-        'group', 'name', 'namer', 'owner',
+        'name', 'namer', 'owner',
         'font', 'name_x', 'name_y', 'rotation', 'scale', 'miscellaneous'
     )
 
@@ -1110,6 +1112,8 @@ class PostCopy(
             return path
         except Exception as e:
             logger.exception(e)
+
+            return False
 
     class Meta:
         verbose_name = _('Post Copy')
