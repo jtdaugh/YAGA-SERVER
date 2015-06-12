@@ -649,8 +649,6 @@ class Post(
                         copy.schedule()
 
                     return post
-            else:
-                self.delete()
 
     # def mark_canceled(self):
     #     with transaction.atomic():
@@ -668,8 +666,6 @@ class Post(
     #                 post.save()
 
     def mark_deleted(self):
-        self.clean_storage()
-
         with transaction.atomic():
             post = self.atomic
 
@@ -693,30 +689,31 @@ class Post(
 
                 connection.on_commit(delete_path)
 
-        if self.checksum:
-            self.checksum = None
+        self.checksum = None
 
-        if self.attachment:
-            attachment_path = self.attachment.name
+        self.attachment = ''
 
-            self.attachment = ''
+        attachment_path = post_attachment_upload_to(
+            self
+        )
 
-            def delete_attachment():
-                CleanStorageTask().delay(attachment_path)
+        def delete_attachment():
+            CleanStorageTask().delay(attachment_path)
 
-            connection.on_commit(delete_attachment)
+        connection.on_commit(delete_attachment)
 
-        if self.attachment_preview:
-            attachment_preview_path = self.attachment_preview.name
+        attachment_preview_path = post_attachment_server_preview_upload_to(
+            self
+        )
 
-            self.attachment_preview = ''
+        def delete_attachment_preview():
+            CleanStorageTask().delay(attachment_preview_path)
 
-            def delete_attachment_preview():
-                CleanStorageTask().delay(attachment_preview_path)
+        connection.on_commit(delete_attachment_preview)
 
-            connection.on_commit(delete_attachment_preview)
-
-        old_attachment_preview_path = post_attachment_preview_upload_to(self)
+        old_attachment_preview_path = post_attachment_preview_upload_to(
+            self
+        )
 
         def delete_old_attachment_preview():
             CleanStorageTask().delay(old_attachment_preview_path)

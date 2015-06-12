@@ -192,12 +192,16 @@ class PostAttachmentProcessTask(
                 raise self.retry(exc=e)
 
             if is_valid_attachment:
-                post.checksum = post.get_checksum()
-
-                post.mark_uploaded(
-                    attachment=post.attachment.name,
-                    checksum=post.checksum
-                )
+                try:
+                    post.checksum = post.get_checksum()
+                except Exception as e:
+                    logger.exception(e)
+                    post.mark_deleted()
+                else:
+                    post.mark_uploaded(
+                        attachment=post.attachment.name,
+                        checksum=post.checksum
+                    )
             else:
                 post.mark_deleted()
 
@@ -258,34 +262,34 @@ class PostCopyTask(
         ).first()
 
         if copy:
-            success = False
+            try:
+                success = False
 
-            uploaded = False
+                if copy.parent.state == Post.state_choices.READY:
+                    attachment, checksum = copy.copy_attachment()
 
-            ready = False
+                    if attachment and checksum:
+                        copy.post = copy.post.mark_uploaded(
+                            transcode=False,
+                            attachment=attachment,
+                            checksum=checksum
+                        )
 
-            if copy.parent.state == Post.state_choices.READY:
-                attachment, checksum = copy.copy_attachment()
+                        if copy.post.state == Post.state_choices.UPLOADED:
+                            attachment_preview = copy.copy_attachment_preview()
 
-                if attachment and checksum:
-                    uploaded = copy.post.mark_uploaded(
-                        transcode=False,
-                        attachment=attachment,
-                        checksum=checksum
-                    )
+                            if attachment_preview:
+                                copy.post = copy.post.mark_ready(
+                                    attachment_preview=attachment_preview
+                                )
 
-                    if uploaded:
-                        attachment_preview = copy.copy_attachment_preview()
+                                if copy.post.state == Post.state_choices.READY:
+                                    success = True
+            except SoftTimeLimitExceeded:
+                pass
 
-                        if attachment_preview:
-                            ready = copy.post.mark_ready(
-                                attachment_preview=attachment_preview
-                            )
-
-                            if ready:
-                                success = True
             if not success:
-                copy.cancel(uploaded, ready)
+                copy.cancel()
 
 
 class NotificationTask(
