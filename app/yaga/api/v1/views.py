@@ -7,7 +7,8 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.db.models import IntegrityError, Q, Prefetch
+from django.db import IntegrityError
+from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
@@ -231,10 +232,13 @@ class GroupSearchListAPIView(
 
     def get_queryset(self):
         contact = Contact.objects.filter(user=self.request.user).first()
+
         if contact:
             phone_query = Q()
+
             for phone in contact.phones:
                 phone_query |= Q(member__user__phone=phone)
+
             queryset = Group.objects.prefetch_related(
                 Prefetch(
                     'member_set',
@@ -245,16 +249,24 @@ class GroupSearchListAPIView(
             ).exclude(
                 members=self.request.user
             ).distinct()
-            lst = list(queryset)
-            lst.sort(
-                key=lambda group: len(set([m.user.phone.as_e164
-                                           for m in group.member_set.all()]) &
-                                      set(contact.phones)),
+
+            groups = list(queryset)
+
+            groups.sort(
+                key=lambda group: len(
+                    set([
+                        member.user.phone.as_e164
+                        for member in group.member_set.all()
+                    ])
+                    &
+                    set(contact.phones)
+                ),
                 reverse=True
             )
-            return lst
         else:
-            return []
+            groups = []
+
+        return groups
 
 
 class GroupListCreateAPIView(
