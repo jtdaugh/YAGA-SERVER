@@ -753,12 +753,31 @@ class PostCopyUpdateAPIView(
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
+
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # posts = self.perform_copy(serializer)
+        posts = self.perform_copy(serializer)
 
-        1 / 0
+        if posts:
+            action_status = status.HTTP_201_CREATED
+        else:
+            action_status = status.HTTP_200_OK
+
+        serializer = self.get_serializer(
+            data={
+                'groups': [post.group.pk for post in posts]
+            }
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        response = dict(serializer.data)
+
+        return Response(
+            response,
+            status=action_status
+        )
 
     def perform_copy(self, serializer):
         posts = []
@@ -778,20 +797,20 @@ class PostCopyUpdateAPIView(
             )
 
             if groups:
-                post = serializer.instance
-                post.user = self.request.user
-                post.attachment_preview = ''
-                post.attachment = ''
+                parent = serializer.instance
 
             for group in groups:
                 copy = PostCopy()
-                copy.parent = post
+                copy.parent = parent
                 copy.group = group
 
-                post.pk = None
-                post.group = group
-                post.status = Post.state_choices.PENDING
-                post.checksum = None
+                post = Post()
+                post.state = Post.state_choices.PENDING
+                post.user = self.request.user
+
+                for attr in PostCopy.copy_attrs:
+                    setattr(post, attr, getattr(parent, attr))
+
                 post.save()
 
                 copy.post = post

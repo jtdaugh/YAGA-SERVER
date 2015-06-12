@@ -384,10 +384,14 @@ class Post(
         )
 
     def save(self, *args, **kwargs):
+        kwargs.setdefault('force', False)
+
+        force = kwargs.pop('force')
+
         if self.checksum == '':
             self.checksum = None
 
-        if self.pk:
+        if self.pk and not force:
             update_fields = list(kwargs.get('update_fields', []))
 
             if update_fields == ['updated_at']:
@@ -1054,6 +1058,11 @@ class PostCopy(
         auto_now_add=True
     )
 
+    copy_attrs = (
+        'group', 'name', 'namer', 'owner',
+        'font', 'name_x', 'name_y', 'rotation', 'scale', 'miscellaneous'
+    )
+
     def schedule(self):
         def copy():
             PostCopyTask().delay(self.pk)
@@ -1061,11 +1070,7 @@ class PostCopy(
         connection.on_commit(copy)
 
     def cancel(self, *instances):
-        for instance in instances:
-            if instance:
-                instance.mark_deleted()
-
-        self.post.mark_deleted()
+        self.post.delete()
         self.delete()
 
     def copy_attachment(self):

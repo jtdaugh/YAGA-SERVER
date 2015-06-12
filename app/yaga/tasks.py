@@ -269,27 +269,35 @@ class PostCopyTask(
                     attachment, checksum = copy.copy_attachment()
 
                     if attachment and checksum:
-                        copy.post = copy.post.mark_uploaded(
+                        copied = copy.post.mark_uploaded(
                             transcode=False,
                             attachment=attachment,
                             checksum=checksum
                         )
 
+                        if copied:
+                            copy.post = copied
+
                         if copy.post.state == Post.state_choices.UPLOADED:
                             attachment_preview = copy.copy_attachment_preview()
 
                             if attachment_preview:
-                                copy.post = copy.post.mark_ready(
+                                post = copy.post.mark_ready(
                                     attachment_preview=attachment_preview
                                 )
 
-                                if copy.post.state == Post.state_choices.READY:
+                                if (
+                                    post and post.state
+                                    ==
+                                    Post.state_choices.READY
+                                ):
                                     success = True
             except SoftTimeLimitExceeded:
                 pass
 
             if not success:
-                copy.cancel()
+                pass
+                # copy.cancel()
 
 
 class NotificationTask(
