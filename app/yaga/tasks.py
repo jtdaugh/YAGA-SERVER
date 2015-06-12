@@ -262,34 +262,31 @@ class PostCopyTask(
         ).first()
 
         if copy:
+            success = False
+
             try:
-                success = False
-
                 if copy.parent.state == Post.state_choices.READY:
-                    attachment, checksum = copy.copy_attachment()
+                    post = copy.copy_attachment()
 
-                    if attachment and checksum:
-                        copied = copy.post.mark_uploaded(
+                    if post:
+                        post = post.mark_uploaded(
                             transcode=False,
-                            attachment=attachment,
-                            checksum=checksum
+                            attachment=post.attachment.name,
+                            checksum=post.checksum
                         )
 
-                        if copied:
-                            copy.post = copied
+                        if post and post.state == Post.state_choices.UPLOADED:
+                            post = copy.copy_attachment_preview()
 
-                        if copy.post.state == Post.state_choices.UPLOADED:
-                            attachment_preview = copy.copy_attachment_preview()
-
-                            if attachment_preview:
-                                copy.post = copy.post.mark_ready(
-                                    attachment_preview=attachment_preview
+                            if post:
+                                post = post.mark_ready(
+                                    attachment_preview=post.attachment_preview
                                 )
 
                                 if (
-                                    copy.post
+                                    post
                                     and
-                                    copy.post.state == Post.state_choices.READY
+                                    post.state == Post.state_choices.READY
                                 ):
                                     success = True
             except SoftTimeLimitExceeded:

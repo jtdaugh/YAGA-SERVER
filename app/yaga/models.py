@@ -561,8 +561,6 @@ class Post(
                 except Exception:
                     pass
 
-        return False
-
     @property
     def atomic(self):
         try:
@@ -571,7 +569,7 @@ class Post(
             )
             return post
         except Post.DoesNotExist:
-            return False
+            pass
 
     def update(self, **kwargs):
         for key, value in list(kwargs.items()):
@@ -1084,17 +1082,20 @@ class PostCopy(
                 self.post.attachment = path
                 self.post.checksum = self.post.get_checksum()
 
-                return self.post.attachment, self.post.checksum
+                return self.post
             except Exception as e:
                 logging.exception(e)
 
-        return False, False
-
     def copy_attachment_preview(self):
-        return self.copy(
+        path = self.copy(
             self.parent.attachment_preview,
             post_attachment_server_preview_upload_to
         )
+
+        if path:
+            self.post.attachment_preview = path
+
+            return self.post
 
     def copy(self, obj, path_fn):
         try:
@@ -1109,8 +1110,6 @@ class PostCopy(
             return path
         except Exception as e:
             logger.exception(e)
-
-            return False
 
     class Meta:
         verbose_name = _('Post Copy')
