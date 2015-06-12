@@ -674,8 +674,8 @@ class PostRetrieveUpdateDestroyAPIView(
         response = dict(serializer.data)
 
         # files actually queued for delete
-        response['attachment'] = ''
-        response['attachment_preview'] = ''
+        response['attachment'] = None
+        response['attachment_preview'] = None
 
         return Response(
             response,
@@ -841,6 +841,7 @@ class DeviceCreateAPIView(
 
 
 class ContactListCreateAPIView(
+    NonAtomicView,
     generics.ListCreateAPIView
 ):
     serializer_class = serializers.UserSerializer
