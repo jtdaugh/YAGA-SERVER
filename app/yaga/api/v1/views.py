@@ -479,12 +479,7 @@ class GroupMemberUpdateDestroyAPIView(
 
             obj.delete()
 
-            if user == self.request.user:
-                notifications.LeftGroupNotification.schedule(
-                    group=instance.pk,
-                    emitter=user.pk
-                )
-            else:
+            if user != self.request.user:
                 notifications.KickGroupNotification.schedule(
                     group=instance.pk,
                     target=user.pk,
