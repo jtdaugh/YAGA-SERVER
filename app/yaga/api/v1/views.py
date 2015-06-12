@@ -856,6 +856,10 @@ class ContactListCreateAPIView(
         return get_user_model().objects.filter(
             verified=True,
             phone__in=list(set(serializer.validated_data['phones']))
+        ).exclude(
+            pk=self.request.user.pk
+        ).exclude(
+            name__isnull=True
         )
 
     def get(self, request, *args, **kwargs):
