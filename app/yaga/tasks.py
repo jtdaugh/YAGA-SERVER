@@ -282,22 +282,21 @@ class PostCopyTask(
                             attachment_preview = copy.copy_attachment_preview()
 
                             if attachment_preview:
-                                post = copy.post.mark_ready(
+                                copy.post = copy.post.mark_ready(
                                     attachment_preview=attachment_preview
                                 )
 
                                 if (
-                                    post and post.state
-                                    ==
-                                    Post.state_choices.READY
+                                    copy.post
+                                    and
+                                    copy.post.state == Post.state_choices.READY
                                 ):
                                     success = True
             except SoftTimeLimitExceeded:
                 pass
 
             if not success:
-                pass
-                # copy.cancel()
+                copy.cancel()
 
 
 class NotificationTask(
