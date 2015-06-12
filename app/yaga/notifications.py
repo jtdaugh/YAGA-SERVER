@@ -221,7 +221,7 @@ class PostGroupNotification(
         previous_post = Post.objects.filter(
             user=self.emitter,
             group=self.group,
-            ready=True
+            state=Post.state_choices.READY
         ).exclude(
             pk=self.post.pk
         ).order_by(
