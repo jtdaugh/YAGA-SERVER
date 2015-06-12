@@ -468,6 +468,16 @@ class ContactSerializer(
         fields = ('phones',)
         model = Contact
 
+    def update(self, instance, validated_data):
+        if validated_data.get('phones'):
+            validated_data['phones'] = list(set(
+                instance.phones + validated_data['phones']
+            ))
+
+        return super(
+            ContactSerializer, self
+        ).update(instance, validated_data)
+
     def save(self, **kwargs):
         user = kwargs['user']
 
