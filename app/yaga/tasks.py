@@ -16,7 +16,7 @@ from app import celery
 from app.utils import get_requests_session
 
 from .conf import settings
-from .models import Code, Group, Post
+from .models import Code, Group, Post, PostCopy
 from .providers import apns_provider
 from .storage import cloudfront_storage
 from .utils import post_attachment_re
@@ -244,6 +244,48 @@ class CoudfrontCacheBoostTask(
                 session.get(url)
             except HTTPError:
                 pass
+
+
+class PostCopyTask(
+    celery.Task
+):
+    def run(self, copy_pk):
+        copy = PostCopy.objects.select_related(
+            'post',
+            'parent'
+        ).filter(
+            pk=copy_pk
+        ).first()
+
+        if copy:
+            success = False
+
+            uploaded = False
+
+            ready = False
+
+            if copy.parent.state == Post.state_choices.READY:
+                attachment, checksum = copy.copy_attachment()
+
+                if attachment and checksum:
+                    uploaded = copy.post.mark_uploaded(
+                        transcode=False,
+                        attachment=attachment,
+                        checksum=checksum
+                    )
+
+                    if uploaded:
+                        attachment_preview = copy.copy_attachment_preview()
+
+                        if attachment_preview:
+                            ready = copy.post.mark_ready(
+                                attachment_preview=attachment_preview
+                            )
+
+                            if ready:
+                                success = True
+            if not success:
+                copy.cancel(uploaded, ready)
 
 
 class NotificationTask(

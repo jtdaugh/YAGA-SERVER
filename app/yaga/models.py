@@ -25,7 +25,7 @@ from model_utils import FieldTracker
 
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import sh
+from app.utils import sh, u
 
 from .choices import StateChoice, VendorChoice
 from .conf import settings
@@ -38,11 +38,11 @@ def code_expire_at():
 
 
 def post_upload_to(instance, filename=None, prefix=None):
-    return os.path.join(
+    return u(str(os.path.join(
         prefix,
         str(instance.group.pk),
         str(instance.pk)
-    )
+    )).__str__())
 
 
 def post_attachment_upload_to(instance, filename=None):
@@ -303,7 +303,14 @@ class Post(
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        verbose_name=_('User')
+        verbose_name=_('User'),
+        related_name='user'
+    )
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_('Owner'),
+        related_name='owner'
     )
 
     group = models.ForeignKey(
@@ -566,7 +573,7 @@ class Post(
         for key, value in list(kwargs.items()):
             setattr(self, key, value)
 
-    def mark_uploaded(self, **kwargs):
+    def mark_uploaded(self, transcode=True, **kwargs):
         with transaction.atomic():
             post = self.atomic
 
@@ -606,9 +613,12 @@ class Post(
                 else:
                     post.state = Post.state_choices.UPLOADED
 
-                    connection.on_commit(self.schedule_transcoding)
+                    if transcode:
+                        connection.on_commit(self.schedule_transcoding)
 
                     post.save()
+
+                    return post
 
     def mark_ready(self, **kwargs):
         with transaction.atomic():
@@ -617,10 +627,12 @@ class Post(
             if post:
                 post.update(**kwargs)
 
-                if post.state == Post.state_choices.READY:
-                    post.save()
-                elif post.state == Post.state_choices.DELETED:
+                if post.state == Post.state_choices.DELETED:
                     post.mark_deleted()
+                elif post.state == Post.state_choices.READY:
+                    post.save()
+
+                    return True
                 elif post.state == Post.state_choices.UPLOADED:
                     post.state = Post.state_choices.READY
                     post.ready_at = timezone.now()
@@ -630,6 +642,13 @@ class Post(
                     post.notify()
 
                     post.save()
+
+                    for copy in PostCopy.objects.filter(
+                        parent=post
+                    ):
+                        copy.schedule()
+
+                    return post
             else:
                 self.delete()
 
@@ -1007,6 +1026,94 @@ class Contact(
 
 
 @python_2_unicode_compatible
+class PostCopy(
+    models.Model
+):
+    id = UUIDField(
+        auto=True,
+        primary_key=True,
+        version=4
+    )
+
+    parent = models.ForeignKey(
+        Post,
+        verbose_name=_('parent'),
+        related_name='parent'
+    )
+
+    post = models.ForeignKey(
+        Post,
+        verbose_name=_('Post'),
+        related_name='post'
+    )
+
+    created_at = models.DateTimeField(
+        verbose_name=_('Created At'),
+        auto_now_add=True
+    )
+
+    def schedule(self):
+        def copy():
+            PostCopyTask().delay(self.pk)
+
+        connection.on_commit(copy)
+
+    def cancel(self, *instances):
+        for instance in instances:
+            if instance:
+                instance.mark_deleted()
+
+        self.post.mark_deleted()
+        self.delete()
+
+    def copy_attachment(self):
+        path = self.copy(
+            self.parent.attachment,
+            post_attachment_upload_to
+        )
+
+        if path:
+            try:
+                self.post.attachment = path
+                self.post.checksum = self.post.get_checksum()
+
+                return self.post.attachment, self.post.checksum
+            except Exception as e:
+                logging.exception(e)
+
+        return False, False
+
+    def copy_attachment_preview(self):
+        return self.copy(
+            self.parent.attachment_preview,
+            post_attachment_server_preview_upload_to
+        )
+
+    def copy(self, obj, path_fn):
+        try:
+            path = path_fn(self.post)
+
+            obj.file.key.copy(
+                settings.AWS_STORAGE_BUCKET_NAME,
+                default_storage._normalize_name(path),
+                preserve_acl=True
+            )
+
+            return path
+        except Exception as e:
+            logger.exception(e)
+
+            return False
+
+    class Meta:
+        verbose_name = _('Post Copy')
+        verbose_name_plural = _('Post Copies')
+
+    def __str__(self):
+        return str(self.pk)
+
+
+@python_2_unicode_compatible
 class MonkeyUser(
     models.Model
 ):
@@ -1031,4 +1138,6 @@ class MonkeyUser(
 
 from .notifications import PostGroupNotification  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
-from .tasks import CleanStorageTask, CoudfrontCacheBoostTask, TranscodingTask  # noqa # isort:skip
+from .tasks import (  # noqa # isort:skip
+    CleanStorageTask, CoudfrontCacheBoostTask, PostCopyTask, TranscodingTask
+)

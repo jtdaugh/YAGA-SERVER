@@ -20,7 +20,7 @@ from . import permissions, serializers, throttling
 from ... import notifications
 from ...conf import settings
 from ...models import (
-    Code, Contact, Group, Like, Member, MonkeyUser, Post,
+    Code, Contact, Group, Like, Member, MonkeyUser, Post, PostCopy,
     post_attachment_preview_upload_to_trash, post_attachment_upload_to
 )
 
@@ -563,6 +563,7 @@ class PostCreateAPIView(
         obj = Post()
         obj.user = request.user
         obj.group = group
+        obj.owner = request.user
         if serializer.validated_data.get('name'):
             obj.name = serializer.validated_data['name']
             obj.namer = request.user
@@ -673,13 +674,100 @@ class PostRetrieveUpdateDestroyAPIView(
         response = dict(serializer.data)
 
         # files actually queued for delete
-        response['attachment'] = None
-        response['attachment_preview'] = None
+        response['attachment'] = ''
+        response['attachment_preview'] = ''
 
         return Response(
             response,
             status=status.HTTP_200_OK
         )
+
+
+class PostCopyUpdateAPIView(
+    PostAPIView,
+    PatchAsPutMixin,
+    generics.UpdateAPIView
+):
+    throttle_classes = (throttling.PostScopedRateThrottle,)
+    serializer_class = serializers.PostCopySerializer
+    permission_classes = (
+        IsAuthenticated, permissions.PostGroupMember,
+        permissions.AvailablePost, permissions.FulfilledProfile
+    )
+
+    def get_queryset(self):
+        return Post.objects.all()
+
+    def put(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            raise MethodNotAllowed(request.method)
+
+        return super(
+            PostCopyUpdateAPIView, self
+        ).put(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.put(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # posts = self.perform_copy(serializer)
+
+        1 / 0
+
+    def perform_copy(self, serializer):
+        posts = []
+
+        if serializer.validated_data.get('groups'):
+            groups = Group.objects.filter(
+                pk__in=list(set(serializer.validated_data['groups']))
+            ).exclude(
+                pk=serializer.instance.group.pk
+            )
+
+            if groups:
+                post = serializer.instance
+                post.user = self.request.user
+                post.attachment_preview = ''
+                post.attachment = ''
+
+            for group in groups:
+                if PostCopy.objects.filter(
+                    parent=post,
+                    post__group=group
+                ).exists():
+                    continue
+
+                if (
+                    post.checksum
+                    and
+                    group.post_set.filter(
+                        checksum=post.checksum
+                    ).exists()
+                ):
+                    continue
+
+                copy = PostCopy()
+                copy.parent = post
+
+                post.pk = None
+                post.group = group
+                post.status = Post.state_choices.PENDING
+                post.checksum = None
+                post.save()
+
+                copy.post = post
+                copy.save()
+
+                posts.append(post)
+
+                if copy.parent.state == Post.state_choices.READY:
+                    copy.schedule()
+
+        return posts
 
 
 class LikeCreateDestroyAPIView(

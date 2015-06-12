@@ -66,6 +66,11 @@ post_urlpatterns = patterns(
         name='like'
     ),
     url(
+        r'^(?P<post_id>{uuid_re})/copy/$'.format(uuid_re=uuid_re),
+        views.PostCopyUpdateAPIView.as_view(),
+        name='copy'
+    ),
+    url(
         r'^(?P<post_id>{uuid_re})/$'.format(uuid_re=uuid_re),
         views.PostRetrieveUpdateDestroyAPIView.as_view(),
         name='detail'

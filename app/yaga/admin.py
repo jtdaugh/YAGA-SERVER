@@ -10,7 +10,7 @@ from django.forms.models import BaseInlineFormSet
 from app.admin import ForceSuperuserAccess
 
 from .models import (
-    Code, Contact, Device, Group, Like, Member, MonkeyUser, Post
+    Code, Contact, Device, Group, Like, Member, MonkeyUser, Post, PostCopy
 )
 
 
@@ -87,7 +87,7 @@ class PostModelAdmin(
 
     date_hierarchy = 'created_at'
 
-    raw_id_fields = ('user', 'group', 'namer')
+    raw_id_fields = ('user', 'group', 'namer', 'owner')
 
 
 class MemberModelAdmin(
@@ -152,6 +152,14 @@ class MonkeyUserModelAdmin(
     raw_id_fields = ('user',)
 
 
+class PostCopyModelAdmin(
+    admin.ModelAdmin
+):
+    list_display = ('parent', 'post')
+
+    raw_id_fields = ('parent', 'post')
+
+
 admin.site.register(Group, GroupModelAdmin)
 admin.site.register(Code, CodeModelAdmin)
 admin.site.register(Contact, ContactModelAdmin)
@@ -160,3 +168,4 @@ admin.site.register(Member, MemberModelAdmin)
 admin.site.register(Like, LikeModelAdmin)
 admin.site.register(Device, DeviceModelAdmin)
 admin.site.register(MonkeyUser, MonkeyUserModelAdmin)
+admin.site.register(PostCopy, PostCopyModelAdmin)

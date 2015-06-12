@@ -18,7 +18,7 @@ from accounts.models import Token
 from app.serializers import PhoneField
 
 from ...conf import settings
-from ...models import Code, Contact, Device, Group, Member, Post
+from ...models import Code, Contact, Device, Group, Member, Post, PostCopy
 from .fields import CodeField, TimeStampField, UnicodeField
 from .validators import UniqueLowerUserName
 
@@ -184,6 +184,8 @@ class PostSerializer(
 
     user = UserSerializer(read_only=True)
 
+    owner = UserSerializer(read_only=True)
+
     namer = UserSerializer(read_only=True)
 
     likers = LikerSerializer(read_only=True, many=True, source='like_set')
@@ -233,7 +235,8 @@ class PostSerializer(
         )
         fields = (
             'attachment', 'attachment_preview', 'ready_at', 'updated_at',
-            'user', 'id', 'name', 'ready', 'deleted', 'likers', 'namer'
+            'user', 'owner', 'id', 'name', 'ready', 'deleted', 'likers',
+            'namer'
         ) + caption_fields
         read_only_fields = (
             'attachment', 'attachment_preview', 'ready_at', 'deleted'
@@ -479,3 +482,15 @@ class ContactSerializer(
 
         if len(self.validated_data['phones']) != 0:
             return super(ContactSerializer, self).save(**kwargs)
+
+
+class PostCopySerializer(
+    serializers.ModelSerializer
+):
+    groups = UniqueNonStrictListField(
+        child=serializers.UUIDField(),
+    )
+
+    class Meta:
+        fields = ('groups',)
+        model = PostCopy
