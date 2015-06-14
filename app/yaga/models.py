@@ -755,6 +755,14 @@ class Post(
         if not self.attachment:
             return False
 
+        try:
+            self.attachment.file
+        except IOError:
+            return False
+
+        if not default_storage.exists(self.attachment.file.name):
+            return False
+
         for chunk in self.attachment.chunks():
             header = chunk
             break
