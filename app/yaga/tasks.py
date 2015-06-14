@@ -278,33 +278,40 @@ class PostCopyTask(
         if copy:
             success = False
 
-            try:
-                if copy.parent.state == Post.state_choices.READY:
+            if copy.post.state == Post.state_choices.DELETED:
+                post = False
+            elif copy.post.state == Post.state_choices.UPLOADED:
+                post = copy.post
+            elif copy.parent.state == Post.state_choices.READY:
+                try:
                     post = copy.copy_attachment()
+                except SoftTimeLimitExceeded:
+                    raise self.retry()
 
-                    if post:
-                        post = post.mark_uploaded(
-                            transcode=False,
-                            attachment=post.attachment.name,
-                            checksum=post.checksum
-                        )
+                if post:
+                    post = post.mark_uploaded(
+                        transcode=False,
+                        attachment=post.attachment.name,
+                        checksum=post.checksum
+                    )
 
-                        if post and post.state == Post.state_choices.UPLOADED:
-                            post = copy.copy_attachment_preview()
+            if post and post.state == Post.state_choices.UPLOADED:
+                try:
+                    post = copy.copy_attachment_preview()
+                except SoftTimeLimitExceeded:
+                    raise self.retry()
 
-                            if post:
-                                post = post.mark_ready(
-                                    attachment_preview=post.attachment_preview
-                                )
+                if post:
+                    post = post.mark_ready(
+                        attachment_preview=post.attachment_preview
+                    )
 
-                                if (
-                                    post
-                                    and
-                                    post.state == Post.state_choices.READY
-                                ):
-                                    success = True
-            except SoftTimeLimitExceeded:
-                pass
+                    if (
+                        post
+                        and
+                        post.state == Post.state_choices.READY
+                    ):
+                        success = True
 
             if not success:
                 copy.cancel()

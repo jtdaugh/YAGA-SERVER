@@ -1114,6 +1114,11 @@ class PostCopy(
 
     def copy(self, obj, path_fn):
         try:
+            obj.file
+        except IOError:
+            return False
+
+        try:
             path = path_fn(self.post)
 
             obj.file.key.copy(
