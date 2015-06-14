@@ -235,18 +235,20 @@ class TranscodingTask(
                 raise self.retry()
             except Exception as e:
                 logger.exception(e)
-                raise self.retry(exc=e)
+
+                transcoded = False
 
             if transcoded:
                 post.mark_ready(
                     attachment_preview=post.attachment_preview
                 )
             else:
+                post.mark_deleted()
+
                 logger.error('Transcoding failed {group}/{post}'.format(
                     group=post.group.pk,
                     post=post.pk
                 ))
-                raise self.retry()
 
 
 class CoudfrontCacheBoostTask(

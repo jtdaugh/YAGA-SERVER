@@ -505,6 +505,14 @@ class Post(
         if self.is_transcoded():
             return True
 
+        if not self.attachment:
+            return False
+
+        try:
+            self.attachment.file
+        except IOError:
+            return False
+
         with self.TmpAttachment(self) as attachment:
             try:
                 output = tempfile.NamedTemporaryFile(delete=False)
@@ -758,9 +766,6 @@ class Post(
         try:
             self.attachment.file
         except IOError:
-            return False
-
-        if not default_storage.exists(self.attachment.file.name):
             return False
 
         for chunk in self.attachment.chunks():
