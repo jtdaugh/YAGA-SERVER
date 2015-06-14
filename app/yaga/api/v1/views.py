@@ -796,12 +796,9 @@ class PostCopyUpdateAPIView(
                 pk=serializer.instance.group.pk
             )
 
-            if groups:
-                parent = serializer.instance
-
             for group in groups:
                 copy = PostCopy()
-                copy.parent = parent
+                copy.parent = serializer.instance
                 copy.group = group
 
                 post = Post()
@@ -810,11 +807,23 @@ class PostCopyUpdateAPIView(
                 post.group = group
 
                 for attr in PostCopy.copy_attrs:
-                    setattr(post, attr, getattr(parent, attr))
+                    setattr(
+                        post,
+                        attr,
+                        getattr(
+                            copy.parent, attr
+                        )
+                    )
 
                 post.save()
 
                 copy.post = post
+
+                if copy.parent.checksum:
+                    if post.group.post_set.filter(
+                        checksum=copy.parent.checksum
+                    ).exists():
+                        continue
 
                 try:
                     copy.save()

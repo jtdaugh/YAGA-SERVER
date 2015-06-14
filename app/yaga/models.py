@@ -17,6 +17,7 @@ from celery import states as celery_states
 from django.core.files.base import File
 from django.core.files.storage import default_storage
 from django.db import connection, models, transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -421,10 +422,19 @@ class Post(
 
     def delete(self, *args, **kwargs):
         self.clean_storage()
+        self.purge_copies()
         super(Post, self).delete(*args, **kwargs)
 
     def __str__(self):
         return str(self.pk)
+
+    def purge_copies(self):
+        for copy in PostCopy.objects.filter(
+            Q(post=self)
+            |
+            Q(parent=self)
+        ):
+            copy.delete()
 
     @property
     def ready(self):
@@ -686,6 +696,8 @@ class Post(
                 post.ready_at = timezone.now()
                 post.clean_storage()
                 post.save()
+
+                post.purge_copies()
 
     def clean_storage(self, path=None):
         if path is not None:
