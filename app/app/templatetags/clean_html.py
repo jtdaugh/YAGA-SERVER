@@ -4,7 +4,7 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-import nltk
+from bs4 import BeautifulSoup
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -14,7 +14,8 @@ register = template.Library()
 
 
 def clean_html(html):
-    return mark_safe(snless(nltk.clean_html(html)))
+    soup = BeautifulSoup(html)
+    return mark_safe(snless(soup.get_text()))
 
 
 register.filter('clean_html', clean_html)

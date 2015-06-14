@@ -2,6 +2,7 @@ amqp==1.4.6
 anyjson==0.3.3
 apns-clerk==0.1.2
 bcrypt==2.0.0
+beautifulsoup4==4.3.2
 billiard==3.3.0.20
 boto==2.38.0
 caniusepython3==3.2.0
