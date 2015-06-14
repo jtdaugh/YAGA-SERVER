@@ -1,7 +1,7 @@
 amqp==1.4.6
 anyjson==0.3.3
 apns-clerk==0.1.2
-bcrypt==1.1.1
+bcrypt==2.0.0
 billiard==3.3.0.20
 boto==2.38.0
 caniusepython3==3.2.0
@@ -80,7 +80,7 @@ flake8-quotes==0.0.1
 flanker==0.4.32
 frosted==1.4.1
 future==0.14.3
-futures==3.0.2
+futures==3.0.3
 gcm-clerk==0.1.5
 geoip2==2.1.0
 gevent==1.0.2
