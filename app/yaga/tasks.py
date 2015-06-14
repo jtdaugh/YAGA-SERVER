@@ -181,29 +181,41 @@ class PostAttachmentProcessTask(
                 post_id=post_pk
             ))
         else:
-            post.attachment = path
+            if post.state == Post.state_choices.DELETED:
+                CleanStorageTask().delay(path)
 
-            try:
-                is_valid_attachment = post.is_valid_attachment()
-            except SoftTimeLimitExceeded:
-                raise self.retry()
-            except Exception as e:
-                logger.exception(e)
-                raise self.retry(exc=e)
-
-            if is_valid_attachment:
-                try:
-                    post.checksum = post.get_checksum()
-                except Exception as e:
-                    logger.exception(e)
-                    post.mark_deleted()
-                else:
-                    post.mark_uploaded(
-                        attachment=post.attachment.name,
-                        checksum=post.checksum
-                    )
+                logger.error('Post is deleted {group_id}/{post_id}'.format(
+                    group_id=group_pk,
+                    post_id=post_pk
+                ))
             else:
-                post.mark_deleted()
+                post.attachment = path
+
+                try:
+                    is_valid_attachment = post.is_valid_attachment()
+                except SoftTimeLimitExceeded:
+                    raise self.retry()
+                except Exception as e:
+                    is_valid_attachment = False
+
+                    logger.error('Validation fail {group_id}/{post_id}'.format(
+                        group_id=group_pk,
+                        post_id=post_pk
+                    ))
+
+                if is_valid_attachment:
+                    try:
+                        post.checksum = post.get_checksum()
+                    except Exception as e:
+                        logger.exception(e)
+                        post.mark_deleted()
+                    else:
+                        post.mark_uploaded(
+                            attachment=post.attachment.name,
+                            checksum=post.checksum
+                        )
+                else:
+                    post.mark_deleted()
 
 
 class TranscodingTask(
