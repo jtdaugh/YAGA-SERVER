@@ -317,10 +317,14 @@ class GroupSerializer(
 class GroupListSerializer(
     GroupSerializer
 ):
+    posts = serializers.IntegerField(
+        read_only=True, source='visible_post_count'
+    )
+
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('name', 'members', 'id', 'updated_at')
+        fields = ('name', 'members', 'posts', 'id', 'updated_at')
 
 
 class GroupRetrieveSerializer(
@@ -329,11 +333,6 @@ class GroupRetrieveSerializer(
     posts = PostSerializer(
         many=True, read_only=True, source='post_set'
     )
-
-    class Meta(
-        GroupSerializer.Meta
-    ):
-        fields = ('name', 'members', 'posts', 'id', 'updated_at')
 
 
 class GroupManageMemberAddSerializer(

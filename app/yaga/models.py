@@ -221,6 +221,14 @@ class Group(
             ('view_group', 'Can view Group'),
         )
 
+    def visible_post_count(self):
+        return self.post_set.filter(
+            state__in=[
+                Post.state_choices.READY,
+                Post.state_choices.DELETED
+            ]
+        ).count()
+
     def member_count(self):
         return self.member_set.count()
     member_count.short_description = _('Members Count')
