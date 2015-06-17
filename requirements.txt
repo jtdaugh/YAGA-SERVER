@@ -1,6 +1,6 @@
 amqp==1.4.6
 anyjson==0.3.3
-apns-clerk==0.1.2
+apns-clerk==0.2.0
 bcrypt==2.0.0
 beautifulsoup4==4.3.2
 billiard==3.3.0.20
@@ -36,7 +36,7 @@ django-crispy-forms==1.4.0
 django-debug-toolbar==1.3.0
 django-debug-toolbar-template-timings==0.6.4
 django-extensions==1.5.5
-django-extra-views==0.7.0
+django-extra-views==0.7.1
 django-filter==0.10.0
 django-flanker==0.3.0
 django-grappelli==2.6.5
@@ -53,7 +53,7 @@ django-pickling==0.1
 django-prefetch==1.0.0
 django-pylibmc==0.6.0
 django-pylibmc-sasl==0.2.4
-django-redis==4.0.0
+django-redis==4.1.0
 django-redis-sessions-fork==0.6.2
 django-rest-swagger==0.3.2
 django-reversion==1.8.7
@@ -103,7 +103,7 @@ librabbitmq==1.6.1
 lxml==3.4.4
 Markdown==2.6.2
 maxminddb==1.2.0
-mccabe==0.3
+mccabe==0.3.1
 meinheld==0.5.7
 mock==1.0.1
 mongoengine==0.9.0
@@ -125,7 +125,7 @@ pip-tools==0.3.6
 pipdeptree==0.4.2
 pluggy==0.3.0
 prompt-toolkit==0.37
-psycopg2==2.6
+psycopg2==2.6.1
 py==1.4.28
 pyasn1==0.1.7
 pycparser==2.14
@@ -142,7 +142,7 @@ pytz==2015.4
 PyYAML==3.11
 raven==5.3.1
 redis==2.10.3
-regex==2015.6.10
+regex==2015.6.15
 requests==2.7.0
 responses==0.4.0
 rest-condition==1.0.1
