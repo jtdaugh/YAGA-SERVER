@@ -603,4 +603,64 @@ class JoinGroupNotification(
         super(JoinGroupNotification, self).notify()
 
 
+class FirebaseNotification(
+    Notification
+):
+    def check_condition(self):
+        return self.target != self.emitter
+
+    def __init__(self, **kwargs):
+        self.post = self.load_post(kwargs['post'])
+        self.emitter = self.load_user(kwargs['emitter'])
+        self.group = self.post.group
+        self.target = self.post.user
+
+        self.type = kwargs['type']
+        self.message = kwargs['message']
+        self.event = kwargs['event']
+
+        if self.type == 'list':
+            self.targets = self.load_users(kwargs['targets'])
+        elif self.type == 'direct':
+            self.targets = [self.target]
+
+    def load_user(self, name):
+        return get_user_model().objects.get(
+            name=name
+        )
+
+    def load_users(self, names):
+        return list(get_user_model().objects.filter(
+            name__in=names
+        ).exclude(
+            pk=self.target.pk
+        ))
+
+    def get_receivers(self):
+        members = self.group.member_set.select_related(
+            'user'
+        ).filter(
+            user__in=self.targets,
+            mute=False
+        )
+
+        return [member.user for member in members]
+
+    def get_meta(self):
+        return {
+            'event': self.event,
+            'group_id': str(self.group.pk),
+            'post_id': str(self.post.pk),
+        }
+
+    def get_message_kwargs(self):
+        return {
+            'emitter': self.emitter.get_username(),
+            'target': self.target.user.get_username(),
+        }
+
+    def get_message(self):
+        return _(self.message)
+
+
 from .tasks import NotificationTask  # noqa # isort:skip
