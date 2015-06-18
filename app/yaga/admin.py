@@ -93,9 +93,9 @@ class PostModelAdmin(
 class MemberModelAdmin(
     ForceSuperuserAccess, admin.ModelAdmin
 ):
-    list_display = ('user', 'group', 'mute', 'joined_at')
+    list_display = ('user', 'status', 'group', 'mute', 'joined_at')
 
-    list_filter = ('mute',)
+    list_filter = ('mute', 'status')
 
     ordering = ('-joined_at', 'mute')
 

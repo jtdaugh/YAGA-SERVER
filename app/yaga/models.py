@@ -3,6 +3,7 @@ from future.builtins import (  # noqa
     ascii, bytes, chr, dict, filter, hex, input, int, list, map, next, object,
     oct, open, pow, range, round, str, super, zip
 )
+from future.types.newstr import newstr
 
 import base64
 import hashlib
@@ -21,14 +22,14 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-from djorm_pgarray.fields import ArrayField
+from djorm_pgarray.fields import TextArrayField
 from model_utils import FieldTracker
 
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import sh, u
 
-from .choices import StateChoice, VendorChoice
+from .choices import StateChoice, StatusChoice, VendorChoice
 from .conf import settings
 
 logger = logging.getLogger(__name__)
@@ -39,11 +40,16 @@ def code_expire_at():
 
 
 def post_upload_to(instance, filename=None, prefix=None):
-    return u(str(os.path.join(
+    path = str(os.path.join(
         prefix,
         str(instance.group.pk),
         str(instance.pk)
-    )).__str__())
+    ))
+
+    if instance(path, newstr):
+        path = path.__str__()
+
+    return u(path)
 
 
 def post_attachment_upload_to(instance, filename=None):
@@ -128,10 +134,19 @@ class Code(
 class Member(
     models.Model
 ):
+    status_choices = StatusChoice()
+
     id = UUIDField(
         auto=True,
         primary_key=True,
         version=4
+    )
+
+    status = models.PositiveSmallIntegerField(
+        verbose_name=_('Status'),
+        choices=status_choices,
+        db_index=True,
+        default=status_choices.MEMBER
     )
 
     user = models.ForeignKey(
@@ -239,6 +254,18 @@ class Group(
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
+
+    def active_member_set(self):
+        return [
+            member for member in self.member_set.all()
+            if member.status == Member.status_choices.MEMBER
+        ]
+
+    def pending_member_set(self):
+        return [
+            member for member in self.member_set.all()
+            if member.status == Member.status_choices.PENDING
+        ]
 
     def __str__(self):
         return str(self.pk)
@@ -1039,9 +1066,9 @@ class Contact(
         verbose_name=_('User')
     )
 
-    phones = ArrayField(
+    phones = TextArrayField(
         verbose_name=_('Phones'),
-        dbtype='character varying(255)',
+        # dbtype='character varying(255)',
         blank=False
     )
     # here is GIN index at migration

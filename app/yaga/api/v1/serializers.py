@@ -307,8 +307,14 @@ class MemberSerializer(
 class GroupSerializer(
     serializers.ModelSerializer
 ):
-    members = MemberSerializer(many=True, read_only=True, source='member_set')
+    members = MemberSerializer(
+        many=True, read_only=True, source='active_member_set'
+    )
+    pending_members = MemberSerializer(
+        many=True, read_only=True, source='pending_member_set'
+    )
     name = UnicodeField(required=True, spaces=True)
+    creator = UserSerializer(read_only=True)
 
     class Meta:
         model = Group
@@ -324,11 +330,14 @@ class GroupListSerializer(
     class Meta(
         GroupSerializer.Meta
     ):
-        fields = ('name', 'members', 'posts', 'id', 'updated_at')
+        fields = (
+            'pending_members', 'members',
+            'name', 'posts', 'id', 'updated_at', 'creator'
+        )
 
 
 class GroupRetrieveSerializer(
-    GroupSerializer
+    GroupListSerializer
 ):
     posts = PostSerializer(
         many=True, read_only=True, source='post_set'

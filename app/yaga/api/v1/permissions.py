@@ -4,11 +4,12 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+from django.db.models import Q
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from accounts.models import Token
 
-from ...models import Post
+from ...models import Contact, Group, Member, Post
 
 
 class TokenOwner(
@@ -23,8 +24,44 @@ class GroupMemeber(
 ):
     def has_object_permission(self, request, view, obj):
         return obj.member_set.filter(
-            user=request.user
+            user=request.user,
+            status=Member.status_choices.MEMBER
         ).exists()
+
+
+class NotGroupMemeber(
+    GroupMemeber
+):
+    def has_object_permission(self, request, view, obj):
+        return not super(NotGroupMemeber, self).has_object_permission(
+            request, view, obj
+        )
+
+
+class ContactsGroupMemeber(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        contact = Contact.objects.filter(user=request.user).first()
+
+        if contact:
+            phone_query = Q()
+
+            for phone in contact.phones:
+                phone_query |= Q(
+                    member__user__phone=phone,
+                    member__status=Member.status_choices.MEMBER
+                )
+
+            return Group.objects.filter(
+                Q(member__user__name__isnull=False)
+                &
+                phone_query
+            ).filter(
+                pk=obj.pk
+            ).exists()
+
+        return False
 
 
 class PostGroupMember(

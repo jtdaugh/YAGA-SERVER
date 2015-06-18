@@ -95,6 +95,11 @@ group_urlpatterns = patterns(
         name='mute'
     ),
     url(
+        r'^(?P<group_id>{uuid_re})/join/$'.format(uuid_re=uuid_re),
+        views.GroupMemberJoinUpdateAPIView.as_view(),
+        name='join'
+    ),
+    url(
         r'^(?P<group_id>{uuid_re})/members/$'.format(uuid_re=uuid_re),
         views.GroupMemberUpdateDestroyAPIView.as_view(),
         name='members'
@@ -104,9 +109,9 @@ group_urlpatterns = patterns(
         include(post_urlpatterns, namespace='posts')
     ),
     url(
-        r'^search/$',
-        views.GroupSearchListAPIView.as_view(),
-        name='search'
+        r'^discover/$',
+        views.GroupDiscoverListAPIView.as_view(),
+        name='discover'
     ),
 )
 

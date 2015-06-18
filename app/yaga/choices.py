@@ -21,3 +21,11 @@ class StateChoice(
     UPLOADED = 1
     READY = 5
     DELETED = 10
+
+
+class StatusChoice(
+    Choice
+):
+    MEMBER = 0
+    LEFT = 5
+    PENDING = 10

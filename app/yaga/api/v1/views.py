@@ -6,6 +6,7 @@ from future.builtins import (  # noqa
 
 import datetime
 
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.db.models import Q, Prefetch
@@ -223,7 +224,7 @@ class TokenDestroyAPIView(
         return obj
 
 
-class GroupSearchListAPIView(
+class GroupDiscoverListAPIView(
     NonAtomicView,
     generics.ListAPIView
 ):
@@ -237,17 +238,29 @@ class GroupSearchListAPIView(
             phone_query = Q()
 
             for phone in contact.phones:
-                phone_query |= Q(member__user__phone=phone)
+                phone_query |= Q(
+                    member__user__phone=phone,
+                    member__status=Member.status_choices.MEMBER
+                )
 
-            queryset = Group.objects.prefetch_related(
+            queryset = Group.objects.select_related(
+                'creator'
+            ).prefetch_related(
                 Prefetch(
                     'member_set',
-                    queryset=Member.objects.select_related('user')
+                    queryset=Member.objects.select_related('user').exclude(
+                        status=Member.status_choices.LEFT
+                    )
                 ),
             ).filter(
-                Q(member__user__name__isnull=False) & phone_query
+                Q(member__user__name__isnull=False)
+                &
+                phone_query
             ).exclude(
-                members=self.request.user
+                member__in=Member.objects.filter(
+                    user=self.request.user,
+                    status=Member.status_choices.MEMBER
+                )
             ).distinct()
 
             groups = list(queryset)
@@ -283,13 +296,18 @@ class GroupListCreateAPIView(
             return []
 
     def get_queryset(self):
-        return Group.objects.prefetch_related(
+        return Group.objects.select_related(
+            'creator'
+        ).prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.select_related('user')
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
             ),
         ).filter(
-            members=self.request.user
+            member__user=self.request.user,
+            member__status=Member.status_choices.MEMBER
         ).order_by(
             '-updated_at'
         )
@@ -308,6 +326,7 @@ class GroupListCreateAPIView(
         obj.group = serializer.instance
         obj.user = request.user
         obj.creator = request.user
+        obj.status = Member.status_choices.MEMBER
         obj.save()
 
         return Response(
@@ -346,10 +365,14 @@ class GroupRetrieveUpdateAPIView(
                 settings.YAGA_SLOP_FACTOR
             )
 
-        queryset = Group.objects.prefetch_related(
+        queryset = Group.objects.select_related(
+            'creator'
+        ).prefetch_related(
             Prefetch(
                 'member_set',
-                queryset=Member.objects.select_related('user')
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
             ),
             Prefetch(
                 'post_set',
@@ -386,21 +409,76 @@ class GroupRetrieveUpdateAPIView(
         ).perform_update(serializer)
 
 
-class GroupMemberUpdateDestroyAPIView(
+class GroupMemberJoinUpdateAPIView(
     PatchAsPutMixin,
     generics.UpdateAPIView,
-    generics.DestroyAPIView
 ):
     throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated, permissions.NotGroupMemeber,
+        permissions.ContactsGroupMemeber, permissions.FulfilledProfile
     )
 
     serializer_class = serializers.GroupListSerializer
 
     def get_queryset(self):
-        return Group.objects.all()
+        return Group.objects.all().select_related(
+            'creator'
+        ).prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
+            ),
+        )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        try:
+            obj = instance.member_set.get(
+                user=self.request.user
+            )
+
+            if obj.status in [
+                Member.status_choices.MEMBER,
+                Member.status_choices.PENDING,
+            ]:
+                raise PermissionDenied
+        except Member.DoesNotExist:
+            obj = Member()
+            obj.group = instance
+            obj.user = self.request.user
+
+            # notifications. ???? TODO
+
+        obj.creator = self.request.user
+        obj.status = Member.status_choices.PENDING
+        obj.save()
+
+        self.permission_classes = list(self.permission_classes)
+
+        self.permission_classes.remove(
+            permissions.NotGroupMemeber
+        )
+
+        serializer = serializers.GroupListSerializer(self.get_object())
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+
+class GroupMemberUpdateDestroyAPIView(
+    GroupMemberJoinUpdateAPIView,
+    generics.DestroyAPIView
+):
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -412,7 +490,7 @@ class GroupMemberUpdateDestroyAPIView(
 
         self.perform_update(instance, serializer.validated_data)
 
-        serializer = serializers.GroupListSerializer(instance)
+        serializer = serializers.GroupListSerializer(self.get_object())
 
         return Response(
             dict(serializer.data),
@@ -429,12 +507,21 @@ class GroupMemberUpdateDestroyAPIView(
 
         self.perform_destroy(instance, serializer.validated_data)
 
-        serializer = serializers.GroupListSerializer(instance)
+        if (
+            serializer.validated_data['phone']
+            !=
+            self.request.user.phone.as_e164
+        ):
+            serializer = serializers.GroupListSerializer(self.get_object())
 
-        return Response(
-            dict(serializer.data),
-            status=status.HTTP_200_OK
-        )
+            return Response(
+                dict(serializer.data),
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                status=status.HTTP_204_NO_CONTENT
+            )
 
     def perform_update(self, instance, validated_data):
         query = None
@@ -479,7 +566,8 @@ class GroupMemberUpdateDestroyAPIView(
                 pass
 
             existing_members = instance.member_set.filter(
-                user__in=users
+                user__in=users,
+                status__in=[Member.status_choices.MEMBER]
             )
 
             existing_users = {member.user for member in existing_members}
@@ -491,10 +579,20 @@ class GroupMemberUpdateDestroyAPIView(
             new_members = []
 
             for user in new_active_users:
-                obj = Member()
-                obj.group = instance
-                obj.user = user
+                try:
+                    obj = instance.member_set.get(
+                        user=user
+                    )
+
+                    if obj.status == Member.status_choices.MEMBER:
+                        continue
+                except Member.DoesNotExist:
+                    obj = Member()
+                    obj.group = instance
+                    obj.user = user
+
                 obj.creator = self.request.user
+                obj.status = Member.status_choices.MEMBER
                 obj.save()
 
                 new_members.append(obj)
@@ -514,33 +612,29 @@ class GroupMemberUpdateDestroyAPIView(
 
     def perform_destroy(self, instance, validated_data):
         try:
-            user = get_user_model().objects.get(
-                phone=validated_data['phone']
-            )
-
             obj = instance.member_set.get(
-                user=user
+                user__phone=validated_data['phone'],
+                status=Member.status_choices.MEMBER
             )
+        except Member.DoesNotExist:
+            pass
+        else:
+            obj.status = Member.status_choices.LEFT
+            obj.save()
 
-            is_muted_group = obj.mute
-
-            obj.delete()
-
-            if user != self.request.user:
+            if obj.user != self.request.user:
                 notifications.KickGroupNotification.schedule(
                     group=instance.pk,
-                    target=user.pk,
+                    target=obj.user.pk,
                     emitter=self.request.user.pk
                 )
 
-                if not is_muted_group:
+                if not obj.mute:
                     notifications.KickDirectNotification.schedule(
                         group=instance.pk,
-                        target=user.pk,
+                        target=obj.user.pk,
                         emitter=self.request.user.pk
                     )
-        except (get_user_model().DoesNotExist, Member.DoesNotExist):
-            pass
 
 
 class GroupMemberMuteAPIView(
@@ -572,7 +666,7 @@ class GroupMemberMuteAPIView(
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        serializer = serializers.GroupListSerializer(instance)
+        serializer = serializers.MemberSerializer(serializer.instance)
 
         return Response(
             dict(serializer.data),
@@ -740,16 +834,18 @@ class PostCopyUpdateAPIView(
     def get_queryset(self):
         return Post.objects.all()
 
+    def post(self, request, *args, **kwargs):
+        return super(
+            PostCopyUpdateAPIView, self
+        ).put(request, *args, **kwargs)
+
     def put(self, request, *args, **kwargs):
         if request.method == 'PUT':
             raise MethodNotAllowed(request.method)
 
         return super(
             PostCopyUpdateAPIView, self
-        ).put(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.put(request, *args, **kwargs)
+        ).get(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -789,7 +885,8 @@ class PostCopyUpdateAPIView(
 
             groups = Group.objects.filter(
                 pk__in=serializer.validated_data['groups'],
-                members=self.request.user
+                member__user=self.request.user,
+                member__user__status=Member.status_choices.MEMBER
             ).exclude(
                 pk__in=copied_groups
             ).exclude(
@@ -853,7 +950,10 @@ class LikeCreateDestroyAPIView(
     )
 
     def get_queryset(self):
-        return Post.objects.all()
+        return Post.objects.Post.objects.select_related(
+            'user',
+            'namer'
+        )
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -941,7 +1041,9 @@ class ContactListCreateAPIView(
         ).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.create(request, *args, **kwargs)
+        super(
+            ContactListCreateAPIView, self
+        ).post(request, *args, **kwargs)
 
         return self.get(request, *args, **kwargs)
 
