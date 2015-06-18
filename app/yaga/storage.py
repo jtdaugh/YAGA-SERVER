@@ -49,7 +49,7 @@ class CloudfrontStorage(
 
         if self.enabled:
             self.cache_storage = CacheStorage()
-            return
+
             self.connection = boto.connect_cloudfront(
                 aws_access_key_id,
                 aws_secret_access_key
