@@ -46,7 +46,7 @@ def post_upload_to(instance, filename=None, prefix=None):
         str(instance.pk)
     ))
 
-    if instance(path, newstr):
+    if isinstance(path, newstr):
         path = path.__str__()
 
     return u(path)
