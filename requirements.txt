@@ -16,7 +16,7 @@ Collectfast==0.2.3
 cookies==2.2.1
 coverage==3.7.1
 cryptography==0.9.1
-Cython==0.22
+Cython==0.22.1
 distlib==0.2.0
 dj-database-url==0.3.0
 Django==1.8.2
@@ -115,7 +115,7 @@ nltk==3.0.3
 nose==1.3.7
 paramiko==1.15.2
 pep8==1.6.2
-pep8-naming==0.2.2
+pep8-naming==0.3.2
 pgcli==0.17.0
 phonenumbers==7.0.6
 pies==2.6.5
@@ -142,7 +142,7 @@ pytz==2015.4
 PyYAML==3.11
 raven==5.3.1
 redis==2.10.3
-regex==2015.6.19
+regex==2015.6.21
 requests==2.7.0
 responses==0.4.0
 rest-condition==1.0.1
