@@ -283,7 +283,7 @@ class BaseConfiguration(
         'modernizr#2.8.3',
         'respond#1.4.2',
         'jquery#2.1.4',
-        'bootstrap#3.3.4',
+        'bootstrap#3.3.5',
         'bootstrap-select#1.6.5',
         'font-awesome#4.3.0',
         'handlebars#3.0.3',
