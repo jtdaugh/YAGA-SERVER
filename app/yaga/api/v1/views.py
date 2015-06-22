@@ -452,11 +452,14 @@ class GroupMemberJoinUpdateAPIView(
             obj.group = instance
             obj.user = self.request.user
 
-            # notifications. ???? TODO
-
         obj.creator = self.request.user
         obj.status = Member.status_choices.PENDING
         obj.save()
+
+        notifications.RequestGroupNotification.schedule(
+            group=obj.group.pk,
+            emitter=obj.user.pk
+        )
 
         self.permission_classes = list(self.permission_classes)
 
@@ -619,6 +622,7 @@ class GroupMemberUpdateDestroyAPIView(
         except Member.DoesNotExist:
             pass
         else:
+            obj.creator = self.request.user
             obj.status = Member.status_choices.LEFT
             obj.save()
 

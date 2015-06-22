@@ -196,6 +196,7 @@ class GroupNotification(
         members = self.group.member_set.select_related(
             'user'
         ).filter(
+            status=Member.status_choices.MEMBER,
             mute=False
         ).exclude(
             **self.get_exclude()
@@ -404,6 +405,45 @@ class KickDirectNotification(
         return _('{emitter} has removed you from {group}')
 
 
+class RequestGroupNotification(
+    GroupNotification
+):
+    def __init__(self, **kwargs):
+        self.target = self.emitter = self.load_user(kwargs['emitter'])
+        self.group = self.load_group(kwargs['group'])
+
+    def get_receivers(self):
+        members = super(RequestGroupNotification, self).get_receivers()
+
+        contacts = Contact.objects.select_related(
+            'user'
+        ).filter(
+            phones__contains=[self.emitter.phone.as_e164],
+        ).exclude(
+            **self.get_exclude()
+        )
+
+        contacts = [contact.user for contact in contacts]
+
+        return list(set(contacts) & set(members))
+
+    def get_meta(self):
+        return {
+            'event': 'request',
+            'user_id': str(self.target.pk),
+            'group_id': str(self.group.pk)
+        }
+
+    def get_message(self):
+        return _('{emitter} requested to join "{group}"')
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.group.name,
+            'emitter': self.emitter.get_username(),
+        }
+
+
 class CaptionDirectNotification(
     DirectNotification
 ):
@@ -558,7 +598,7 @@ class JoinGroupNotification(
         return [member.user for member in Member.objects.select_related(
             'user'
         ).filter(
-            group__in=self.groups
+            group__in=groups
         ).distinct('user')]
 
     def notify(self):
@@ -641,6 +681,7 @@ class FirebaseNotification(
             'user'
         ).filter(
             user__in=self.targets,
+            status=Member.status_choices.MEMBER,
             mute=False
         )
 
