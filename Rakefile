@@ -99,7 +99,7 @@ task :celery_worker do
 end
 
 task :firebase_proxy do
-  cmd = 'npm run-script preinstall; pm2 start index.js'
+  cmd = 'npm run-script preinstall; node index.js'
 
   Dir.chdir('node-push-chat') do
     sh cmd
