@@ -97,3 +97,11 @@ task :celery_worker do
     sh cmd
   end
 end
+
+task :firebase_proxy do
+  cmd = 'forever start index.js'
+
+  Dir.chdir('node-push-chat') do
+    sh cmd
+  end
+end
