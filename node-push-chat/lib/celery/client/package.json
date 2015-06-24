@@ -1,0 +1,86 @@
+{
+  "name": "node-celery",
+  "version": "0.2.3",
+  "description": "Celery client for Node",
+  "author": {
+    "name": "Mher Movsisyan",
+    "email": "mher.movsisyan@gmail.com"
+  },
+  "dependencies": {
+    "amqp": "*",
+    "node-uuid": "*",
+    "redis": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mher/node-celery.git"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "engine": "node >= 0.8.2",
+  "main": "celery.js",
+  "contributors": [
+    {
+      "name": "=================================="
+    },
+    {
+      "name": "AUTHORS",
+      "url": "in chronological order"
+    },
+    {
+      "name": "=================================="
+    },
+    {
+      "name": "Mher Movsisyan"
+    },
+    {
+      "name": "Esco Obong"
+    },
+    {
+      "name": "Jeffrey Luyau"
+    },
+    {
+      "name": "Mihail Mikov"
+    },
+    {
+      "name": "Colin Hubert"
+    },
+    {
+      "name": "Ivo Rothschild"
+    },
+    {
+      "name": "Jack Williams"
+    },
+    {
+      "name": "David Gouldin"
+    }
+  ],
+  "gitHead": "9d3ca248b0962c84e0cff7463e6df55d5d10d23f",
+  "bugs": {
+    "url": "https://github.com/mher/node-celery/issues"
+  },
+  "homepage": "https://github.com/mher/node-celery",
+  "_id": "node-celery@0.2.3",
+  "scripts": {},
+  "_shasum": "04c38a2639303065884de4e72e46be137b6a77f5",
+  "_from": "node-celery@",
+  "_npmVersion": "2.3.0",
+  "_nodeVersion": "0.10.35",
+  "_npmUser": {
+    "name": "mher",
+    "email": "mher.movsisyan@gmail.com"
+  },
+  "maintainers": [
+    {
+      "name": "mher",
+      "email": "mher.movsisyan@gmail.com"
+    }
+  ],
+  "dist": {
+    "shasum": "04c38a2639303065884de4e72e46be137b6a77f5",
+    "tarball": "http://registry.npmjs.org/node-celery/-/node-celery-0.2.3.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/node-celery/-/node-celery-0.2.3.tgz"
+}

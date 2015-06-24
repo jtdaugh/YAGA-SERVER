@@ -1,0 +1,28 @@
+{
+  "name": "firenode",
+  "version": "0.0.1",
+  "description": "proxy firebase events to celery queue",
+  "main": "monitor.js",
+  "scripts": {
+    "preinstall": "npm install --dev",
+    "test": "mocha test"
+  },
+  "author": "Dylan Williams",
+  "license": "Private",
+  "private": true,
+  "dependencies": {
+    "amqp": "^0.2.4",
+    "async": "^1.2.1",
+    "bunyan": "^1.4.0",
+    "firebase": "^2.2.6",
+    "hiredis": "^0.4.0",
+    "node-uuid": "^1.4.3",
+    "optimist": "^0.6.1",
+    "pg": "^4.4.0",
+    "redis": "^0.12.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.2.5",
+    "should": "^6.0.3"
+  }
+}
