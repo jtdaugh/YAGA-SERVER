@@ -29,5 +29,5 @@ config.db = {
 
 config.push = {
     limit: 2, // limit per ttl
-    ttl: 300000 // 5 minutes
+    ttl: 300  // 5 minutes / 300 seconds
 }

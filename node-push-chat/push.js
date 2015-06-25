@@ -45,21 +45,26 @@ push.qualifyNotification = function(thread, commenter, cb){
     
     $log.debug('qualify ',thread.id,' ',commenter);
     
+    var rate_limit_key = thread.id + '_' + commenter;
+    
     $async.waterfall([
 
             //check redis for thread/user push count
-            function(callback){ return redis.hgetall(thread.id, callback); },
-            function(push_map, callback){
-                $log.debug({push_map:push_map},'rate limit map');
+            function(callback){ return redis.get(rate_limit_key, callback); },
+            function(num_pushes, callback){
+                $log.debug({ rate_limit_key:rate_limit_key, num_pushes:num_pushes }, 'user pushes');
                 
-                // no redis hash for this thread, create one and allow push
-                if(!push_map) return redis.hset(thread.id, commenter, 1, callback);
-                
-                //enfore rate limit policy
-                var pushes_sent = parseInt(push_map[commenter], 10) || 0;
-                if(pushes_sent >= $config.push.limit) return new Error(push.genericErrorMsg+'commenter rate limit exceeded');
-                
-                return redis.hset(thread.id, commenter, pushes_sent + 1, callback);
+                // no redis key for this thread/user, create one and allow push
+                if(!num_pushes) { 
+                    redis.set(rate_limit_key, 1, callback); 
+                    return redis.expire(rate_limit_key, $config.push.ttl);
+                }
+                else{//enfore rate limit policy
+                    var pushes_sent = parseInt(num_pushes, 10) || 0;
+                    if(pushes_sent >= $config.push.limit) return new Error(push.genericErrorMsg+'commenter rate limit exceeded');
+                    
+                    return redis.set(rate_limit_key, pushes_sent + 1, callback);
+                }
             },
         ],
         cb
