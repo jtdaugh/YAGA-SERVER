@@ -73,10 +73,14 @@ push.prepareRecipientsInfo = function(thread, commenter, cb){
     var thread_contents = thread.contents;
     if(!thread.contents) return cb(new Error(push.genericErrorMsg+'thread is empty'));
     
+    var recipients_map = {};
     var recipients = [];
-    for(var comment in thread_contents){
+    for(var comment in thread_contents){ // map and reduce
         comment = thread_contents[comment] || {};
-        if(comment.username !== commenter) recipients.push(comment.username);
+        if(comment.username !== commenter && !recipients_map[comment.username]){
+            recipients_map[comment.username] = '';
+            recipients.push(comment.username);
+        }
     }
     
     return cb(null, recipients);
