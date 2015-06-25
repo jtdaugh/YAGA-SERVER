@@ -7,7 +7,7 @@ var globals = [
     
     //from node_modules
     'async',
-    { name: 'log', value: require('bunyan').createLogger({ name: 'firenode' }) },
+    { name: 'log', value: require('bunyan').createLogger({ name: 'firenode', level: 'debug' }) },
     { name: 'argv', value: require('optimist').argv },
     
     //local modules

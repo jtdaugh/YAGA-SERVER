@@ -3,20 +3,33 @@ require('../globals');
 var should = require('should');
 var config = require('../config');
 
+var firenode; // main app
+
 var firebase = require('firebase');
 var firedev;
 
 // mock events
-var mock_event = {
-    first: 'thing'
+var mock_event = { first: 'thing' };
+var mock_thread = {
+    thread1: {
+        comment1: { type: 'comment', comment: 'this rules!', username: 'dan' },
+        comment2: { type: 'comment', comment: 'pretty cool!', username: 'dylan' }
+    }
 };
 var mock_push_event = {
-    val: function(){ return [
-        { comment: 'nice', type: 'comment', username: 'dan' },
-        { comment: 'this rules!', type: 'comment', username: 'dylan' } 
-    ] },
-    key: function(){ return 'MOCK_EVENT'; }
+    _val: [
+        { comment: 'nice', type: 'comment', username: 'dan', val: function(){ return this} },
+        { comment: 'this rules!', type: 'comment', username: 'dylan', val: function(){ return this} } 
+    ],
+    _key: 'MOCK_EVENT',
+    val: function(){ return this._val },
+    key: function(){ return this._key; },
 };
+mock_push_event.forEach = function(iter){
+    mock_push_event._val.forEach(function(elem){
+        iter(elem);
+    });
+}
 
 describe('firenode', function(){
     
@@ -111,6 +124,33 @@ describe('firenode', function(){
         );
         
     });
+    
+    //complete app tests
+    // it('should receive a child_changed event and queue a push notification', function(done){
+    //     var events = firenode.child('events');
+    //     var loaded = false;
+        
+    //     $async.series([
+    //             function(cb){
+    //                 events.on('child_changed', function(data){
+    //                     if(!loaded) return;
+                        
+                        
+    //                     done();
+    //                 });
+    //                 events.once('value', function(){ // called after initial db load
+    //                     loaded = true;
+    //                     cb(null);
+    //                 });
+    //             }
+    //         ],
+            
+    //         function(err){
+    //             events.child('mock_event').set(mock_thread);
+    //         }
+    //     );
+        
+    // });
     
     after(function(done){
         firedev.child('events').once('value',function(events){

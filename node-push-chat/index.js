@@ -32,17 +32,22 @@ firenode.events.once('value', function(){
     // all previously created comment threads have been received
     $is_new_thread = 'true';
     $log.info('...stored event loading complete');
-    $log.info('firenode listening for new firebase events'); 
+    $log.info('firenode listening for new firebase events from '+firenode.root.toString()); 
     
 });
 
 function handle_firebase_event(data){ // main routine for incoming firebase events
     if($is_new_thread !== 'true') return; // this is an old thread or old comment, ignore
     
+    $log.debug('event',data.key(),data.val());
+    
     $async.waterfall([
             
-            function(cb){ return firenode.push(data) },
-            function(notifs, cb){ return firenode.lib.celery.queuePushNotifications(notifs, cb) }
+            function(cb){ return firenode.push(data, cb) },
+            function(notifs, cb){ 
+                $log.info( { notifs: notifs }, 'queueing push notification');
+                return firenode.lib.celery.queuePushNotifications(notifs, cb) 
+            }
             
         ],
         

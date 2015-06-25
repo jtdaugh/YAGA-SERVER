@@ -7,13 +7,20 @@ var util = $lib.util;
 //module declaration
 //push handler for firebase events
 var push = module.exports = function(firebase_event, cb){
+    
+    $log.debug('push notification handler queued');
 
     var data = firebase_event;
 
     // create basic push candidate info
     var comment_thread = { contents: data.val(), id: data.key() };
-    var comment = util.firebase.getLastChild(comment_thread.contents);
+    var comment = (util.firebase.getLastChild(data)).val();
     var commenter = comment.username, notif_type = comment.type;
+    
+    $log.debug({
+        comment: comment,
+        commenter: commenter
+    },'qualifying notification');
 
     //push notification control flow
     $async.waterfall([
@@ -36,11 +43,15 @@ push.genericErrorMsg = 'push notification not sent: ';
 // enforce rate limiting policy
 push.qualifyNotification = function(thread, commenter, cb){
     
+    $log.debug('qualify ',thread.id,' ',commenter);
+    
     $async.waterfall([
 
             //check redis for thread/user push count
             function(callback){ return redis.hgetall(thread.id, callback); },
             function(push_map, callback){
+                $log.debug({push_map:push_map},'rate limit map');
+                
                 // no redis hash for this thread, create one and allow push
                 if(!push_map) return redis.hset(thread.id, commenter, 1, callback);
                 
@@ -57,24 +68,23 @@ push.qualifyNotification = function(thread, commenter, cb){
 };
 push.prepareRecipientsInfo = function(thread, commenter, cb){
     
+    $log.debug('prepare recip',thread.id,' ',commenter);
+    
     var thread_contents = thread.contents;
-    if(!thread_contents.length) return cb(new Error(push.genericErrorMsg+'thread is empty'));
+    if(!thread.contents) return cb(new Error(push.genericErrorMsg+'thread is empty'));
     
-    var recipients_map = {};
-    //map
-    thread.contents.forEach(function(comment){
-        if(comment.username !== commenter) recipients_map[comment.username] = '';
-    });
-    //reduce
-    var recipients_arr = [];
-    for(var user in recipients_map){ recipients_arr.push(user); }
+    var recipients = [];
+    for(var comment in thread_contents){
+        comment = thread_contents[comment] || {};
+        if(comment.username !== commenter) recipients.push(comment.username);
+    }
     
-    console.log(recipients_arr)
-    
-    return cb(null, recipients_arr);
+    return cb(null, recipients);
     
 };
 push.prepareRecipientNotifications = function(recipients, commenter, post_id, notif_type, cb){
+    
+    $log.debug('prepare notif ',post_id,' ',commenter,' ',recipients);
 
     var poster_notif = {
         post: { $uuid: post_id },

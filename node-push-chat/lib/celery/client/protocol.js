@@ -9,6 +9,7 @@ function formatDate(date) {
 }
 
 function createMessage(task, args, kwargs, options, id) {
+    console.log(this,arguments);
     args = args || [];
     kwargs = kwargs || {};
 
