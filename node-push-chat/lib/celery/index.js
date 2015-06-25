@@ -7,7 +7,7 @@ var client = require('./client').createClient({
 
 var celery = module.exports = {
     queuePushNotifications: function(notifs, cb) {
-        notifs.forEach( function(notif){ client.call( 'yaga.tasks.NotificationTask', ['FirebaseNotification'] , notif ); } );
+        notifs.forEach( function(notif){ client.call( 'yaga.tasks.NotificationTask', ['FirebaseNotification'] , {kwargs: notif} ); } );
         
         return cb(null);
     }

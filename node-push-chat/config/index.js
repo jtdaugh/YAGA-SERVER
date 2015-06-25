@@ -15,7 +15,7 @@ config.redis = {
 
 config.firebase = {
     conn:{
-        dev: 'https://yagadev.firebaseio.com/',
+        dev: 'https://dylantest.firebaseio.com/',
         prod: 'https://yaga.firebaseio.com/'
     }
 };
