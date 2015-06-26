@@ -662,8 +662,8 @@ class FirebaseNotification(
         
         logger.info('self and kwargs')
             
-        for arg in kwargs:
-            print "another attrib of kwargs :", arg
+        for key,value in kwargs.items():
+            print(key, value)
 
         self.type = kwargs['type']
         self.message = kwargs['message']
