@@ -664,7 +664,7 @@ class FirebaseNotification(
         logger.info(self);
         logger.info(**kwargs);
         
-        if instanceof(self.target, RelatedManager)
+        if isinstance(self.target, RelatedManager)
             self.target = self.target[0]
 
         self.type = kwargs['type']
