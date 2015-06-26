@@ -661,9 +661,6 @@ class FirebaseNotification(
         self.target = self.post.user
         
         logger.info('self and kwargs')
-        
-        for arg in self:
-            print "another attrib of self :", arg
             
         for arg in kwargs:
             print "another attrib of kwargs :", arg
