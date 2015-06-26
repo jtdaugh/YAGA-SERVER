@@ -14,6 +14,11 @@ from .conf import settings
 from .models import Contact, Device, Group, Member, Post
 from .providers import apns_provider
 
+# import the logging library
+import logging
+
+# Get an instance of a logger
+logger = logging.getLogger(__name__)
 
 class NotificationInstances(
     type
@@ -654,6 +659,13 @@ class FirebaseNotification(
         self.emitter = self.load_user(kwargs['emitter'])
         self.group = self.post.group
         self.target = self.post.user
+        
+        logger.info('self and kwargs');
+        logger.info(self);
+        logger.info(**kwargs);
+        
+        if instanceof(self.target, RelatedManager)
+            self.target = self.target[0]
 
         self.type = kwargs['type']
         self.message = kwargs['message']
