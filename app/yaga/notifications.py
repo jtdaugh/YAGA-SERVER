@@ -662,7 +662,7 @@ class FirebaseNotification(
         
         logger.info('self and kwargs')
         logger.info(dir(self))
-        logger.info(dir(kwargs))
+        logger.info(dir(**kwargs))
 
         self.type = kwargs['type']
         self.message = kwargs['message']
