@@ -37,6 +37,7 @@ class YagaAppConf(
     ATTACHMENT_TRASH_PREFIX = 'trash'
 
     ATTACHMENT_PREVIEW = {
+        'transpose': 0,
         'width': 200,
         'height': 200,
         'speed': 1.5,
@@ -59,7 +60,8 @@ class YagaAppConf(
     ATTACHMENT_TRANSCODE_CMD = (
         'ffmpeg -i {input} '
         +
-        '-vf "transpose=1,scale={width}:-1" -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
+        '-vf "transpose={transpose},scale={width}:-1" -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
+            transpose=ATTACHMENT_PREVIEW['transpose'],
             width=ATTACHMENT_PREVIEW['width'],
             height=ATTACHMENT_PREVIEW['height'],
             fps=ATTACHMENT_PREVIEW['fps'],
