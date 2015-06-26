@@ -660,9 +660,9 @@ class FirebaseNotification(
         self.group = self.post.group
         self.target = self.post.user
         
-        logger.info('self and kwargs');
-        logger.info(self);
-        logger.info(**kwargs);
+        logger.info('self and kwargs')
+        dir(self)
+        dir(kwargs)
 
         self.type = kwargs['type']
         self.message = kwargs['message']
