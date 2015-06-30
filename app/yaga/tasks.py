@@ -321,9 +321,6 @@ class NotificationTask(
     celery.Task
 ):
     def run(self, instance, **kwargs):
-        print('notifying')
-        for key,value in kwargs.items():
-            print(key,value)
         NotificationInstances.get_instance(instance)(
             **kwargs
         ).notify()

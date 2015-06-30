@@ -233,13 +233,6 @@ class APNSProvider(
             receivers,
             **kwargs
         )
-        
-        print('apns debug')
-        
-        print(self)
-        print(receivers)
-        print(kwargs)
-        print(message)
 
         response = service.send(message)
 
