@@ -6,7 +6,6 @@ from future.builtins import (  # noqa
 
 import logging
 
-from celery import states as celery_states
 from celery.exceptions import SoftTimeLimitExceeded
 from django.core.files.storage import default_storage
 from django.utils import timezone
@@ -56,6 +55,7 @@ if settings.YAGA_PERIODIC_CLEANUP:
         run_every = settings.YAGA_CLEANUP_RUN_EVERY
 
         def run(self):
+            # TODO: states cleanup
             for group in Group.objects.filter(
                 members=None
             ):
@@ -88,35 +88,6 @@ if settings.YAGA_PERIODIC_CLEANUP:
                 state=Post.state_choices.PENDING
             ):
                 post.mark_deleted()
-
-    class PostTranscodePeriodicTask(
-        celery.PeriodicTask
-    ):
-        run_every = settings.YAGA_ATTACHMENT_TRANSCODE_RUN_EVERY
-
-        def run(self):
-            expired = (
-                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_EXPIRES
-            )
-
-            deadline = (
-                timezone.now() - settings.YAGA_ATTACHMENT_TRANSCODE_DEADLINE
-            )
-
-            for post in Post.objects.filter(
-                created_at__lte=expired,
-                state=Post.state_choices.UPLOADED
-            ):
-                if post.created_at < deadline:
-                    post.mark_deleted()
-                else:
-                    result = post.transcoding_result
-
-                    if result.state in (
-                        celery_states.FAILURE,
-                        celery_states.PENDING
-                    ):
-                        post.schedule_transcoding()
 
     class APNSFeedBackPeriodicTask(
         celery.PeriodicTask
