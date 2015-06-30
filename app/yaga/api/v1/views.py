@@ -234,14 +234,13 @@ class GroupDiscoverListAPIView(
     def get_queryset(self):
         contact = Contact.objects.filter(user=self.request.user).first()
 
-        if contact:
-            phone_query = Q()
+        if contact and contact.phones:
+            phones = []
 
             for phone in contact.phones:
-                phone_query |= Q(
-                    member__user__phone=phone,
-                    member__status=Member.status_choices.MEMBER
-                )
+                phones.append('\'{phone}\'::text'.format(
+                    phone=phone
+                ))
 
             queryset = Group.objects.select_related(
                 'creator'
@@ -252,14 +251,17 @@ class GroupDiscoverListAPIView(
                         status=Member.status_choices.LEFT
                     )
                 ),
-            ).filter(
-                Q(member__user__name__isnull=False)
-                &
-                phone_query
+            ).extra(
+                where=[
+                    '"accounts_user"."phone" in ({phones})'.format(
+                        phones=','.join(phones)
+                    ),
+                    '"accounts_user"."name" IS NOT NULL'
+                ]
             ).exclude(
-                member__in=Member.objects.filter(
-                    user=self.request.user,
-                    status=Member.status_choices.MEMBER
+                pk__in=Group.objects.filter(
+                    member__user=self.request.user,
+                    member__status=Member.status_choices.MEMBER
                 )
             ).distinct()
 
