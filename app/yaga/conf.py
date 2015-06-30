@@ -7,6 +7,7 @@ from future.builtins import (  # noqa
 import datetime
 import os
 
+import regex
 from appconf import AppConf
 from decouple import config
 from django.conf import settings  # noqa
@@ -37,7 +38,6 @@ class YagaAppConf(
     ATTACHMENT_TRASH_PREFIX = 'trash'
 
     ATTACHMENT_PREVIEW = {
-        'transpose': 0,
         'width': 200,
         'height': 200,
         'speed': 1.5,
@@ -58,10 +58,9 @@ class YagaAppConf(
     )
 
     ATTACHMENT_TRANSCODE_CMD = (
-        'ffmpeg -i {input} '
+        'ffmpeg -i {input} -vf "transpose={transpose}'
         +
-        '-vf "transpose={transpose},scale={width}:-1" -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
-            transpose=ATTACHMENT_PREVIEW['transpose'],
+        ',scale={width}:-1" -r {fps} -f image2pipe -vcodec ppm - | convert -delay {speed} +dither -coalesce -layers Optimize -gravity Center -crop {width}x{height}+0+0 +repage - gif:- | gifsicle -O3 > '.format(  # noqa
             width=ATTACHMENT_PREVIEW['width'],
             height=ATTACHMENT_PREVIEW['height'],
             fps=ATTACHMENT_PREVIEW['fps'],
@@ -121,6 +120,14 @@ class YagaAppConf(
     CLOUDFRONT_CLEAN_CACHE_KEY_TTL = 60 * 30
     CLOUDFRONT_CLEAN_CACHE_KEY = 'yaga:cloudfront_purge_cache_key'
     CLOUDFRONT_CLEAN_RUN_EVERY = datetime.timedelta(minutes=5)
+
+    CLIENT_VERSION_NO_TRANSPOSE = 1
+    CLIENT_VERSION_HEADER = 'HTTP_USER_AGENT'
+    DEFAULT_CLIENT_HEADER = 'YAGA IOS 0'
+    CLIENT_RE = regex.compile(
+        r'YAGA\s(?P<vendor>IOS|ANDROID)\s(?P<version>\d+)'
+    )
+    SUPPORTED_CLIENT_VERSIONS = (0, 1)
 
     class Meta:
         prefix = 'yaga'

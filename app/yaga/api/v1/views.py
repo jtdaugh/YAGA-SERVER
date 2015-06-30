@@ -707,7 +707,8 @@ class PostCreateAPIView(
         if serializer.validated_data.get('name'):
             obj.name = serializer.validated_data['name']
             obj.namer = request.user
-        obj.upload_version = self.get_version(request.META.get('HTTP_USER_AGENT', ''))
+
+        obj.upload_version = self.request.bridge.yaga.CLIENT_VERSION
         obj.save()
 
         serializer = self.get_serializer(obj)
@@ -729,9 +730,6 @@ class PostCreateAPIView(
             status=status.HTTP_201_CREATED
         )
 
-    # XXX make this more generic and move out of this class to somewhere more general
-    def get_version(self, useragent):
-        return 1  # XXX agree on user agent version and parse appropriately
 
 class PostAPIView(
     object

@@ -551,6 +551,13 @@ class Post(
             (self.pk,), task_id=self.transcoding_task_id
         )
 
+    def get_transpose(self):
+        return int(
+            self.upload_version
+            <
+            settings.YAGA_CLIENT_VERSION_NO_TRANSPOSE
+        )
+
     def transcode(self):
         if self.is_transcoded():
             return True
@@ -563,9 +570,6 @@ class Post(
         except IOError:
             return False
 
-        # Temporary for upgrade from App Store version 2.0
-        transpose = (self.upload_version>=2)
-
         with self.TmpAttachment(self) as attachment:
             try:
                 output = tempfile.NamedTemporaryFile(delete=False)
@@ -574,7 +578,7 @@ class Post(
 
                 process = sh(
                     settings.YAGA_ATTACHMENT_TRANSCODE_CMD.format(
-                        transpose=transpose,
+                        transpose=self.get_tranpose(),
                         input=attachment.name,
                         output=output.name
                     )
