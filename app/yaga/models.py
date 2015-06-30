@@ -578,7 +578,7 @@ class Post(
 
                 process = sh(
                     settings.YAGA_ATTACHMENT_TRANSCODE_CMD.format(
-                        transpose=self.get_tranpose(),
+                        transpose=self.get_transpose(),
                         input=attachment.name,
                         output=output.name
                     )
