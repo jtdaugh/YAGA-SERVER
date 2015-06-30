@@ -121,13 +121,16 @@ class YagaAppConf(
     CLOUDFRONT_CLEAN_CACHE_KEY = 'yaga:cloudfront_purge_cache_key'
     CLOUDFRONT_CLEAN_RUN_EVERY = datetime.timedelta(minutes=5)
 
-    CLIENT_VERSION_NO_TRANSPOSE = 1
+    CLIENT_VERSION_NO_TRANSPOSE = 210
     CLIENT_VERSION_HEADER = 'HTTP_USER_AGENT'
-    DEFAULT_CLIENT_HEADER = 'YAGA IOS 0'
+    DEFAULT_CLIENT_HEADER = 'YAGA IOS 0.0.0'
     CLIENT_RE = regex.compile(
-        r'YAGA\s(?P<vendor>IOS|ANDROID)\s(?P<version>\d+)'
+        r'YAGA\s(?P<vendor>IOS|ANDROID)\s(?P<version>\d+\.\d\.\d)'
     )
-    SUPPORTED_CLIENT_VERSIONS = (0, 1)
+    SUPPORTED_CLIENT_VERSIONS = (
+        lambda version: version == 0,
+        lambda version: version > 210
+    )
 
     class Meta:
         prefix = 'yaga'

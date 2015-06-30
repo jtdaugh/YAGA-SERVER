@@ -31,7 +31,7 @@ class YagaRequest(
 
         vendort_choice = VendorChoice()
 
-        self.CLIENT_VERSION = int(info['version'])
+        self.CLIENT_VERSION = int(info['version'].replace('.', ''))
         self.CLIENT_VENDOR = vendort_choice.key(str(info['vendor']))
 
 
@@ -47,9 +47,14 @@ class YagaMiddleware(
     def process_request(self, request):
         request.bridge.yaga = YagaRequest(request)
 
-        if (
-            request.bridge.yaga.CLIENT_VERSION
-            not in
-            settings.YAGA_SUPPORTED_CLIENT_VERSIONS
-        ):
+        is_supported_version = False
+
+        for rule in settings.YAGA_SUPPORTED_CLIENT_VERSIONS:
+            check = rule(request.bridge.yaga.CLIENT_VERSION)
+
+            if check:
+                is_supported_version = True
+                break
+
+        if not is_supported_version:
             return not_supported_client(request)
