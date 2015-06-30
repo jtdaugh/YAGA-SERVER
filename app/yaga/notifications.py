@@ -647,7 +647,10 @@ class FirebaseNotification(
     Notification
 ):
     def check_condition(self):
-        return self.target != self.emitter
+        if self.type == 'direct':
+            return self.target != self.emitter
+        else:
+            return True
 
     def __init__(self, **kwargs):
         self.post = self.load_post(kwargs['post'])
