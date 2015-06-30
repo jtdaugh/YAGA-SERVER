@@ -423,9 +423,20 @@ class RequestGroupNotification(
             **self.get_exclude()
         )
 
-        contacts = [contact.user for contact in contacts]
+        contacts = {contact.user for contact in contacts}
 
-        return list(set(contacts) & set(members))
+        user_contacts = Contact.objects.filter(
+            user=self.emitter
+        ).first()
+
+        if user_contacts:
+            user_contacts = get_user_model().objects.filter(
+                phone__in=user_contacts.phones
+            )
+
+            contacts |= set(user_contacts)
+
+        return list(contacts & set(members))
 
     def get_meta(self):
         return {
