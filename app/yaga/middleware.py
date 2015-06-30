@@ -7,8 +7,8 @@ from future.builtins import (  # noqa
 from django.http import HttpResponse
 from rest_framework import status
 
-from .conf import settings
 from .choices import VendorChoice
+from .conf import settings
 
 
 class YagaRequest(
