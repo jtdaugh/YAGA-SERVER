@@ -552,11 +552,10 @@ class Post(
         )
 
     def get_transpose(self):
-        return int(
-            self.upload_version
-            <
-            settings.YAGA_CLIENT_VERSION_NO_TRANSPOSE
-        )
+        if self.upload_version < settings.YAGA_CLIENT_VERSION_NO_TRANSPOSE:
+            return 'transpose=1,'
+        else:
+            return ''
 
     def transcode(self):
         if self.is_transcoded():
