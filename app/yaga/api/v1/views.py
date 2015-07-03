@@ -15,6 +15,7 @@ from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from psycopg2.extensions import QuotedString
 
 from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
@@ -238,8 +239,8 @@ class GroupDiscoverListAPIView(
             phones = []
 
             for phone in contact.phones:
-                phones.append('\'{phone}\'::text'.format(
-                    phone=phone
+                phones.append('{phone}::text'.format(
+                    phone=QuotedString(phone)
                 ))
 
             queryset = Group.objects.select_related(
