@@ -959,7 +959,7 @@ class LikeCreateDestroyAPIView(
     )
 
     def get_queryset(self):
-        return Post.objects.Post.objects.select_related(
+        return Post.objects.select_related(
             'user',
             'namer'
         )
