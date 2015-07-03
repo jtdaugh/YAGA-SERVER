@@ -15,7 +15,7 @@ from app import celery
 from app.utils import get_requests_session
 
 from .conf import settings
-from .models import Code, Group, Post, PostCopy
+from .models import Code, Post, PostCopy
 from .providers import apns_provider
 from .storage import cloudfront_storage
 from .utils import post_attachment_re
@@ -49,32 +49,6 @@ if settings.YAGA_PERIODIC_CLEANUP:
             ):
                 code.delete()
 
-    class GroupCleanupAtomicPeriodicTask(
-        celery.AtomicPeriodicTask
-    ):
-        run_every = settings.YAGA_CLEANUP_RUN_EVERY
-
-        def run(self):
-            # TODO: states cleanup
-            for group in Group.objects.filter(
-                members=None
-            ):
-                keep_group = False
-
-                for post in Post.atomic_objects.filter(
-                    group=group
-                ):
-                    if post.state in [
-                        Post.state_choices.READY,
-                        Post.state_choices.DELETED
-                    ]:
-                        post.delete()
-                    else:  # waiting for pending posts
-                        keep_group = True
-
-                if not keep_group:
-                    group.delete()
-
     class PostCleanupAtomicPeriodicTask(
         celery.AtomicPeriodicTask
     ):
@@ -96,6 +70,32 @@ if settings.YAGA_PERIODIC_CLEANUP:
 
         def run(self):
             apns_provider.feedback()
+
+    # class GroupCleanupAtomicPeriodicTask(
+    #     celery.AtomicPeriodicTask
+    # ):
+    #     run_every = settings.YAGA_CLEANUP_RUN_EVERY
+
+    #     def run(self):
+    #         # TODO: states cleanup
+    #         for group in Group.objects.filter(
+    #             members=None
+    #         ):
+    #             keep_group = False
+
+    #             for post in Post.atomic_objects.filter(
+    #                 group=group
+    #             ):
+    #                 if post.state in [
+    #                     Post.state_choices.READY,
+    #                     Post.state_choices.DELETED
+    #                 ]:
+    #                     post.delete()
+    #                 else:  # waiting for pending posts
+    #                     keep_group = True
+
+    #             if not keep_group:
+    #                 group.delete()
 
 
 class CleanStorageTask(
