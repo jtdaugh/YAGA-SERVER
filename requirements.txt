@@ -120,7 +120,7 @@ pgcli==0.17.0
 phonenumbers==7.0.7
 pies==2.6.5
 pies2overrides==2.6.5
-Pillow==2.8.2
+Pillow==2.9.0
 pip-tools==0.3.6
 pipdeptree==0.4.2
 pluggy==0.3.0

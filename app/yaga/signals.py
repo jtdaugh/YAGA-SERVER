@@ -67,6 +67,13 @@ class LikeSignal(
     receiver = receivers.LikeReceiver
 
 
+class PostCopySignal(
+    ModelSignal
+):
+    model = models.PostCopy
+    receiver = receivers.PostCopyReceiver
+
+
 class UserSignal(
     ModelSignal
 ):

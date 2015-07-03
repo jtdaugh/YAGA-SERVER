@@ -105,7 +105,8 @@ class AbstractUser(
         verbose_name=_('Name'),
         max_length=255,
         null=True,
-        blank=True
+        blank=True,
+        db_index=True
     )
     # here is function lower unique index at migration
 

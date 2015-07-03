@@ -77,6 +77,12 @@ class LikeReceiver(
         instance.post.mark_updated()
 
 
+class PostCopyReceiver(
+    ModelReceiver
+):
+    pass
+
+
 class UserReceiver(
     ModelReceiver
 ):
