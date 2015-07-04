@@ -2,6 +2,8 @@ require 'rake'
 
 APP_DIR = 'app'
 PROCESS_WORKERS = 3
+WEB_WORKERS = PROCESS_WORKERS - 1
+BACKGROUND_WORKERS = PROCESS_WORKERS
 LIMIT = 1000
 HTTP_TIMEOUT = 30
 USE_NEWRELIC = {
@@ -34,7 +36,7 @@ task :uwsgi do
   cmd = cmd % {
     limit: LIMIT,
     format: '"%(addr) \"%(method) %(uri) %(proto)\" -> %(status) in %(msecs)ms"',
-    workers: PROCESS_WORKERS,
+    workers: WEB_WORKERS,
     timeout: HTTP_TIMEOUT,
     port: ENV['PORT'] || 8000
   }
@@ -51,7 +53,7 @@ task :gunicorn do
   cmd = cmd % {
     limit: LIMIT,
     format: '"%(h)s \"%(r)s\" -> %(s)s in %(L)ss"',
-    workers: PROCESS_WORKERS,
+    workers: WEB_WORKERS,
     timeout: HTTP_TIMEOUT,
     port: ENV['PORT'] || 8000
   }
@@ -87,7 +89,7 @@ task :celery_worker do
   cmd = 'celery -A app worker -c %{workers} --maxtasksperchild %{limit}'
 
   cmd = cmd % {
-    workers: PROCESS_WORKERS,
+    workers: BACKGROUND_WORKERS,
     limit: LIMIT
   }
 
