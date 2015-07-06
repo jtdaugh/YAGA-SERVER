@@ -235,14 +235,26 @@ class GroupDiscoverListAPIView(
     def get_queryset(self):
         contact = Contact.objects.filter(user=self.request.user).first()
 
-        if contact and contact.phones:
-            phones = []
+        phones = []
 
+        if contact and contact.phones:
             for phone in contact.phones:
                 phones.append('{phone}::text'.format(
                     phone=QuotedString(phone)
                 ))
 
+        for contact in Contact.objects.select_related(
+            'user'
+        ).filter(
+            phones__contains=[self.request.user.phone.as_e164],
+        ):
+            phones.append('{phone}::text'.format(
+                phone=QuotedString(contact.user.phone.as_e164)
+            ))
+
+        phones = list(set(phones))
+
+        if phones:
             queryset = Group.objects.select_related(
                 'creator'
             ).prefetch_related(
@@ -257,7 +269,7 @@ class GroupDiscoverListAPIView(
                     '"accounts_user"."phone" in ({phones})'.format(
                         phones=','.join(phones)
                     ),
-                    '"accounts_user"."name" IS NOT NULL'
+                    '"accounts_user"."name" IS NOT NULL',
                 ]
             ).exclude(
                 pk__in=Group.objects.filter(

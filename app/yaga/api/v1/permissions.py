@@ -4,12 +4,11 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from django.db.models import Q
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from accounts.models import Token
 
-from ...models import Contact, Group, Member, Post
+from ...models import Contact, Member, Post
 
 
 class TokenOwner(
@@ -44,24 +43,27 @@ class ContactsGroupMemeber(
     def has_object_permission(self, request, view, obj):
         contact = Contact.objects.filter(user=request.user).first()
 
-        if contact:
-            phone_query = Q()
+        phones = []
 
+        if contact and contact.phones:
             for phone in contact.phones:
-                phone_query |= Q(
-                    member__user__phone=phone,
-                    member__status=Member.status_choices.MEMBER
-                )
+                phones.append(phone)
 
-            return Group.objects.filter(
-                Q(member__user__name__isnull=False)
-                &
-                phone_query
-            ).filter(
-                pk=obj.pk
+        for contact in Contact.objects.select_related(
+            'user'
+        ).filter(
+            phones__contains=[request.user.phone.as_e164],
+        ):
+            phones.append(contact.user.phone.as_e164)
+
+        phones = list(set(phones))
+
+        if not phones:
+            return False
+        else:
+            return obj.member_set.filter(
+                user__phone__in=phones
             ).exists()
-
-        return False
 
 
 class PostGroupMember(
