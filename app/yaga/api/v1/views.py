@@ -15,7 +15,6 @@ from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from psycopg2.extensions import QuotedString
 
 from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
@@ -239,18 +238,14 @@ class GroupDiscoverListAPIView(
 
         if contact and contact.phones:
             for phone in contact.phones:
-                phones.append('{phone}::text'.format(
-                    phone=QuotedString(phone)
-                ))
+                phones.append(phone)
 
         for contact in Contact.objects.select_related(
             'user'
         ).filter(
             phones__contains=[self.request.user.phone.as_e164],
         ):
-            phones.append('{phone}::text'.format(
-                phone=QuotedString(contact.user.phone.as_e164)
-            ))
+            phones.append(contact.user.phone.as_e164)
 
         phones = list(set(phones))
 
@@ -264,13 +259,8 @@ class GroupDiscoverListAPIView(
                         status=Member.status_choices.LEFT
                     )
                 ),
-            ).extra(
-                where=[
-                    '"accounts_user"."phone" in ({phones})'.format(
-                        phones=','.join(phones)
-                    ),
-                    '"accounts_user"."name" IS NOT NULL',
-                ]
+            ).filter(
+                member__user__phone__in=phones
             ).exclude(
                 pk__in=Group.objects.filter(
                     member__user=self.request.user,
