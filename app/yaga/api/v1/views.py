@@ -260,7 +260,9 @@ class GroupDiscoverListAPIView(
                     )
                 ),
             ).filter(
-                member__user__phone__in=phones
+                member__user__phone__in=phones,
+                member__status=Member.status_choices.MEMBER,
+                member__user__name__isnull=False
             ).exclude(
                 pk__in=Group.objects.filter(
                     member__user=self.request.user,

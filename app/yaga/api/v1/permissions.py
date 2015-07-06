@@ -62,7 +62,9 @@ class ContactsGroupMemeber(
             return False
         else:
             return obj.member_set.filter(
-                user__phone__in=phones
+                user__name__isnull=False,
+                user__phone__in=phones,
+                status=Member.status_choices.MEMBER
             ).exists()
 
 
