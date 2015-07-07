@@ -67,6 +67,11 @@ post_urlpatterns = patterns(
         name='list'
     ),
     url(
+        r'^approve/$',
+        post_view.PostApproveFormView.as_view(),
+        name='approve'
+    ),
+    url(
         r'^list/(?P<post_id>{uuid_re})/delete/$'.format(uuid_re=uuid_re),
         post_view.PostDeleteView.as_view(),
         name='delete'

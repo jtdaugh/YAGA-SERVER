@@ -113,6 +113,11 @@ group_urlpatterns = patterns(
         views.GroupDiscoverListAPIView.as_view(),
         name='discover'
     ),
+    url(
+        r'^public/$',
+        views.PublicGroupListAPIView.as_view(),
+        name='public'
+    ),
 )
 
 

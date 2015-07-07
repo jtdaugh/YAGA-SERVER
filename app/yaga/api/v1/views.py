@@ -262,7 +262,8 @@ class GroupDiscoverListAPIView(
             ).filter(
                 member__user__phone__in=phones,
                 member__status=Member.status_choices.MEMBER,
-                member__user__name__isnull=False
+            ).filter(
+                private=True
             ).exclude(
                 pk__in=Group.objects.filter(
                     member__user=self.request.user,
@@ -287,6 +288,22 @@ class GroupDiscoverListAPIView(
             groups = []
 
         return groups
+
+
+class PublicGroupListAPIView(
+    NonAtomicView,
+    generics.ListAPIView
+):
+    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    serializer_class = serializers.PublicGroupListSerializer
+    throttle_classes = (throttling.GroupScopedRateThrottle,)
+
+    def get_queryset(self):
+        return Group.objects.filter(
+            private=False
+        ).order_by(
+            '-updated_at'
+        )
 
 
 class GroupListCreateAPIView(
@@ -315,6 +332,8 @@ class GroupListCreateAPIView(
         ).filter(
             member__user=self.request.user,
             member__status=Member.status_choices.MEMBER
+        ).filter(
+            private=True
         ).order_by(
             '-updated_at'
         )
@@ -353,13 +372,17 @@ class GroupRetrieveUpdateAPIView(
         IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
     )
 
-    def get_queryset(self):
-        post_filter = {
+    def get_post_filter(self):
+        return {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
-            )
+            ),
+            'approved': True
         }
+
+    def get_queryset(self):
+        post_filter = self.get_post_filter()
 
         serializer = serializers.SinceSerializer(
             data=self.request.QUERY_PARAMS.dict()
@@ -711,6 +734,9 @@ class PostCreateAPIView(
         obj.user = request.user
         obj.group = group
         obj.owner = request.user
+
+        obj.approved = obj.group.private
+
         if serializer.validated_data.get('name'):
             obj.name = serializer.validated_data['name']
             obj.namer = request.user

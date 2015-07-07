@@ -38,6 +38,11 @@ class InvalidTemplateObject(
 
         return ''
 
+    def __bool__(self):
+        return False
+
+    __nonzero__ = __bool__
+
     def __contains__(self, search):
         if search == '%s':
             return True
@@ -291,6 +296,7 @@ class BaseConfiguration(
         'video.js#5.0.0-29',
         'bootstrap-switch#3.3.2',
         'json3#3.3.2',
+        'bootstrap3-dialog#1.34.5'
     )
     # -------------------------------------------------------
     # secret key configuration

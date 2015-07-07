@@ -6,7 +6,6 @@ from future.builtins import (  # noqa
 
 from app.receivers import ModelReceiver
 
-from .models import Post
 from .notifications import JoinGroupNotification
 
 
@@ -49,16 +48,7 @@ class MemberReceiver(
 class PostReceiver(
     ModelReceiver
 ):
-    @staticmethod
-    def pre_save(sender, **kwargs):
-        instance = kwargs['instance']
-
-        if (
-            instance.state == Post.state_choices.READY
-            and
-            instance.tracker.previous('state') != instance.state
-        ):
-            instance.group.mark_updated()
+    pass
 
 
 class LikeReceiver(

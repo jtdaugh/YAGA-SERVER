@@ -125,10 +125,10 @@
                     <td>
                         {% if perms.yaga.view_post %}
                             <a href="{% url 'yaga:post:list' %}?user={{ user.pk | urlencode }}">
-                                {{ user.post_set.count}}
+                                {{ user.post_user.count }}
                             </a>
                         {% else %}
-                            {{ user.post_set.count}}
+                            {{ user.post_user.count }}
                         {% endif %}
                     </td>
                     <td>

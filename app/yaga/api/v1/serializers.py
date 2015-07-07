@@ -336,6 +336,17 @@ class GroupListSerializer(
         )
 
 
+class PublicGroupListSerializer(
+    GroupListSerializer
+):
+    class Meta(
+        GroupListSerializer.Meta
+    ):
+        fields = (
+            'name', 'id'
+        )
+
+
 class GroupRetrieveSerializer(
     GroupListSerializer
 ):

@@ -58,9 +58,11 @@ class PostTabularInline(
 class GroupModelAdmin(
     ForceSuperuserAccess, admin.ModelAdmin
 ):
-    list_display = ('pk', 'name', 'created_at', 'member_count', 'post_count')
+    list_display = ('pk', 'name', 'private', 'member_count', 'post_count')
 
     ordering = ('-created_at',)
+
+    list_filter = ('private',)
 
     search_fields = ('name', 'id')
 
@@ -76,12 +78,12 @@ class PostModelAdmin(
 ):
     list_display = (
         'pk', 'name', 'user', 'like_count', 'group',
-        'state', 'created_at'
+        'state', 'created_at', 'approved'
     )
 
     ordering = ('-created_at',)
 
-    list_filter = ('state',)
+    list_filter = ('state', 'approved')
 
     search_fields = ('attachment', 'name', 'id')
 

@@ -22,6 +22,9 @@ class GroupMemeber(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
+        if not obj.private:
+            return True
+
         return obj.member_set.filter(
             user=request.user,
             status=Member.status_choices.MEMBER
@@ -62,7 +65,6 @@ class ContactsGroupMemeber(
             return False
         else:
             return obj.member_set.filter(
-                user__name__isnull=False,
                 user__phone__in=phones,
                 status=Member.status_choices.MEMBER
             ).exists()

@@ -15,6 +15,8 @@
                 <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
                 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
             {% endblock %}
+            {% block csrf %}
+            {% endblock %}
             {% snless %}
                 <title>
                     {% block title %}
@@ -38,6 +40,7 @@
                     <link rel="stylesheet" href="{% static 'bootstrap-select/dist/css/bootstrap-select.css' %}" type="text/css">
                     <link rel="stylesheet" href="{% static 'bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css' %}" type="text/css">
                     <link rel="stylesheet" href="{% static 'video.js/dist/video-js.css' %}" type="text/css">
+                    <link rel="stylesheet" href="{% static 'bootstrap3-dialog/dist/css/bootstrap-dialog.css' %}" type="text/css">
                 {% endcompress %}
             {% endblock %}
             {% block extra_css %}
@@ -63,6 +66,7 @@
                     <script type="text/javascript" src="{% static 'bootstrap-switch/dist/js/bootstrap-switch.js' %}"></script>
                     <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
                     <script type="text/javascript" src="{% static 'video.js/dist/video.js' %}"></script>
+                    <script type="text/javascript" src="{% static 'bootstrap3-dialog/dist/js/bootstrap-dialog.js' %}"></script>
                 {% endcompress %}
             {% endblock %}
             <script type="text/javascript">

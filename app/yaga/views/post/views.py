@@ -4,17 +4,22 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
-from braces.views import LoginRequiredMixin, PermissionRequiredMixin
+import uuid
+
+from braces.views import (
+    LoginRequiredMixin, PermissionRequiredMixin, JSONResponseMixin
+)
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView, ListView
+from django.views.generic.edit import FormView
 from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
 from ...models import Post
 from .filters import PostFilterSet
-from .forms import PageDeleteForm
+from .forms import PageDeleteForm, ApproveForm
 
 
 class PostView(
@@ -78,3 +83,31 @@ class PostDeleteView(
         context = super(PostDeleteView, self).get_context_data(**kwargs)
         context['form'] = self.form_class()
         return context
+
+
+class PostApproveFormView(
+    PostView,
+    JSONResponseMixin,
+    FormView
+):
+    raise_exception = True
+    permission_required = 'yaga.approve_post'
+    form_class = ApproveForm
+
+    def form_valid(self, form):
+        pk = form.cleaned_data['pk']
+
+        pk = uuid.UUID(pk)
+
+        post = Post.objects.filter(
+            pk=pk
+        ).first()
+
+        if post:
+            post = post.mark_approved()
+
+        approved = post and post.approved
+
+        return self.render_json_response({
+            'approved': approved
+        })

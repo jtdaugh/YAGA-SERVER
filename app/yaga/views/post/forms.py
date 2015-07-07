@@ -7,7 +7,10 @@ from future.builtins import (  # noqa
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import ButtonHolder, Fieldset, Layout, Submit
 from django import forms
+from django.core.validators import RegexValidator
 from django.utils.translation import ugettext_lazy as _
+
+from ...utils import uuid_re
 
 
 class Delete(
@@ -31,3 +34,12 @@ class PageDeleteForm(
             )
         )
         return helper
+
+
+class ApproveForm(
+    forms.Form
+):
+    pk = forms.CharField(
+        label=_('Pk'),
+        validators=[RegexValidator(regex=uuid_re)]
+    )

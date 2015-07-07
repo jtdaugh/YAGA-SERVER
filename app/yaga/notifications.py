@@ -718,4 +718,29 @@ class FirebaseNotification(
         return _(self.message)
 
 
+class ApprovedDirectNotification(
+    DirectNotification
+):
+    def __init__(self, **kwargs):
+        self.post = self.load_post(kwargs['post'])
+
+        if self.post:
+            self.target = self.post.user
+            self.group = self.post.group
+
+    def get_meta(self):
+        return {
+            'event': 'apporve',
+            'group_id': str(self.group.pk)
+        }
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.group.name
+        }
+
+    def get_message(self):
+        return _('Your post in {group} has been approved')
+
+
 from .tasks import NotificationTask  # noqa # isort:skip

@@ -71,6 +71,9 @@
                 <th>
                     {% trans 'Users' %}
                 </th>
+                <th>
+                    {% trans 'Private' %}
+                </th>
             </tr>
             {% for group in groups %}
                 <tr>
@@ -96,6 +99,17 @@
                     </td>
                     <td>
                         {{ group.member_set.count }}
+                    </td>
+                    <td>
+                        {% if group.private %}
+                            <span class="label label-success">
+                                {% trans 'Yes' %}
+                            </span>
+                        {% else %}
+                            <span class="label label-danger">
+                                {% trans 'No' %}
+                            </span>
+                        {% endif %}
                     </td>
                 </tr>
             {% endfor %}

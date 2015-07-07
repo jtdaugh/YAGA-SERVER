@@ -17,6 +17,10 @@
     {% trans 'List' %}
 {% endblock %}
 
+{% block csrf %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+{% endblock %}
+
 {% block extra_css %}
     {{ block.super }}
     {% compress css %}
@@ -28,7 +32,14 @@
     {{ block.super }}
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'yaga/coffee/preview.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'frontend/coffee/csrf.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'yaga/coffee/approve.coffee' %}"></script>
     {% endcompress %}
+{% endblock %}
+
+{% block extra_js_plain %}
+    {{ block.super }}
+    var APPROVE_ENDPOINT = '{% url 'yaga:post:approve' %}';
 {% endblock %}
 
 {% block breadcrumbs_list %}
@@ -92,8 +103,16 @@
                     {% trans 'Likes' %}
                 </th>
                 <th>
+                    {% trans 'Approved' %}
+                </th>
+                <th>
                     {% trans 'Preview' %}
                 </th>
+                {% if perms.yaga.approve_post %}
+                    <th>
+                        {% trans 'Approve' %}
+                    </th>
+                {% endif %}
             </tr>
             {% for post in posts %}
                 <tr>
@@ -165,6 +184,17 @@
                         {{ post.like_set.count }}
                     </td>
                     <td>
+                        {% if post.approved %}
+                            <span class="label label-success">
+                                {% trans 'Yes' %}
+                            </span>
+                        {% else %}
+                            <span class="label label-danger">
+                                {% trans 'No' %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
                         {% if post.attachment_preview %}
                             <button class="btn btn-default" rel="popover" data-title="{{ post.pk }}" data-url="{{ post.attachment_preview.url }}">
                                 {% trans 'Preview' %}
@@ -175,6 +205,15 @@
                             </span>
                         {% endif %}
                     </td>
+                    {% if perms.yaga.approve_post %}
+                        <td>
+                            {% if not post.approved and not post.group.private %}
+                                <button class="btn btn-warning approve" data-pk="{{ post.pk }}">
+                                    {% trans 'Approve' %}
+                                </button>
+                            {% endif %}
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>

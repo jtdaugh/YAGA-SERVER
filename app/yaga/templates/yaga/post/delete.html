@@ -115,6 +115,22 @@
                         </tr>
                         <tr>
                             <td>
+                                {% trans 'Approved' %}
+                            </td>
+                            <td>
+                                {% if post.approved %}
+                                    <span class="label label-success">
+                                        {% trans 'Yes' %}
+                                    </span>
+                                {% else %}
+                                    <span class="label label-danger">
+                                        {% trans 'No' %}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
                                 {% trans 'Deleted' %}
                             </td>
                             <td>

@@ -227,6 +227,12 @@ class Group(
         db_index=True
     )
 
+    private = models.BooleanField(
+        verbose_name=_('Private'),
+        default=True,
+        db_index=True
+    )
+
     tracker = FieldTracker()
 
     class Meta:
@@ -340,13 +346,13 @@ class Post(
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('User'),
-        related_name='user'
+        related_name='post_user'
     )
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_('Owner'),
-        related_name='owner'
+        related_name='post_owner'
     )
 
     group = models.ForeignKey(
@@ -409,6 +415,12 @@ class Post(
         default=0
     )
 
+    approved = models.BooleanField(
+        verbose_name=('Approved'),
+        default=True,
+        db_index=True
+    )
+
     tracker = FieldTracker()
 
     objects = models.Manager()
@@ -419,6 +431,7 @@ class Post(
         verbose_name_plural = _('Posts')
         permissions = (
             ('view_post', 'Can view Post'),
+            ('approve_post', 'Can approve Post')
         )
         unique_together = (
             ('checksum', 'group'),
@@ -509,9 +522,29 @@ class Post(
                 pass
 
     def notify(self):
-        PostGroupNotification.schedule(
-            post=self.pk
-        )
+        if self.group.private:
+            PostGroupNotification.schedule(
+                post=self.pk
+            )
+
+    def mark_approved(self):
+        with transaction.atomic():
+            post = self.atomic
+
+            if post:
+                if not post.approved:
+                    post.approved = True
+
+                    if post.state == Post.state_choices.READY:
+                        post.group.mark_updated()
+
+                        ApprovedDirectNotification.schedule(
+                            post=post.pk
+                        )
+
+                    post.save()
+
+                return post
 
     def download_cache_boost(self):
         for url in [
@@ -711,6 +744,8 @@ class Post(
                     post.notify()
 
                     post.save()
+
+                    post.group.mark_updated()
 
                     for copy in PostCopy.objects.filter(
                         parent=post
@@ -1116,13 +1151,13 @@ class PostCopy(
     parent = models.ForeignKey(
         Post,
         verbose_name=_('parent'),
-        related_name='parent'
+        related_name='post_parent'
     )
 
     post = models.ForeignKey(
         Post,
         verbose_name=_('Post'),
-        related_name='post'
+        related_name='post_post'
     )
 
     created_at = models.DateTimeField(
@@ -1226,7 +1261,7 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .notifications import PostGroupNotification  # noqa # isort:skip
+from .notifications import ApprovedDirectNotification, PostGroupNotification  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
 from .tasks import (  # noqa # isort:skip
     CleanStorageTask, CoudfrontCacheBoostTask, PostCopyTask, TranscodingTask

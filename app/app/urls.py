@@ -124,7 +124,9 @@ sitemaps = {
 
 js_info_dict = {
     'domain': 'djangojs',
-    'packages': []
+    'packages': [
+        'yaga'
+    ]
 }
 
 
