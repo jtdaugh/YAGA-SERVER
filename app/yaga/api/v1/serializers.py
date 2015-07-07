@@ -343,7 +343,7 @@ class PublicGroupListSerializer(
         GroupListSerializer.Meta
     ):
         fields = (
-            'name', 'id'
+            'name', 'id', 'updated_at'
         )
 
 
