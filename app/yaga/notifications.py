@@ -730,7 +730,8 @@ class ApprovedDirectNotification(
 
     def get_meta(self):
         return {
-            'event': 'apporve',
+            'event': 'approve',
+            'post_id': str(self.post.pk),
             'group_id': str(self.group.pk)
         }
 
