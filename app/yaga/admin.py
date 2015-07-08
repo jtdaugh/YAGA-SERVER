@@ -89,7 +89,7 @@ class PostModelAdmin(
 
     date_hierarchy = 'created_at'
 
-    raw_id_fields = ('user', 'group', 'namer', 'owner')
+    raw_id_fields = ('user', 'group', 'namer')
 
 
 class MemberModelAdmin(

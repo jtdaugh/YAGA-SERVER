@@ -372,8 +372,24 @@ class GroupRetrieveUpdateAPIView(
         IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
     )
 
+    def get_object(self):
+        queryset = Group.objects.all()
+
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        obj = generics.get_object_or_404(queryset, **filter_kwargs)
+
+        self.private_group = obj.private
+
+        return super(GroupRetrieveUpdateAPIView, self).get_object()
+
     def get_post_filter(self):
-        return {
+        serializer = serializers.SinceSerializer(
+            data=self.request.QUERY_PARAMS.dict()
+        )
+
+        post_filter = {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
@@ -381,19 +397,37 @@ class GroupRetrieveUpdateAPIView(
             'approved': True
         }
 
+        if serializer.is_valid():
+            since_filter = {
+                'updated_at__gte': (
+                    serializer.validated_data['since']
+                    -
+                    settings.YAGA_SLOP_FACTOR
+                )
+            }
+        else:
+            since_filter = {}
+
+        post_filter.update(since_filter)
+
+        if self.private_group:
+            return Q(**post_filter)
+        else:
+            user_not_approved_posts = {
+                'state__in': (
+                    Post.state_choices.READY,
+                    Post.state_choices.DELETED
+                ),
+                'approved': False,
+                'user': self.request.user
+            }
+
+            user_not_approved_posts.update(**since_filter)
+
+            return Q(**user_not_approved_posts) | Q(**post_filter)
+
     def get_queryset(self):
         post_filter = self.get_post_filter()
-
-        serializer = serializers.SinceSerializer(
-            data=self.request.QUERY_PARAMS.dict()
-        )
-
-        if serializer.is_valid():
-            post_filter['updated_at__gte'] = (
-                serializer.validated_data['since']
-                -
-                settings.YAGA_SLOP_FACTOR
-            )
 
         queryset = Group.objects.select_related(
             'creator'
@@ -415,7 +449,7 @@ class GroupRetrieveUpdateAPIView(
                         queryset=Like.objects.select_related('user')
                     )
                 ).filter(
-                    **post_filter
+                    post_filter
                 ).order_by('-ready_at'),
             )
         )
@@ -446,7 +480,7 @@ class GroupMemberJoinUpdateAPIView(
     throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, permissions.NotGroupMemeber,
+        IsAuthenticated, permissions.NotGroupMemeber, permissions.PrivateGroup,
         permissions.ContactsGroupMemeber, permissions.FulfilledProfile
     )
 
@@ -510,7 +544,8 @@ class GroupMemberUpdateDestroyAPIView(
     generics.DestroyAPIView
 ):
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated, permissions.GroupMemeber, permissions.PrivateGroup,
+        permissions.FulfilledProfile
     )
 
     def update(self, request, *args, **kwargs):
@@ -678,7 +713,8 @@ class GroupMemberMuteAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated, permissions.GroupMemeber, permissions.PrivateGroup,
+        permissions.FulfilledProfile
     )
 
     serializer_class = serializers.MemberSerializer
@@ -733,7 +769,6 @@ class PostCreateAPIView(
         obj = Post()
         obj.user = request.user
         obj.group = group
-        obj.owner = request.user
 
         obj.approved = obj.group.private
 
@@ -866,7 +901,7 @@ class PostCopyUpdateAPIView(
     throttle_classes = (throttling.PostScopedRateThrottle,)
     serializer_class = serializers.PostCopySerializer
     permission_classes = (
-        IsAuthenticated, permissions.PostGroupMember,
+        IsAuthenticated, permissions.PostOwner,
         permissions.AvailablePost, permissions.FulfilledProfile
     )
 
@@ -941,6 +976,7 @@ class PostCopyUpdateAPIView(
                 post.state = Post.state_choices.PENDING
                 post.user = self.request.user
                 post.group = group
+                post.approved = post.group.private
 
                 for attr in PostCopy.copy_attrs:
                     setattr(
@@ -1022,7 +1058,7 @@ class LikeCreateDestroyAPIView(
             obj.post = instance
             obj.save()
 
-            if obj.user != obj.post.user:
+            if obj.user != obj.post.user and obj.post.group.private:
                 notifications.LikeDirectNotification.schedule(
                     post=obj.post.pk,
                     emitter=obj.user.pk

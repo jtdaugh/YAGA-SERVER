@@ -93,6 +93,20 @@ class PostOwnerOrPostGroupMember(
             )
 
 
+class PostOwner(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.user
+
+
+class PrivateGroup(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        return obj.private
+
+
 class AvailablePost(
     BasePermission
 ):

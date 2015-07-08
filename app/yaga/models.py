@@ -349,12 +349,6 @@ class Post(
         related_name='post_user'
     )
 
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_('Owner'),
-        related_name='post_owner'
-    )
-
     group = models.ForeignKey(
         Group,
         verbose_name=_('Group')

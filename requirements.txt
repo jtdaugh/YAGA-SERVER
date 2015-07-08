@@ -141,7 +141,7 @@ python-decouple==2.3
 python-magic==0.4.6
 pytz==2015.4
 PyYAML==3.11
-raven==5.4.0
+raven==5.4.1
 redis==2.10.3
 regex==2015.6.24
 requests==2.7.0

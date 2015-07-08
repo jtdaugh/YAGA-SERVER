@@ -11,6 +11,12 @@ group user filter
 
 nexmo updates
 
+disable approve non ready videos
+approve UI yes - green, UI Fixes
+disable public members
+disable public creator
+disable public rename
+
 u\b\force fixes
 first exist none refactor
 
