@@ -961,7 +961,8 @@ class PostCopyUpdateAPIView(
                 Q(
                     pk__in=serializer.validated_data['groups'],
                     member__user=self.request.user,
-                    member__status=Member.status_choices.MEMBER
+                    member__status=Member.status_choices.MEMBER,
+                    private=True
                 )
                 |
                 Q(
