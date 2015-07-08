@@ -20,7 +20,7 @@ cryptography==0.9.2
 Cython==0.22.1
 distlib==0.2.0
 dj-database-url==0.3.0
-Django==1.8.2
+Django==1.8.3
 django-activeurl==0.1.8
 django-appconf==1.0.1
 django-bower==5.0.4
