@@ -6,10 +6,14 @@ from django.db import models, migrations
 
 def ensure_humanity(apps, schema_editor):
     Group = apps.get_model('yaga', 'Group')
+    User = apps.get_model('accounts', 'User')
 
     humanity = Group.objects.get_or_create(
         private=False,
-        name='Humanity'
+        name='Humanity',
+        creator=User.objects.get(
+            name='hellysmile'  # yeah, evil hardcode
+        )
     )
 
 
