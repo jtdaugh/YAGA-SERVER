@@ -1160,7 +1160,7 @@ class PostCopy(
     )
 
     copy_attrs = (
-        'name', 'namer', 'owner',
+        'name', 'namer',
         'font', 'name_x', 'name_y', 'rotation', 'scale', 'miscellaneous'
     )
 

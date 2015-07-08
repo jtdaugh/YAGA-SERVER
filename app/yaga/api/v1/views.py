@@ -958,9 +958,16 @@ class PostCopyUpdateAPIView(
             ).values_list('group', flat=True)
 
             groups = Group.objects.filter(
-                pk__in=serializer.validated_data['groups'],
-                member__user=self.request.user,
-                member__status=Member.status_choices.MEMBER
+                Q(
+                    pk__in=serializer.validated_data['groups'],
+                    member__user=self.request.user,
+                    member__status=Member.status_choices.MEMBER
+                )
+                |
+                Q(
+                    pk__in=serializer.validated_data['groups'],
+                    private=False
+                )
             ).exclude(
                 pk__in=copied_groups
             ).exclude(
