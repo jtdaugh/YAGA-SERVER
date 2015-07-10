@@ -28,6 +28,7 @@ from model_utils import FieldTracker
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import sh, u
+from requestprovider import get_request
 
 from .choices import StateChoice, StatusChoice, VendorChoice
 from .conf import settings
@@ -257,6 +258,22 @@ class Group(
     def post_count(self):
         return self.post_set.count()
     post_count.short_description = _('Posts Count')
+
+    def last_foreign_post(self):
+        request = get_request()
+
+        last_post = self.post_set.exclude(
+            user=request.user
+        ).order_by(
+            '-ready_at'
+        ).first()
+
+        if not last_post:
+            last_post = None
+        else:
+            last_post = last_post.pk
+
+        return last_post
 
     def mark_updated(self):
         self.save(update_fields=['updated_at'])
