@@ -325,13 +325,15 @@ class GroupListSerializer(
         read_only=True, source='visible_post_count'
     )
 
-    last_foreign_post = serializers.UUIDField(read_only=True)
+    last_foreign_post_id = serializers.UUIDField(
+        read_only=True, source='last_foreign_post'
+    )
 
     class Meta(
         GroupSerializer.Meta
     ):
         fields = (
-            'pending_members', 'members', 'last_foreign_post',
+            'pending_members', 'members', 'last_foreign_post_id',
             'name', 'posts', 'id', 'updated_at', 'creator'
         )
 

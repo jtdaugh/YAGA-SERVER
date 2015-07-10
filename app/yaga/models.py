@@ -262,7 +262,9 @@ class Group(
     def last_foreign_post(self):
         request = get_request()
 
-        last_post = self.post_set.exclude(
+        last_post = self.post_set.filter(
+            state=Post.state_choices.READY
+        ).exclude(
             user=request.user
         ).order_by(
             '-ready_at'
