@@ -184,9 +184,9 @@ class PostSerializer(
 
     user = UserSerializer(read_only=True)
 
-    namer = UserSerializer(read_only=True)
+    # namer = UserSerializer(read_only=True)
 
-    likers = LikerSerializer(read_only=True, many=True, source='like_set')
+    likers = LikerSerializer(read_only=True, many=True, source='dummy_likes')
 
     font = serializers.IntegerField(
         required=False, min_value=0, max_value=20
@@ -234,8 +234,8 @@ class PostSerializer(
         fields = (
             'attachment', 'attachment_preview', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'ready', 'deleted', 'likers',
-            'namer', 'approved'
-        ) + caption_fields
+            'approved'
+        ) + caption_fields  # 'namer',
         read_only_fields = (
             'attachment', 'attachment_preview', 'ready_at', 'deleted'
         )

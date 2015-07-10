@@ -442,12 +442,6 @@ class GroupRetrieveUpdateAPIView(
                 'post_set',
                 queryset=Post.objects.select_related(
                     'user',
-                    'namer'
-                ).prefetch_related(
-                    Prefetch(
-                        'like_set',
-                        queryset=Like.objects.select_related('user')
-                    )
                 ).filter(
                     post_filter
                 ).order_by('-ready_at'),
@@ -838,11 +832,6 @@ class PostRetrieveUpdateDestroyAPIView(
         return Post.objects.select_related(
             'user',
             'namer'
-        ).prefetch_related(
-            Prefetch(
-                'like_set',
-                queryset=Like.objects.select_related('user')
-            )
         )
 
     def perform_update(self, serializer):

@@ -438,6 +438,9 @@ class Post(
     objects = models.Manager()
     atomic_objects = AtomicManager()
 
+    def dummy_likes(self):
+        return []
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')
