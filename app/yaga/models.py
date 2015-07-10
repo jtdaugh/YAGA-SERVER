@@ -263,7 +263,8 @@ class Group(
         request = get_request()
 
         last_post = self.post_set.filter(
-            state=Post.state_choices.READY
+            state=Post.state_choices.READY,
+            approved=True,
         ).exclude(
             user=request.user
         ).order_by(

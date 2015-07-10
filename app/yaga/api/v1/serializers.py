@@ -180,7 +180,7 @@ class LikerSerializer(
 class PostSerializer(
     serializers.ModelSerializer
 ):
-    name = UnicodeField(required=False, spaces=True, max_length=200)
+    # name = UnicodeField(required=False, spaces=True, max_length=200)
 
     user = UserSerializer(read_only=True)
 
