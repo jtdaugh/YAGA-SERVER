@@ -268,9 +268,7 @@ class Group(
             '-ready_at'
         ).first()
 
-        if not last_post:
-            last_post = None
-        else:
+        if last_post:
             last_post = last_post.pk
 
         return last_post
