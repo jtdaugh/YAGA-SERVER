@@ -441,6 +441,9 @@ class Post(
     def dummy_likes(self):
         return []
 
+    def dummy_namer(self):
+        return None
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')

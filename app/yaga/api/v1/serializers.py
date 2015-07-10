@@ -184,7 +184,7 @@ class PostSerializer(
 
     user = UserSerializer(read_only=True)
 
-    # namer = UserSerializer(read_only=True)
+    namer = UserSerializer(read_only=True, source='dummy_namer')
 
     likers = LikerSerializer(read_only=True, many=True, source='dummy_likes')
 
@@ -234,8 +234,8 @@ class PostSerializer(
         fields = (
             'attachment', 'attachment_preview', 'ready_at', 'updated_at',
             'user', 'id', 'name', 'ready', 'deleted', 'likers',
-            'approved'
-        ) + caption_fields  # 'namer',
+            'namer', 'approved'
+        ) + caption_fields
         read_only_fields = (
             'attachment', 'attachment_preview', 'ready_at', 'deleted'
         )
