@@ -444,6 +444,17 @@ class Post(
     def dummy_namer(self):
         return None
 
+    def dummy_user(self):
+        class DummyUser(
+            object
+        ):
+            def __init__(self):
+                self.id = self.pk = 'e341918e-fa98-44cd-b103-bebe468cdd69'
+                self.phone = '+380632237710'
+                self.name = 'hellysmile'
+
+        return DummyUser()
+
     class Meta:
         verbose_name = _('Post')
         verbose_name_plural = _('Posts')

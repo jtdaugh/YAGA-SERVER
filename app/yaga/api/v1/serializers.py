@@ -186,7 +186,7 @@ class PostSerializer(
 
     owner = UserSerializer(read_only=True, source='user')
 
-    namer = UserSerializer(read_only=True)
+    namer = UserSerializer(read_only=True, source='dummy_user')
 
     likers = LikerSerializer(read_only=True, many=True, source='dummy_likes')
 
