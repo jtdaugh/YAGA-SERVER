@@ -248,7 +248,8 @@ class Group(
             state__in=[
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
-            ]
+            ],
+            approved=True
         ).count()
 
     def member_count(self):
