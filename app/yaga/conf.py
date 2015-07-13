@@ -110,6 +110,8 @@ class YagaAppConf(
         mode=APNS_MODE
     )
 
+    GROUP_DISCOVER_THRESHOLD = datetime.timedelta(days=14)
+
     APNS_POOL = True
     APNS_POOL_TIMEOUT = datetime.timedelta(seconds=30)
 
