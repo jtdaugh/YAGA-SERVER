@@ -461,7 +461,6 @@ class BaseConfiguration(
         # sentry 404
         # 'raven.contrib.django.middleware.Sentry404CatchMiddleware',
         'yaga.middleware.YagaMiddleware',
-        'django_cprofile_middleware.middleware.ProfilerMiddleware'
     ]
     # -------------------------------------------------------
     # django south migrations
