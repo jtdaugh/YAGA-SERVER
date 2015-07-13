@@ -7,19 +7,19 @@ from future.builtins import (  # noqa
 import uuid
 
 from braces.views import (
-    LoginRequiredMixin, PermissionRequiredMixin, JSONResponseMixin
+    JSONResponseMixin, LoginRequiredMixin, PermissionRequiredMixin
 )
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView, ListView
-from django.views.generic.edit import FormView
 from django.views.generic.base import RedirectView
+from django.views.generic.edit import FormView
 
 from app.views import CrispyFilterView
 
 from ...models import Post
 from .filters import PostFilterSet
-from .forms import PageDeleteForm, ApproveForm
+from .forms import ApproveForm, PageDeleteForm
 
 
 class PostView(
