@@ -1,6 +1,7 @@
 .coverage
 .tox
 env*
+.env*
 build
 dist
 *.egg-info
