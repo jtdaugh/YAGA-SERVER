@@ -19,16 +19,16 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # debug mode configuration
     # -------------------------------------------------------
-    DEBUG = True
+    DEBUG = False
     # -------------------------------------------------------
     # https configuration
     # -------------------------------------------------------
-    HTTPS = False
+    HTTPS = True
     # -------------------------------------------------------
     # django compressor configuration
     # -------------------------------------------------------
     COMPRESS_OFFLINE = True
-    COMPRESS_ENABLED = False
+    COMPRESS_ENABLED = True
     # -------------------------------------------------------
     # template cache configuration
     # -------------------------------------------------------
@@ -44,7 +44,7 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # debug toolbar configuration
     # -------------------------------------------------------
-    DEBUG_TOOLBAR = True
+    DEBUG_TOOLBAR = False
     # -------------------------------------------------------
     # docs configuration
     # -------------------------------------------------------
@@ -61,7 +61,6 @@ class HerokuConfiguration(
     # hosts configuration
     # -------------------------------------------------------
     ALLOWED_HOSTS = [
-        '*',
         'api.yagaprivate.com',
         'www.yagaprivate.com',
 
@@ -70,7 +69,7 @@ class HerokuConfiguration(
     ]
     USE_X_FORWARDED_HOST = False
     BEHIND_PROXY = False
-    CLOUDFLARE_BEHIND = False
+    CLOUDFLARE_BEHIND = True
     # -------------------------------------------------------
     # database configuration
     # -------------------------------------------------------
@@ -106,8 +105,8 @@ class HerokuConfiguration(
     # -------------------------------------------------------
     # cookies configuration
     # -------------------------------------------------------
-    SESSION_COOKIE_DOMAIN = '127.0.0.1'  # config('DOMAIN')
-    CSRF_COOKIE_DOMAIN = '127.0.0.1'  # config('DOMAIN')
+    SESSION_COOKIE_DOMAIN = config('DOMAIN')
+    CSRF_COOKIE_DOMAIN = config('DOMAIN')
     # -------------------------------------------------------
     # email backend configuration
     # -------------------------------------------------------
@@ -142,8 +141,8 @@ class HerokuConfiguration(
 
     CLOUDFRONT_HOST = config('CLOUDFRONT_HOST', default='')
 
-    # STATICFILES_STORAGE = 'app.storage.CachedS3StaticStorage'
-    # COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
+    STATICFILES_STORAGE = 'app.storage.CachedS3StaticStorage'
+    COMPRESS_STORAGE = 'app.storage.CachedS3StaticStorage'
 
 
 class HerokuImplementation(
@@ -154,10 +153,10 @@ class HerokuImplementation(
         # -------------------------------------------------------
         # storages implementation
         # -------------------------------------------------------
-        # self.STATIC_URL = '{host}{location}/'.format(
-        #     location=self.STATIC_LOCATION,
-        #     host=self.S3_HOST
-        # )
+        self.STATIC_URL = '{host}{location}/'.format(
+            location=self.STATIC_LOCATION,
+            host=self.S3_HOST
+        )
         # -------------------------------------------------------
         # collectfast implementation
         # -------------------------------------------------------
