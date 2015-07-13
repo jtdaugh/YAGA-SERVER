@@ -777,7 +777,9 @@ class Post(
 
                     post.save()
 
-                    post.group.mark_updated()
+                    if post.group.private:
+
+                        post.group.mark_updated()
 
                     for copy in PostCopy.objects.filter(
                         parent=post
