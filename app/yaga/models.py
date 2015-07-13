@@ -446,6 +446,8 @@ class Post(
         return None
 
     def dummy_user(self):
+        return None
+
         class DummyUser(
             object
         ):
