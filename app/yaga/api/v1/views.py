@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models import Q, Prefetch
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
@@ -264,6 +265,12 @@ class GroupDiscoverListAPIView(
                 member__status=Member.status_choices.MEMBER,
             ).filter(
                 private=True
+            ).filter(
+                updated_at__gte=(
+                    timezone.now()
+                    -
+                    settings.YAGA_GROUP_DISCOVER_THRESHOLD
+                )
             ).exclude(
                 pk__in=Group.objects.filter(
                     member__user=self.request.user,
