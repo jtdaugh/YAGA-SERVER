@@ -241,6 +241,7 @@ class Group(
         verbose_name_plural = _('Groups')
         permissions = (
             ('view_group', 'Can view Group'),
+            ('wipe_group', 'Can wipe Group'),
         )
 
     def visible_post_count(self):
