@@ -94,7 +94,7 @@
             </div>
         </div>
     </div>
-    {% if group.member_set %}
+    {% if group.member_set.count and group.private %}
         <div class="row">
             <div class="col-md-offset-2 col-md-8 well">
                 {% trans 'Members' %} {{ group.member_set.count }}
@@ -142,6 +142,26 @@
                     </table>
                 </div>
             </div>
+        </div>
+        {% if perms.yaga.wipe_group %}
+            <div class="row">
+                <div class="col-md-offset-4 col-md-4 well">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">
+                                {% trans 'Kick all member' %}
+                            </h3>
+                        </div>
+
+                        <div class="panel-body">
+                            <a href="{% url 'yaga:group:wipe' group_id=group.pk %}" class="btn btn-danger">
+                                {% trans 'Wipe' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
         </div>
     {% endif %}
 {% endblock %}

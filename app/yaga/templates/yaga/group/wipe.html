@@ -1,0 +1,32 @@
+{% extends 'yaga/group/detail.html' %}
+
+{% load i18n %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {{ block.super }}
+    |
+    {% trans 'Wipe' %}
+{% endblock %}
+
+{% block breadcrumbs_list %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'yaga:group:detail' group_id=group.pk %}">
+            {% trans 'Detail' %}
+        </a>
+    </li>
+{% endblock %}
+
+{% block breadcrumbs_active %}
+    {% trans 'Wipe' %}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-offset-2 col-md-8 well">
+            {% crispy form %}
+        </div>
+    </div>
+{% endblock %}

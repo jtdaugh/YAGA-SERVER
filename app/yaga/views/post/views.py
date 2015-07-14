@@ -90,7 +90,6 @@ class PostApproveFormView(
     JSONResponseMixin,
     FormView
 ):
-    raise_exception = True
     permission_required = 'yaga.approve_post'
     form_class = ApproveForm
 

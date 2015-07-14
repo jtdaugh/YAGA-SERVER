@@ -6,13 +6,15 @@ from future.builtins import (  # noqa
 
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic import DetailView, ListView
+from django.http import HttpResponseRedirect
+from django.views.generic import DeleteView, DetailView, ListView
 from django.views.generic.base import RedirectView
 
 from app.views import CrispyFilterView
 
 from ...models import Group
 from .filters import GroupFilterSet
+from .forms import WipeForm
 
 
 class GroupView(
@@ -60,3 +62,37 @@ class GroupDetailView(
     context_object_name = 'group'
     pk_url_kwarg = 'group_id'
     template_name = 'yaga/group/detail.html'
+
+
+class GroupWipeDeleteView(
+    GroupView,
+    DeleteView
+):
+    context_object_name = 'group'
+    pk_url_kwarg = 'group_id'
+    permission_required = 'yaga.wipe_group'
+    form_class = WipeForm
+    template_name = 'yaga/group/wipe.html'
+
+    def delete(self, request, *args, **kwargs):
+        self.object = self.get_object()
+
+        for member in self.object.member_set.all():
+            member.delete()
+
+        success_url = self.get_success_url()
+
+        return HttpResponseRedirect(success_url)
+
+    def get_success_url(self):
+        return reverse_lazy(
+            'yaga:group:detail',
+            kwargs={
+                'group_id': self.object.pk
+            }
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupWipeDeleteView, self).get_context_data(**kwargs)
+        context['form'] = self.form_class()
+        return context

@@ -95,6 +95,11 @@ group_urlpatterns = patterns(
         group_view.GroupDetailView.as_view(),
         name='detail'
     ),
+    url(
+        r'^list/(?P<group_id>{uuid_re})/wipe/$'.format(uuid_re=uuid_re),
+        group_view.GroupWipeDeleteView.as_view(),
+        name='wipe'
+    ),
 )
 
 urlpatterns = patterns(
