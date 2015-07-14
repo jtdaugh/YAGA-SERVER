@@ -7,7 +7,6 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models import Q, Prefetch
 from django.utils import timezone
@@ -250,36 +249,49 @@ class GroupDiscoverListAPIView(
 
         phones = list(set(phones))
 
+        query = Q(
+            member__user=self.request.user,
+            member__status__in=[
+                Member.status_choices.LEFT,
+                Member.status_choices.PENDING,
+            ]
+        )
+
         if phones:
-            queryset = Group.objects.select_related(
-                'creator'
-            ).prefetch_related(
-                Prefetch(
-                    'member_set',
-                    queryset=Member.objects.select_related('user').exclude(
-                        status=Member.status_choices.LEFT
-                    )
-                ),
-            ).filter(
+            query |= Q(
                 member__user__phone__in=phones,
                 member__status=Member.status_choices.MEMBER,
-            ).filter(
-                private=True
-            ).filter(
-                updated_at__gte=(
-                    timezone.now()
-                    -
-                    settings.YAGA_GROUP_DISCOVER_THRESHOLD
-                )
-            ).exclude(
-                pk__in=Group.objects.filter(
-                    member__user=self.request.user,
-                    member__status=Member.status_choices.MEMBER
-                )
-            ).distinct()
+            )
 
-            groups = list(queryset)
+        queryset = Group.objects.select_related(
+            'creator'
+        ).prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
+            ),
+        ).filter(
+            query
+        ).filter(
+            private=True
+        ).filter(
+            updated_at__gte=(
+                timezone.now()
+                -
+                settings.YAGA_GROUP_DISCOVER_THRESHOLD
+            )
+        ).exclude(
+            pk__in=Group.objects.filter(
+                member__user=self.request.user,
+                member__status=Member.status_choices.MEMBER
+            )
+        ).distinct()
 
+        groups = list(queryset)
+
+        if phones:
             groups.sort(
                 key=lambda group: len(
                     set([
@@ -292,7 +304,10 @@ class GroupDiscoverListAPIView(
                 reverse=True
             )
         else:
-            groups = []
+            groups.sort(
+                key=lambda group: group.post_set.count(),
+                reverse=True
+            )
 
         return groups
 
@@ -482,8 +497,8 @@ class GroupMemberJoinUpdateAPIView(
     throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, permissions.NotGroupMemeber, permissions.PrivateGroup,
-        permissions.ContactsGroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated, permissions.PrivateGroup,
+        permissions.LeftOrContactsGroupMemeber, permissions.FulfilledProfile
     )
 
     serializer_class = serializers.GroupListSerializer
@@ -507,31 +522,21 @@ class GroupMemberJoinUpdateAPIView(
             obj = instance.member_set.get(
                 user=self.request.user
             )
-
-            if obj.status in [
-                Member.status_choices.MEMBER,
-                Member.status_choices.PENDING,
-            ]:
-                raise PermissionDenied
         except Member.DoesNotExist:
             obj = Member()
             obj.group = instance
             obj.user = self.request.user
 
-        obj.creator = self.request.user
-        obj.status = Member.status_choices.PENDING
-        obj.save()
+        if obj.status != Member.status_choices.PENDING:
+            obj.creator = self.request.user
+            obj.status = Member.status_choices.PENDING
 
-        notifications.RequestGroupNotification.schedule(
-            group=obj.group.pk,
-            emitter=obj.user.pk
-        )
+            obj.save()
 
-        self.permission_classes = list(self.permission_classes)
-
-        self.permission_classes.remove(
-            permissions.NotGroupMemeber
-        )
+            notifications.RequestGroupNotification.schedule(
+                group=obj.group.pk,
+                emitter=obj.user.pk
+            )
 
         serializer = serializers.GroupListSerializer(self.get_object())
 

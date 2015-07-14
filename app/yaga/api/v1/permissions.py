@@ -40,10 +40,19 @@ class NotGroupMemeber(
         )
 
 
-class ContactsGroupMemeber(
+class LeftOrContactsGroupMemeber(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
+        if obj.member_set.filter(
+            user=request.user,
+            status__in=[
+                Member.status_choices.LEFT,
+                Member.status_choices.PENDING,
+            ]
+        ).exists():
+            return True
+
         contact = Contact.objects.filter(user=request.user).first()
 
         phones = []
