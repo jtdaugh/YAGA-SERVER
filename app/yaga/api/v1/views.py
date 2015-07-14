@@ -464,7 +464,6 @@ class GroupRetrieveUpdateAPIView(
                 'post_set',
                 queryset=Post.objects.select_related(
                     'user',
-                    'namer'
                 ).filter(
                     post_filter
                 ).order_by('-ready_at'),
