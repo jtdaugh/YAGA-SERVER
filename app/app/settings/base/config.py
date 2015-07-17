@@ -296,7 +296,9 @@ class BaseConfiguration(
         'video.js#5.0.0-29',
         'bootstrap-switch#3.3.2',
         'json3#3.3.2',
-        'bootstrap3-dialog#1.34.5'
+        'bootstrap3-dialog#1.34.5',
+        'moment#2.10.3',
+        'eonasdan-bootstrap-datetimepicker#4.14.30'
     )
     # -------------------------------------------------------
     # secret key configuration

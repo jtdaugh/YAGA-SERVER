@@ -13,13 +13,13 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView, ListView
 from django.views.generic.base import RedirectView
-from django.views.generic.edit import FormView
+from django.views.generic.edit import FormView, UpdateView
 
 from app.views import CrispyFilterView
 
 from ...models import Post
 from .filters import PostFilterSet
-from .forms import ApproveForm, PageDeleteForm
+from .forms import ApproveForm, PostDeleteForm, PostUpdateForm
 
 
 class PostView(
@@ -68,10 +68,12 @@ class PostDeleteView(
     template_name = 'yaga/post/delete.html'
     permission_required = 'yaga.delete_post'
     context_object_name = 'post'
-    form_class = PageDeleteForm
+    form_class = PostDeleteForm
 
     def get_success_url(self):
-        return reverse_lazy('yaga:post:list')
+        return reverse_lazy('yaga:post:update', kwargs={
+            'post_id': self.object.pk
+        })
 
     def delete(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -83,6 +85,27 @@ class PostDeleteView(
         context = super(PostDeleteView, self).get_context_data(**kwargs)
         context['form'] = self.form_class()
         return context
+
+
+class PostUpdateView(
+    PostView,
+    UpdateView
+):
+    permission_required = 'yaga.change_post'
+    pk_url_kwarg = 'post_id'
+    template_name = 'yaga/post/update.html'
+    context_object_name = 'post'
+    form_class = PostUpdateForm
+
+    def form_valid(self, form):
+        form.instance.namer = self.request.user
+
+        return super(PostUpdateView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('yaga:post:update', kwargs={
+            'post_id': self.object.pk
+        })
 
 
 class PostApproveFormView(

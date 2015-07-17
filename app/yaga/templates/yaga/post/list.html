@@ -117,8 +117,8 @@
             {% for post in posts %}
                 <tr>
                     <td>
-                        {% if perms.yaga.delete_post %}
-                            <a href="{% url 'yaga:post:delete' post_id=post.pk %}">
+                        {% if perms.yaga.change_post %}
+                            <a href="{% url 'yaga:post:update' post_id=post.pk %}">
                                 {{ post.pk }}
                             </a>
                         {% else %}

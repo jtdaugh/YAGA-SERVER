@@ -75,6 +75,11 @@ post_urlpatterns = patterns(
         r'^list/(?P<post_id>{uuid_re})/delete/$'.format(uuid_re=uuid_re),
         post_view.PostDeleteView.as_view(),
         name='delete'
+    ),
+    url(
+        r'^list/(?P<post_id>{uuid_re})/update/$'.format(uuid_re=uuid_re),
+        post_view.PostUpdateView.as_view(),
+        name='update'
     )
 )
 
