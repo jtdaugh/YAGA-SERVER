@@ -86,6 +86,9 @@
                 <th>
                     {% trans 'Is Active' %}
                 </th>
+                <th>
+                    {% trans 'Is Monkey' %}
+                </th>
             </tr>
             {% for user in users %}
                 <tr>
@@ -155,6 +158,17 @@
                             </span>
                         {% else %}
                             <span class="label label-danger">
+                                {% trans 'No' %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_monkey %}
+                            <span class="label label-danger">
+                                {% trans 'Yes' %}
+                            </span>
+                        {% else %}
+                            <span class="label label-success">
                                 {% trans 'No' %}
                             </span>
                         {% endif %}

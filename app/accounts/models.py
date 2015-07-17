@@ -19,6 +19,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
 
 from app.model_fields import PhoneNumberField, UUIDField
+from yaga.models import MonkeyUser
 
 from .conf import settings
 
@@ -199,6 +200,26 @@ class User(
     AbstractUser
 ):
     tracker = FieldTracker()
+
+    def get_monkey(self):
+        return MonkeyUser.objects.filter(
+            user=self
+        ).exists()
+
+    def set_monkey(self, value):
+        if value:
+            if not self.get_monkey():
+                monkeyuser = MonkeyUser(
+                    user=self
+                )
+                monkeyuser.save()
+
+                return monkeyuser
+        else:
+            if self.get_monkey():
+                self.monkeyuser.delete()
+
+    is_monkey = property(get_monkey, set_monkey)
 
     class Meta(
         AbstractUser.Meta
