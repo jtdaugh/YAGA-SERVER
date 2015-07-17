@@ -455,37 +455,6 @@ class RequestGroupNotification(
         }
 
 
-class CaptionDirectNotification(
-    DirectNotification
-):
-    def check_condition(self):
-        return (not self.is_muted_group() and self.is_ready_post())
-
-    def __init__(self, **kwargs):
-        self.post = self.load_post(kwargs['post'])
-
-        if self.post:
-            self.group = self.post.group
-            self.target = self.post.user
-            self.emitter = self.load_user(kwargs['emitter'])
-
-    def get_meta(self):
-        return {
-            'event': 'caption',
-            'post_id': str(self.post.pk),
-            'group_id': str(self.group.pk),
-        }
-
-    def get_message_kwargs(self):
-        return {
-            'group': self.group.name,
-            'emitter': self.emitter.get_username()
-        }
-
-    def get_message(self):
-        return _('{emitter} captioned your video in {group}')
-
-
 class RenameGroupNotification(
     GroupNotification
 ):

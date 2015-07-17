@@ -850,24 +850,6 @@ class PostRetrieveUpdateDestroyAPIView(
         if serializer.validated_data.get('name'):
             serializer.validated_data['namer'] = self.request.user
 
-            if (
-                (
-                    serializer.validated_data['name']
-                    !=
-                    serializer.instance.name
-                    or
-                    serializer.instance.namer
-                    !=
-                    self.request.user
-                )
-                and
-                serializer.instance.user != self.request.user
-            ):
-                notifications.CaptionDirectNotification.schedule(
-                    post=serializer.instance.pk,
-                    emitter=self.request.user.pk
-                )
-
         super(
             PostRetrieveUpdateDestroyAPIView, self
         ).perform_update(serializer)
