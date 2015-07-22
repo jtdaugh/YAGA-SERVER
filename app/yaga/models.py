@@ -244,6 +244,16 @@ class Group(
             ('wipe_group', 'Can wipe Group'),
         )
 
+    def latest_posts(self):
+        return self.post_set.select_related(
+            'user',
+        ).filter(
+            state=Post.state_choices.READY,
+            approved=True
+        ).order_by(
+            '-updated_at'
+        )[0:settings.YAGA_LATEST_POSTS_LIMIT]
+
     def visible_post_count(self):
         return self.post_set.filter(
             state__in=[

@@ -134,5 +134,7 @@ class YagaAppConf(
         lambda version: version >= 210
     )
 
+    LATEST_POSTS_LIMIT = 3
+
     class Meta:
         prefix = 'yaga'
