@@ -688,24 +688,36 @@ class GroupMemberUpdateDestroyAPIView(
         try:
             obj = instance.member_set.get(
                 user__phone=validated_data['phone'],
-                status=Member.status_choices.MEMBER
+                status__in=[
+                    Member.status_choices.MEMBER,
+                    Member.status_choices.PENDING
+                ]
             )
         except Member.DoesNotExist:
             pass
         else:
+            previous_status = obj.status
+
             obj.creator = self.request.user
             obj.status = Member.status_choices.LEFT
             obj.save()
 
             if obj.user != self.request.user:
-                notifications.KickGroupNotification.schedule(
-                    group=instance.pk,
-                    target=obj.user.pk,
-                    emitter=self.request.user.pk
-                )
+                if previous_status == Member.status_choices.MEMBER:
+                    notifications.KickGroupNotification.schedule(
+                        group=instance.pk,
+                        target=obj.user.pk,
+                        emitter=self.request.user.pk
+                    )
 
-                if not obj.mute:
-                    notifications.KickDirectNotification.schedule(
+                    if not obj.mute:
+                        notifications.KickDirectNotification.schedule(
+                            group=instance.pk,
+                            target=obj.user.pk,
+                            emitter=self.request.user.pk
+                        )
+                elif previous_status == Member.status_choices.PENDING:
+                    notifications.RejectGroupNotification.schedule(
                         group=instance.pk,
                         target=obj.user.pk,
                         emitter=self.request.user.pk
