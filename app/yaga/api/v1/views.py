@@ -723,6 +723,13 @@ class GroupMemberUpdateDestroyAPIView(
                         emitter=self.request.user.pk
                     )
 
+                    if not obj.mute:
+                        notifications.RejectDirectNotification.schedule(
+                            group=instance.pk,
+                            target=obj.user.pk,
+                            emitter=self.request.user.pk
+                        )
+
 
 class GroupMemberMuteAPIView(
     NonAtomicView,

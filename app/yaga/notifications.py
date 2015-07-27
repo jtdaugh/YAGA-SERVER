@@ -431,6 +431,31 @@ class KickDirectNotification(
         return _('{emitter} has removed you from {group}')
 
 
+class RejectDirectNotification(
+    DirectNotification
+):
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+        self.target = self.load_user(kwargs['target'])
+        self.emitter = self.load_user(kwargs['emitter'])
+
+    def get_meta(self):
+        return {
+            'event': 'reject',
+            'user_id': str(self.target.pk),
+            'group_id': str(self.group.pk),
+        }
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.group.name,
+            'emitter': self.emitter.get_username()
+        }
+
+    def get_message(self):
+        return _('{emitter} has reject your request to {group}')
+
+
 class RequestGroupNotification(
     GroupNotification
 ):
