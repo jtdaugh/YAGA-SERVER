@@ -1112,7 +1112,9 @@ class PostRetrieveAPIView(
     renderer_classes = jsonp_renderer
 
     def get_queryset(self):
-        return Post.objects.filter(
+        return Post.objects.select_related(
+            'user'
+        ).filter(
             approved=True,
             state=Post.state_choices.READY
         )
