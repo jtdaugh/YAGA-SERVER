@@ -60,6 +60,11 @@ post_urlpatterns = patterns(
         views.PostCreateAPIView.as_view(),
         name='create'
     ),
+    # url(
+    #     r'list/^$',
+    #     views.PostListAPIView.as_view(),
+    #     name='list'
+    # ),
     url(
         r'^(?P<post_id>{uuid_re})/like/$'.format(uuid_re=uuid_re),
         views.LikeCreateDestroyAPIView.as_view(),

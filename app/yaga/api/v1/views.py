@@ -383,6 +383,20 @@ class GroupListCreateAPIView(
         )
 
 
+class PostListAPIView(
+    NonAtomicView,
+    generics.ListAPIView
+):
+    lookup_url_kwarg = 'group_id'
+    serializer_class = serializers.PostListSerializer
+    permission_classes = (permissions.GroupMemeber, )
+
+    def get_queryset(self):
+        return Post.objects.select_related(
+            'user',
+        ).order_by('-ready_at')[0:settings.YAGA_PUBLIC_POST_LIMIT]
+
+
 class GroupRetrieveUpdateAPIView(
     SafeNonAtomicView,
     PatchAsPutMixin,
