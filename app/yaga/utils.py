@@ -5,6 +5,8 @@ from future.builtins import (  # noqa
 )
 
 import regex
+from django.utils.module_loading import import_string
+from rest_framework_jsonp.renderers import JSONPRenderer
 
 from .conf import settings
 
@@ -16,3 +18,9 @@ post_attachment_re = regex.compile(
 )
 
 uuid_re = '[0-9a-f]{8}-*[0-9a-f]{4}-*[0-9a-f]{4}-*[0-9a-f]{4}-*[0-9a-f]{12}'
+
+
+jsonp_renderer = list(map(
+    import_string, settings.REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']
+))
+jsonp_renderer.append(JSONPRenderer)

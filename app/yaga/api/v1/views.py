@@ -14,9 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
-from rest_framework_jsonp.renderers import JSONPRenderer
 
 from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
@@ -27,6 +25,7 @@ from ...models import (
     Code, Contact, Group, Like, Member, MonkeyUser, Post, PostCopy,
     post_attachment_preview_upload_to_trash, post_attachment_upload_to
 )
+from ...utils import jsonp_renderer
 
 
 class UserRetrieveUpdateAPIView(
@@ -392,7 +391,7 @@ class PublicGroupGroupRetrieveAPIView(
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.PublicGroupRetrieveSerializer
     permission_classes = (permissions.PublicGroup, )
-    renderer_classes = (JSONRenderer, BrowsableAPIRenderer, JSONPRenderer)
+    renderer_classes = jsonp_renderer
 
     def get_queryset(self):
         return Group.objects.prefetch_related(
