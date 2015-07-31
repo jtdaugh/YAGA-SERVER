@@ -545,3 +545,59 @@ class PostCopySerializer(
     ):
         fields = list(PostSerializer.Meta.fields)
         fields.append('group')
+
+
+class PublicPostSerializer(
+    serializers.ModelSerializer
+):
+
+    user = UserSerializer(read_only=True)
+
+    font = serializers.IntegerField(
+        required=False, min_value=0, max_value=20
+    )
+
+    name_x = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
+    )
+
+    name_y = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
+    )
+
+    rotation = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4,
+    )
+
+    scale = serializers.DecimalField(
+        required=False,
+        min_value=Decimal(-255.0000), max_value=Decimal(255.0000),
+        max_digits=7, decimal_places=4
+    )
+
+    miscellaneous = UnicodeField(required=False, spaces=True, max_length=255)
+
+    class Meta:
+        model = Post
+        fields = list(PostSerializer.Meta.caption_fields)
+        fields.append('user')
+        fields.extend(PostSerializer.Meta.read_only_fields)
+
+
+class PublicGroupRetrieveSerializer(
+    serializers.ModelSerializer
+):
+    name = UnicodeField(read_only=True)
+
+    posts = PublicPostSerializer(
+        many=True, read_only=True, source='post_set'
+    )
+
+    class Meta:
+        model = Group

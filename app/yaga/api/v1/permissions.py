@@ -116,6 +116,15 @@ class PrivateGroup(
         return obj.private
 
 
+class PublicGroup(
+    PrivateGroup
+):
+    def has_object_permission(self, request, view, obj):
+        return not super(PublicGroup, self).has_object_permission(
+            request, view, obj
+        )
+
+
 class AvailablePost(
     BasePermission
 ):

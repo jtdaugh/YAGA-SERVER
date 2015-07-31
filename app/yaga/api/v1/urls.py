@@ -60,11 +60,6 @@ post_urlpatterns = patterns(
         views.PostCreateAPIView.as_view(),
         name='create'
     ),
-    # url(
-    #     r'list/^$',
-    #     views.PostListAPIView.as_view(),
-    #     name='list'
-    # ),
     url(
         r'^(?P<post_id>{uuid_re})/like/$'.format(uuid_re=uuid_re),
         views.LikeCreateDestroyAPIView.as_view(),
@@ -122,6 +117,11 @@ group_urlpatterns = patterns(
         r'^public/$',
         views.PublicGroupListAPIView.as_view(),
         name='public'
+    ),
+    url(
+        r'^(?P<group_id>{uuid_re})/list/'.format(uuid_re=uuid_re),
+        views.PublicGroupGroupRetrieveAPIView.as_view(),
+        name='list'
     ),
 )
 

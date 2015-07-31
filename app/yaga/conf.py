@@ -137,5 +137,7 @@ class YagaAppConf(
 
     LATEST_POSTS_LIMIT = 3
 
+    PUBLIC_POST_LIMIT = 20
+
     class Meta:
         prefix = 'yaga'
