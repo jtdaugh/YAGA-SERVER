@@ -610,3 +610,4 @@ class PublicGroupRetrieveSerializer(
 
     class Meta:
         model = Group
+        fields = ('name', 'id', 'posts', 'updated_at')
