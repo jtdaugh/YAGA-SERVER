@@ -547,11 +547,20 @@ class PostCopySerializer(
         fields.append('group')
 
 
+class PublicUserSerializer(
+    UserSerializer
+):
+    class Meta(
+        UserSerializer.Meta
+    ):
+        fields = ('name', 'id')
+
+
 class PublicPostSerializer(
     serializers.ModelSerializer
 ):
 
-    user = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
 
     font = serializers.IntegerField(
         required=False, min_value=0, max_value=20
