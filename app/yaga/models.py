@@ -941,6 +941,9 @@ class Post(
 
             return False
 
+        if not settings.YAGA_DEEP_ATTACHMENT_VALIDATION:
+            return True
+
         with self.TmpAttachment(self) as attachment:
             process = sh(
                 settings.YAGA_ATTACHMENT_VALIDATE_CMD.format(
