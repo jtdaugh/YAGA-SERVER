@@ -543,4 +543,5 @@ class PostCopySerializer(
     class Meta(
         PostSerializer.Meta
     ):
-        fields = ['id', 'group']
+        fields = list(PostSerializer.Meta.fields)
+        fields.append('group')
