@@ -812,8 +812,10 @@ class PostCreateAPIView(
         obj.approved = obj.group.private
 
         if serializer.validated_data.get('name'):
-            obj.name = serializer.validated_data['name']
             obj.namer = request.user
+
+            for key, value in list(serializer.validated_data.items()):
+                setattr(obj, key, value)
 
         obj.upload_version = self.request.bridge.yaga.CLIENT_VERSION
         obj.save()
@@ -915,7 +917,7 @@ class PostCopyUpdateAPIView(
     generics.UpdateAPIView
 ):
     throttle_classes = (throttling.PostScopedRateThrottle,)
-    serializer_class = serializers.PostCopySerializer
+    serializer_class = serializers.PostCopyGroupSerializer
     permission_classes = (
         IsAuthenticated, permissions.PostOwner,
         permissions.AvailablePost, permissions.FulfilledProfile
@@ -950,18 +952,13 @@ class PostCopyUpdateAPIView(
         else:
             action_status = status.HTTP_200_OK
 
-        serializer = self.get_serializer(
-            data={
-                'groups': [post.group.pk for post in posts]
-            }
+        serializer = serializers.PostCopySerializer(
+            posts,
+            many=True
         )
 
-        serializer.is_valid(raise_exception=True)
-
-        response = dict(serializer.data)
-
         return Response(
-            response,
+            list(serializer.data),
             status=action_status
         )
 

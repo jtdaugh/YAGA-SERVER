@@ -228,6 +228,10 @@ class PostSerializer(
         read_only=True
     )
 
+    approved = serializers.BooleanField(
+        read_only=True
+    )
+
     class Meta:
         model = Post
         caption_fields = (
@@ -521,7 +525,7 @@ class ContactSerializer(
             return super(ContactSerializer, self).save(**kwargs)
 
 
-class PostCopySerializer(
+class PostCopyGroupSerializer(
     serializers.ModelSerializer
 ):
     groups = UniqueNonStrictListField(
@@ -531,3 +535,12 @@ class PostCopySerializer(
     class Meta:
         fields = ('groups',)
         model = PostCopy
+
+
+class PostCopySerializer(
+    PostSerializer
+):
+    class Meta(
+        PostSerializer.Meta
+    ):
+        fields = ['id', 'group']
