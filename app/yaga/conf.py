@@ -43,6 +43,7 @@ class YagaAppConf(
         'speed': 1.5,
         'fps': 4
     }
+    DEEP_ATTACHMENT_VALIDATION = False
     ATTACHMENT_VALIDATE_TIMEOUT = 60 * 3
     ATTACHMENT_VALIDATE_CMD = 'ffprobe {path}'
     ATTACHMENT_VALIDATE_RULES = (
