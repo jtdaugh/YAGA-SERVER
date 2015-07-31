@@ -53,6 +53,15 @@ user_urlpatterns = patterns(
     )
 )
 
+posts_urlpatterns = patterns(
+    '',
+    url(
+        r'^(?P<post_id>{uuid_re})/$'.format(uuid_re=uuid_re),
+        views.PostRetrieveAPIView.as_view(),
+        name='detail'
+    ),
+)
+
 post_urlpatterns = patterns(
     '',
     url(
@@ -139,5 +148,9 @@ urlpatterns = patterns(
     url(
         r'^groups/',
         include(group_urlpatterns, namespace='groups')
+    ),
+    url(
+        r'^posts/',
+        include(posts_urlpatterns, namespace='posts')
     ),
 )

@@ -1103,6 +1103,21 @@ class LikeCreateDestroyAPIView(
         )
 
 
+class PostRetrieveAPIView(
+    NonAtomicView,
+    generics.RetrieveAPIView
+):
+    lookup_url_kwarg = 'post_id'
+    serializer_class = serializers.PublicPostSerializer
+    renderer_classes = jsonp_renderer
+
+    def get_queryset(self):
+        return Post.objects.filter(
+            approved=True,
+            state=Post.state_choices.READY
+        )
+
+
 class DeviceCreateAPIView(
     NonAtomicView,
     generics.CreateAPIView
