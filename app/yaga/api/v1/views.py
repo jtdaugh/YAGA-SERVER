@@ -425,11 +425,10 @@ class PublicGroupGroupRetrieveAPIView(
         )
 
 
-class GroupRetrieveUpdateAPIView(
-    SafeNonAtomicView,
-    PatchAsPutMixin,
-    generics.RetrieveUpdateAPIView
+class SinceMixin(
+    object
 ):
+<<<<<<< f15a94d8c179f4fa119a244ca49cc434a06d0823
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.GroupRetrieveSerializer
     permission_classes = (
@@ -448,19 +447,19 @@ class GroupRetrieveUpdateAPIView(
 
         return super(GroupRetrieveUpdateAPIView, self).get_object()
 
-    def get_post_filter(self):
+    def get_since_filter(self, is_q=False):
         serializer = serializers.SinceSerializer(
-            data=self.request.QUERY_PARAMS.dict()
+            data=self.request.query_params.dict()
         )
 
-        param_unapproved = self.request.QUERY_PARAMS.get('unapproved', False)
+        # param_unapproved = self.request.query_params.get('unapproved', False)
 
         post_filter = {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            'approval': Post.approval_choices.WAITING if param_unapproved else Post.approval_choices.APPROVED
+            # 'approval': Post.approval_choices.WAITING if param_unapproved else Post.approval_choices.APPROVED
         }
 
         if serializer.is_valid():
@@ -476,7 +475,91 @@ class GroupRetrieveUpdateAPIView(
 
         post_filter.update(since_filter)
 
-        if self.private_group or param_unapproved:
+        if is_q:
+            return Q(**post_filter)
+        else:
+            return post_filter
+
+
+class PostListAPIView(
+    NonAtomicView,
+    SinceMixin,
+    generics.ListAPIView
+):
+    permission_classes = (
+        IsAuthenticated, permissions.FulfilledProfile
+    )
+    serializer_class = serializers.PostListSerializer
+
+    def get_post_filter(self):
+        post_filter = self.get_since_filter(is_q=True)
+
+        post_filter |= self.get_visibility_filter()
+
+        return post_filter
+
+    def get_queryset(self):
+        post_filter = self.get_post_filter()
+
+        queryset = Post.objects.select_related(
+            'user',
+        ).filter(
+            post_filter
+        ).order_by('-ready_at')
+
+        return queryset
+
+
+class UserPostListAPIView(
+    PostListAPIView
+):
+    def get_visibility_filter(self):
+        return Q(
+            user=self.request.user
+        )
+
+
+class GroupMemberPostListAPIView(
+    PostListAPIView
+):
+    def get_visibility_filter(self):
+        return Q(
+            group__in=Group.objects.filter(
+                member__user=self.request.user,
+                member__status=Member.status_choices.MEMBER
+            )
+        )
+
+
+class GroupRetrieveUpdateAPIView(
+    SafeNonAtomicView,
+    PatchAsPutMixin,
+    SinceMixin,
+    generics.RetrieveUpdateAPIView
+):
+    lookup_url_kwarg = 'group_id'
+    serializer_class = serializers.GroupRetrieveSerializer
+    permission_classes = (
+        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+    )
+
+    def get_object(self):
+        queryset = Group.objects.all()
+
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        obj = generics.get_object_or_404(queryset, **filter_kwargs)
+
+        self.private_group = obj.private
+
+        return super(GroupRetrieveUpdateAPIView, self).get_object()
+
+    def get_post_filter(self):
+        post_filter = self.get_since_filter()
+
+        if self.private_group:
+>>>>>>> Grid posts views.
             return Q(**post_filter)
         else:
             user_not_approved_posts = {
@@ -491,7 +574,7 @@ class GroupRetrieveUpdateAPIView(
                 'user': self.request.user
             }
 
-            user_not_approved_posts.update(**since_filter)
+            user_not_approved_posts.update(**post_filter)
 
             return Q(**user_not_approved_posts) | Q(**post_filter)
 
@@ -1041,7 +1124,7 @@ class PostRejectAPIView(
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
         obj.mark_rejected()
-        
+
         serializer = self.get_serializer(obj)
         return Response(
             dict(serializer.data),

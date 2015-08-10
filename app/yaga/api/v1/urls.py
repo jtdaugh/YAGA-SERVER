@@ -60,6 +60,16 @@ posts_urlpatterns = patterns(
         views.PostRetrieveAPIView.as_view(),
         name='detail'
     ),
+    url(
+        r'^my/$',
+        views.UserPostListAPIView.as_view(),
+        name='user-post-list'
+    ),
+    url(
+        r'^list/$',
+        views.GroupMemberPostListAPIView.as_view(),
+        name='post-list'
+    ),
 )
 
 post_urlpatterns = patterns(

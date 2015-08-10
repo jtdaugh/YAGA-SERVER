@@ -549,6 +549,12 @@ class PostCopySerializer(
         fields.append('group')
 
 
+class PostListSerializer(
+    PostCopySerializer
+):
+    pass
+
+
 class PublicUserSerializer(
     UserSerializer
 ):
