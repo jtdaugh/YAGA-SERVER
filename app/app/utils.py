@@ -21,6 +21,7 @@ from django.utils.functional import SimpleLazyObject
 from django.utils.http import urlquote
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.cache import cache_page
+from django_redis import get_redis_connection
 from raven.contrib.django import DjangoClient
 from rest_framework.exceptions import ParseError
 from rest_framework.parsers import BaseParser
@@ -411,3 +412,5 @@ class Choice(
 
 
 sentry_client = get_sentry_client()
+
+redis_client = get_redis_connection('default')

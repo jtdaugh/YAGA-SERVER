@@ -27,7 +27,7 @@ from model_utils import FieldTracker
 
 from app.managers import AtomicManager
 from app.model_fields import PhoneNumberField, UUIDField
-from app.utils import sh, u
+from app.utils import sh, u  # redis_client
 from requestprovider import get_request
 
 from .choices import ApprovalChoice, StateChoice, StatusChoice, VendorChoice
@@ -591,11 +591,52 @@ class Post(
             except IOError:
                 pass
 
+    # def is_copy(self):
+    #     return PostCopy.objects.filter(
+    #         post=self
+    #     ).first()
+
+    # @property
+    # def copy_notification_key(self):
+    #     return '{prefix}:post_copy:{pk}'.format(
+    #         prefix=settings.CACHES['default'].get('KEY_PREFIX', ''),
+    #         pk=str(self.pk)
+    #     )
+
+    # def schedule_copy_notifications(self, posts):
+    #     copies = [str(post.pk) for post in posts]
+
+    #     connection.on_commit(
+    #         lambda: redis_client.rpush(self.copy_notification_key, copies)
+    #     )
+
     def notify(self):
         if self.group.private:
-            PostGroupNotification.schedule(
+            notifications.PostGroupNotification.schedule(
                 post=self.pk
             )
+
+            # is_copy = self.is_copy()
+
+            # if not is_copy:
+
+            # else:
+            #     redis_client.lrem(
+            #         is_copy.parent.copy_notification_key,
+            #         0,
+            #         str(self.pk)
+            #     )
+
+            #     # empty pending copies
+            #     if not redis_client.llen(
+            #         is_copy.parent.copy_notification_key
+            #     ):
+            #         redis_client.delete(is_copy.parent.copy_notification_key)
+
+            #         notifications.CopyFinishedNotification.schedule(
+            #             parent=is_copy.parent.pk
+            #         )
+            #         print 'NOTIFY'
 
     def mark_approved(self):
         with transaction.atomic():
@@ -608,7 +649,7 @@ class Post(
                     if post.state == Post.state_choices.READY:
                         post.group.mark_updated()
 
-                        ApprovedDirectNotification.schedule(
+                        notifications.ApprovedDirectNotification.schedule(
                             post=post.pk
                         )
 
@@ -1347,7 +1388,7 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .notifications import ApprovedDirectNotification, PostGroupNotification  # noqa # isort:skip
+from .import notifications
 from .providers import code_provider  # noqa # isort:skip
 from .tasks import (  # noqa # isort:skip
     CleanStorageTask, CoudfrontCacheBoostTask, PostCopyTask, TranscodingTask

@@ -1090,6 +1090,9 @@ class PostCopyUpdateAPIView(
         else:
             action_status = status.HTTP_200_OK
 
+        # if posts:
+        #     serializer.instance.schedule_copy_notifications(posts)
+
         serializer = serializers.PostCopySerializer(
             posts,
             many=True

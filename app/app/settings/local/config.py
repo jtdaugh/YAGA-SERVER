@@ -10,7 +10,19 @@ from ..base.config import BaseConfiguration, Implementation, Initialization
 class LocalConfiguration(
     BaseConfiguration
 ):
-    pass
+    # -------------------------------------------------------
+    # cache configuration
+    # -------------------------------------------------------
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': 'redis://localhost:6379/2',
+            'OPTIONS': {
+                'PICKLE_VERSION': 2,
+                'IGNORE_EXCEPTIONS': True
+            }
+        }
+    }
 
 
 class LocalImplementation(
