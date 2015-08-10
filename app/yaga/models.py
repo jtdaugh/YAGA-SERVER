@@ -1388,7 +1388,7 @@ class MonkeyUser(
         return str(self.pk)
 
 
-from .import notifications
+from .import notifications  # noqa # isort:skip
 from .providers import code_provider  # noqa # isort:skip
 from .tasks import (  # noqa # isort:skip
     CleanStorageTask, CoudfrontCacheBoostTask, PostCopyTask, TranscodingTask

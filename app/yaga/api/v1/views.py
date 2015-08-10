@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -137,7 +138,7 @@ class CodeRetrieveAPIView(
         return Code.objects.all()
 
     def get(self, request, *args, **kwargs):
-        data = self.request.QUERY_PARAMS.dict()
+        data = self.request.query_params.dict()
         return self.retrieve(request, data, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
@@ -490,6 +491,7 @@ class PostListAPIView(
         IsAuthenticated, permissions.FulfilledProfile
     )
     serializer_class = serializers.PostListSerializer
+    pagination_class = LimitOffsetPagination
 
     def get_post_filter(self):
         post_filter = self.get_since_filter(is_q=True)

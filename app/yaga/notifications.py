@@ -670,12 +670,12 @@ class JoinGroupNotification(
         super(JoinGroupNotification, self).notify()
 
 
-class CopyFinishedNotification(
-    Notification
-):
-    def __init__(self, **kwargs):
-        parent = self.load_post(kwargs['parent'])
-        1 / 0
+# class CopyFinishedNotification(
+#     Notification
+# ):
+#     def __init__(self, **kwargs):
+#         parent = self.load_post(kwargs['parent'])
+#         1 / 0
 
 
 class FirebaseNotification(
