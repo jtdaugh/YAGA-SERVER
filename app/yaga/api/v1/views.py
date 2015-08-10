@@ -494,7 +494,7 @@ class PostListAPIView(
     def get_post_filter(self):
         post_filter = self.get_since_filter(is_q=True)
 
-        post_filter |= self.get_visibility_filter()
+        post_filter &= self.get_visibility_filter()
 
         return post_filter
 
