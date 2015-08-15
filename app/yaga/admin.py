@@ -78,12 +78,12 @@ class PostModelAdmin(
 ):
     list_display = (
         'pk', 'name', 'user', 'like_count', 'group',
-        'state', 'created_at', 'approved'
+        'state', 'created_at', 'approval'
     )
 
     ordering = ('-created_at',)
 
-    list_filter = ('state', 'approved')
+    list_filter = ('state', 'approval')
 
     search_fields = ('attachment', 'name', 'id')
 

@@ -12,7 +12,7 @@ def ensure_humanity(apps, schema_editor):
         private=False,
         name='Humanity',
         creator=User.objects.get(
-            name='hellysmile'  # yeah, evil hardcode
+            phone='+19733423338'  # yeah, evil hardcode
         )
     )
 

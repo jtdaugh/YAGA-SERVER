@@ -400,7 +400,7 @@ class PublicGroupGroupRetrieveAPIView(
                 queryset=Post.objects.select_related(
                     'user',
                 ).filter(
-                    approved=True,
+                    approval=Post.approval_choices.APPROVED,
                     state=Post.state_choices.READY
                 ).order_by('-ready_at')
             )
@@ -440,7 +440,7 @@ class GroupRetrieveUpdateAPIView(
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            'approved': True
+            'approval': Post.approval_choices.APPROVED
         }
 
         if serializer.is_valid():
@@ -464,7 +464,10 @@ class GroupRetrieveUpdateAPIView(
                     Post.state_choices.READY,
                     Post.state_choices.DELETED
                 ),
-                'approved': False,
+                'approval__in': (
+                    Post.approval_choices.WAITING,
+                    Post.approval_choices.REJECTED
+                ),
                 'user': self.request.user
             }
 
@@ -819,7 +822,8 @@ class PostCreateAPIView(
         obj.user = request.user
         obj.group = group
 
-        obj.approved = obj.group.private
+        if obj.group.private:
+            obj.approval = Post.approval_choices.APPROVED
 
         if serializer.validated_data.get('name'):
             obj.namer = request.user
@@ -1007,7 +1011,10 @@ class PostCopyUpdateAPIView(
                 post.state = Post.state_choices.PENDING
                 post.user = self.request.user
                 post.group = group
-                post.approved = post.group.private
+                if (post.group.private):
+                    post.approval = Post.approval_choices.APPROVED
+                else:
+                    post.approval = Post.approval_choices.WAITING
 
                 for attr in PostCopy.copy_attrs:
                     setattr(
@@ -1115,7 +1122,7 @@ class PostRetrieveAPIView(
         return Post.objects.select_related(
             'user'
         ).filter(
-            approved=True,
+            approval=Post.approval_choices.APPROVED,
             state=Post.state_choices.READY
         )
 

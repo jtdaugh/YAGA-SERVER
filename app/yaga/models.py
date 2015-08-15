@@ -30,7 +30,7 @@ from app.model_fields import PhoneNumberField, UUIDField
 from app.utils import sh, u
 from requestprovider import get_request
 
-from .choices import StateChoice, StatusChoice, VendorChoice
+from .choices import ApprovalChoice, StateChoice, StatusChoice, VendorChoice
 from .conf import settings
 
 logger = logging.getLogger(__name__)
@@ -146,7 +146,6 @@ class Member(
     status = models.PositiveSmallIntegerField(
         verbose_name=_('Status'),
         choices=status_choices,
-        db_index=True,
         default=status_choices.MEMBER
     )
 
@@ -166,9 +165,13 @@ class Member(
         verbose_name=_('Group')
     )
 
+    follow = models.BooleanField(
+        verbose_name=_('Follow'),
+        default=False
+    )
+
     mute = models.BooleanField(
         verbose_name=_('Mute'),
-        db_index=True,
         default=False
     )
 
@@ -249,7 +252,7 @@ class Group(
             'user',
         ).filter(
             state=Post.state_choices.READY,
-            approved=True
+            approval=Post.approval_choices.APPROVED
         ).order_by(
             '-updated_at'
         )[0:settings.YAGA_LATEST_POSTS_LIMIT]
@@ -260,7 +263,7 @@ class Group(
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ],
-            approved=True
+            approval=Post.approval_choices.APPROVED
         ).count()
 
     def member_count(self):
@@ -276,7 +279,7 @@ class Group(
 
         last_post = self.post_set.filter(
             state=Post.state_choices.READY,
-            approved=True,
+            approval=Post.approval_choices.APPROVED,
         ).exclude(
             user=request.user
         ).order_by(
@@ -416,6 +419,14 @@ class Post(
         default=state_choices.PENDING
     )
 
+    approval_choices = ApprovalChoice()
+
+    approval = models.PositiveSmallIntegerField(
+        verbose_name=_('approved'),
+        choices=approval_choices,
+        default=approval_choices.WAITING
+    )
+
     created_at = models.DateTimeField(
         verbose_name=_('Created At'),
         auto_now_add=True
@@ -437,12 +448,6 @@ class Post(
     upload_version = models.PositiveIntegerField(
         verbose_name=_('Upload Client Version'),
         default=0
-    )
-
-    approved = models.BooleanField(
-        verbose_name=('Approved'),
-        default=True,
-        db_index=True
     )
 
     tracker = FieldTracker()
@@ -573,8 +578,8 @@ class Post(
             post = self.atomic
 
             if post:
-                if not post.approved:
-                    post.approved = True
+                if not post.approval == Post.approval_choices.APPROVED:
+                    post.approval = Post.approval_choices.APPROVED
 
                     if post.state == Post.state_choices.READY:
                         post.group.mark_updated()
@@ -586,6 +591,8 @@ class Post(
                     post.save()
 
                 return post
+
+    # TODO: Add mark_rejected
 
     def download_cache_boost(self):
         for url in [

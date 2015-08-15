@@ -128,7 +128,7 @@ class PostApproveFormView(
         if post:
             post = post.mark_approved()
 
-        approved = post and post.approved
+        approved = (post and post.approval == Post.approval_choices.APPROVED)
 
         return self.render_json_response({
             'approved': approved

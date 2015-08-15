@@ -22,10 +22,18 @@ class StateChoice(
     READY = 5
     DELETED = 10
 
-
 class StatusChoice(
     Choice
 ):
     MEMBER = 0
+    FOLLOWER = 1
     LEFT = 5
     PENDING = 10
+
+
+class ApprovalChoice(
+    Choice
+):
+    WAITING = 0
+    APPROVED = 1
+    REJECTED = 5
