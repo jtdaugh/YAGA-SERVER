@@ -422,7 +422,7 @@ class Post(
     approval_choices = ApprovalChoice()
 
     approval = models.PositiveSmallIntegerField(
-        verbose_name=_('approved'),
+        verbose_name=_('Approval State'),
         choices=approval_choices,
         default=approval_choices.WAITING
     )
@@ -541,6 +541,10 @@ class Post(
             Post.state_choices.DELETED,
             Post.state_choices.READY
         ]
+
+    @property
+    def approved(self):
+        return self.approval == Post.approval_choices.APPROVED
 
     @property
     def deleted(self):

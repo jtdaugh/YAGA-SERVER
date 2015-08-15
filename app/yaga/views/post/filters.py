@@ -31,6 +31,10 @@ class PostFilterSet(
         choices=empty_choice + tuple(Post.state_choices)
     )
 
+    approve_state = django_filters.ChoiceFilter(
+        choices=empty_choice + tuple(Post.approval_choices)
+    )
+
     class Meta:
         model = Post
-        fields = ['id', 'user', 'group', 'name', 'approval', 'state']
+        fields = ['id', 'user', 'group', 'name', 'state', 'approve_state']

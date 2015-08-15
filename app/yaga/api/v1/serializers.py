@@ -243,7 +243,7 @@ class PostSerializer(
             'namer', 'approved', 'owner'
         ) + caption_fields
         read_only_fields = (
-            'attachment', 'attachment_preview', 'ready_at', 'deleted'
+            'attachment', 'attachment_preview', 'ready_at', 'deleted', 'approved'
         )
 
     def validate(self, attrs):
