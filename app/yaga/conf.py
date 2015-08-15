@@ -21,8 +21,8 @@ class YagaAppConf(
     SMS_EXPIRATION = datetime.timedelta(minutes=5)
     SMS_TITLE = 'yaga'
 
-    SMS_KEY = '354d4cc5'
-    SMS_SECRET = '066e303e'
+    SMS_KEY = config('YAGA_SMS_KEY', default='9ff533a9')
+    SMS_SECRET = config('YAGA_SMS_SECRET', default='be0a631d')
 
     SMS_DEFAULT_LANGUAGE_CODE = 'en-us'
 
