@@ -133,3 +133,29 @@ class PostApproveFormView(
         return self.render_json_response({
             'approved': approved
         })
+
+class PostRejectFormView(
+    PostView,
+    JSONResponseMixin,
+    FormView
+):
+    permission_required = 'yaga.approve_post'
+    form_class = ApproveForm
+
+    def form_valid(self, form):
+        pk = form.cleaned_data['pk']
+
+        pk = uuid.UUID(pk)
+
+        post = Post.objects.filter(
+            pk=pk
+        ).first()
+
+        if post:
+            post = post.mark_rejected()
+
+        approved = (post and post.approval == Post.approval_choices.APPROVED)
+
+        return self.render_json_response({
+            'approved': approved
+        })

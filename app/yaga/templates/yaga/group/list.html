@@ -69,7 +69,10 @@
                     {% trans 'Posts' %}
                 </th>
                 <th>
-                    {% trans 'Users' %}
+                    {% trans 'Members' %}
+                </th>
+                <th>
+                    {% trans 'Followers' %}
                 </th>
                 <th>
                     {% trans 'Private' %}
@@ -98,7 +101,10 @@
                         {% endif %}
                     </td>
                     <td>
-                        {{ group.member_set.count }}
+                        {{ group.active_member_count }}
+                    </td>
+                    <td>
+                        {{ group.follower_count }}
                     </td>
                     <td>
                         {% if group.private %}

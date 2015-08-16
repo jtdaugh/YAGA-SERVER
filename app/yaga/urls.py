@@ -72,6 +72,11 @@ post_urlpatterns = patterns(
         name='approve'
     ),
     url(
+        r'^reject/$',
+        post_view.PostRejectFormView.as_view(),
+        name='reject'
+    ),
+    url(
         r'^list/(?P<post_id>{uuid_re})/delete/$'.format(uuid_re=uuid_re),
         post_view.PostDeleteView.as_view(),
         name='delete'

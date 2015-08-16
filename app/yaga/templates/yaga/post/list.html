@@ -33,13 +33,14 @@
     {% compress js %}
         <script type="text/coffeescript" src="{% static 'yaga/coffee/preview.coffee' %}"></script>
         <script type="text/coffeescript" src="{% static 'frontend/coffee/csrf.coffee' %}"></script>
-        <script type="text/coffeescript" src="{% static 'yaga/coffee/approve.coffee' %}"></script>
+        <script type="text/coffeescript" src="{% static 'yaga/coffee/approvereject.coffee' %}"></script>
     {% endcompress %}
 {% endblock %}
 
 {% block extra_js_plain %}
     {{ block.super }}
     var APPROVE_ENDPOINT = '{% url 'yaga:post:approve' %}';
+    var REJECT_ENDPOINT = '{% url 'yaga:post:reject' %}';
 {% endblock %}
 
 {% block breadcrumbs_list %}
@@ -113,6 +114,11 @@
                         {% trans 'Approve' %}
                     </th>
                 {% endif %}
+                {% if perms.yaga.approve_post %}
+                    <th>
+                        {% trans 'Reject' %}
+                    </th>
+                {% endif %}
             </tr>
             {% for post in posts %}
                 <tr>
@@ -184,15 +190,7 @@
                         {{ post.like_set.count }}
                     </td>
                     <td>
-                        {% if post.approved %}
-                            <span class="label label-success">
-                                {% trans 'Yes' %}
-                            </span>
-                        {% else %}
-                            <span class="label label-danger">
-                                {% trans 'No' %}
-                            </span>
-                        {% endif %}
+                        {{ post.approval|choice:post.approval_choices }}
                     </td>
                     <td>
                         {% if post.attachment_preview %}
@@ -207,10 +205,17 @@
                     </td>
                     {% if perms.yaga.approve_post %}
                         <td>
-                            {% if not post.approved and not post.group.private %}
+                            {% if not post.approval == post.approval_choices.APPROVED %}
                                 <button class="btn btn-warning approve" data-pk="{{ post.pk }}">
                                     {% trans 'Approve' %}
                                 </button>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not post.approval == post.approval_choices.REJECTED and not post.group.private %}
+                                <button class="btn btn-warning reject" data-pk="{{ post.pk }}">
+                                    {% trans 'Reject' %}
+                                </button>                                
                             {% endif %}
                         </td>
                     {% endif %}

@@ -97,13 +97,13 @@
     {% if group.member_set.count and group.private %}
         <div class="row">
             <div class="col-md-offset-2 col-md-8 well">
-                {% trans 'Members' %} {{ group.member_set.count }}
+                {% trans 'Users:' %} {{ group.member_set.count }}
                 <hr>
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered">
                         <tr>
                             <th>
-                                {% trans 'Member' %}
+                                {% trans 'User' %}
                             </th>
                             <th>
                                 {% trans 'Status' %}
@@ -149,7 +149,7 @@
                     <div class="panel panel-danger">
                         <div class="panel-heading">
                             <h3 class="panel-title">
-                                {% trans 'Kick all member' %}
+                                {% trans 'Kick all members' %}
                             </h3>
                         </div>
 
