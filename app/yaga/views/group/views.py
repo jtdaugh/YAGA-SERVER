@@ -9,12 +9,13 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.views.generic import DeleteView, DetailView, ListView
 from django.views.generic.base import RedirectView
+from django.views.generic.edit import FormView, UpdateView
 
 from app.views import CrispyFilterView
 
 from ...models import Group
 from .filters import GroupFilterSet
-from .forms import WipeForm
+from .forms import WipeForm, GroupDetailForm
 
 
 class GroupView(
@@ -54,14 +55,30 @@ class GroupListView(
             GroupListView, self
         ).get_queryset().order_by('-created_at')
 
-
 class GroupDetailView(
     GroupView,
-    DetailView
+    UpdateView
 ):
-    context_object_name = 'group'
+    permission_required = 'yaga.change_group'
     pk_url_kwarg = 'group_id'
     template_name = 'yaga/group/detail.html'
+    context_object_name = 'group'
+    form_class = GroupDetailForm
+
+    def form_valid(self, form):
+        form.instance.namer = self.request.user
+        return super(GroupDetailView, self).form_valid(form)
+   
+    def get_context_data(self, **kwargs):
+        context = super(GroupDetailView, self).get_context_data(**kwargs)
+        context['form'] = self.form_class()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy('yaga:group:detail', kwargs={
+            'group_id': self.object.pk
+        })
+
 
 
 class GroupWipeDeleteView(

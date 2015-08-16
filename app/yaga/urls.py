@@ -104,7 +104,7 @@ group_urlpatterns = patterns(
         r'^list/(?P<group_id>{uuid_re})/$'.format(uuid_re=uuid_re),
         group_view.GroupDetailView.as_view(),
         name='detail'
-    ),
+    ),    
     url(
         r'^list/(?P<group_id>{uuid_re})/wipe/$'.format(uuid_re=uuid_re),
         group_view.GroupWipeDeleteView.as_view(),

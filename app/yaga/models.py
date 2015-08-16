@@ -237,6 +237,11 @@ class Group(
         db_index=True
     )
 
+    featured = models.BooleanField(
+        verbose_name=_('Featured'),
+        default=False,
+    )
+
     tracker = FieldTracker()
 
     class Meta:

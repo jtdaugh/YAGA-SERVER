@@ -1,7 +1,10 @@
 {% extends 'yaga/group/list.html' %}
 
 {% load i18n %}
+{% load static %}
 
+{% load compress %}
+{% load crispy_forms_tags %}
 {% load choice %}
 
 {% block title %}
@@ -62,6 +65,22 @@
                     </tr>
                     <tr>
                         <td>
+                            {% trans 'Featured' %}
+                        </td>
+                        <td>
+                            {% if group.featured %}
+                                <span class="label label-success">
+                                    {% trans 'Yes' %}
+                                </span>
+                            {% else %}
+                                <span class="label label-danger">
+                                    {% trans 'No' %}
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             {% trans 'Creator' %}
                         </td>
                         <td>
@@ -94,7 +113,16 @@
             </div>
         </div>
     </div>
-    {% if group.member_set.count and group.private %}
+
+    {% if perms.yaga.change_group and not group.private %}
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8 well">
+                {% crispy form %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if group.member_set.count %}
         <div class="row">
             <div class="col-md-offset-2 col-md-8 well">
                 {% trans 'Users:' %} {{ group.member_set.count }}

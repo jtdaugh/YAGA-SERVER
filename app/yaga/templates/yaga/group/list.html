@@ -77,6 +77,9 @@
                 <th>
                     {% trans 'Private' %}
                 </th>
+                <th>
+                    {% trans 'Featured' %}
+                </th>
             </tr>
             {% for group in groups %}
                 <tr>
@@ -108,6 +111,17 @@
                     </td>
                     <td>
                         {% if group.private %}
+                            <span class="label label-success">
+                                {% trans 'Yes' %}
+                            </span>
+                        {% else %}
+                            <span class="label label-danger">
+                                {% trans 'No' %}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if group.featured %}
                             <span class="label label-success">
                                 {% trans 'Yes' %}
                             </span>
