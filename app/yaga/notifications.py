@@ -453,7 +453,7 @@ class RejectDirectNotification(
         }
 
     def get_message(self):
-        return _('{emitter} has reject your request to {group}')
+        return _('{emitter} has rejected your request to join {group}')
 
 
 class RequestGroupNotification(
@@ -479,6 +479,28 @@ class RequestGroupNotification(
             'emitter': self.emitter.get_username(),
         }
 
+class FollowGroupNotification(
+    GroupNotification
+):
+    def __init__(self, **kwargs):
+        self.target = self.emitter = self.load_user(kwargs['emitter'])
+        self.group = self.load_group(kwargs['group'])
+
+    def get_meta(self):
+        return {
+            'event': 'request',
+            'user_id': str(self.target.pk),
+            'group_id': str(self.group.pk)
+        }
+
+    def get_message(self):
+        return _('{emitter} followed {group}')
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.group.name,
+            'emitter': self.emitter.get_username(),
+        }
 
 class RenameGroupNotification(
     GroupNotification

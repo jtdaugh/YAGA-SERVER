@@ -266,10 +266,6 @@ class Group(
             approval=Post.approval_choices.APPROVED
         ).count()
 
-    def member_count(self):
-        return self.member_set.count()
-    member_count.short_description = _('Members Count')
-
     def post_count(self):
         return self.post_set.count()
     post_count.short_description = _('Posts Count')
@@ -300,11 +296,30 @@ class Group(
             if member.status == Member.status_choices.MEMBER
         ]
 
+    def follower_set(self):
+        return [
+            member for member in self.member_set.all()
+            if member.status == Member.status_choices.FOLLOWER
+        ]
+
     def pending_member_set(self):
         return [
             member for member in self.member_set.all()
             if member.status == Member.status_choices.PENDING
         ]
+
+    def member_count(self):
+        return self.member_set.count()
+    member_count.short_description = _('Members Count')
+
+    def active_member_count(self):
+        return len(self.active_member_set())
+    active_member_count.short_description = _('Active Members Count')
+
+    def follower_count(self):
+        return len(self.follower_set())
+    follower_count.short_description = _('Followers Count')
+
 
     def __str__(self):
         return str(self.pk)
@@ -596,7 +611,16 @@ class Post(
 
                 return post
 
-    # TODO: Add mark_rejected
+    def mark_rejected(self):
+        with transaction.atomic():
+            post = self.atomic
+
+            if post:
+                if not post.approval == Post.approval_choices.REJECTED:
+                    post.approval = Post.approval_choices.REJECTED
+                    post.save()
+
+                return post
 
     def download_cache_boost(self):
         for url in [

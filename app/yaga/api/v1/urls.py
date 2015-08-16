@@ -75,6 +75,16 @@ post_urlpatterns = patterns(
         name='like'
     ),
     url(
+        r'^(?P<post_id>{uuid_re})/reject/$'.format(uuid_re=uuid_re),
+        views.PostRejectAPIView.as_view(),
+        name='reject'
+    ),
+    url(
+        r'^(?P<post_id>{uuid_re})/approve/$'.format(uuid_re=uuid_re),
+        views.PostApproveAPIView.as_view(),
+        name='approve'
+    ),
+    url(
         r'^(?P<post_id>{uuid_re})/copy/$'.format(uuid_re=uuid_re),
         views.PostCopyUpdateAPIView.as_view(),
         name='copy'
@@ -107,6 +117,11 @@ group_urlpatterns = patterns(
         r'^(?P<group_id>{uuid_re})/join/$'.format(uuid_re=uuid_re),
         views.GroupMemberJoinUpdateAPIView.as_view(),
         name='join'
+    ),
+    url(
+        r'^(?P<group_id>{uuid_re})/follow/$'.format(uuid_re=uuid_re),
+        views.GroupFollowAPIView.as_view(),
+        name='follow'
     ),
     url(
         r'^(?P<group_id>{uuid_re})/members/$'.format(uuid_re=uuid_re),

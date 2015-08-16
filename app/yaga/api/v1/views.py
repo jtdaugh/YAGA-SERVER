@@ -225,6 +225,8 @@ class TokenDestroyAPIView(
         return obj
 
 
+# Get all groups (public or private) that friends are in or following
+# TODO: Prepend all Featured Public groups
 class GroupDiscoverListAPIView(
     NonAtomicView,
     generics.ListAPIView
@@ -261,7 +263,10 @@ class GroupDiscoverListAPIView(
         if phones:
             query |= Q(
                 member__user__phone__in=phones,
-                member__status=Member.status_choices.MEMBER,
+                member__status__in= [
+                    Member.status_choices.MEMBER,
+                    Member.status_choices.FOLLOWER,
+                ]
             )
 
         queryset = Group.objects.select_related(
@@ -275,8 +280,6 @@ class GroupDiscoverListAPIView(
             ),
         ).filter(
             query
-        ).filter(
-            private=True
         ).filter(
             updated_at__gte=(
                 timezone.now()
@@ -354,9 +357,10 @@ class GroupListCreateAPIView(
             ),
         ).filter(
             member__user=self.request.user,
-            member__status=Member.status_choices.MEMBER
-        ).filter(
-            private=True
+            member__status__in=[
+                Member.status_choices.MEMBER,
+                Member.status_choices.FOLLOWER,
+            ]
         ).order_by(
             '-updated_at'
         )
@@ -514,6 +518,62 @@ class GroupRetrieveUpdateAPIView(
         super(
             GroupRetrieveUpdateAPIView, self
         ).perform_update(serializer)
+
+class GroupFollowAPIView(
+    PatchAsPutMixin,
+    generics.UpdateAPIView,
+):
+    throttle_classes = (throttling.MemberScopedRateThrottle,)
+    lookup_url_kwarg = 'group_id'
+    permission_classes = (
+        IsAuthenticated, permissions.PublicGroup,
+        permissions.LeftOrContactsGroupMemeber, permissions.FulfilledProfile
+    )
+
+    serializer_class = serializers.GroupListSerializer
+
+    def get_queryset(self):
+        return Group.objects.all().select_related(
+            'creator'
+        ).prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
+            ),
+        )
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        try:
+            obj = instance.member_set.get(
+                user=self.request.user
+            )
+        except Member.DoesNotExist:
+            obj = Member()
+            obj.group = instance
+            obj.user = self.request.user
+
+        if obj.status != Member.status_choices.FOLLOWER:
+            obj.creator = self.request.user
+            obj.status = Member.status_choices.FOLLOWER
+
+            obj.save()
+
+            notifications.FollowGroupNotification.schedule(
+                group=obj.group.pk,
+                emitter=obj.user.pk
+            )
+
+        serializer = serializers.GroupListSerializer(self.get_object())
+
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
 
 
 class GroupMemberJoinUpdateAPIView(
@@ -717,6 +777,7 @@ class GroupMemberUpdateDestroyAPIView(
                 user__phone=validated_data['phone'],
                 status__in=[
                     Member.status_choices.MEMBER,
+                    Member.status_choices.FOLLOWER,
                     Member.status_choices.PENDING
                 ]
             )
@@ -921,6 +982,53 @@ class PostRetrieveUpdateDestroyAPIView(
 
         return Response(
             response,
+            status=status.HTTP_200_OK
+        )
+
+class PostApproveAPIView(
+    PostAPIView,
+    generics.UpdateAPIView
+):
+    serializer_class = serializers.PostSerializer
+    permission_classes = (
+       # IsAuthenticated, permissions.PostGroupMember,
+       # permissions.FulfilledProfile
+    )
+
+    def get_queryset(self):
+        return Post.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.mark_approved()
+
+        serializer = self.get_serializer(obj)
+        return Response(
+            dict(serializer.data),
+            status=status.HTTP_200_OK
+        )
+
+
+class PostRejectAPIView(
+    PostAPIView,
+    generics.UpdateAPIView
+):
+    serializer_class = serializers.PostSerializer
+    permission_classes = (
+      #  IsAuthenticated, permissions.PostGroupMember,
+      #  permissions.FulfilledProfile
+    )
+
+    def get_queryset(self):
+        return Post.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.mark_rejected()
+        
+        serializer = self.get_serializer(obj)
+        return Response(
+            dict(serializer.data),
             status=status.HTTP_200_OK
         )
 

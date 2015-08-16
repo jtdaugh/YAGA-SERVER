@@ -314,6 +314,9 @@ class GroupSerializer(
     members = MemberSerializer(
         many=True, read_only=True, source='active_member_set'
     )
+    followers = MemberSerializer(
+        many=True, read_only=True, source='follower_set'
+    )
     pending_members = MemberSerializer(
         many=True, read_only=True, source='pending_member_set'
     )

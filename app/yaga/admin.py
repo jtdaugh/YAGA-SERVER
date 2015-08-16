@@ -58,7 +58,7 @@ class PostTabularInline(
 class GroupModelAdmin(
     ForceSuperuserAccess, admin.ModelAdmin
 ):
-    list_display = ('pk', 'name', 'private', 'member_count', 'post_count')
+    list_display = ('pk', 'name', 'private', 'member_count', 'active_member_count', 'follower_count', 'post_count')
 
     ordering = ('-created_at',)
 
