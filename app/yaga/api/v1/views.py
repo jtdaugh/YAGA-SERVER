@@ -289,7 +289,10 @@ class GroupDiscoverListAPIView(
         ).exclude(
             pk__in=Group.objects.filter(
                 member__user=self.request.user,
-                member__status=Member.status_choices.MEMBER
+                member__status__in=[
+                    Member.status_choices.MEMBER,
+                    Member.status_choices.FOLLOWER
+                ]
             )
         ).distinct()
 
