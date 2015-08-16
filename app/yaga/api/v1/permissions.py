@@ -22,9 +22,6 @@ class GroupMemeber(
     BasePermission
 ):
     def has_object_permission(self, request, view, obj):
-        if not obj.private:
-            return True
-
         return obj.member_set.filter(
             user=request.user,
             status=Member.status_choices.MEMBER
@@ -38,6 +35,28 @@ class NotGroupMemeber(
         return not super(NotGroupMemeber, self).has_object_permission(
             request, view, obj
         )
+
+class GroupFollower(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        return obj.member_set.filter(
+            user=request.user,
+            status=Member.status_choices.FOLLOWER
+        ).exists()
+
+
+class GroupMemberOrFollower(
+    BasePermission
+):
+    def has_object_permission(self, request, view, obj):
+        return obj.member_set.filter(
+            user=request.user,
+            status__in=[
+                Member.status_choices.MEMBER, 
+                Member.status_choices.FOLLOWER,
+            ]
+        ).exists()
 
 
 class LeftOrContactsGroupMemeber(

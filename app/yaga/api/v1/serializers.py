@@ -347,7 +347,7 @@ class GroupListSerializer(
     ):
         fields = (
             'pending_members', 'members', 'last_foreign_post_id',
-            'name', 'posts', 'id', 'updated_at', 'creator',
+            'name', 'posts', 'id', 'updated_at', 'creator', 'private'
         )
 
 

@@ -233,7 +233,7 @@ class Group(
 
     private = models.BooleanField(
         verbose_name=_('Private'),
-        default=True,
+        default=False,
         db_index=True
     )
 
