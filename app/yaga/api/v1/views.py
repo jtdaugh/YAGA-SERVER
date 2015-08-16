@@ -260,6 +260,11 @@ class GroupDiscoverListAPIView(
             ]
         )
 
+        query |= Q(
+            private=False,
+            featured=True,
+        )
+
         if phones:
             query |= Q(
                 member__user__phone__in=phones,
@@ -316,7 +321,12 @@ class GroupDiscoverListAPIView(
                 reverse=True
             )
 
-        return groups
+        groups.sort(
+            key=lambda group:group.featured,
+            reverse=True
+        )
+
+        return groups[:50]
 
 
 class PublicGroupListAPIView(

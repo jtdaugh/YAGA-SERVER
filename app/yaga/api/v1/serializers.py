@@ -314,12 +314,11 @@ class GroupSerializer(
     members = MemberSerializer(
         many=True, read_only=True, source='active_member_set'
     )
-    followers = MemberSerializer(
-        many=True, read_only=True, source='follower_set'
-    )
     pending_members = MemberSerializer(
         many=True, read_only=True, source='pending_member_set'
     )
+    follower_count = serializers.IntegerField(read_only=True)
+    
     name = UnicodeField(required=True, spaces=True)
     creator = UserSerializer(read_only=True)
 
@@ -346,7 +345,7 @@ class GroupListSerializer(
         GroupSerializer.Meta
     ):
         fields = (
-            'pending_members', 'members', 'last_foreign_post_id',
+            'members', 'pending_members', 'follower_count', 'last_foreign_post_id',
             'name', 'posts', 'id', 'updated_at', 'creator', 'private'
         )
 
