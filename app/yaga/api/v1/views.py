@@ -577,7 +577,7 @@ class GroupRetrieveUpdateAPIView(
                 )
 
                 # Still must obey the since filter
-                post_filter |= (self.get_since_filter & Q(
+                post_filter |= (self.get_since_filter() & Q(
                     user=self.request.user
                 ))
 
