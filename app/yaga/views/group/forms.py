@@ -24,7 +24,7 @@ class GroupDetailForm(
     class Meta:
         model = Group
         fields = ('featured',)
-    
+
     def save(self, commit=True):
         self.instance.featured = self.cleaned_data['featured']
         return super(GroupDetailForm, self).save(commit=commit)

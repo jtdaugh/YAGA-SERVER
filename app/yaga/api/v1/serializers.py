@@ -243,7 +243,8 @@ class PostSerializer(
             'namer', 'approved', 'owner'
         ) + caption_fields
         read_only_fields = (
-            'attachment', 'attachment_preview', 'ready_at', 'deleted', 'approved'
+            'attachment', 'attachment_preview', 'ready_at', 'deleted',
+            'approved'
         )
 
     def validate(self, attrs):
@@ -318,7 +319,7 @@ class GroupSerializer(
         many=True, read_only=True, source='pending_member_set'
     )
     follower_count = serializers.IntegerField(read_only=True)
-    
+
     name = UnicodeField(required=True, spaces=True)
     creator = UserSerializer(read_only=True)
 
@@ -345,7 +346,8 @@ class GroupListSerializer(
         GroupSerializer.Meta
     ):
         fields = (
-            'members', 'pending_members', 'follower_count', 'last_foreign_post_id',
+            'members', 'pending_members', 'follower_count',
+            'last_foreign_post_id',
             'name', 'posts', 'id', 'updated_at', 'creator', 'private'
         )
 

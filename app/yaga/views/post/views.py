@@ -134,6 +134,7 @@ class PostApproveFormView(
             'approved': approved
         })
 
+
 class PostRejectFormView(
     PostView,
     JSONResponseMixin,

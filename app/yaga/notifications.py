@@ -479,6 +479,7 @@ class RequestGroupNotification(
             'emitter': self.emitter.get_username(),
         }
 
+
 class FollowGroupNotification(
     GroupNotification
 ):
@@ -501,6 +502,7 @@ class FollowGroupNotification(
             'group': self.group.name,
             'emitter': self.emitter.get_username(),
         }
+
 
 class RenameGroupNotification(
     GroupNotification

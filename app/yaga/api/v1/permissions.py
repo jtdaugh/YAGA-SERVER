@@ -36,6 +36,7 @@ class NotGroupMemeber(
             request, view, obj
         )
 
+
 class GroupFollower(
     BasePermission
 ):
@@ -53,7 +54,7 @@ class GroupMemberOrFollower(
         return obj.member_set.filter(
             user=request.user,
             status__in=[
-                Member.status_choices.MEMBER, 
+                Member.status_choices.MEMBER,
                 Member.status_choices.FOLLOWER,
             ]
         ).exists()

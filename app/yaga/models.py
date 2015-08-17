@@ -318,13 +318,12 @@ class Group(
     member_count.short_description = _('Members Count')
 
     def active_member_count(self):
-        return len(self.active_member_set())
+        return self.active_member_set().count()
     active_member_count.short_description = _('Active Members Count')
 
     def follower_count(self):
-        return len(self.follower_set())
+        return self.follower_set().count()
     follower_count.short_description = _('Followers Count')
-
 
     def __str__(self):
         return str(self.pk)

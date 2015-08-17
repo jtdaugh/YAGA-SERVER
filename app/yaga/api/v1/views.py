@@ -270,7 +270,7 @@ class GroupDiscoverListAPIView(
         if phones:
             query |= Q(
                 member__user__phone__in=phones,
-                member__status__in= [
+                member__status__in=[
                     Member.status_choices.MEMBER,
                     Member.status_choices.FOLLOWER,
                 ]
@@ -324,7 +324,7 @@ class GroupDiscoverListAPIView(
             )
 
         groups.sort(
-            key=lambda group:group.featured,
+            key=lambda group: group.featured,
             reverse=True
         )
 
@@ -429,11 +429,11 @@ class PublicGroupGroupRetrieveAPIView(
 class SinceMixin(
     object
 ):
-<<<<<<< f15a94d8c179f4fa119a244ca49cc434a06d0823
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.GroupRetrieveSerializer
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemberOrFollower, permissions.FulfilledProfile
+        IsAuthenticated, permissions.GroupMemberOrFollower,
+        permissions.FulfilledProfile
     )
 
     def get_object(self):
@@ -460,7 +460,8 @@ class SinceMixin(
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            # 'approval': Post.approval_choices.WAITING if param_unapproved else Post.approval_choices.APPROVED
+            # 'approval': Post.approval_choices.WAITING
+            # if param_unapproved else Post.approval_choices.APPROVED
         }
 
         if serializer.is_valid():
@@ -561,7 +562,6 @@ class GroupRetrieveUpdateAPIView(
         post_filter = self.get_since_filter()
 
         if self.private_group:
->>>>>>> Grid posts views.
             return Q(**post_filter)
         else:
             user_not_approved_posts = {
@@ -620,6 +620,7 @@ class GroupRetrieveUpdateAPIView(
             GroupRetrieveUpdateAPIView, self
         ).perform_update(serializer)
 
+
 class GroupFollowAPIView(
     PatchAsPutMixin,
     generics.UpdateAPIView,
@@ -627,7 +628,8 @@ class GroupFollowAPIView(
     throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, # TODO:(PUT THIS PERMISSION BACK IN AFTER TESTING) permissions.PublicGroup,
+        IsAuthenticated,  # TODO:(PUT THIS PERMISSION BACK IN AFTER TESTING)
+        # permissions.PublicGroup,
         permissions.FulfilledProfile
     )
 
@@ -674,7 +676,6 @@ class GroupFollowAPIView(
             dict(serializer.data),
             status=status.HTTP_200_OK
         )
-
 
 
 class GroupMemberJoinUpdateAPIView(
@@ -1086,14 +1087,15 @@ class PostRetrieveUpdateDestroyAPIView(
             status=status.HTTP_200_OK
         )
 
+
 class PostApproveAPIView(
     PostAPIView,
     generics.UpdateAPIView
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-       # IsAuthenticated, permissions.PostGroupMember,
-       # permissions.FulfilledProfile
+        # IsAuthenticated, permissions.PostGroupMember,
+        # permissions.FulfilledProfile
     )
 
     def get_queryset(self):
@@ -1116,8 +1118,8 @@ class PostRejectAPIView(
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-      #  IsAuthenticated, permissions.PostGroupMember,
-      #  permissions.FulfilledProfile
+        # IsAuthenticated, permissions.PostGroupMember,
+        # permissions.FulfilledProfile
     )
 
     def get_queryset(self):
