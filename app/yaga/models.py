@@ -165,12 +165,6 @@ class Member(
         verbose_name=_('Group')
     )
 
-    follow = models.BooleanField(
-        verbose_name=_('Follow'),
-        db_index=True,
-        default=False
-    )
-
     mute = models.BooleanField(
         verbose_name=_('Mute'),
         default=False,
