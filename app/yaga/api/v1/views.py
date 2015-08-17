@@ -225,8 +225,9 @@ class TokenDestroyAPIView(
         return obj
 
 
-# Get all groups (public or private) that friends are in or following
-# TODO: Prepend all Featured Public groups
+# Get all groups (public or private) that friends are members or following.
+# Prepend all featured groups
+# Limit to 50 items
 class GroupDiscoverListAPIView(
     NonAtomicView,
     generics.ListAPIView
@@ -652,7 +653,7 @@ class GroupMemberUpdateDestroyAPIView(
     generics.DestroyAPIView
 ):
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber,
+        IsAuthenticated, permissions.GroupMemberOrFollower,
         permissions.FulfilledProfile
     )
 
