@@ -36,12 +36,18 @@ def ensure_prompt(label):
 
 
 @task
-def release(initial=False):
+def release(branch='master', initial=False):
     if not initial:
         stop()
 
     local('git st')
-    local('git push heroku master')
+
+    if branch == 'master':
+        local('git push heroku master')
+    else:
+        local('git push heroku {branch}:master'.format(
+            branch=branch
+        ))
 
     local('heroku run rake deploy')
 
