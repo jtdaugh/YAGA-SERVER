@@ -443,7 +443,7 @@ class SinceMixin(
 
         self.private_group = obj.private
 
-        return super(GroupRetrieveUpdateAPIView, self).get_object()
+        return super(SinceMixin, self).get_object()
 
     def get_since_filter(self, is_q=False):
         serializer = serializers.SinceSerializer(
@@ -452,17 +452,14 @@ class SinceMixin(
 
         param_unapproved = self.request.query_params.get('unapproved', False)
 
-        unapproved_query = {
-            False: Post.approval_choices.WAITING,
-            True: Post.approval_choices.APPROVED
-        }
+        approval_filter = Post.approval_choices.WAITING if param_unapproved else Post.approval_choices.APPROVED
 
         post_filter = {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            'approval': unapproved_query[param_unapproved]
+            'approval': approval_filter
         }
 
         if serializer.is_valid():
