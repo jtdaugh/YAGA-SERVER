@@ -167,12 +167,14 @@ class Member(
 
     follow = models.BooleanField(
         verbose_name=_('Follow'),
+        db_index=True,
         default=False
     )
 
     mute = models.BooleanField(
         verbose_name=_('Mute'),
-        default=False
+        default=False,
+        db_index=True
     )
 
     joined_at = models.DateTimeField(
@@ -233,7 +235,7 @@ class Group(
 
     private = models.BooleanField(
         verbose_name=_('Private'),
-        default=False,
+        default=True,
         db_index=True
     )
 
@@ -443,7 +445,8 @@ class Post(
     approval = models.PositiveSmallIntegerField(
         verbose_name=_('Approval State'),
         choices=approval_choices,
-        default=approval_choices.WAITING
+        default=approval_choices.WAITING,
+        db_index=True
     )
 
     created_at = models.DateTimeField(
