@@ -445,21 +445,16 @@ class SinceMixin(
 
         return super(SinceMixin, self).get_object()
 
-    def get_since_filter(self, is_q=False):
+    def get_since_filter(self):
         serializer = serializers.SinceSerializer(
             data=self.request.query_params.dict()
         )
-
-        param_unapproved = self.request.query_params.get('unapproved', False)
-
-        approval_filter = Post.approval_choices.WAITING if param_unapproved else Post.approval_choices.APPROVED
 
         post_filter = {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            'approval': approval_filter
         }
 
         if serializer.is_valid():
@@ -475,10 +470,7 @@ class SinceMixin(
 
         post_filter.update(since_filter)
 
-        if is_q:
-            return Q(**post_filter)
-        else:
-            return post_filter
+        return Q(**post_filter)
 
 
 class PostListAPIView(
@@ -493,7 +485,7 @@ class PostListAPIView(
     pagination_class = LimitOffsetPagination
 
     def get_post_filter(self):
-        post_filter = self.get_since_filter(is_q=True)
+        post_filter = self.get_since_filter()
 
         post_filter &= self.get_visibility_filter()
 
@@ -516,7 +508,8 @@ class UserPostListAPIView(
 ):
     def get_visibility_filter(self):
         return Q(
-            user=self.request.user
+            # return posts for all approval states
+            user=self.request.user,
         )
 
 
@@ -527,8 +520,13 @@ class GroupMemberPostListAPIView(
         return Q(
             group__in=Group.objects.filter(
                 member__user=self.request.user,
-                member__status=Member.status_choices.MEMBER
-            )
+                member__status__in=[
+                    Member.status_choices.MEMBER,
+                    Member.status_choices.FOLLOWER
+                ]
+            ),
+            # only return APPROVED posts
+            approval=Post.approval_choices.APPROVED
         )
 
 
@@ -541,7 +539,9 @@ class GroupRetrieveUpdateAPIView(
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.GroupRetrieveSerializer
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated,
+        permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBERS. FOLLOWERS CAN GET POSTS
+        permissions.FulfilledProfile
     )
 
     def get_object(self):
@@ -560,23 +560,28 @@ class GroupRetrieveUpdateAPIView(
         post_filter = self.get_since_filter()
 
         if self.private_group:
-            return Q(**post_filter)
+            # Don't need to handle unapproved param. Since its private, return all post approval types
+            return post_filter
         else:
-            user_not_approved_posts = {
-                'state__in': (
-                    Post.state_choices.READY,
-                    Post.state_choices.DELETED
-                ),
-                'approval__in': (
-                    Post.approval_choices.WAITING,
-                    Post.approval_choices.REJECTED
-                ),
-                'user': self.request.user
-            }
+            param_unapproved = self.request.query_params.get('unapproved', False)
+            
+            if param_unapproved:
+                # Limit returned posts to only WAITING posts
+                post_filter &= Q(
+                    approval=Post.approval_choices.WAITING
+                )
+            else:
+                # Returned posts should contain all APPROVED posts and all posts of any approval status from user
+                post_filter &= Q(
+                    approval=Post.approval_choices.APPROVED
+                )
 
-            user_not_approved_posts.update(**post_filter)
+                # Still must obey the since filter
+                post_filter |= (self.get_since_filter & Q(
+                    user=self.request.user
+                ))
 
-            return Q(**user_not_approved_posts) | Q(**post_filter)
+            return post_filter
 
     def get_queryset(self):
         post_filter = self.get_post_filter()
@@ -626,8 +631,8 @@ class GroupFollowAPIView(
     throttle_classes = (throttling.MemberScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated,  # TODO:(PUT THIS PERMISSION BACK IN AFTER TESTING)
-        # permissions.PublicGroup,
+        IsAuthenticated,
+        permissions.PublicGroup,
         permissions.FulfilledProfile
     )
 
@@ -965,7 +970,9 @@ class PostCreateAPIView(
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.FulfilledProfile
+        IsAuthenticated, 
+        permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBER BECAUSE FOLLOWERS CAN POST 
+        permissions.FulfilledProfile
     )
 
     def get_queryset(self):
@@ -1092,8 +1099,8 @@ class PostApproveAPIView(
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        # IsAuthenticated, permissions.PostGroupMember,
-        # permissions.FulfilledProfile
+        IsAuthenticated, permissions.PostGroupMember,
+        permissions.FulfilledProfile
     )
 
     def get_queryset(self):
@@ -1116,8 +1123,8 @@ class PostRejectAPIView(
 ):
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        # IsAuthenticated, permissions.PostGroupMember,
-        # permissions.FulfilledProfile
+        IsAuthenticated, permissions.PostGroupMember,
+        permissions.FulfilledProfile
     )
 
     def get_queryset(self):
