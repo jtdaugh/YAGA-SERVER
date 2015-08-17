@@ -226,9 +226,6 @@ class TokenDestroyAPIView(
         return obj
 
 
-# Get all groups (public or private) that friends are members or following.
-# Prepend all featured groups
-# Limit to 50 items
 class GroupDiscoverListAPIView(
     NonAtomicView,
     generics.ListAPIView
@@ -301,7 +298,7 @@ class GroupDiscoverListAPIView(
                     Member.status_choices.FOLLOWER
                 ]
             )
-        ).distinct()
+        ).distinct()[:settings.YAGA_DISCOVER_LIMIT]
 
         groups = list(queryset)
 
@@ -328,7 +325,7 @@ class GroupDiscoverListAPIView(
             reverse=True
         )
 
-        return groups[:50]
+        return groups
 
 
 class PublicGroupListAPIView(
@@ -453,15 +450,19 @@ class SinceMixin(
             data=self.request.query_params.dict()
         )
 
-        # param_unapproved = self.request.query_params.get('unapproved', False)
+        param_unapproved = self.request.query_params.get('unapproved', False)
+
+        unapproved_query = {
+            False: Post.approval_choices.WAITING,
+            True: Post.approval_choices.APPROVED
+        }
 
         post_filter = {
             'state__in': (
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ),
-            # 'approval': Post.approval_choices.WAITING
-            # if param_unapproved else Post.approval_choices.APPROVED
+            'approval': unapproved_query[param_unapproved]
         }
 
         if serializer.is_valid():

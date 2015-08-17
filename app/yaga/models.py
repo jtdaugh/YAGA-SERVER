@@ -320,11 +320,11 @@ class Group(
     member_count.short_description = _('Members Count')
 
     def active_member_count(self):
-        return self.active_member_set().count()
+        return self.active_member_set.count()
     active_member_count.short_description = _('Active Members Count')
 
     def follower_count(self):
-        return self.follower_set().count()
+        return self.follower_set.count()
     follower_count.short_description = _('Followers Count')
 
     def __str__(self):

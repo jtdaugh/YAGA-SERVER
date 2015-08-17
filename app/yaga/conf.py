@@ -37,6 +37,8 @@ class YagaAppConf(
     ATTACHMENT_SERVER_PREVIEW_PREFIX = 'posts_server_preview'
     ATTACHMENT_TRASH_PREFIX = 'trash'
 
+    DISCOVER_LIMIT = 50
+
     ATTACHMENT_PREVIEW = {
         'width': 200,
         'height': 200,
