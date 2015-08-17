@@ -319,7 +319,7 @@ class GroupSerializer(
         many=True, read_only=True, source='pending_member_set'
     )
     follower_count = serializers.IntegerField(
-        read_only=True, source='follower_coun'
+        read_only=True, source='follower_count'
     )
 
     name = UnicodeField(required=True, spaces=True)
