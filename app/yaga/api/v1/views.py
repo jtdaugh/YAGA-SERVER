@@ -1039,7 +1039,7 @@ class PostCreateAPIView(
 
         if obj.group.private or group.active_member_set().filter(
             user=obj.user
-        ):
+        ).exists():
             obj.approval = Post.approval_choices.APPROVED
 
         if serializer.validated_data.get('name'):
