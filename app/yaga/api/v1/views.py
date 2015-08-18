@@ -538,9 +538,8 @@ class GroupRetrieveUpdateAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.GroupRetrieveSerializer
-    permission_classes = (
+    permission_classes = (  # Anyone can retrieve info about a group.
         IsAuthenticated,
-        permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBERS. FOLLOWERS CAN GET POSTS
         permissions.FulfilledProfile
     )
 
@@ -553,6 +552,14 @@ class GroupRetrieveUpdateAPIView(
         obj = generics.get_object_or_404(queryset, **filter_kwargs)
 
         self.private_group = obj.private
+        try:
+            obj.member_set.get(
+                user=self.request.user,
+                status=Member.status_choices.MEMBER
+            )
+            self.is_active_member = True
+        except Member.DoesNotExist:
+            self.is_active_member = False
 
         return super(GroupRetrieveUpdateAPIView, self).get_object()
 
@@ -560,8 +567,12 @@ class GroupRetrieveUpdateAPIView(
         post_filter = self.get_since_filter()
 
         if self.private_group:
-            # Don't need to handle unapproved param. Since its private, return all post approval types
-            return post_filter
+            if self.is_active_member:
+                # Don't need to handle unapproved param. Since its private, return all post approval types
+                return post_filter
+            else:
+                # FORBIDDEN TO GET POSTS IF GROUP IS PRIVATE AND USER IS NOT MEMBER
+                return Q() #TODO: Make sure this returns no results.
         else:
             param_unapproved = self.request.query_params.get('unapproved', False)
             
@@ -990,7 +1001,7 @@ class PostCreateAPIView(
         obj.user = request.user
         obj.group = group
 
-        if obj.group.private:
+        if (obj.group.private or (obj.user in group.active_member_set())):
             obj.approval = Post.approval_choices.APPROVED
 
         if serializer.validated_data.get('name'):
@@ -1230,7 +1241,8 @@ class PostCopyUpdateAPIView(
                 post.state = Post.state_choices.PENDING
                 post.user = self.request.user
                 post.group = group
-                if (post.group.private):
+
+                if (post.group.private or (post.user in group.active_member_set())):
                     post.approval = Post.approval_choices.APPROVED
                 else:
                     post.approval = Post.approval_choices.WAITING
