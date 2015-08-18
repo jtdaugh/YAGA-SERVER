@@ -328,6 +328,42 @@ class GroupDiscoverListAPIView(
         return groups
 
 
+class GroupSearchListAPIView(
+    NonAtomicView,
+    generics.ListAPIView
+):
+    permission_classes = (IsAuthenticated, permissions.FulfilledProfile)
+    serializer_class = serializers.GroupListSerializer
+
+    def get_queryset(self):
+        serializer = serializers.GroupSearchSerializer(
+            data=self.request.query_params.dict()
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        return Group.objects.select_related(
+            'creator'
+        ).prefetch_related(
+            Prefetch(
+                'member_set',
+                queryset=Member.objects.select_related('user').exclude(
+                    status=Member.status_choices.LEFT
+                )
+            )
+        ).filter(
+            name__icontains=serializer.validated_data['name']
+        ).exclude(
+            pk__in=Group.objects.filter(
+                member__user=self.request.user,
+                member__status__in=[
+                    Member.status_choices.MEMBER,
+                    Member.status_choices.FOLLOWER
+                ]
+            )
+        )
+
+
 class PublicGroupListAPIView(
     NonAtomicView,
     generics.ListAPIView

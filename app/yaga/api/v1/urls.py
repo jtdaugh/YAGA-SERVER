@@ -157,6 +157,11 @@ group_urlpatterns = patterns(
         views.PublicGroupGroupRetrieveAPIView.as_view(),
         name='list'
     ),
+    url(
+        r'^search/'.format(uuid_re=uuid_re),
+        views.GroupSearchListAPIView.as_view(),
+        name='search'
+    ),
 )
 
 
