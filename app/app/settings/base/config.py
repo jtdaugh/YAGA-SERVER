@@ -127,7 +127,7 @@ class BaseConfiguration(
     # crispy forms configuration
     # -------------------------------------------------------
     CRISPY_FAIL_SILENTLY = False
-    CRISPY_TEMPLATE_PACK = 'bootstrap'
+    CRISPY_TEMPLATE_PACK = 'bootstrap3'
     # -------------------------------------------------------
     # app features configuration
     # -------------------------------------------------------
