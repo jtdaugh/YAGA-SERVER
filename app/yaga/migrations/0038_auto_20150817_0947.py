@@ -17,6 +17,8 @@ def approval_migration(apps, schema_editor):
         else:
             post.approval = approval_choices.WAITING
 
+        post.save()
+
 
 class Migration(migrations.Migration):
 
