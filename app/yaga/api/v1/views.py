@@ -575,7 +575,7 @@ class GroupRetrieveUpdateAPIView(
                 return Q() #TODO: Make sure this returns no results.
         else:
             param_unapproved = self.request.query_params.get('unapproved', False)
-            
+
             if param_unapproved:
                 # Limit returned posts to only WAITING posts
                 post_filter &= Q(
@@ -981,8 +981,8 @@ class PostCreateAPIView(
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.PostSerializer
     permission_classes = (
-        IsAuthenticated, 
-        permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBER BECAUSE FOLLOWERS CAN POST 
+        IsAuthenticated,
+        permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBER BECAUSE FOLLOWERS CAN POST
         permissions.FulfilledProfile
     )
 
@@ -1001,7 +1001,9 @@ class PostCreateAPIView(
         obj.user = request.user
         obj.group = group
 
-        if (obj.group.private or (obj.user in group.active_member_set())):
+        if obj.group.private or group.active_member_set().filter(
+            user=obj.user
+        ):
             obj.approval = Post.approval_choices.APPROVED
 
         if serializer.validated_data.get('name'):

@@ -292,41 +292,30 @@ class Group(
         self.save(update_fields=['updated_at'])
 
     def active_member_set(self):
-        return [
-            member for member in self.member_set.all()
-            if member.status == Member.status_choices.MEMBER
-        ]
+        return self.member_set.filter(
+            status=Member.status_choices.MEMBER
+        )
 
     def follower_set(self):
-        return [
-            member for member in self.member_set.all()
-            if member.status == Member.status_choices.FOLLOWER
-        ]
+        return self.member_set.filter(
+            status=Member.status_choices.FOLLOWER
+        )
 
     def pending_member_set(self):
-        return [
-            member for member in self.member_set.all()
-            if member.status == Member.status_choices.PENDING
-        ]
+        return self.member_set.filter(
+            status=Member.status_choices.PENDING
+        )
 
     def member_count(self):
         return self.member_set.count()
     member_count.short_description = _('Members Count')
 
     def active_member_count(self):
-        return len(self.follower_set())
-        # TODO: do this in a better way. But .count() is causing error:
-        # 'function' object has no attribute 'count'
-        #
-        # return self.active_member_set.count()
+        return self.active_member_set().count()
     active_member_count.short_description = _('Active Members Count')
 
     def follower_count(self):
-        return len(self.follower_set())
-        # TODO: do this in a better way. But .count() is causing error:
-        # 'function' object has no attribute 'count'
-        #
-        #return self.follower_set.count()
+        return self.follower_set().count()
     follower_count.short_description = _('Followers Count')
 
     def __str__(self):
