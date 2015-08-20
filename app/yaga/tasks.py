@@ -15,7 +15,7 @@ from app import celery
 from app.utils import get_requests_session
 
 from .conf import settings
-from .models import Code, Post, PostCopy
+from .models import Code, Post, PostCopy, Group
 from .providers import apns_provider
 from .storage import cloudfront_storage
 from .utils import post_attachment_re
@@ -288,6 +288,20 @@ class PostCopyTask(
                 copy.cancel()
 
 
+class PendingPeriodicTask(
+    celery.PeriodicTask
+):
+    run_every = settings.YAGA_PENDING_RUN_EVERY
+
+    def run(self):
+        for group in Group.objects.filter(
+            private=True
+        ):
+            PendingVideoGroupNotification.schedule(
+                group=group.pk
+            )
+
+
 class NotificationTask(
     celery.Task
 ):
@@ -309,4 +323,4 @@ class APNSPushTask(
                 raise self.retry(exc=e)
 
 
-from .notifications import NotificationInstances  # noqa # isort:skip
+from .notifications import NotificationInstances, PendingVideoGroupNotification  # noqa # isort:skip

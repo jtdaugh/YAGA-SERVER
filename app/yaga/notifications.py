@@ -770,4 +770,34 @@ class ApprovedDirectNotification(
         return _('Your post in {group} has been approved')
 
 
+class PendingVideoGroupNotification(
+    GroupNotification
+):
+    def check_condition(self):
+        return self.count > 0
+
+    def __init__(self, **kwargs):
+        self.group = self.load_group(kwargs['group'])
+
+        self.count = self.group.pending_posts_set_count()
+
+    def get_meta(self):
+        return {
+            'event': 'pending',
+            'group_id': str(self.group.pk)
+        }
+
+    def get_message_kwargs(self):
+        return {
+            'group': self.group.name,
+            'count': self.count
+        }
+
+    def get_exclude(self):
+        return {}
+
+    def get_message(self):
+        return _('There are {count} pending videos in {group}')
+
+
 from .tasks import NotificationTask  # noqa # isort:skip

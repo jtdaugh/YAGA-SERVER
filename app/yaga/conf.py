@@ -86,6 +86,8 @@ class YagaAppConf(
     ATTACHMENT_TRANSCODE_DEADLINE = datetime.timedelta(hours=6)
     ATTACHMENT_TRANSCODE_RUN_EVERY = datetime.timedelta(minutes=10)
 
+    PENDING_RUN_EVERY = datetime.timedelta(seconds=5)
+
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
     CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)
 
