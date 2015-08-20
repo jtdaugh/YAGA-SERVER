@@ -264,7 +264,8 @@ class Group(
                 Post.state_choices.READY,
                 Post.state_choices.DELETED
             ],
-            approval=Post.approval_choices.APPROVED
+            # not sure... about approval here, need to double check it
+            # approval=Post.approval_choices.APPROVED
         ).count()
 
     def post_count(self):
