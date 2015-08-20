@@ -321,7 +321,7 @@ class Group(
 
     def waiting_posts_set(self):
         return self.post_set.filter(
-            approval=Post.approval_choices.WAITING
+            approval=Post.approval_choices.WAITING,
             state=Post.state_choices.READY
         )
 

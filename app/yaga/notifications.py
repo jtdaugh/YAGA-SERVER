@@ -787,7 +787,8 @@ class PendingVideoGroupNotification(
                 timezone.now()
                 -
                 settings.YAGA_PENDING_RUN_EVERY
-            ).count()
+            )
+        ).count()
 
     def get_meta(self):
         return {
