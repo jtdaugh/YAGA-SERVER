@@ -322,6 +322,10 @@ class GroupSerializer(
         read_only=True
     )
 
+    featured = serializers.BooleanField(
+        read_only=True
+    )
+
     name = UnicodeField(required=True, spaces=True)
     creator = UserSerializer(read_only=True)
 
@@ -353,7 +357,7 @@ class GroupListSerializer(
     ):
         fields = (
             'members', 'pending_members', 'follower_count',
-            'last_foreign_post_id', 'pending_posts_count',
+            'last_foreign_post_id', 'pending_posts_count', 'featured',
             'name', 'posts', 'id', 'updated_at', 'creator', 'private'
         )
 
