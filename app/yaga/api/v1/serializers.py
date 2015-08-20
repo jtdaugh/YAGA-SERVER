@@ -349,7 +349,7 @@ class GroupListSerializer(
     )
 
     pending_posts_count = serializers.IntegerField(
-        read_only=True, source='pending_posts_set_count'
+        read_only=True, source='waiting_posts_set_count'
     )
 
     class Meta(

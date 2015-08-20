@@ -4,9 +4,12 @@ from future.builtins import (  # noqa
     oct, open, pow, range, round, str, super, zip
 )
 
+import datetime
+
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.utils import six
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import override, ungettext
 
@@ -779,7 +782,12 @@ class PendingVideoGroupNotification(
     def __init__(self, **kwargs):
         self.group = self.load_group(kwargs['group'])
 
-        self.count = self.group.pending_posts_set_count()
+        self.count = self.group.waiting_posts_set().filter(
+            updated_at__gte=(
+                timezone.now()
+                -
+                settings.YAGA_PENDING_RUN_EVERY
+            ).count()
 
     def get_meta(self):
         return {
@@ -797,7 +805,7 @@ class PendingVideoGroupNotification(
         return {}
 
     def get_message(self):
-        return _('There are {count} pending videos in {group}')
+        return _('There are {count} new pending videos in {group}')
 
 
 from .tasks import NotificationTask  # noqa # isort:skip

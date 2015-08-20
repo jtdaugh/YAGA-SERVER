@@ -295,7 +295,7 @@ class PendingPeriodicTask(
 
     def run(self):
         for group in Group.objects.filter(
-            private=True
+            private=False
         ):
             PendingVideoGroupNotification.schedule(
                 group=group.pk
