@@ -318,6 +318,14 @@ class Group(
         return self.follower_set().count()
     follower_count.short_description = _('Followers Count')
 
+    def pending_posts_set(self):
+        return self.post_set.filter(
+            state=Post.state_choices.PENDING
+        )
+
+    def pending_posts_set_count(self):
+        return self.pending_posts_set().count()
+
     def __str__(self):
         return str(self.pk)
 

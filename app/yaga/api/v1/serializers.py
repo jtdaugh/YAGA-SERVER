@@ -344,12 +344,16 @@ class GroupListSerializer(
         read_only=True, source='last_foreign_post'
     )
 
+    pending_posts_count = serializers.IntegerField(
+        read_only=True, source='pending_posts_set_count'
+    )
+
     class Meta(
         GroupSerializer.Meta
     ):
         fields = (
             'members', 'pending_members', 'follower_count',
-            'last_foreign_post_id',
+            'last_foreign_post_id', 'pending_posts_count',
             'name', 'posts', 'id', 'updated_at', 'creator', 'private'
         )
 
