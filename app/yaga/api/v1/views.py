@@ -298,7 +298,18 @@ class GroupDiscoverListAPIView(
                     Member.status_choices.FOLLOWER
                 ]
             )
-        ).distinct()[:settings.YAGA_DISCOVER_LIMIT]
+        )
+
+        if (
+            self.request.bridge.yaga.CLIENT_VERSION
+            <
+            settings.YAGA_THIRD_RELEASE_CLIENT_VERSION
+        ):
+            queryset = queryset.filter(
+                private=True
+            )
+
+        queryset = queryset.distinct()[:settings.YAGA_DISCOVER_LIMIT]
 
         groups = list(queryset)
 
@@ -376,8 +387,8 @@ class PublicGroupListAPIView(
         return Group.objects.filter(
             private=False
         ).order_by(
-            '-updated_at'
-        )
+            'created_at'
+        )[:1]  # Yeah evil hardcode, cuz humanity is just first created ;)
 
 
 class GroupListCreateAPIView(
