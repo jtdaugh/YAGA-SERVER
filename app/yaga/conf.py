@@ -87,7 +87,7 @@ class YagaAppConf(
     ATTACHMENT_TRANSCODE_RUN_EVERY = datetime.timedelta(minutes=10)
 
     # TODO: Change this back to 1 hour before deploying to prod!!!
-    PENDING_RUN_EVERY = datetime.timedelta(minutes=2)
+    PENDING_RUN_EVERY = datetime.timedelta(minutes=60)
 
     CLEANUP_RUN_EVERY = datetime.timedelta(minutes=5)
     CODE_CLEANUP_RUN_EVERY = datetime.timedelta(seconds=15)
