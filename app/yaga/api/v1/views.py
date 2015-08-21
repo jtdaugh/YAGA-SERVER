@@ -978,7 +978,7 @@ class GroupMemberMuteAPIView(
 ):
     lookup_url_kwarg = 'group_id'
     permission_classes = (
-        IsAuthenticated, permissions.GroupMemeber, permissions.PrivateGroup,
+        IsAuthenticated, permissions.GroupMemeber,
         permissions.FulfilledProfile
     )
 
