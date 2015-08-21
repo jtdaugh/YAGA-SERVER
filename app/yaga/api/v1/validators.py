@@ -7,6 +7,8 @@ from future.builtins import (  # noqa
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 
+from ...models import Group
+
 
 class UniqueLowerUserName(
     object
@@ -16,3 +18,13 @@ class UniqueLowerUserName(
             name__iexact=value
         ).exists():
             raise ValidationError('This name is already taken.')
+
+
+class UniqueLowerGroupName(
+    object
+):
+    def __call__(self, value):
+        if Group.objects.filter(
+            name__iexact=value
+        ).exists():
+            raise ValidationError('Channel name already taken.')

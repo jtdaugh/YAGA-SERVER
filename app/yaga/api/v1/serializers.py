@@ -327,10 +327,27 @@ class GroupSerializer(
     )
 
     name = UnicodeField(required=True, spaces=True)
+
     creator = UserSerializer(read_only=True)
 
     class Meta:
         model = Group
+
+    def validate(self, attrs):
+        name = attrs['name']
+
+        is_private = attrs.get('private', True)
+
+        if self.instance and self.instance.private:
+            is_private = True
+
+        if not is_private:
+            if Group.objects.filter(
+                name__iexact=name
+            ).exists():
+                raise ValidationError('Channel name already taken.')
+
+        return attrs
 
 
 class GroupListSerializer(
