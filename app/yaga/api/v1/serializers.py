@@ -334,18 +334,21 @@ class GroupSerializer(
         model = Group
 
     def validate(self, attrs):
-        name = attrs['name']
+        name = attrs.get('name')
 
-        is_private = attrs.get('private', True)
+        if name:
+            is_private = attrs.get('private', True)
 
-        if self.instance and self.instance.private:
-            is_private = True
+            if self.instance and self.instance.private:
+                is_private = True
 
-        if not is_private:
-            if Group.objects.filter(
-                name__iexact=name
-            ).exists():
-                raise ValidationError('Channel name already taken.')
+                attrs['private'] = True
+
+            if not is_private:
+                if Group.objects.filter(
+                    name__iexact=name
+                ).exists():
+                    raise ValidationError('Channel name already taken.')
 
         return attrs
 
