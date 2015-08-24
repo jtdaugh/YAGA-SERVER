@@ -348,7 +348,8 @@ class GroupSerializer(
                 if Group.objects.filter(
                     name__iexact=name
                 ).exists():
-                    raise ValidationError('Channel name already taken.')
+                    msg = _('Channel name already taken.')
+                    raise ValidationError(msg)
 
         return attrs
 

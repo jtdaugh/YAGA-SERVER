@@ -431,20 +431,25 @@ class GroupListCreateAPIView(
         serializer = self.get_serializer(
             data=request.data
         )
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        if serializer.is_valid():
+            self.perform_create(serializer)
 
-        obj = Member()
-        obj.group = serializer.instance
-        obj.user = request.user
-        obj.creator = request.user
-        obj.status = Member.status_choices.MEMBER
-        obj.save()
+            obj = Member()
+            obj.group = serializer.instance
+            obj.user = request.user
+            obj.creator = request.user
+            obj.status = Member.status_choices.MEMBER
+            obj.save()
 
-        return Response(
-            dict(serializer.data),
-            status=status.HTTP_201_CREATED,
-        )
+            return Response(
+                dict(serializer.data),
+                status=status.HTTP_201_CREATED,
+            )
+        else:
+            return Response(
+                    dict(serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
 
 class PublicGroupGroupRetrieveAPIView(
