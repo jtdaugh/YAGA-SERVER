@@ -525,6 +525,33 @@ class SinceMixin(
         return Q(**post_filter)
 
 
+# Because of a bug in the shipped iOS client where offset is incremented
+# incorrectly, always return the first 30 videos
+class FirstThirtyPlusLimitOffsetPagination(
+    LimitOffsetPagination
+):
+    def paginate_queryset(self, queryset, request, view=None):
+        self.limit = self.get_limit(request)
+        if self.limit is None:
+            return None
+
+        self.offset = self.get_offset(request)
+        
+        try:
+            self.count = queryset.count()
+        except (AttributeError, TypeError):
+            self.count = len(queryset)
+
+        self.request = request
+        if self.count > self.limit and self.template is not None:
+            self.display_page_controls = True
+        
+        if (self.offset >= 50):
+            return list(queryset[:50]).extend(list(queryset[self.offset:self.offset + self.limit]))
+        else:
+            return list(queryset[:self.offset + self.limit])
+
+
 class PostListAPIView(
     NonAtomicView,
     SinceMixin,
@@ -534,7 +561,7 @@ class PostListAPIView(
         IsAuthenticated, permissions.FulfilledProfile
     )
     serializer_class = serializers.PostListSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = FirstThirtyPlusLimitOffsetPagination
 
     def get_post_filter(self):
         post_filter = self.get_since_filter()
