@@ -11,11 +11,13 @@ from django.db import IntegrityError
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from itertools import chain
 from rest_framework import generics, status
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.utils.urls import replace_query_param
 
 from app.views import NonAtomicView, PatchAsPutMixin, SafeNonAtomicView
 
@@ -547,9 +549,15 @@ class FirstThirtyPlusLimitOffsetPagination(
             self.display_page_controls = True
         
         if (self.offset >= 50):
-            return list(queryset[:50]).extend(list(queryset[self.offset:self.offset + self.limit]))
+            return list(chain(queryset[:50], queryset[self.offset:self.offset + self.limit]))
         else:
             return list(queryset[:self.offset + self.limit])
+   
+    def get_next_link(self):
+        url = self.request.build_absolute_uri()
+        offset = self.offset + self.limit
+        
+        return replace_query_param(url, self.offset_query_param, offset)
 
 
 class PostListAPIView(
