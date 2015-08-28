@@ -333,16 +333,16 @@ class GroupSerializer(
     class Meta:
         model = Group
 
-    def validate(self, attrs):
-        name = attrs.get('name')
+    def validate_name(self, value):
+        name = value
 
         if name:
-            is_private = attrs.get('private', True)
+            is_private = self.initial_data.get('private', True)
 
             if self.instance and self.instance.private:
                 is_private = True
-
-                attrs['private'] = True
+            elif self.instance:
+                is_private = False
 
             if not is_private:
                 if Group.objects.filter(
@@ -351,7 +351,7 @@ class GroupSerializer(
                     msg = _('Channel name already taken.')
                     raise ValidationError(msg)
 
-        return attrs
+        return value
 
 
 class GroupListSerializer(

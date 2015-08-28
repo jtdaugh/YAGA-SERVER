@@ -40,6 +40,7 @@ class TimeStampField(
 # cache char list
 allowed_chr = list(set(list(map(
     chr,
+    [0x0023] +
     list(range(0x0030, 0x0039 + 1)) +
     list(range(0x0041, 0x005A + 1)) +
     list(range(0x0061, 0x007A + 1)) +

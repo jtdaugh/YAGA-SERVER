@@ -7,7 +7,7 @@ from future.builtins import (  # noqa
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Q, Prefetch
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -449,9 +449,9 @@ class GroupListCreateAPIView(
             )
         else:
             return Response(
-                    dict(serializer.errors),
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                dict(serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PublicGroupGroupRetrieveAPIView(
@@ -706,20 +706,21 @@ class GroupRetrieveUpdateAPIView(
         return queryset
 
     def perform_update(self, serializer):
-        if serializer.validated_data.get('name'):
-            if (
-                serializer.validated_data['name'] != serializer.instance.name
-            ):
-                notifications.RenameGroupNotification.schedule(
-                    group=serializer.instance.pk,
-                    emitter=self.request.user.pk,
-                    old_name=serializer.instance.name,
-                    new_name=serializer.validated_data['name']
-                )
+        if serializer.is_valid():
+            if serializer.validated_data.get('name'):
+                if (
+                    serializer.validated_data['name'] != serializer.instance.name
+                ):
+                    notifications.RenameGroupNotification.schedule(
+                        group=serializer.instance.pk,
+                        emitter=self.request.user.pk,
+                        old_name=serializer.instance.name,
+                        new_name=serializer.validated_data['name']
+                    )
 
-        super(
-            GroupRetrieveUpdateAPIView, self
-        ).perform_update(serializer)
+            super(
+                GroupRetrieveUpdateAPIView, self
+            ).perform_update(serializer)
 
 
 class GroupFollowAPIView(
@@ -1356,11 +1357,14 @@ class PostCopyUpdateAPIView(
                         continue
 
                 try:
-                    copy.save()
+                    with transaction.atomic():
+                        copy.save()
 
                     posts.append(post)
+
                 except IntegrityError:
-                    post.delete()
+                    with transaction.atomic():
+                        post.delete()
                     continue
 
                 if copy.parent.state == Post.state_choices.READY:
