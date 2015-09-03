@@ -529,35 +529,35 @@ class SinceMixin(
 
 # Because of a bug in the shipped iOS client where offset is incremented
 # incorrectly, always return the first 30 videos
-class FirstThirtyPlusLimitOffsetPagination(
-    LimitOffsetPagination
-):
-    def paginate_queryset(self, queryset, request, view=None):
-        self.limit = self.get_limit(request)
-        if self.limit is None:
-            return None
+# class FirstThirtyPlusLimitOffsetPagination(
+#     LimitOffsetPagination
+# ):
+#     def paginate_queryset(self, queryset, request, view=None):
+#         self.limit = self.get_limit(request)
+#         if self.limit is None:
+#             return None
 
-        self.offset = self.get_offset(request)
+#         self.offset = self.get_offset(request)
         
-        try:
-            self.count = queryset.count()
-        except (AttributeError, TypeError):
-            self.count = len(queryset)
+#         try:
+#             self.count = queryset.count()
+#         except (AttributeError, TypeError):
+#             self.count = len(queryset)
 
-        self.request = request
-        if self.count > self.limit and self.template is not None:
-            self.display_page_controls = True
+#         self.request = request
+#         if self.count > self.limit and self.template is not None:
+#             self.display_page_controls = True
         
-        if (self.offset >= 50):
-            return list(chain(queryset[:50], queryset[self.offset:self.offset + self.limit]))
-        else:
-            return list(queryset[:self.offset + self.limit])
+#         if (self.offset >= 50):
+#             return list(chain(queryset[:50], queryset[self.offset:self.offset + self.limit]))
+#         else:
+#             return list(queryset[:self.offset + self.limit])
    
-    def get_next_link(self):
-        url = self.request.build_absolute_uri()
-        offset = self.offset + self.limit
+#     def get_next_link(self):
+#         url = self.request.build_absolute_uri()
+#         offset = self.offset + self.limit
         
-        return replace_query_param(url, self.offset_query_param, offset)
+#         return replace_query_param(url, self.offset_query_param, offset)
 
 
 class PostListAPIView(
@@ -569,7 +569,7 @@ class PostListAPIView(
         IsAuthenticated, permissions.FulfilledProfile
     )
     serializer_class = serializers.PostListSerializer
-    pagination_class = FirstThirtyPlusLimitOffsetPagination
+    pagination_class = LimitOffsetPagination
 
     def get_post_filter(self):
         post_filter = self.get_since_filter()
