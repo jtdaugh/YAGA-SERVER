@@ -1332,10 +1332,10 @@ class PostCopyUpdateAPIView(
                 post.user = self.request.user
                 post.group = group
 
-                if (post.group.private or (post.user in group.active_member_set())):
+                if group.private or group.active_member_set().filter(
+                    user=post.user
+                ).exists():
                     post.approval = Post.approval_choices.APPROVED
-                else:
-                    post.approval = Post.approval_choices.WAITING
 
                 for attr in PostCopy.copy_attrs:
                     setattr(
