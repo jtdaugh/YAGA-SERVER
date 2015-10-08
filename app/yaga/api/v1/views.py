@@ -299,7 +299,8 @@ class GroupDiscoverListAPIView(
                     Member.status_choices.MEMBER,
                     Member.status_choices.FOLLOWER
                 ]
-            )
+            ), 
+            active_member_count__lte=2
         )
 
         if (
@@ -629,6 +630,7 @@ class GroupRetrieveUpdateAPIView(
         IsAuthenticated,
         permissions.FulfilledProfile
     )
+    pagination_class = LimitOffsetPagination
 
     def get_object(self):
         queryset = Group.objects.all()
