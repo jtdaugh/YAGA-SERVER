@@ -314,7 +314,12 @@ class GroupDiscoverListAPIView(
 
         queryset = queryset.distinct()[:settings.YAGA_DISCOVER_LIMIT]
 
-        groups = list(queryset)
+
+        groups = []
+        # Don't return groups with <= 2 members
+        for group in list(queryset):
+            if (group.active_member_count > 2):
+                groups.append(group)
 
         if phones:
             groups.sort(
@@ -621,7 +626,7 @@ class GroupMemberPostListAPIView(
 class GroupRetrieveUpdateAPIView(
     SafeNonAtomicView,
     PatchAsPutMixin,
-    SinceMixin,
+    PostListAPIView,
     generics.RetrieveUpdateAPIView
 ):
     lookup_url_kwarg = 'group_id'
@@ -652,36 +657,16 @@ class GroupRetrieveUpdateAPIView(
 
         return super(GroupRetrieveUpdateAPIView, self).get_object()
 
-    def get_post_filter(self):
-        post_filter = self.get_since_filter()
-
-        if self.private_group:
-            if self.is_active_member:
-                # Don't need to handle unapproved param. Since its private, return all post approval types
-                return post_filter
-            else:
-                # FORBIDDEN TO GET POSTS IF GROUP IS PRIVATE AND USER IS NOT MEMBER
-                return Q() #TODO: Make sure this returns no results.
-        else:
-            param_unapproved = self.request.query_params.get('unapproved', False)
-
-            if param_unapproved:
-                # Limit returned posts to only WAITING posts
-                post_filter &= Q(
-                    approval=Post.approval_choices.WAITING
-                )
-            else:
-                # Returned posts should contain all APPROVED posts and all posts of any approval status from user
-                post_filter &= Q(
-                    approval=Post.approval_choices.APPROVED
-                )
-
-                # Still must obey the since filter
-                post_filter |= (self.get_since_filter() & Q(
-                    user=self.request.user
-                ))
-
-            return post_filter
+    def get_visibility_filter(self):
+        post_filter = Q(
+            approval=Post.approval_choices.APPROVED
+        )
+        # Don't need to handle unapproved self posts for this version.
+        # # Still must obey the since filter
+        # post_filter |= (self.get_since_filter() & Q(
+        #     user=self.request.user
+        # ))
+        return post_filter
 
     def get_queryset(self):
         post_filter = self.get_post_filter()
