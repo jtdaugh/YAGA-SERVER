@@ -299,8 +299,7 @@ class GroupDiscoverListAPIView(
                     Member.status_choices.MEMBER,
                     Member.status_choices.FOLLOWER
                 ]
-            ), 
-            active_member_count__lte=2
+            )
         )
 
         if (
@@ -318,7 +317,7 @@ class GroupDiscoverListAPIView(
         groups = []
         # Don't return groups with <= 2 members
         for group in list(queryset):
-            if (group.active_member_count > 2):
+            if (group.active_member_count() > 2):
                 groups.append(group)
 
         if phones:
@@ -622,7 +621,6 @@ class GroupMemberPostListAPIView(
             approval=Post.approval_choices.APPROVED
         )
 
-
 class GroupRetrieveUpdateAPIView(
     SafeNonAtomicView,
     PatchAsPutMixin,
@@ -635,7 +633,6 @@ class GroupRetrieveUpdateAPIView(
         IsAuthenticated,
         permissions.FulfilledProfile
     )
-    pagination_class = LimitOffsetPagination
 
     def get_object(self):
         queryset = Group.objects.all()
@@ -657,20 +654,7 @@ class GroupRetrieveUpdateAPIView(
 
         return super(GroupRetrieveUpdateAPIView, self).get_object()
 
-    def get_visibility_filter(self):
-        post_filter = Q(
-            approval=Post.approval_choices.APPROVED
-        )
-        # Don't need to handle unapproved self posts for this version.
-        # # Still must obey the since filter
-        # post_filter |= (self.get_since_filter() & Q(
-        #     user=self.request.user
-        # ))
-        return post_filter
-
     def get_queryset(self):
-        post_filter = self.get_post_filter()
-
         queryset = Group.objects.select_related(
             'creator'
         ).prefetch_related(
@@ -679,17 +663,8 @@ class GroupRetrieveUpdateAPIView(
                 queryset=Member.objects.select_related('user').exclude(
                     status=Member.status_choices.LEFT
                 )
-            ),
-            Prefetch(
-                'post_set',
-                queryset=Post.objects.select_related(
-                    'user',
-                ).filter(
-                    post_filter
-                ).order_by('-ready_at'),
             )
         )
-
         return queryset
 
     def perform_update(self, serializer):
@@ -1048,21 +1023,46 @@ class GroupMemberMuteAPIView(
         )
 
 
-class PostCreateAPIView(
+class PostListCreateAPIView(
     NonAtomicView,
-    generics.CreateAPIView
+    SinceMixin,
+    generics.ListCreateAPIView
 ):
-    throttle_classes = (throttling.PostScopedRateThrottle,)
     lookup_url_kwarg = 'group_id'
     serializer_class = serializers.PostSerializer
+    pagination_class = LimitOffsetPagination
     permission_classes = (
         IsAuthenticated,
         permissions.GroupMemberOrFollower, # NOT ONLY GROUP MEMBER BECAUSE FOLLOWERS CAN POST
         permissions.FulfilledProfile
     )
 
+    def get_throttles(self):
+        if self.request.method != 'GET':
+            return [throttling.PostScopedRateThrottle()]
+        else:
+            return []
+
+    def get_post_filter(self):
+        post_filter = (self.get_since_filter() & Q(
+            approval=Post.approval_choices.APPROVED
+        ))
+
+        # Still must obey the since filter
+        post_filter |= (self.get_since_filter() & Q(
+            user=self.request.user
+        ))
+
+        return post_filter
+
     def get_queryset(self):
-        return Group.objects.all()
+        post_filter = self.get_post_filter()
+        queryset = Post.objects.select_related(
+            'user',
+        ).filter(
+            post_filter
+        ).order_by('-ready_at')
+        return queryset
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(

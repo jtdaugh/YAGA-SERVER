@@ -645,13 +645,9 @@ class PublicGroupRetrieveSerializer(
 ):
     name = UnicodeField(read_only=True)
 
-    posts = PublicPostSerializer(
-        many=True, read_only=True, source='post_set'
-    )
-
     class Meta:
         model = Group
-        fields = ('name', 'id', 'posts', 'updated_at')
+        fields = ('name', 'id', 'updated_at')
 
 
 class GroupSearchSerializer(
