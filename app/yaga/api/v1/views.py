@@ -1066,7 +1066,10 @@ class PostListCreateAPIView(
 
         obj = Post()
         obj.user = request.user
-        obj.group = self.kwargs['group_id']
+        obj.group = generics.get_object_or_404(
+            Group.objects.all(),
+            pk=self.kwargs['group_id']
+        )
 
         if obj.group.private or obj.group.active_member_set().filter(
             user=obj.user
