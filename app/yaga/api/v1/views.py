@@ -1028,7 +1028,6 @@ class PostListCreateAPIView(
     generics.ListCreateAPIView
 ):
     lookup_url_kwarg = 'group_id'
-    model = Post
     serializer_class = serializers.PostSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (
@@ -1065,13 +1064,11 @@ class PostListCreateAPIView(
         )
         serializer.is_valid(raise_exception=True)
 
-        group = self.get_object()
-
         obj = Post()
         obj.user = request.user
-        obj.group = group
+        obj.group = self.kwargs['group_id']
 
-        if obj.group.private or group.active_member_set().filter(
+        if obj.group.private or obj.group.active_member_set().filter(
             user=obj.user
         ).exists():
             obj.approval = Post.approval_choices.APPROVED
