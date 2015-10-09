@@ -425,7 +425,6 @@ class GroupListCreateAPIView(
             member__user=self.request.user,
             member__status__in=[
                 Member.status_choices.MEMBER,
-                Member.status_choices.FOLLOWER,
             ]
         ).order_by(
             '-updated_at'
@@ -486,7 +485,7 @@ class SinceMixin(
     object
 ):
     lookup_url_kwarg = 'group_id'
-    serializer_class = serializers.GroupRetrieveSerializer
+    serializer_class = serializers.PostSerializer
     permission_classes = (
         IsAuthenticated, permissions.GroupMemberOrFollower,
         permissions.FulfilledProfile
@@ -1029,6 +1028,7 @@ class PostListCreateAPIView(
     generics.ListCreateAPIView
 ):
     lookup_url_kwarg = 'group_id'
+    model = Post
     serializer_class = serializers.PostSerializer
     pagination_class = LimitOffsetPagination
     permission_classes = (
@@ -1045,12 +1045,7 @@ class PostListCreateAPIView(
 
     def get_post_filter(self):
         post_filter = (self.get_since_filter() & Q(
-            approval=Post.approval_choices.APPROVED
-        ))
-
-        # Still must obey the since filter
-        post_filter |= (self.get_since_filter() & Q(
-            user=self.request.user
+            group=self.kwargs['group_id']
         ))
 
         return post_filter
