@@ -40,10 +40,10 @@ class YagaAppConf(
     DISCOVER_LIMIT = 50
 
     ATTACHMENT_PREVIEW = {
-        'width': 200,
-        'height': 200,
-        'speed': 1.5,
-        'fps': 4
+        'width': 140,
+        'height': 140,
+        'speed': 1.75,
+        'fps': 10
     }
     DEEP_ATTACHMENT_VALIDATION = False
     ATTACHMENT_VALIDATE_TIMEOUT = 60 * 3
