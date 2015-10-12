@@ -24,7 +24,7 @@ class HerokuConfiguration(
     # https configuration
     # -------------------------------------------------------
     #HTTPS = True
-    HTTPS = False
+    HTTPS = True
     # -------------------------------------------------------
     # django compressor configuration
     # -------------------------------------------------------
@@ -71,7 +71,7 @@ class HerokuConfiguration(
     USE_X_FORWARDED_HOST = False
     BEHIND_PROXY = False
     #CLOUDFLARE_BEHIND = True
-    CLOUDFLARE_BEHIND = False
+    CLOUDFLARE_BEHIND = True
     # -------------------------------------------------------
     # database configuration
     # -------------------------------------------------------
