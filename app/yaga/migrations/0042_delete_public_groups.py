@@ -17,7 +17,7 @@ def delete_public_groups(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('yaga', '0041_remove_member_follow.py'),
+        ('yaga', '0041_remove_member_follow'),
     ]
 
     operations = [
