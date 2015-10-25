@@ -15,35 +15,39 @@ def clean_up_pair_groups(apps, schema_editor):
     Member = apps.get_model('yaga', 'Member')
     Post = apps.get_model('yaga', 'Post')
 
-    uniquePairGroups = 0
     postsModified = 0
     postsFailedToModify = 0
 
+    uniquePairGroupIds = []
     deletedGroupIds = []
 
     logger.info("Before migration: %d groups", Group.objects.count())
     logger.info("Before migration: %d posts", Post.objects.count())
 
-    for group in Group.objects.annotate(count=Count('members')).filter(count=2):
-        if (group.id in deletedGroupIds):
+    for masterGroup in Group.objects.annotate(count=Count('members')).filter(count=2).order_by('-updated_at'):
+        if (masterGroup.id in deletedGroupIds):
             continue
         
-        uniquePairGroups += 1
-        
-        query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=group.id)
-        
+        uniquePairGroupIds.append(masterGroup.id)
+                
         # for m in group.members.all():
         #     query = query.filter(member__user=m)
         
-        member_list = list(group.members.all())
+        member_list = list(masterGroup.members.all())
 
-        for otherGroup in query:
+        for otherGroup in Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id):
+            if (otherGroup.id in uniquePairGroupIds):
+                continue
+
             if not (Member.objects.filter(group=otherGroup).filter(user=member_list[0]).exists() and Member.objects.filter(group=otherGroup).filter(user=member_list[1]).exists()):
                 continue # Exclude groups that dont have identical members
 
+            if otherGroup.id == masterGroup.id:
+                continue # Don't want to delete itself. Iedally the exclude above makes this redundant
+
             deletedGroupIds.append(otherGroup.id)
             for post in Post.objects.filter(group=otherGroup):
-                post.group = group
+                post.group = masterGroup
                 try:
                     with transaction.atomic():
                         post.save()
@@ -56,7 +60,7 @@ def clean_up_pair_groups(apps, schema_editor):
             Member.objects.filter(group=otherGroup).delete()
             otherGroup.delete()
 
-    logger.info("Found %d unique pair groups", uniquePairGroups)
+    logger.info("Found %d unique pair groups", len(uniquePairGroupIds))
     logger.info("Deleted %d groups", len(deletedGroupIds))
     logger.info("Modified %d posts", postsModified)
     logger.info("Failed to modify, thus deleted %d posts", postsFailedToModify)
