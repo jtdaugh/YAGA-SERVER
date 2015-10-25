@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models, migrations
+from django.db import models, migrations, IntegrityError
 from django.db.models import Count
 
 from ..choices import ApprovalChoice
@@ -17,6 +17,7 @@ def clean_up_pair_groups(apps, schema_editor):
 
     uniquePairGroups = 0
     postsModified = 0
+    postsFailedToModify = 0
 
     deletedGroupIds = []
 
@@ -33,16 +34,21 @@ def clean_up_pair_groups(apps, schema_editor):
         for otherGroup in query:
             deletedGroupIds.append(otherGroup.id)
             for post in Post.objects.filter(group=otherGroup):
-                postsModified += 1
                 post.group = group
-                post.save()
+                try:
+                    post.save()
+                    postsModified += 1
+                except IntegrityError as e:
+                    post.delete()
+                    postsFailedToModify += 1
+
             Member.objects.filter(group=otherGroup).delete()
             otherGroup.delete()
 
     logger.info("Found %d unique pair groups", uniquePairGroups)
     logger.info("Deleted %d groups", len(deletedGroupIds))
     logger.info("Modified %d posts", postsModified)
-
+    logger.info("Failed to modify, thus deleted %d posts", postsFailedToModify)
 
 class Migration(migrations.Migration):
 
