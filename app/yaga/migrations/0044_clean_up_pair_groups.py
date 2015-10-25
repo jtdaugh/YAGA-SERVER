@@ -33,7 +33,7 @@ def clean_up_pair_groups(apps, schema_editor):
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=group.id)
         
         for m in group.members.all():
-            query = query.filter(member__user=m.user)
+            query = query.filter(member__user=m)
         
         for otherGroup in query:
             deletedGroupIds.append(otherGroup.id)
