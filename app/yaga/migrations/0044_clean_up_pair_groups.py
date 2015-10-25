@@ -38,8 +38,8 @@ def clean_up_pair_groups(apps, schema_editor):
         member_list = list(group.members.all())
 
         for otherGroup in query:
-            if not (Member.objects.filter(group=otherGroup).filter(user=member_list[0]).exists() && Member.objects.filter(group=otherGroup).filter(user=member_list[1]).exists()):
-                break
+            if not (Member.objects.filter(group=otherGroup).filter(user=member_list[0]).exists() and Member.objects.filter(group=otherGroup).filter(user=member_list[1]).exists()):
+                continue # Exclude groups that dont have identical members
 
             deletedGroupIds.append(otherGroup.id)
             for post in Post.objects.filter(group=otherGroup):
