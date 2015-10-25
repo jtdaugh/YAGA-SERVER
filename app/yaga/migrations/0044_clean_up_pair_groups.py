@@ -21,13 +21,16 @@ def clean_up_pair_groups(apps, schema_editor):
 
     deletedGroupIds = []
 
+    logger.info("Before migration: %d groups", Group.objects.count())
+    logger.info("Before migration: %d posts", Post.objects.count())
+
     for group in Group.objects.annotate(count=Count('members')).filter(count=2):
         if (group.id in deletedGroupIds):
             continue
         
         uniquePairGroups += 1
         
-        query = Group.objects.exclude(id=group.id)
+        query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=group.id)
         for member in group.members.all():
             query = query.filter(members=member)
         
