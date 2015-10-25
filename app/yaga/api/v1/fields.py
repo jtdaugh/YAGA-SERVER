@@ -56,16 +56,16 @@ allowed_chr = list(set(list(map(
     list(range(0x0400, 0x0481 + 1)) +
     list(range(0x048A, 0x04FF + 1)) +
     list(range(0x0531, 0x053B + 1)) +
-    list(range(0x05F0, 0x05F2 + 1)) +
-    list(range(0x1F300, 0x1F32C + 1)) +
-    list(range(0x1F330, 0x1F37D + 1)) +
-    list(range(0x1F380, 0x1F3CE + 1)) +
-    list(range(0x1F3D4, 0x1F3F7 + 1)) +
-    list(range(0x1F400, 0x1F4FE + 1)) +
-    list(range(0x1F500, 0x1F54A + 1)) +
-    list(range(0x1F550, 0x1F579 + 1)) +
-    list(range(0x1F57B, 0x1F5A3 + 1)) +
-    list(range(0x1F5A5, 0x1F5FF + 1))
+    list(range(0x05F0, 0x05F2 + 1)) # +
+    # list(range(0x1F300, 0x1F32C + 1)) +
+    # list(range(0x1F330, 0x1F37D + 1)) +
+    # list(range(0x1F380, 0x1F3CE + 1)) +
+    # list(range(0x1F3D4, 0x1F3F7 + 1)) +
+    # list(range(0x1F400, 0x1F4FE + 1)) +
+    # list(range(0x1F500, 0x1F54A + 1)) +
+    # list(range(0x1F550, 0x1F579 + 1)) +
+    # list(range(0x1F57B, 0x1F5A3 + 1)) +
+    # list(range(0x1F5A5, 0x1F5FF + 1))
 ))))
 
 allowed_non_leading_chr = list(map(
