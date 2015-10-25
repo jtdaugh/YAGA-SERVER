@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from django.db.models import Count
 
 from ..choices import ApprovalChoice
 
@@ -22,8 +23,14 @@ def clean_up_pair_groups(apps, schema_editor):
     for group in Group.objects.annotate(count=Count('members')).filter(count=2):
         if (group.id in deletedGroupIds):
             continue
+        
         uniquePairGroups += 1
-        for otherGroup in Group.objects.exclude(id=group.id).filter(members=group.members):
+        
+        query = Group.objects.exclude(id=group.id)
+        for member in group.members.all():
+            query = query.filter(members=member)
+        
+        for otherGroup in query:
             deletedGroupIds.append(otherGroup.id)
             for post in Post.objects.filter(group=otherGroup):
                 postsModified += 1
