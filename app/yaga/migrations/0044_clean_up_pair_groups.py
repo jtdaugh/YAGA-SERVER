@@ -29,13 +29,14 @@ def clean_up_pair_groups(apps, schema_editor):
             continue
         
         uniquePairGroupIds.append(masterGroup.id)
-                
-        # for m in group.members.all():
-        #     query = query.filter(member__user=m)
+           
+        query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
+        for m in group.members.all():
+            query = query.filter(member__user=m)
         
         member_list = list(masterGroup.members.all())
 
-        for otherGroup in Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id):
+        for otherGroup in query:
             if (otherGroup.id in uniquePairGroupIds):
                 continue
 
@@ -57,8 +58,10 @@ def clean_up_pair_groups(apps, schema_editor):
                         post.delete()
                     postsFailedToModify += 1
 
-            Member.objects.filter(group=otherGroup).delete()
-            otherGroup.delete()
+            with transaction.atomic():
+                Member.objects.filter(group=otherGroup).delete()
+            with transaction.atomic():
+                otherGroup.delete()
 
     logger.info("Found %d unique pair groups", len(uniquePairGroupIds))
     logger.info("Deleted %d groups", len(deletedGroupIds))
