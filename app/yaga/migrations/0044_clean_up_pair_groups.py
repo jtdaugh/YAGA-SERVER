@@ -36,10 +36,12 @@ def clean_up_pair_groups(apps, schema_editor):
             for post in Post.objects.filter(group=otherGroup):
                 post.group = group
                 try:
-                    post.save()
+                    with transaction.atomic():
+                        post.save()
                     postsModified += 1
                 except IntegrityError as e:
-                    post.delete()
+                    with transaction.atomic():
+                        post.delete()
                     postsFailedToModify += 1
 
             Member.objects.filter(group=otherGroup).delete()
