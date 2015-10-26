@@ -24,7 +24,7 @@ def clean_up_pair_groups(apps, schema_editor):
     logger.info("Before migration: %d groups", Group.objects.count())
     logger.info("Before migration: %d posts", Post.objects.count())
 
-    for masterGroup in Group.objects.annotate(count=Count('members')).filter(count=2).order_by('-updated_at'):
+    for masterGroup in Group.objects.annotate(count=Count('members')).filter(count=2).order_by('-created_at'):
         if (masterGroup.id in deletedGroupIds):
             continue
         
