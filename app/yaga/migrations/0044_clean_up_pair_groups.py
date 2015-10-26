@@ -32,11 +32,12 @@ def clean_up_pair_groups(apps, schema_editor):
            
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
         for m in masterGroup.members.all():
-            query = query.filter(member__user=m)
+            query = query.filter(member__user__id=m.id)
         
         member_list = list(masterGroup.members.all())
 
-        logger.info("\nMaster group name: %s", masterGroup.name)
+        logger.info("----------------------------------------------------")
+        logger.info("Master group name: %s members: %s, %s", masterGroup.name, member_list[0].id[:5], member_list[1].id[:5])
 
         for otherGroup in query.iterator():
             if (otherGroup.id in uniquePairGroupIds):
@@ -63,7 +64,7 @@ def clean_up_pair_groups(apps, schema_editor):
                         post.delete()
                     postsFailedToModify += 1
 
-            logger.info("%s (with %d videos) merged into %s", otherGroup.name, postsJustMoved, masterGroup.name)
+            logger.info("%s (%d videos - members: %s, %s) merged into %s", otherGroup.name, postsJustMoved, list(otherGroup.members.all())[0].id[:5], list(otherGroup.members.all())[1].id[:5], masterGroup.name)
 
             with transaction.atomic():
                 Member.objects.filter(group=otherGroup).delete()
