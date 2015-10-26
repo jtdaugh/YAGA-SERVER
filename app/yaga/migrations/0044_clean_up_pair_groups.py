@@ -36,6 +36,8 @@ def clean_up_pair_groups(apps, schema_editor):
         
         member_list = list(masterGroup.members.all())
 
+        logger.info("\nMaster group name: %s", masterGroup.name)
+
         for otherGroup in query.iterator():
             if (otherGroup.id in uniquePairGroupIds):
                 continue
@@ -47,16 +49,21 @@ def clean_up_pair_groups(apps, schema_editor):
                 continue # Don't want to delete itself. Iedally the exclude above makes this redundant
 
             deletedGroupIds.append(otherGroup.id)
+            
+            postsJustMoved = 0
             for post in Post.objects.filter(group=otherGroup):
                 post.group = masterGroup
                 try:
                     with transaction.atomic():
                         post.save()
                     postsModified += 1
+                    postsJustMoved += 1
                 except IntegrityError as e:
                     with transaction.atomic():
                         post.delete()
                     postsFailedToModify += 1
+
+            logger.info("%s (with %d videos) merged into %s", otherGroup.name, postsJustMoved, masterGroup.name)
 
             with transaction.atomic():
                 Member.objects.filter(group=otherGroup).delete()
