@@ -31,7 +31,7 @@ def clean_up_pair_groups(apps, schema_editor):
         uniquePairGroupIds.append(masterGroup.id)
            
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
-        for m in group.members.all():
+        for m in masterGroup.members.all():
             query = query.filter(member__user=m)
         
         member_list = list(masterGroup.members.all())
