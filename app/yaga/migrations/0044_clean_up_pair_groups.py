@@ -27,17 +27,25 @@ def clean_up_pair_groups(apps, schema_editor):
     for masterGroup in Group.objects.annotate(count=Count('members')).filter(count=2).order_by('-created_at').iterator():
         if (masterGroup.id in deletedGroupIds):
             continue
-        
+
         uniquePairGroupIds.append(masterGroup.id)
            
+
+        member_list = list(masterGroup.members.all())
+        logger.info("----------------------------------------------------")
+        logger.info("Master group name: %s members: %s, %s", masterGroup.name, str(member_list[0].id)[:5], str(member_list[1].id)[:5])
+
+        for key, value in masterGroup.__dict__:
+            logger.info("%s, %s", str(key), str(value))
+
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
         for m in masterGroup.members.all():
             query = query.filter(member__user__id=m.id)
-        
-        member_list = list(masterGroup.members.all())
+            logger.info("Member info:")
+            for key, value in m.__dict__:
+                logger.info("%s, %s", str(key), str(value))
+            
 
-        logger.info("----------------------------------------------------")
-        logger.info("Master group name: %s members: %s, %s", masterGroup.name, str(member_list[0].id)[:5], str(member_list[1].id)[:5])
 
         for otherGroup in query.iterator():
             if (otherGroup.id in uniquePairGroupIds):
