@@ -30,29 +30,25 @@ def clean_up_pair_groups(apps, schema_editor):
             continue
 
         uniquePairGroupIds.append(masterGroup.id)
-           
 
         member_list = list(Member.objects.filter(group=masterGroup))
         logger.info("----------------------------------------------------")
-        logger.info("Master group name: %s members: %s, %s", masterGroup.name, str(member_list[0].id)[:5], str(member_list[1].id)[:5])
+        logger.info("Master group name: %s members: %s, %s", masterGroup.name, str(member_list[0].user.id)[:5], str(member_list[1].user.id)[:5])
 
-        for key, value in model_to_dict(masterGroup).iteritems():
-            logger.info("%s: %s", str(key), str(value))
+        # for key, value in model_to_dict(masterGroup).iteritems():
+        #     logger.info("%s: %s", str(key), str(value))
 
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
-        for m in Member.objects.filter(group=masterGroup):
-            query = query.filter(member__user__id=m.user.id)
-            logger.info("Member info:")
-            for key, value in model_to_dict(m).iteritems():
-                logger.info("%s: %s", str(key), str(value))
+        # for m in Member.objects.filter(group=masterGroup):
+        #     logger.info("Member info:")
+        #     for key, value in model_to_dict(m).iteritems():
+        #         logger.info("%s: %s", str(key), str(value))
             
-
-
         for otherGroup in query.iterator():
             if (otherGroup.id in uniquePairGroupIds):
                 continue
 
-            if not (Member.objects.filter(group=otherGroup).filter(user=member_list[0]).exists() and Member.objects.filter(group=otherGroup).filter(user=member_list[1]).exists()):
+            if not (Member.objects.filter(group=otherGroup).filter(user=member_list[0].user).exists() and Member.objects.filter(group=otherGroup).filter(user=member_list[1].user).exists()):
                 continue # Exclude groups that dont have identical members
 
             if otherGroup.id == masterGroup.id:
@@ -73,7 +69,9 @@ def clean_up_pair_groups(apps, schema_editor):
                         post.delete()
                     postsFailedToModify += 1
 
-            logger.info("%s (%d videos - members: %s, %s) merged into %s", otherGroup.name, postsJustMoved, str(list(otherGroup.members.all())[0].id)[:5], str(list(otherGroup.members.all())[1].id)[:5], masterGroup.name)
+            others_member_list = list(Member.objects.filter(group=otherGroup))
+
+            logger.info("%s (%d videos - members: %s, %s) merged into %s", otherGroup.name, postsJustMoved, str(others_member_list[0].user.id)[:5], str(others_member_list[1].user.id)[:5], masterGroup.name)
 
             with transaction.atomic():
                 Member.objects.filter(group=otherGroup).delete()
