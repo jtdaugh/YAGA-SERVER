@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations, IntegrityError, transaction
 from django.db.models import Count
+# from django.forms.models import model_to_dict
 
 from ..choices import ApprovalChoice
 
@@ -35,14 +36,14 @@ def clean_up_pair_groups(apps, schema_editor):
         logger.info("----------------------------------------------------")
         logger.info("Master group name: %s members: %s, %s", masterGroup.name, str(member_list[0].id)[:5], str(member_list[1].id)[:5])
 
-        for key, value in masterGroup.__dict__:
+        for key, value in masterGroup.__dict__.iteritems():
             logger.info("%s, %s", str(key), str(value))
 
         query = Group.objects.annotate(c=Count('members')).filter(c=2).exclude(id=masterGroup.id)
         for m in masterGroup.members.all():
             query = query.filter(member__user__id=m.id)
             logger.info("Member info:")
-            for key, value in m.__dict__:
+            for key, value in m.__dict__.iteritems():
                 logger.info("%s, %s", str(key), str(value))
             
 
