@@ -261,7 +261,10 @@ class PostGroupNotification(
         }
 
     def get_message(self):
-        return _('{emitter} posted into {group}{caption}')
+        if (self.group.active_member_count() == 2):
+            return _('{emitter} sent you a video{caption}')
+        else:
+            return _('{emitter} posted into {group}{caption}')
 
     def get_message_kwargs(self):
         return {
@@ -292,7 +295,10 @@ class InviteDirectNotification(
         }
 
     def get_message(self):
-        return _('{emitter} has added you to {group}')
+        if (self.group.active_member_count() == 2):
+            return _('{emitter} started a video chat with you')
+        else:
+            return _('{emitter} has added you to {group}')
 
 
 class LikeDirectNotification(
