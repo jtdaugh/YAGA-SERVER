@@ -24,6 +24,9 @@ class YagaAppConf(
     SMS_KEY = config('YAGA_SMS_KEY', default='9ff533a9')
     SMS_SECRET = config('YAGA_SMS_SECRET', default='be0a631d')
 
+    SMS_INVITE_SUFFIX = config('SMS_INVITE_SUFFIX', default='Join in at getyaga.com')
+    SMS_VIDEO_BASE_URL = config('SMS_VIDEO_BASE_URL', default='yaga.video/watch/?v=')
+    
     SMS_DEFAULT_LANGUAGE_CODE = 'en-us'
 
     SLOP_FACTOR = datetime.timedelta(seconds=5)

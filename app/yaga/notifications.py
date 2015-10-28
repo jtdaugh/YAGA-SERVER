@@ -15,7 +15,7 @@ from django.utils.translation import override, ungettext
 
 from .conf import settings
 from .models import Contact, Device, Group, Member, Post
-from .providers import apns_provider
+from .providers import apns_provider, sms_notification_provider
 
 
 class NotificationInstances(

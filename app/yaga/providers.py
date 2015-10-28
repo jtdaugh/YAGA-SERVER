@@ -60,15 +60,6 @@ class NexmoProvider(
     object
 ):
     FORMAT = 'json'
-    VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
-    SEND_VERIFY_ENDPOINT = '{verify_endpoint}{format}'.format(
-        verify_endpoint=VERIFY_ENDPOINT,
-        format=FORMAT
-    )
-    CHECK_VERIFY_ENDPOINT = '{verify_endpoint}check/{format}'.format(
-        verify_endpoint=VERIFY_ENDPOINT,
-        format=FORMAT
-    )
 
     session = get_requests_session()
 
@@ -120,6 +111,20 @@ class NexmoProvider(
     def parse(self, response):
         return json.loads(response.text)
 
+
+class NexmoCodeProvider(
+    NexmoProvider
+):
+    VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
+    SEND_VERIFY_ENDPOINT = '{verify_endpoint}{format}'.format(
+        verify_endpoint=VERIFY_ENDPOINT,
+        format=FORMAT
+    )
+    CHECK_VERIFY_ENDPOINT = '{verify_endpoint}check/{format}'.format(
+        verify_endpoint=VERIFY_ENDPOINT,
+        format=FORMAT
+    )
+    
     def verify(
         self, receiver,
         sender=None, locale=None, length=None
@@ -159,6 +164,61 @@ class NexmoProvider(
 
         return self.request(
             self.CHECK_VERIFY_ENDPOINT,
+            params
+        )
+
+
+class NexmoNotificationProvider(
+    NexmoProvider
+): 
+    ALERT_ENDPOINT = 'https://rest.nexmo.com/sc/us/alert/'
+    SEND_NOTIFICATION_ENDPOINT = '{verify_endpoint}{format}'.format(
+        verify_endpoint=ALERT_ENDPOINT,
+        format=FORMAT
+    )
+    CHECK_BLACKLIST_ENDPOINT = '{verify_endpoint}check/{format}'.format(
+        verify_endpoint=ALERT_ENDPOINT,
+        format=FORMAT
+    )
+
+    def sendInvite(
+        self, receiver,
+        sender=None
+    ):
+        params = {
+            'template': 0,
+            'to': int(receiver),
+            'username': sender.name,
+            'link': settings.YAGA_SMS_INVITE_SUFFIX,
+        }
+
+        return self.request(
+            self.SEND_NOTIFICATION_ENDPOINT,
+            params
+        )
+
+    def sendVideo(
+        self, receiver,
+        sender=None, group=None, video=None
+    ):
+        link = '{base_url}{video_id}'.format(
+            base_url=settings.YAGA_SMS_VIDEO_BASE_URL,
+            video_id=str(video.id)[:7]
+        )
+
+        params = {
+            'template': 1,
+            'to': int(receiver),
+            'username': sender.name,
+            'link': link
+        }
+
+        if group is not None:
+            params['template'] = 2
+            params['group'] = group.name
+
+        return self.request(
+            self.SEND_NOTIFICATION_ENDPOINT,
             params
         )
 
@@ -284,4 +344,6 @@ class APNSProvider(
 
 apns_provider = APNSProvider()
 
-code_provider = NexmoProvider()
+code_provider = NexmoCodeProvider()
+
+sms_notification_provider = NexmoNotificationProvider()
