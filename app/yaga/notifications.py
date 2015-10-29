@@ -174,9 +174,8 @@ class Notification(
                 )
             )
 
-            if (self.should_also_notify_via_sms()) {
+            if (self.should_also_notify_via_sms()):
                 self.notify_nonusers_via_sms()
-            }
 
             for code, title in settings.LANGUAGES:
                 with override(code.lower()):

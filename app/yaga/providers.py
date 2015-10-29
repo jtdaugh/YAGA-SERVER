@@ -59,8 +59,6 @@ class NexmoResponse(
 class NexmoProvider(
     object
 ):
-    FORMAT = 'json'
-
     session = get_requests_session()
 
     @property
@@ -115,6 +113,7 @@ class NexmoProvider(
 class NexmoCodeProvider(
     NexmoProvider
 ):
+    FORMAT = 'json'
     VERIFY_ENDPOINT = 'https://api.nexmo.com/verify/'
     SEND_VERIFY_ENDPOINT = '{verify_endpoint}{format}'.format(
         verify_endpoint=VERIFY_ENDPOINT,
@@ -171,6 +170,7 @@ class NexmoCodeProvider(
 class NexmoNotificationProvider(
     NexmoProvider
 ): 
+    FORMAT = 'json'
     ALERT_ENDPOINT = 'https://rest.nexmo.com/sc/us/alert/'
     SEND_NOTIFICATION_ENDPOINT = '{alert_endpoint}{format}'.format(
         alert_endpoint=ALERT_ENDPOINT,
