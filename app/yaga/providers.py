@@ -172,23 +172,23 @@ class NexmoNotificationProvider(
     NexmoProvider
 ): 
     ALERT_ENDPOINT = 'https://rest.nexmo.com/sc/us/alert/'
-    SEND_NOTIFICATION_ENDPOINT = '{verify_endpoint}{format}'.format(
-        verify_endpoint=ALERT_ENDPOINT,
+    SEND_NOTIFICATION_ENDPOINT = '{alert_endpoint}{format}'.format(
+        alert_endpoint=ALERT_ENDPOINT,
         format=FORMAT
     )
-    CHECK_BLACKLIST_ENDPOINT = '{verify_endpoint}check/{format}'.format(
-        verify_endpoint=ALERT_ENDPOINT,
-        format=FORMAT
-    )
+    # CHECK_BLACKLIST_ENDPOINT = '{alert_endpoint}check/{format}'.format(
+    #     alert_endpoint=ALERT_ENDPOINT,
+    #     format=FORMAT
+    # )
 
-    def sendInvite(
+    def send_invite(
         self, receiver,
         sender=None
     ):
         params = {
             'template': 0,
             'to': int(receiver),
-            'username': sender.name,
+            'username': sender.get_username(),
             'link': settings.YAGA_SMS_INVITE_SUFFIX,
         }
 
@@ -197,7 +197,7 @@ class NexmoNotificationProvider(
             params
         )
 
-    def sendVideo(
+    def send_video(
         self, receiver,
         sender=None, group=None, video=None
     ):
@@ -209,7 +209,7 @@ class NexmoNotificationProvider(
         params = {
             'template': 1,
             'to': int(receiver),
-            'username': sender.name,
+            'username': sender.get_username(),
             'link': link
         }
 

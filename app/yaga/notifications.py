@@ -143,6 +143,23 @@ class Notification(
     def get_android_message(self):
         raise NotImplementedError
 
+    def should_also_notify_via_sms(self):
+        return False
+
+    def send_sms_notification(self, user=None):
+        return NotImplementedError
+
+    def notify_nonusers_via_sms(self):
+        # get querySet of devices. For each recipient without matching device, send SMS
+        device_queryset = self.get_devices(
+            self.get_receivers()
+        )
+
+        for user in self.get_receivers():
+            if not device_queryset.filter(user=user).exists():
+                self.send_sms_notification(user)
+
+
     def notify(self):
         if (
             self.check_setup()
@@ -156,6 +173,10 @@ class Notification(
                     self.get_receivers()
                 )
             )
+
+            if (self.should_also_notify_via_sms()) {
+                self.notify_nonusers_via_sms()
+            }
 
             for code, title in settings.LANGUAGES:
                 with override(code.lower()):
@@ -220,6 +241,19 @@ class PostGroupNotification(
         if self.post:
             self.group = self.post.group
             self.emitter = self.post.user
+
+    def should_also_notify_via_sms(self):
+        return True
+
+    def send_sms_notification(self, user=None):
+        is_pair = False
+        if (self.group.active_member_count() == 2):
+            isPair = True
+        
+        sms_notification_provider.send_video(user.phone.as_e164,
+            sender=self.emitter,
+            group=(None if isPair else self.group),
+            video=self.post)
 
     def check_threshold(self):
         previous_post = Post.objects.filter(
@@ -293,6 +327,13 @@ class InviteDirectNotification(
             'group': self.group.name,
             'emitter': self.emitter.get_username()
         }
+
+    def should_also_notify_via_sms(self):
+        return True
+
+    def send_sms_notification(self, user=None):
+        sms_notification_provider.send_invite(user.phone.as_e164,
+            sender=self.emitter)
 
     def get_message(self):
         if (self.group.active_member_count() == 2):
