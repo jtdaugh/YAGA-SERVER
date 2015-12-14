@@ -1,111 +1,38 @@
-{% load static %}
-{% load i18n %}
-
-{% load compress %}
-{% load activeurl %}
-
-{% load snless %}
-
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" class="no-js">
+<html style="border-top-color:rgba(236,0,140,1); border-top-width:10px; border-top-style:solid;">
     <head>
-        {% block head %}
-            {% block meta %}
-                <meta charset="utf-8">
-                <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            {% endblock %}
-            {% block csrf %}
-            {% endblock %}
-            {% snless %}
-                <title>
-                    {% block title %}
-                        {% trans 'Project' %}
-                    {% endblock %}
-                </title>
-            {% endsnless %}
-            {% block seo %}
-                {% snless %}
-                    <meta name="description" content="
-                        {% block description %}
-                            {% trans 'Description' %}
-                        {% endblock %}
-                    ">
-                {% endsnless %}
-            {% endblock %}
-            {% block css %}
-                {% compress css %}
-                    <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap-select/dist/css/bootstrap-select.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'video.js/dist/video-js.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap3-dialog/dist/css/bootstrap-dialog.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css' %}" type="text/css">
-                {% endcompress %}
-            {% endblock %}
-            {% block extra_css %}
-                {% compress css %}
-                    <link rel="stylesheet" type="text/stylus" href="{% static 'frontend/stylus/main.styl' %}">
-                {% endcompress %}
-            {% endblock %}
-            <style type"text/css">
-                {% block extra_css_plain %}
-                {% endblock %}
-            </style>
-            {% block djnagojs %}
-                <script type="text/javascript" src="{% url 'djangojs' %}"></script>
-            {% endblock %}
-            {% block js %}
-                {% compress js %}
-                    <script type="text/javascript" src="{% static 'modernizr/modernizr.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'respond/dest/respond.src.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'json3/lib/json3.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'jquery/dist/jquery.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap-select/dist/js/bootstrap-select.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap-switch/dist/js/bootstrap-switch.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'video.js/dist/video.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap3-dialog/dist/js/bootstrap-dialog.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'moment/min/moment.min.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js' %}"></script>
-                {% endcompress %}
-            {% endblock %}
-            <script type="text/javascript">
-                {% block extra_js_plain %}
-                    'use strict';
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link href="http://vjs.zencdn.net/5.4.4/video-js.css" rel="stylesheet">
 
-                    var LANGUAGE_CODE = '{{ LANGUAGE_CODE }}';
-                {% endblock %}
-            </script>
-            {% block extra_js %}
-                {% compress js %}
-                    <script type="text/coffeescript" src="{% static 'frontend/coffee/main.coffee' %}"></script>
-                {% endcompress %}
-            {% endblock %}
-            {% block apple %}
-                <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'frontend/img/apple-touch-icon-144x144-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'frontend/img/apple-touch-icon-114x114-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'frontend/img/apple-touch-icon-72x72-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" href="{% static 'frontend/img/apple-touch-icon-57x57-precomposed.png' %}">
-            {% endblock %}
-            {% block favicon %}
-                <link rel="shortcut icon" href="{% static favicon %}">
-            {% endblock %}
-            {% block extra_head %}
-            {% endblock %}
-        {% endblock %}
+      <!-- If you'd like to support IE8 -->
+      <script src="http://vjs.zencdn.net/ie8/1.1.1/videojs-ie8.min.js"></script>
+
     </head>
-    <body>
 
-    {% block content %}
+    <body >
+        <a href="/" style="position:absolute; left: 20px; top:20px;">
+          <div style="z-index:10000; width:40px; height:40px; background-image:url(http://i.imgur.com/3hEJ8lL.png); background-size: 40px 40px;"></div>
+        </a>
+        <img  src="">
+        <div style="width:100%; max-width:480px; margin:0 auto;">            
+        <video id="video" class="video-js" autoplay loop data-setup='{"fluid":"true","aspectRatio":"3:4"}'>
+        <source src="{{ post.attachment.url }}" type='video/mp4'>
 
-        <video id="attachment" class="video-js vjs-default-skin vjs-big-play-centered">
-            <source src="{{ post.attachment.url }}" type="video/mp4" />
+             <p class="vjs-no-js">
+                To view this video please enable JavaScript, and consider upgrading to a web browser that
+                <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+            </p>
         </video>
-        
-    {% endblock %}
-    
+        <div>
+            <h3 style="float:left;font-family:sans-serif; color:gray;">- jtdaugh</h3>
+            
+
+        <a href="/" style="margin-top:10px; float:right;">
+          <div style="width:140px; height:40px; background-image:url(http://www.paraglidingmap.com/images/available-on-the-app-store.png); background-size:140px 40px;"></div>
+        </a>
+
+        </div>
+       </div>
+      <script src="http://vjs.zencdn.net/5.4.4/video.js"></script>
     </body>
 </html>
