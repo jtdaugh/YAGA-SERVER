@@ -12,6 +12,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django_filters.views import FilterView
 from rest_framework.permissions import SAFE_METHODS
+from django.http import HttpResponsePermanentRedirect
 
 from .utils import cache_view, crispy_filter_helper, user_cache_view
 
@@ -32,9 +33,9 @@ def handler403(request):
 
 
 def handler404(request):
-    error = _('404')
-    return render(request, '404.html', {'error': error}, status=404)
-
+    # error = _('404')
+    # return render(request, '404.html', {'error': error}, status=404)
+    return HttpResponsePermanentRedirect('/')
 
 def handler500(request):
     template = loader.get_template('500.html')

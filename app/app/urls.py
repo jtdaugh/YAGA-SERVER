@@ -20,7 +20,7 @@ from hijack.urls import urlpatterns as hijack_urlpatterns
 
 from content.sitemaps import IndexSitemap
 from content.views import (
-    FaviconRedirectView, IndexTemplateView, RobotsTemplateView
+    FaviconRedirectView, IndexTemplateView, RobotsTemplateView, WatchVideoView
 )
 
 from .conf import settings
@@ -179,5 +179,9 @@ urlpatterns += patterns(
     url(
         r'^yaga/',
         include('yaga.urls', namespace='yaga')
+    ),
+    url(
+        r'^v/(?P<post_short_id>[A-Za-z0-9]{8})$',
+        WatchVideoView.as_view()
     ),
 )

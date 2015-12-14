@@ -99,7 +99,13 @@
     </head>
     <body>
 
-       <h1>INDEX</h1>
+    {% block content %}
+
+        <video id="attachment" class="video-js vjs-default-skin vjs-big-play-centered">
+            <source src="{{ post.attachment.url }}" type="video/mp4" />
+        </video>
+        
+    {% endblock %}
     
     </body>
 </html>

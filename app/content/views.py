@@ -10,6 +10,7 @@ from django.views.generic.base import RedirectView
 
 from app.utils import reverse_host
 from app.views import CacheView, UserCacheView
+from yaga.models import Post
 
 from .conf import settings
 
@@ -39,7 +40,22 @@ class RobotsTemplateView(
 
 
 class IndexTemplateView(
-    UserCacheView,
     TemplateView
 ):
     template_name = 'content/index.html'
+
+class WatchVideoView(
+    TemplateView
+):
+    template_name = 'content/watch.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(WatchVideoView, self).get_context_data(**kwargs)
+        for p in Post.objects.all():
+            if str(p.id).startswith(self.kwargs['post_short_id']):
+                context['post'] = p
+                break;
+            
+        return context
+
+
