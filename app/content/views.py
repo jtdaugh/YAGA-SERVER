@@ -51,9 +51,10 @@ class WatchVideoView(
 
     def get_context_data(self, **kwargs):
         context = super(WatchVideoView, self).get_context_data(**kwargs)
-        for p in Post.objects.all():
+        for p in Post.objects.select_related('user').all():
             if str(p.id).startswith(self.kwargs['post_short_id']):
                 context['post'] = p
+                context['username'] = p.user.name
                 break;
             
         return context

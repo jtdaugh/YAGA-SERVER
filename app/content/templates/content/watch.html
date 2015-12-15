@@ -13,11 +13,12 @@
         <a href="/" style="position:absolute; left: 20px; top:20px;">
           <div style="z-index:10000; width:44px; height:44px; background-image:url(http://i.imgur.com/3hEJ8lL.png); background-size: 44px 44px;"></div>
         </a>
-        <div style="width:100%; max-width:480px; margin:0 auto;">            
+        <div style="width:100%; max-width:480px; margin:0 auto 5px;">            
         <video id="yaga-video" class="video-js" style="max-width:100%" autoplay controls loop data-setup='{aspectRatio":"3:4"}'>
+            <!-- <video id="yaga-video" class="video-js" autoplay loop data-setup='{}'> -->
 
-        <source src="{{ post.attachment.url }}" type='video/mp4'>
-
+        <!-- <source src="{{ post.attachment.url }}" type='video/mp4'> -->
+<source src="https://d1avr4q9rc4w3a.cloudfront.net/media/posts/8b2b2f3d-49f2-4e38-a46c-2c4aa69984d4/848af10a-7d31-11e5-9fa7-02dbf8fbd1b4" type="video/mp4">
              <p class="vjs-no-js">
                 To view this video please enable JavaScript, and consider upgrading to a web browser that
                 <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
@@ -40,7 +41,7 @@
         </a>            
 
         </div>
-        <h3 style="margin:10px 0 2px; float:left;font-family:sans-serif; color:gray;">- jtdaugh</h3>
+        <h3 style="margin:10px 0 2px; float:left;font-family:sans-serif; color:gray;">-{{ username }}</h3>
 
        </div>
 
