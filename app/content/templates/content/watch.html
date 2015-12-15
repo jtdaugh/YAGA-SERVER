@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="border-top-color:rgba(236,0,140,1); border-top-width:10px; border-top-style:solid;">
+<html style="border-top-color:rgba(236,0,140,1); border-top-width:7px; border-top-style:solid;">
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <link href="http://vjs.zencdn.net/5.4.4/video-js.css" rel="stylesheet">
@@ -9,30 +9,61 @@
 
     </head>
 
-    <body >
+    <body>
         <a href="/" style="position:absolute; left: 20px; top:20px;">
-          <div style="z-index:10000; width:40px; height:40px; background-image:url(http://i.imgur.com/3hEJ8lL.png); background-size: 40px 40px;"></div>
+          <div style="z-index:10000; width:44px; height:44px; background-image:url(http://i.imgur.com/3hEJ8lL.png); background-size: 44px 44px;"></div>
         </a>
-        <img  src="">
         <div style="width:100%; max-width:480px; margin:0 auto;">            
-        <video id="video" class="video-js" autoplay loop data-setup='{"fluid":"true","aspectRatio":"3:4"}'>
-        <source src="{{ post.attachment.url }}" type='video/mp4'>
+        <video id="yaga-video" class="video-js" style="max-width:100%" autoplay controls loop data-setup='{aspectRatio":"3:4"}'>
+            <!-- <video id="yaga-video" class="video-js" autoplay loop data-setup='{}'> -->
 
+        <!-- <source src="{{ post.attachment.url }}" type='video/mp4'> -->
+<source src="https://d1avr4q9rc4w3a.cloudfront.net/media/posts/8b2b2f3d-49f2-4e38-a46c-2c4aa69984d4/848af10a-7d31-11e5-9fa7-02dbf8fbd1b4" type="video/mp4">
              <p class="vjs-no-js">
                 To view this video please enable JavaScript, and consider upgrading to a web browser that
                 <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
             </p>
         </video>
-        <div>
-            <h3 style="float:left;font-family:sans-serif; color:gray;">- jtdaugh</h3>
-            
+        
+          
 
-        <a href="/" style="margin-top:10px; float:right;">
-          <div style="width:140px; height:40px; background-image:url(http://www.paraglidingmap.com/images/available-on-the-app-store.png); background-size:140px 40px;"></div>
-        </a>
+        <div style="margin-top:5px;">
+        
+        {% if post.name %}
+        <div style="float:left; margin-top:3px;margin-right:12px; font-size:30px; font-weight:bold; font-family:sans-serif; color:rgb(236,0,140)">
+            "{{ post.name }}"
+        </div>
+        {% endif %}
+
+        <a href="https://itunes.apple.com/us/app/yaga-instant-video-messaging/id976285308" style="float:right;">
+            <div style="width:140px; height:40px; background-image:url(http://www.paraglidingmap.com/images/available-on-the-app-store.png); background-size:140px 40px;">
+            </div>
+        </a>            
 
         </div>
+        <h3 style="margin:10px 0 2px; float:left;font-family:sans-serif; color:gray;">- jtdaugh</h3>
+
        </div>
+
       <script src="http://vjs.zencdn.net/5.4.4/video.js"></script>
+
+    <script type="text/javascript">
+      // Once the video is ready
+      videojs('yaga-video').ready(function(){
+
+        var myPlayer = this;    // Store the video object
+        var aspectRatio = 4/3; // Make up an aspect ratio
+
+        function resizeVideoJS(){
+          // Get the parent element's actual width
+          var width = document.getElementById(myPlayer.id_).parentElement.offsetWidth;
+          // Set width to fill parent element, Set height
+          myPlayer.width(width).height( width * aspectRatio );
+        }
+
+        resizeVideoJS(); // Initialize the function
+        window.onresize = resizeVideoJS; // Call the function on resize
+      });
+    </script>
     </body>
 </html>
