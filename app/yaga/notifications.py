@@ -245,7 +245,7 @@ class PostGroupNotification(
         return True
 
     def send_sms_notification(self, user=None):
-        is_pair = False
+        isPair = False
         if (self.group.active_member_count() == 2):
             isPair = True
         
