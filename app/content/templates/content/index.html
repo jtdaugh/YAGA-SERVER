@@ -1,105 +1,230 @@
-{% load static %}
-{% load i18n %}
-
-{% load compress %}
-{% load activeurl %}
-
-{% load snless %}
-
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}" class="no-js">
+<!doctype html>
+<html>
     <head>
-        {% block head %}
-            {% block meta %}
-                <meta charset="utf-8">
-                <!--[if IE]><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'><![endif]-->
-                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-            {% endblock %}
-            {% block csrf %}
-            {% endblock %}
-            {% snless %}
-                <title>
-                    {% block title %}
-                        {% trans 'Project' %}
-                    {% endblock %}
-                </title>
-            {% endsnless %}
-            {% block seo %}
-                {% snless %}
-                    <meta name="description" content="
-                        {% block description %}
-                            {% trans 'Description' %}
-                        {% endblock %}
-                    ">
-                {% endsnless %}
-            {% endblock %}
-            {% block css %}
-                {% compress css %}
-                    <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'font-awesome/css/font-awesome.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap-select/dist/css/bootstrap-select.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'video.js/dist/video-js.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'bootstrap3-dialog/dist/css/bootstrap-dialog.css' %}" type="text/css">
-                    <link rel="stylesheet" href="{% static 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css' %}" type="text/css">
-                {% endcompress %}
-            {% endblock %}
-            {% block extra_css %}
-                {% compress css %}
-                    <link rel="stylesheet" type="text/stylus" href="{% static 'frontend/stylus/main.styl' %}">
-                {% endcompress %}
-            {% endblock %}
-            <style type"text/css">
-                {% block extra_css_plain %}
-                {% endblock %}
-            </style>
-            {% block djnagojs %}
-                <script type="text/javascript" src="{% url 'djangojs' %}"></script>
-            {% endblock %}
-            {% block js %}
-                {% compress js %}
-                    <script type="text/javascript" src="{% static 'modernizr/modernizr.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'respond/dest/respond.src.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'json3/lib/json3.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'jquery/dist/jquery.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap/dist/js/bootstrap.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap-select/dist/js/bootstrap-select.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap-switch/dist/js/bootstrap-switch.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'underscore/underscore.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'video.js/dist/video.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'bootstrap3-dialog/dist/js/bootstrap-dialog.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'moment/min/moment.min.js' %}"></script>
-                    <script type="text/javascript" src="{% static 'eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js' %}"></script>
-                {% endcompress %}
-            {% endblock %}
-            <script type="text/javascript">
-                {% block extra_js_plain %}
-                    'use strict';
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <title>Yaga</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-                    var LANGUAGE_CODE = '{{ LANGUAGE_CODE }}';
-                {% endblock %}
-            </script>
-            {% block extra_js %}
-                {% compress js %}
-                    <script type="text/coffeescript" src="{% static 'frontend/coffee/main.coffee' %}"></script>
-                {% endcompress %}
-            {% endblock %}
-            {% block apple %}
-                <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{% static 'frontend/img/apple-touch-icon-144x144-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{% static 'frontend/img/apple-touch-icon-114x114-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{% static 'frontend/img/apple-touch-icon-72x72-precomposed.png' %}">
-                <link rel="apple-touch-icon-precomposed" href="{% static 'frontend/img/apple-touch-icon-57x57-precomposed.png' %}">
-            {% endblock %}
-            {% block favicon %}
-                <link rel="shortcut icon" href="{% static favicon %}">
-            {% endblock %}
-            {% block extra_head %}
-            {% endblock %}
-        {% endblock %}
+        <link rel="shortcut icon" href="https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/favicon.png">
+
+        <meta property="og:title" content="Yaga - Instant Video Messaging"/> 
+        <meta property="og:image" content="https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/banner.png"/> 
+        <meta property="og:description" content="Instant video messaging! Yaga isn't live video chat, its a permanent conversation where every message is a video, and sending one is never more than a tap away."/> 
+        <meta property="og:url" content="https://yaga.video"/>
+
+        <style type="text/css">
+            html, body {
+                background-color: #ec008c;
+                height:100%;
+            }
+
+            * {
+                font-family:'Avenir Next';
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+                margin:0; 
+                padding:0;
+                color:white;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            *:focus {
+                outline: 0;
+            }
+
+            .left, .right {
+                width:48%;
+                position: relative;
+                top: 50%;
+                -webkit-transform: translateY(-50%);
+                transform: translateY(-50%);
+                text-align: center;
+                float:left;
+            }
+
+            .left {
+            }
+
+            .right {
+                margin-left:4%;
+                position:relative;
+                text-align: left;
+            }
+
+            .container, .center * {
+                text-align: center;
+            }
+
+            .container {
+                width:640px;
+                height:100%;
+                margin:0 auto;
+                position:relative;
+            }
+
+            .logo {
+                width:50%;
+                height:90px;
+                margin:0 auto;
+                background-image: url(https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/logo.png);
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position:left center;
+                display:inline-block;
+                margin-bottom:20px;
+            }
+
+            h1, h2, h3 {
+                color:#fff;
+                font-weight:500;
+            }
+
+            h1 {
+                font-size:30px;
+                font-weight:bold;
+            }
+
+            h2 {
+                font-size:22px;
+            }
+
+            h3 {
+                font-size:18px;
+            }
+
+            h4 {
+                margin-top:20px;
+                text-align: left;
+            }
+
+            ul {
+                text-align:left;
+            }
+
+            li {
+                margin-left:20px;
+            }
+
+            .download {
+                display:inline-block;
+                background-image:url(https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/appstore.png);
+                background-size: contain;
+                -webkit-user-select:none;
+                cursor:pointer;
+                width:160px;
+                height:60px;
+                background-position: left center;
+                margin-top:20px;
+                background-repeat: no-repeat;;
+            }
+
+            .android {
+                font-size:14px;
+            }
+
+            span {
+                color:#fff;
+                font-size:15px;
+                display:block;
+                margin-top:10px;
+            }
+
+            .phonebg {
+                position:relative;
+                width:300px;
+                height:540px;
+                float:left;
+                background-size:contain;
+                background-repeat:no-repeat;
+                background-position:center center;
+                background-image:url(https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/phonebg.png);
+                padding:0;
+            }
+
+            .screenshot-container {
+                width:248px;
+                height:440px;
+                position:absolute;
+                top: 50%;
+                left:50%;
+                -webkit-transform: translateY(-50%) translateX(-50%);
+                transform: translateY(-50%) translateX(-50%);
+                margin:0 auto;
+                background-image: url(https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/1.png);
+                background-size: contain;
+                background-repeat:no-repeat;
+                background-position: center center;
+                display:none;
+            }
+
+            .bottom-bar {
+                position:absolute;
+                bottom:5px;
+                width:100%;
+                text-align:center;
+                font-weight:500;
+                font-size:14px;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+        </style>
+
+        <script>
+            $(document).ready(function(){
+                var index = 0;
+                var speed = 800;
+                setInterval(function(){
+                    $($('.screenshot-container')[index]).fadeOut(speed);
+                    index = (index+1) % 3;
+                    $($('.screenshot-container')[index]).fadeIn(speed); 
+                }, 5000);
+            });
+        </script>
+
     </head>
     <body>
+        <div class="container">
 
-       <h1>INDEX</h1>
-    
+            <div class="left">
+                <div class="phonebg">
+                    <div class="screenshot-container" style="background-image:url(  
+https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/1.png); display:block;"></div>
+                    <div class="screenshot-container" style="background-image:url(  
+https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/2.png)"></div>
+                    <div class="screenshot-container" style="background-image:url(  
+https://s3-us-west-2.amazonaws.com/yagavideo-prod/public/3.png)"></div>
+                </div>
+            </div>
+            <div class="right">
+                <div class="logo" ></div>
+                <h2>Instant Video Messaging</h2>
+                <span>
+                    Yaga isn't live video chat, its a permanent conversation. Every message is a video, and sending one is never more than a tap away.
+                </span>
+                <span>
+                    Create a group video chat for your roommates or family, or chat one on one with a friend. 
+                </span>
+                <span>
+                    Once you've sent a video, others in the chat can like the video, comment right on top of your video, or reply with a video of their own.
+                    You can also add captions or wacky filters to your video messages.
+                </span>
+                <span>
+                    Oh, and your videos will never expire on Yaga. You can always choose to delete a video, but you'll never lose them.  
+                </span>
+                <a class="download" href="https://itunes.apple.com/us/app/yaga-group-chat-gone-wild/id976285308"></a>
+                <!-- <span class="android"></span> -->
+            </div>
+
+            <div class="bottom-bar">
+<!--                <a target="_blank" href="ambassadors">Ambassadors</a> &sdot; -->                
+                <a target="_blank" href="http://facebook.com/getyaga">Facebook</a> &sdot;
+                <a target="_blank" href="http://twitter.com/getyaga">Twitter</a> &sdot;
+                <a target="_blank" href="http://instagram.com/getyaga">Instagram</a> &sdot;
+                <a target="_blank" href="mailto:team@getyaga.com">Contact</a>
+            </div>
+        </div>
     </body>
 </html>
