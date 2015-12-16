@@ -176,17 +176,14 @@ class NexmoNotificationProvider(
         alert_endpoint=ALERT_ENDPOINT,
         format=FORMAT
     )
-    # CHECK_BLACKLIST_ENDPOINT = '{alert_endpoint}check/{format}'.format(
-    #     alert_endpoint=ALERT_ENDPOINT,
-    #     format=FORMAT
-    # )
 
     def send_invite(
         self, receiver,
         sender=None
     ):
         params = {
-            'template': 0,
+            'api_key' : settings.YAGA_SMS_KEY,
+            'api_secret' : settings.YAGA_SMS_SECRET,
             'to': int(receiver),
             'username': sender.get_username(),
             'link': settings.YAGA_SMS_INVITE_SUFFIX,
@@ -203,11 +200,14 @@ class NexmoNotificationProvider(
     ):
         link = '{base_url}{video_id}'.format(
             base_url=settings.YAGA_SMS_VIDEO_BASE_URL,
-            video_id=str(video.id)[:7]
+            video_id=str(video.id)[:8]
         )
 
         params = {
-            'template': 1,
+            'api_key' : settings.YAGA_SMS_KEY,
+            'api_secret' : settings.YAGA_SMS_SECRET,
+            'template': 3,
+            'type' : 'unicode',
             'to': int(receiver),
             'username': sender.get_username(),
             'link': link
