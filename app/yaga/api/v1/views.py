@@ -412,9 +412,7 @@ class GroupListCreateAPIView(
             return []
 
     def get_queryset(self):
-        return Group.objects.select_related(
-            'creator'
-        ).prefetch_related(
+        return Group.objects.prefetch_related(
             Prefetch(
                 'member_set',
                 queryset=Member.objects.select_related('user').exclude(

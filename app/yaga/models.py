@@ -146,7 +146,8 @@ class Member(
     status = models.PositiveSmallIntegerField(
         verbose_name=_('Status'),
         choices=status_choices,
-        default=status_choices.MEMBER
+        default=status_choices.MEMBER,
+        db_index=True
     )
 
     user = models.ForeignKey(

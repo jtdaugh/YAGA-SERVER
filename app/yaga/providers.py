@@ -207,7 +207,6 @@ class NexmoNotificationProvider(
             'api_key' : settings.YAGA_SMS_KEY,
             'api_secret' : settings.YAGA_SMS_SECRET,
             'template': 3,
-            'type' : 'unicode',
             'to': int(receiver),
             'username': sender.get_username(),
             'link': link
@@ -215,6 +214,7 @@ class NexmoNotificationProvider(
 
         if group is not None:
             params['template'] = 2
+            params['type'] = 'unicode'
             params['group'] = group.name
 
         return self.request(
