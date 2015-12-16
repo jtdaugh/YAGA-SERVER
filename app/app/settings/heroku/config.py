@@ -64,6 +64,7 @@ class HerokuConfiguration(
     ALLOWED_HOSTS = [
         'api.yaga.video',
         'www.yaga.video',
+        'yaga.video',
 
         'api-dev.yaga.video',
         'www-dev.yaga.video'
